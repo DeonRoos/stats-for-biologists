@@ -14,7 +14,9 @@ sbs_theme <- function() {
       axis.text = element_text(color = "white", size = 18),
       legend.title = element_text(color = "white", size = 22),
       legend.text = element_text(color = "white", size = 18),
-      panel.border = element_blank(),
+      strip.text = element_text(color = "white", size = 18),
+      strip.background = element_rect(color = "#72758d", fill = "black", size = 1),
+      panel.border = element_rect(color = "#72758d", fill = NA, size = 1),
       panel.grid.major = element_line(color = "#444654"),
       panel.grid.minor = element_line(color = "#444654")
     )

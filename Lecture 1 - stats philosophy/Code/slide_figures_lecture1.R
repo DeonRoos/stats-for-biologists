@@ -2,6 +2,7 @@
 
 library(here)
 library(ggplot2)
+library(gganimate)
 source("sbs_theme.R")
 
 set.seed(3031) #3025
@@ -111,3 +112,121 @@ p4 <- ggplot(df, aes(x = gun, y = decrease/total)) +
   sbs_theme()
 p4
 ggsave(here("Lecture 1 - stats philosophy/Figures", file = "gun.png"), plot = p4, width = 650/72, height = 775/72, dpi = 72)
+
+
+
+# First example slide -----------------------------------------------------
+
+library(ascot)
+library(lubridate)
+
+# Generate landscape ------------------------------------------------------
+set.seed(3010)
+
+# Takes a couple of mins to run - reduce x and y to increase speed
+spatial_field <- define_pattern_s(n_x = 100, n_y = 100, 
+                                  autocorr = TRUE,
+                                  range = 20, amplitude = 5)
+
+# 25 temporal units - called days but treated as years
+time_df <- set_timeline(25, "days")
+
+# Little bit of temporal noise in landscape + sin wave
+time_series <- define_pattern_t(time_df, weekly_amplitude = 0.5, weekly_noise = 1)
+
+#Simulate spatio-temporal data
+truth <- simulate_spacetime(temporal_pattern = time_series,
+                            field = spatial_field,
+                            pattern_adherence = 0)
+
+# Shifting habitat value to be positive
+# Negative values for covariate influencing speed is twisting my brain
+truth$value <- truth$value + abs(min(truth$value))
+truth$time <- interval(min(truth$date), truth$date) %/% days(1)
+
+b0 <- 0.05
+fr <- 0.35
+phase <- 3
+amp <- 0.8
+b1 <- 0.8
+b2 <- 0.001
+b3 <- -0.001
+b4 <- 0.02
+b5 <- 0.3
+ampt <- 0.5
+frt <- 0.2
+phaset <- 1
+
+# plot((ampt * sin(frt * truth$time + phaset)) ~ truth$time)
+# 
+# plot(amp * sin(fr * truth$value + phase) ~ truth$value)
+# 
+# plot(b0 + b1 * (amp * sin(fr * truth$value + phase)) + 
+#        b2 * truth$x +
+#        b3 * truth$y +
+#        b4 * (2 + cos(0.04 * truth$x)) * (2 + sin(0.06 * truth$y)) +
+#        b5 * (ampt * sin(frt * truth$time + phaset)) ~
+#        truth$value)
+
+truth$mu <- b0 + b1 * (amp * sin(fr * truth$value + phase)) + 
+  b2 * truth$x +
+  b3 * truth$y +
+  b4 * (2 + cos(0.04 * truth$x)) * (2 + sin(0.06 * truth$y)) +
+  b5 * (ampt * sin(frt * truth$time + phaset))
+
+truth$growth <- rnorm(n = nrow(truth), mean = truth$mu, sd = 0.1)
+# truth$sampled <- rbinom(n = nrow(truth), size = 1, prob = 0.008)
+# obs <- truth[truth$sampled == 1,]
+
+# ggplot() +
+#   geom_tile(data = truth[truth$time == 0,], aes(x = x, y = y, fill = value),
+#             show.legend = FALSE) +
+#   scale_fill_viridis_c() +
+#   labs(x = "Longitude",
+#        y = "Latitude") +
+#   coord_fixed() +
+#   sbs_theme()
+# 
+ggplot() +
+  geom_tile(data = truth[truth$time == 0,], aes(x = x, y = y, fill = growth),
+            show.legend = FALSE) +
+  scale_fill_viridis_c(option = "A") +
+  labs(x = "Longitude",
+       y = "Latitude") +
+  coord_fixed() +
+  sbs_theme()
+
+
+# ggplot() +
+#   geom_tile(data = truth, aes(x = x, y = y, fill = value),
+#             show.legend = FALSE) +
+#   scale_fill_viridis_c() +
+#   labs(x = "Longitude",
+#        y = "Latitude") +
+#   coord_fixed() +
+#   facet_wrap(~time) +
+#   sbs_theme()
+
+ggplot() +
+  geom_tile(data = truth, aes(x = x, y = y, fill = growth),
+            show.legend = FALSE) +
+  scale_fill_viridis_c(option = "A") +
+  labs(x = "Longitude",
+       y = "Latitude") +
+  coord_fixed() +
+  facet_wrap(~time) +
+  sbs_theme()
+
+anim_a <- ggplot() +
+  geom_tile(data = truth, aes(x = x, y = y, fill = growth),
+            show.legend = FALSE) +
+  scale_fill_viridis_c(option = "A") +
+  labs(x = "Longitude",
+       y = "Latitude",
+       title = "Orangutan range",
+       subtitle = "Year {round(frame_time, digits = 0)}") +
+  coord_fixed() +
+  sbs_theme() +
+  transition_time(time)
+
+anim_save(here("Lecture 1 - stats philosophy/Figures", file = "orangutan.gif"), animation = anim_a)

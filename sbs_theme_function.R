@@ -10,6 +10,7 @@ sbs_theme <- function() {
       panel.background = element_blank(),
       plot.background = element_rect(fill = "black"),
       plot.title = element_text(color = "white", size = 24),
+      plot.subtitle = element_text(color = "white", size = 22),
       axis.title = element_text(color = "white", size = 22),
       axis.text = element_text(color = "white", size = 18),
       legend.title = element_text(color = "white", size = 22),

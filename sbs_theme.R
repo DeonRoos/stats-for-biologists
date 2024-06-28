@@ -6,7 +6,8 @@ function ()
     update_geom_defaults("bar", list(fill = "transparent", colour = "white"))
     theme_minimal(base_size = 15) + theme(panel.background = element_blank(), 
         plot.background = element_rect(fill = "black"), plot.title = element_text(color = "white", 
-            size = 24), axis.title = element_text(color = "white", 
+            size = 24), plot.subtitle = element_text(color = "white", 
+            size = 22), axis.title = element_text(color = "white", 
             size = 22), axis.text = element_text(color = "white", 
             size = 18), legend.title = element_text(color = "white", 
             size = 22), legend.text = element_text(color = "white", 

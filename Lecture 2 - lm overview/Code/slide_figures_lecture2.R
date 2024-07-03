@@ -96,7 +96,7 @@ p <- ggplot(df, aes(x = age, y = height)) +
   labs(x = "Deon's age",
        y = "Deon's height") +
   scale_x_continuous(limits = c(0, 6)) +
-  scale_y_continuous(limits = c(50, 140)) +
+  scale_y_continuous(limits = c(0, 140)) +
   sbs_theme()
 
 ggsave(here("Lecture 2 - lm overview/Figures", file = "deon_height.png"), plot = p, width = 650/72, height = 775/72, dpi = 72)
@@ -124,7 +124,6 @@ for(i in 1:max(df$baby)) {
    df$height[df$baby == i & df$age == j] <- rnorm(1, mean = df$height[df$baby == i & df$age == j-1] + b1, sd = 5)
   }
 }
-#df$height <- rnorm(nrow(df), mean = b0 + b1 * df$age, sd = 10)
 
 p2 <- ggplot(df, aes(x = age, y = height, colour = factor(baby))) +
   geom_point(show.legend = FALSE) +
@@ -172,3 +171,32 @@ p4 <- ggplot(df, aes(x = age, y = height)) +
   sbs_theme()
 p4
 ggsave(here("Lecture 2 - lm overview/Figures", file = "children_height_fit.png"), plot = p4, width = 650/72, height = 775/72, dpi = 72)
+
+
+df <- expand.grid(
+  age = 1:5,
+  baby = 1:20
+)
+
+df$height[df$age == 1] <- rnorm(max(df$baby), 50, 10)
+
+for(i in 1:max(df$baby)) {
+  for(j in 2:max(df$age)) {
+    df$height[df$baby == i & df$age == j] <- rnorm(1, mean = df$height[df$baby == i & df$age == j-1] + b1, sd = 10)
+  }
+}
+
+cfs <- coef(lm(height ~ age, data = df))
+sig <- sigma(lm(height ~ age, data = df))
+
+df1 <- data.frame(x = 0:200)
+df1$L <- dnorm(df1$x, mean = mean(cfs[1] + cfs[2] * 1:5), sd = sig)
+
+p5 <- ggplot() +
+  geom_histogram(data = df, aes(x = height, y = ..density.. * 100), fill = "#72758d", alpha = 0.5) +
+  geom_line(data = df1, aes(x = x, y = L*100)) +
+  labs(x = "Child height",
+       y = "Fequency of values") +
+  sbs_theme()
+
+ggsave(here("Lecture 2 - lm overview/Figures", file = "children_height_dist.png"), plot = p5, width = 650/72, height = 775/72, dpi = 72)

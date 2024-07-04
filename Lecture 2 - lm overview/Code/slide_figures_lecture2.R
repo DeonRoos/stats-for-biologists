@@ -200,3 +200,36 @@ p5 <- ggplot() +
   sbs_theme()
 
 ggsave(here("Lecture 2 - lm overview/Figures", file = "children_height_dist.png"), plot = p5, width = 650/72, height = 775/72, dpi = 72)
+
+
+# Range of Normal ---------------------------------------------------------
+
+df <- data.frame(x = -100:100)
+df$L <- dnorm(df$x, mean = -10, sd = 10)
+df$grp <- 1
+df1 <- data.frame(x = -100:100)
+df1$L <- dnorm(df1$x, mean = -0, sd = 4.5)
+df1$grp <- 2
+df2 <- data.frame(x = -100:100)
+df2$L <- dnorm(df2$x, mean = 25, sd = 25)
+df2$grp <- 3
+df3 <- data.frame(x = -100:100)
+df3$L <- dnorm(df3$x, mean = 64, sd = 8)
+df3$grp <- 4
+df4 <- data.frame(x = -100:100)
+df4$L <- dnorm(df4$x, mean = -58, sd = 12)
+df4$grp <- 5
+
+df <- rbind(df, df1, df2, df3, df4)
+df$grp <- factor(df$grp)
+p1 <- ggplot(df) +
+  geom_line(aes(x = x, y = L, group = grp, colour = grp), show.legend = FALSE) +
+  geom_area(aes(x = x, y = L, fill = grp), position = position_identity(), alpha = 0.4, show.legend = F) +
+  scale_colour_brewer(palette = "Dark2") +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(x = "Value of our response variable",
+       y = "Fequency of values") +
+  sbs_theme()
+p1
+
+ggsave(here("Lecture 2 - lm overview/Figures", file = "normal_dist.png"), plot = p1, width = 650/72, height = 775/72, dpi = 72)

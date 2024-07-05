@@ -1,0 +1,2 @@
+https://rpubs.com/oharar/19171 - Bob OHara's analysis
+https://nbnatlas.org/ - NBN dataset used by Simon for deer SDM

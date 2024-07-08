@@ -1,2 +1,4 @@
 https://rpubs.com/oharar/19171 - Bob OHara's analysis
 https://nbnatlas.org/ - NBN dataset used by Simon for deer SDM
+https://species.nbnatlas.org/species/NBNSYS0000005143 - NBN red deer
+https://www.iucnredlist.org/species/55997072/142404453 - IUCN red deer

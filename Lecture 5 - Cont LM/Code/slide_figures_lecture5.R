@@ -95,7 +95,7 @@ p4 <- ggplot() +
 p4
 ggsave(here("Lecture 5 - Cont LM/Figures", file = "model_fits.png"), plot = p4, width = 1400/72, height = 650/72, dpi = 72)
 
-df1$votes <- c(13, 1, 8, 52, 36, 19)
+df1$votes <- c(13, 1, 8, 52, 19, 36)
 
 p5 <- ggplot(df1) +
   geom_col(aes(x = grp, y = votes)) +
@@ -128,16 +128,25 @@ ggsave(here("Lecture 5 - Cont LM/Figures", file = "best_fit.png"), plot = p7, wi
 set.seed(88)
 df <- df %>%
   mutate(pm_bin = cut(pm, breaks = quantile(pm, probs = seq(0, 1, 0.2)), include.lowest = TRUE))
+
 sub_df <- df %>%
   group_by(pm_bin) %>%
   sample_n(10) %>%
   ungroup()
+
+calculate_likelihood <- function(observed, mean, sd = 5) {
+  dnorm(observed, mean = mean, sd = sd)
+}
 
 combined_df <- bind_rows(
   lapply(1:nrow(df1), function(i) {
     temp_df <- sub_df
     temp_df$line <- df1$intercept[i] + df1$slope[i] * temp_df$pm
     temp_df$grp <- df1$grp[i]
+    temp_df$likelihood <- calculate_likelihood(temp_df$tawny, temp_df$line)
+    temp_df$fit_mean <- df1$intercept[i] + df1$slope[i] * temp_df$pm
+    temp_df$intercept <- df1$intercept[i]
+    temp_df$slope <- df1$slope[i]
     return(temp_df)
   })
 )
@@ -155,7 +164,7 @@ a1 <- ggplot() +
   sbs_theme() +
   transition_states(grp) + 
   ease_aes("cubic-in")
-
+a1
 anim_save(here("Lecture 5 - Cont LM/Figures", file = "model_fit_resid.gif"), animation = a1)
 
 
@@ -218,45 +227,126 @@ p9 + p10
 ggsave(here("Lecture 5 - Cont LM/Figures", file = "subj_likelihood.png"), plot = p6, width = 1400/72, height = 650/72, dpi = 72)
 
 
+density_df <- bind_rows(
+  lapply(unique(combined_df$grp), function(g) {
+    temp_df <- combined_df %>% filter(grp == g)
+    x_vals <- seq(20, 60, length.out = 75)
+    densities <- dnorm(x_vals, mean = mean(temp_df$fit_mean), sd = 5)
+    data.frame(x = x_vals, y = densities, grp = g)
+  })
+)
 
+df1 <- df1 %>%
+  mutate(subtitle_text = paste0("beta[0] == ", round(intercept, 2), ", ", "beta[1] == ", round(slope, 2)))
 
-m1 <- lm(tawny ~ pm, data = df)
-summary(m1)
-plot(m1, ask = F)
+combined_df <- combined_df %>%
+  left_join(df1, by = "grp")
 
+a2 <- ggplot() +
+  geom_histogram(data = combined_df, aes(x = tawny, y = ..density..), binwidth = 2, alpha = 0.5, position = "identity") +
+  geom_line(data = density_df, aes(x = x, y = y), size = 1.5) +
+  scale_x_continuous(limits = c(20, 60)) +
+  labs(x = "Tawny owl density (ha)", 
+       y = "Density",
+       subtitle = '{paste("mu =", round(df1[df1$grp == closest_state, "intercept"], 2), "+ ", round(df1[df1$grp == closest_state, "slope"], 2), "* Pine Marten")}') +
+  sbs_theme() +
+  transition_states(grp) + 
+  ease_aes("cubic-in")
 
-# Plot with sigma ---------------------------------------------------------
-breaks <- seq(0, max(df$pm), len = 5)
-df$section <- cut(df$pm, breaks, include.lowest = TRUE)
+anim_save(here("Lecture 5 - Cont LM/Figures", file = "dnorm_vs_data.gif"), animation = a2)
 
-## Get the residuals
-df$res <- residuals(m1)
-
-break_size <- 25
-
-## Compute densities for each section, and flip the axes, and add means of sections
-## Note: the densities need to be scaled in relation to the section size (2000 here)
-dens <- do.call(rbind, lapply(split(df, df$section), function(x) {
-  if (nrow(x) == 0) return(NULL)
+likelihood <- function(intercept, slope, data) {
+  pm <- data$pm
+  tawny <- data$tawny
   
-  d <- density(x$res, n = 50)
-  xs <- seq(min(x$res), max(x$res), length.out = 50)
+  # Calculate mu_i
+  mu <- intercept + slope * pm
   
-  # Create the expected data only
-  res <- data.frame(
-    y = xs + mean(x$tawny, na.rm = TRUE),
-    x = max(x$pm, na.rm = TRUE) - break_size * dnorm(xs, 0, sd(x$res, na.rm = TRUE))
-  )
+  # Calculate negative log-likelihood
+  n <- length(tawny)
+  nll <- n/2 * log(2 * pi) + n/2 * log(var(tawny - mu)) + sum((tawny - mu)^2) / (2 * var(tawny - mu))
   
-  res <- res[order(res$y), ]
-  res
-}))
+  return(nll)
+}
 
-dens$section <- rep(levels(df$section), each = 50)
+likelihood_values <- apply(df1, 1, function(row) {
+  intercept <- row["intercept"]
+  slope <- row["slope"]
+  
+  # Convert intercept and slope to numeric if needed
+  intercept <- as.numeric(intercept)
+  slope <- as.numeric(slope)
+  
+  # Calculate likelihood for current parameter combination
+  likelihood(intercept, slope, combined_df)
+})
 
-ggplot(df, aes(pm, tawny)) +
-  geom_point(colour = "white", size = 0.2, alpha = 0.4) +
-  geom_smooth(method = "lm", fill = NA, lwd = 1, colour = "white") +
-  geom_path(data = dens, aes(x, y, group = section), lwd = 1, colour = "yellow") +
-  labs(x = "Pine marten density",
-       y = "Tawny owl density")
+df1_likelihood <- cbind(df1, likelihood = likelihood_values)
+df1_likelihood$parms = paste0("Intercept = ", df1_likelihood$intercept, ",\nSlope = ", df1_likelihood$slope)
+
+
+p7 <- ggplot(df1_likelihood) +
+  geom_point(aes(x = parms, y = likelihood)) +
+  labs(x = "",
+       y = "Likelihood") +
+  sbs_theme() +
+  theme(axis.text.x = element_text(angle = 60, vjust = 0.5, hjust = 0.5))
+
+ggsave(here("Lecture 5 - Cont LM/Figures", file = "mle.png"), plot = p7, width = 650/72, height = 775/72, dpi = 72)
+
+
+df <- data.frame(
+  marten = seq(from = 0, to = 10, by = 0.5)
+)
+
+df$tawny <- 40 - 3.5 * df$marten
+
+a3 <- ggplot(df, aes(x = marten, y = tawny)) +
+  geom_line() +
+  labs(x = "Pine marten",
+       y = "Tawny owls") +
+  sbs_theme() +
+  transition_reveal(marten)
+anim_save(here("Lecture 5 - Cont LM/Figures", file = "tawny_pred.gif"), animation = a3)
+
+p8 <- ggplot(df, aes(x = marten, y = tawny)) +
+  geom_line() +
+  labs(x = "Pine marten",
+       y = "Tawny owls") +
+  sbs_theme()
+ggsave(here("Lecture 5 - Cont LM/Figures", file = "tawny_pred.png"), plot = p8, width = 650/72, height = 775/72, dpi = 72)
+
+
+
+# Running the model -------------------------------------------------------
+
+set.seed(666)
+
+df <- expand.grid(
+  site = 1:23,
+  year = 0:44
+)
+
+# PM
+b0 <- -3.5
+b1 <- 0.08
+
+g0 <- rnorm(23, mean = 0, sd = 0.2)
+names(g0) <- 1:23
+df$g0 <- g0[df$site]
+
+df$pm_lamb <- exp(b0 + b1 * df$year + df$g0)
+df$marten <- rlnorm(nrow(df), meanlog = df$pm_lamb, sdlog = 0.1)
+
+a0 <- 40
+a1 <- -3.5
+
+df$mu <- a0 + a1 * df$marten
+df$tawny <- rnorm(nrow(df), mean = df$mu, sd = 5)
+owl_data <- df
+
+
+owl_model <- lm(tawny ~ marten,
+                data = owl_data)
+
+summary(owl_model)

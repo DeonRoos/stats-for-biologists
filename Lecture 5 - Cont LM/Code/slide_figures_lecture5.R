@@ -42,6 +42,13 @@ a1 <- -3.5
 
 df$mu <- a0 + a1 * df$pm
 df$tawny <- rnorm(nrow(df), mean = df$mu, sd = 5)
+df_sub <- data.frame(
+  site = df$site,
+  year = df$year + 1979,
+  tawny = round(df$tawny, digits = 1),
+  marten = round(df$pm, digits = 1)
+)
+write.csv(df_sub, here("Lecture 5 - Cont LM", file = "tawny.csv"), row.names = FALSE)
 
 p2 <- ggplot(df) +
   geom_point(aes(x = year, y = tawny)) +
@@ -350,3 +357,62 @@ owl_model <- lm(tawny ~ marten,
                 data = owl_data)
 
 summary(owl_model)
+
+df$resids <- resid(owl_model, type = "pearson")
+
+p9 <- ggplot(df) +
+  geom_histogram(aes(x = resids)) +
+  geom_vline(xintercept = 0.0008, colour = "white", linetype = 2, linewidth = 1.5) +
+  geom_vline(xintercept = -3.4267, colour = "white", linetype = 2, linewidth = 1.5) +
+  geom_vline(xintercept = 3.4721, colour = "white", linetype = 2, linewidth = 1.5) +
+  geom_vline(xintercept = -15.7312, colour = "white", linetype = 2, linewidth = 1.5) +
+  geom_vline(xintercept = 14.1214, colour = "white", linetype = 2, linewidth = 1.5) +
+  labs(x = "'Pearson' residuals",
+       y = "Frequency") +
+  sbs_theme()
+
+ggsave(here("Lecture 5 - Cont LM/Figures", file = "model_resids_hist.png"), plot = p9, width = 650/72, height = 775/72, dpi = 72)
+
+
+set.seed(88)
+df <- df %>%
+  mutate(pm_bin = cut(marten, breaks = quantile(marten, probs = seq(0, 1, 0.2)), include.lowest = TRUE))
+
+
+sub_df <- df %>%
+  group_by(pm_bin) %>%
+  sample_n(50) %>%
+  ungroup()
+
+sub_df$line <- coef(owl_model)[1] + coef(owl_model)[2] * sub_df$marten
+
+p10 <- ggplot(data = sub_df) +
+  geom_point(aes(x = marten, y = tawny)) +
+  geom_abline(intercept = coef(owl_model)[1], slope = coef(owl_model)[2],
+              size = 1.5, colour = "red",
+              show.legend = FALSE) +
+  geom_segment(aes(x = marten, xend = marten, y = tawny, yend = line),
+               linetype = "dashed", colour = "white") +
+  labs(x = "Pine marten density",
+       y = "Tawny owl density") +
+  sbs_theme()
+p10
+ggsave(here("Lecture 5 - Cont LM/Figures", file = "model_resids_line.png"), plot = p10, width = 650/72, height = 775/72, dpi = 72)
+
+
+marten <- seq(from = 0,
+              to = 10,
+              length.out = 25)
+marten
+
+pred_tawny <- 39.5 - 3.1 * marten
+
+p11 <- ggplot() +
+  geom_line(aes(x = marten, y = pred_tawny), colour = "black")
+
+ggsave(here("Lecture 5 - Cont LM/Figures", file = "ugly_pred.png"), plot = p11, width = 650/72, height = 775/72, dpi = 72)
+
+library(ggeffects)
+
+p12 <- plot(ggpredict(owl_model)) + theme_bw()
+ggsave(here("Lecture 5 - Cont LM/Figures", file = "ggeffects.png"), plot = p12, width = 650/72, height = 775/72, dpi = 72)

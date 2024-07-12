@@ -345,7 +345,6 @@ df$mu <- a0 + a1 * df$marten
 df$tawny <- rnorm(nrow(df), mean = df$mu, sd = 5)
 owl_data <- df
 
-
 owl_model <- lm(tawny ~ marten,
                 data = owl_data)
 
@@ -362,3 +361,6 @@ p9 <- ggplot(df, aes(x = x, y = y)) +
   geom_line() +
   sbs_theme()
 ggsave(here("Lecture 5 - Cont LM/Figures", file = "fig_eg.png"), plot = p9, width = 650/72, height = 775/72, dpi = 72)
+
+
+  

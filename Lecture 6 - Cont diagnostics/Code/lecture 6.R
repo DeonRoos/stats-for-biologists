@@ -352,3 +352,115 @@ dat1 <- data.frame(x = 8,
                    y = 2)
 dat_bad <- rbind(dat, dat1)
 plot(lm(y ~ x, data = dat_bad))
+
+
+
+
+# Worked example data -----------------------------------------------------
+
+library(tidyverse)
+library(lubridate)
+
+co2 <- read.csv("H:\\003 - Teaching\\006-BI3010\\Lecture 6 - Cont diagnostics\\Data\\co2_owid.csv",
+                header = TRUE,
+                stringsAsFactors = TRUE)
+co2 <- co2 |> 
+  group_by(Year) |> 
+  summarise(co2 = sum(Annual.CO..emissions))
+
+co2 <- co2[co2$Year > 1950 & co2$Year < 2021,]
+
+sst <- read.csv("H:\\003 - Teaching\\006-BI3010\\Lecture 6 - Cont diagnostics\\Data\\sst_owid.csv",
+                header = TRUE,
+                stringsAsFactors = TRUE)
+
+sst$date <- dmy(sst$Day)
+sst$year <- year(sst$date)
+sst <- sst[!is.na(sst$date),]
+sst <- sst[sst$year > 1950 & sst$year < 2021,]
+
+sst <- sst |> 
+  group_by(year) |> 
+  summarise(sst = mean(Monthly.sea.surface.temperature.anomaly))
+
+head(sst)
+
+dat <- data.frame(
+  year = sst$year,
+  sst = sst$sst,
+  co2 = co2$co2/1000000
+)
+
+# write.csv(dat, here("Lecture 6 - Cont diagnostics/Data", file = "cc_dat.csv"),
+#           row.names = FALSE)
+
+cc_dat <- read.csv("H:\\003 - Teaching\\006-BI3010\\Lecture 6 - Cont diagnostics\\Data\\cc_dat.csv",
+                   header = TRUE,
+                   stringsAsFactors = TRUE)
+head(cc_dat, n = 10)
+summary(cc_dat)
+p <- ggplot(dat, aes(x = co2, y = sst)) +
+  geom_point() +
+  sbs_theme()
+ggsave(here("Lecture 6 - Cont diagnostics/Figures", file = "cc_eda.png"), plot = p, width = 650/72, height = 775/72, dpi = 72)
+
+cc_mod <- lm(sst ~ co2, data = dat)
+summary(cc_mod)
+
+par(mfrow = c(2,2), bg = "black", col = "white", col.axis = "white", col.lab = "white")
+plot(cc_mod, ask = F)
+
+summary(cc_mod)
+
+fake <- data.frame(
+  co2 = seq(from = min(cc_dat$co2),
+            to = max(cc_dat$co2),
+            length.out = 25)
+)
+fake$fit <- predict(cc_mod, newdata = fake)
+fake
+
+p1 <- ggplot(dat) +
+  geom_line(aes(x = co2, y = fit)) +
+  labs(x = "CO2 (millions of tonnes)",
+       y = "Sea surface temperature (degrees C)") +
+  scale_x_continuous(labels = scales::comma) +
+  sbs_theme()
+ggsave(here("Lecture 6 - Cont diagnostics/Figures", file = "cc_pred.png"), plot = p1, width = 650/72, height = 775/72, dpi = 72)
+
+
+p2 <- ggplot() +
+  geom_line(data = fake, aes(x = co2, y = fit)) +
+  geom_point(data = cc_dat, aes(x = co2, y = sst)) +
+  labs(x = "CO2 (millions of tonnes)",
+       y = "Sea surface temperature (degrees C)") +
+  scale_x_continuous(labels = scales::comma) +
+  sbs_theme()
+ggsave(here("Lecture 6 - Cont diagnostics/Figures", file = "cc_pred_dat.png"), plot = p2, width = 650/72, height = 775/72, dpi = 72)
+
+cc_dat$resid <- resid(cc_mod)
+cc_dat$residf <- ifelse(cc_dat$resid <= 0, "Negative", "Positive")
+p3 <- ggplot() +
+  geom_line(data = fake, aes(x = co2, y = fit)) +
+  geom_point(data = cc_dat, aes(x = co2, y = sst, colour = residf), size = 2) +
+  scale_colour_brewer(palette = "Set2") +
+  labs(x = "CO2 (millions of tonnes)",
+       y = "Sea surface temperature (degrees C)",
+       colour = "Residual error") +
+  scale_x_continuous(labels = scales::comma) +
+  sbs_theme()
+ggsave(here("Lecture 6 - Cont diagnostics/Figures", file = "cc_pred_nonlin.png"), plot = p3, width = 650/72, height = 775/72, dpi = 72)
+
+
+p4 <- ggplot() +
+  geom_smooth(data = cc_dat, aes(x = co2, y = sst), colour = "red", method = "gam", se = FALSE) +
+  geom_line(data = fake, aes(x = co2, y = fit)) +
+  geom_point(data = cc_dat, aes(x = co2, y = sst, colour = residf), size = 2) +
+  scale_colour_brewer(palette = "Set2") +
+  labs(x = "CO2 (millions of tonnes)",
+       y = "Sea surface temperature (degrees C)",
+       colour = "Residual error") +
+  scale_x_continuous(labels = scales::comma) +
+  sbs_theme()
+p4
+ggsave(here("Lecture 6 - Cont diagnostics/Figures", file = "cc_pred_sline.png"), plot = p4, width = 650/72, height = 775/72, dpi = 72)

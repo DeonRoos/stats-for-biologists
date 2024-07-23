@@ -55,36 +55,146 @@ p1 <- ggplot(dat) +
 
 ggsave(here("Lecture 7 - Cat LM/figures", file = "horn_desc.png"), plot = p1, width = 650/72, height = 775/72, dpi = 72)
 
-
 m1 <- lm(horn ~ region, data = df)
 summary(m1)
 
 plot(ggeffects::ggpredict(m1))
 
+nu_data <- data.frame(region = c("Skeena", "Peace"))
+nu_data$fit <- predict(m1, nu_data)
+
+p <- ggplot(nu_data) +
+  geom_point(aes(x = region, y = fit)) +
+  labs(x = "Region",
+       y = "Predicted horn length") +
+  sbs_theme()
+
+ggsave(here("Lecture 7 - Cat LM/figures", file = "horn_pred.png"), plot = p, width = 650/72, height = 775/72, dpi = 72)
+
+nu_data <- data.frame(region = c("Skeena", "Peace"))
+prds <- predict(m1, nu_data, se.fit = TRUE)
+nu_data$fit <- prds$fit
+nu_data$low <- prds$fit - prds$se.fit * 1.96
+nu_data$upp <- prds$fit + prds$se.fit * 1.96
+
+p1 <- ggplot(nu_data) +
+  geom_point(aes(x = region, y = fit), colour = "black")
+p1
+p <- ggplot(nu_data) +
+  geom_errorbar(aes(x = region, ymin = low, ymax = upp), width = 0.03, colour = "white") +
+  geom_point(aes(x = region, y = fit), size = 4) +
+  labs(x = "Region",
+       y = "Predicted horn length") +
+  sbs_theme()
+
+ggsave(here("Lecture 7 - Cat LM/figures", file = "horn_pred_ci.png"), plot = p, width = 650/72, height = 775/72, dpi = 72)
+
+
+drug <- data.frame(drug = c("A", "B"),
+                   fit = c(0.1, 0.08),
+                   low = c(0.05, 0.03),
+                   upp = c(0.16, 0.885))
+
+p <- ggplot(drug) +
+  geom_point(aes(x = drug, y = fit)) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "Drug",
+       y = "Probability of death") +
+  sbs_theme()
+p
+
+ggsave(here("Lecture 7 - Cat LM/figures", file = "drug_no_ci.png"), plot = p, width = 650/72, height = 775/72, dpi = 72)
+
+
+p <- ggplot(drug) +
+  geom_point(aes(x = drug, y = fit)) +
+  geom_errorbar(aes(x = drug, ymin = low, ymax = upp), width = 0.1, colour = "white") +
+  scale_y_continuous(labels = scales::percent, limits = c(0,1)) +
+  labs(x = "Drug",
+       y = "Probability of death") +
+  sbs_theme()
+p
+
+ggsave(here("Lecture 7 - Cat LM/figures", file = "drug_ci.png"), plot = p, width = 650/72, height = 775/72, dpi = 72)
 
 
 
+# Dichotomania ------------------------------------------------------------
 
 
+set.seed(666)
 
+df <- expand.grid(
+  site = 1:23,
+  year = 0:44
+)
 
+# PM
+b0 <- -3.5
+b1 <- 0.08
 
+g0 <- rnorm(23, mean = 0, sd = 0.2)
+names(g0) <- 1:23
+df$g0 <- g0[df$site]
 
+df$pm_lamb <- exp(b0 + b1 * df$year + df$g0)
+df$pm <- rlnorm(nrow(df), meanlog = df$pm_lamb, sdlog = 0.1)
 
+# Tawny
+a0 <- 40
+a1 <- -3.5
 
+df$mu <- a0 + a1 * df$pm
+df$tawny <- rnorm(nrow(df), mean = df$mu, sd = 5)
 
+df$pm_cat <- ifelse(df$pm < 1.5, "Low",
+                    ifelse(
+                      df$pm >= 1.5 & df$pm < 3, "Medium", "High")
+                    )
+                    
 
+m2 <- lm(tawny ~ pm_cat, data = df)
 
+nu_data <- data.frame(
+  pm_cat = c("High", "Medium", "Low")
+)
 
+prds <- predict(m2, nu_data, se.fit = TRUE)
+nu_data$fit <- prds$fit
+nu_data$low <- prds$fit - prds$se.fit * 1.96
+nu_data$upp <- prds$fit + prds$se.fit * 1.96
+nu_data$pm_cat <- factor(nu_data$pm_cat, levels = c("Low", "Medium", "High"))
+p <- ggplot(nu_data) +
+  geom_point(aes(x = pm_cat, y = fit)) +
+  geom_errorbar(aes(x = pm_cat, ymin = low, ymax = upp), width = 0.1, colour = "white") +
+  labs(x = "Pine marten density (100 km)",
+       y = "Tawny owl density (100km)") +
+  sbs_theme()
+p
 
+ggsave(here("Lecture 7 - Cat LM/figures", file = "pm_cat.png"), plot = p, width = 650/72, height = 775/72, dpi = 72)
 
+m3 <- lm(tawny ~ pm, data = df)
 
+nu_data <- data.frame(
+  pm = seq(from = min(df$pm), to = max(df$pm), length.out = 20)
+)
 
+prds <- predict(m3, nu_data, se.fit = TRUE)
+nu_data$fit <- prds$fit
+nu_data$low <- prds$fit - prds$se.fit * 1.96
+nu_data$upp <- prds$fit + prds$se.fit * 1.96
+p <- ggplot(nu_data) +
+  geom_ribbon(aes(x = pm, ymin = low, ymax = upp), colour = "white", alpha = 0.5) +
+  geom_line(aes(x = pm, y = fit)) +
+  geom_vline(xintercept = 1.5, linetype = 2, colour = "white") +
+  geom_vline(xintercept = 3, linetype = 2, colour = "white") +
+  labs(x = "Pine marten density (100 km)",
+       y = "Tawny owl density (100km)") +
+  sbs_theme()
+p
 
-
-
-
-
+ggsave(here("Lecture 7 - Cat LM/figures", file = "pm_cont.png"), plot = p, width = 650/72, height = 775/72, dpi = 72)
 
 set.seed(1988)
 

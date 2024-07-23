@@ -78,8 +78,16 @@ nu_data$low <- prds$fit - prds$se.fit * 1.96
 nu_data$upp <- prds$fit + prds$se.fit * 1.96
 
 p1 <- ggplot(nu_data) +
-  geom_point(aes(x = region, y = fit), colour = "black")
+  geom_point(aes(x = region, y = fit))
 p1
+ggsave(here("Lecture 7 - Cat LM/figures", file = "horn_pred_points.png"), plot = p1, width = 650/72, height = 775/72, dpi = 72)
+p2 <- ggplot(nu_data) +
+  geom_point(aes(x = region, y = fit)) +
+  geom_errorbar(aes(x = region, ymin = low, ymax = upp))
+p2
+ggsave(here("Lecture 7 - Cat LM/figures", file = "horn_pred_bars.png"), plot = p2, width = 650/72, height = 775/72, dpi = 72)
+
+
 p <- ggplot(nu_data) +
   geom_errorbar(aes(x = region, ymin = low, ymax = upp), width = 0.03, colour = "white") +
   geom_point(aes(x = region, y = fit), size = 4) +

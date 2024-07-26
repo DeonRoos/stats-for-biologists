@@ -13,6 +13,8 @@ source("sbsvoid_theme.R")
 # Example dataset ---------------------------------------------------------
 # Number of varrao mites (if infected) in honey bee hives
 
+set.seed(2024)
+
 n_years <- 23
 n_sites <- 5
 n_samples <- n_years * n_sites
@@ -96,8 +98,65 @@ range(yst_dat$beaver)
 m1 <- lm(beaver ~ wolf, data = yst_dat)
 summary(m1)
 
-m2 <- lm(beaver ~ site + survival + reproduction + wolf + park, data = yst_dat)
+m2 <- lm(beaver ~ survival + reproduction + wolf + park, data = yst_dat)
 summary(m2)
+
+
+# EDA ---------------------------------------------------------------------
+
+p <- ggplot(yst_dat) +
+  geom_jitter(aes(x = wolf, y = beaver),
+              width = 0.1, height = 0) +
+  labs(x = "Wolf presence",
+       y = "Beaver density") +
+  sbs_theme()
+p
+
+p1 <- ggplot(yst_dat) +
+  geom_jitter(aes(x = site, y = beaver),
+              width = 0.1, height = 0) +
+  labs(x = "Site",
+       y = "Beaver density") +
+  sbs_theme()
+p1
+
+p2 <- ggplot(yst_dat) +
+  geom_point(aes(x = survival, y = beaver)) +
+  labs(x = "Beaver survival",
+       y = "Beaver density") +
+  sbs_theme()
+p2
+
+p3 <- ggplot(yst_dat) +
+  geom_point(aes(x = reproduction, y = beaver)) +
+  labs(x = "Beaver reproduction",
+       y = "Beaver density") +
+  sbs_theme()
+p3
+
+p4 <- ggplot(yst_dat) +
+  geom_point(aes(x = year, y = beaver)) +
+  labs(x = "Year",
+       y = "Beaver density") +
+  sbs_theme()
+p4
+
+p5 <- ggplot(yst_dat) +
+  geom_jitter(aes(x = park, y = beaver),
+              width = 0.1, height = 0) +
+  labs(x = "Park protection",
+       y = "Beaver density") +
+  sbs_theme()
+p5
+
+design <- "
+ABC
+DEF
+"
+
+p6 <- p + p1 + p2 + p3 + p4 + p5 + plot_layout(design = design)
+ggsave(here("Lecture 9 - Multivariate LM/Figures", file = "eda.png"), plot = p6,width = 1400/72, height = 650/72, dpi = 72)
+
 
 
 # Confounded relationship -------------------------------------------------
@@ -114,7 +173,7 @@ p <- ggplot(nu_data) +
   labs(x = "Wolf presence",
        y = "Beaver density") +
   sbs_theme()
-
+p
 ggsave(here("Lecture 9 - Multivariate LM/Figures", file = "beaver_wolf.png"), plot = p, width = 650/72, height = 775/72, dpi = 72)
 
 
@@ -354,4 +413,23 @@ CD
 
 p <- p1 + p4 + p3 + p2 + plot_layout(design = design)
 ggsave(here("Lecture 9 - Multivariate LM/Figures", file = "complex_results.png"), plot = p,width = 1400/72, height = 650/72, dpi = 72)
+
+nu_data <- expand.grid(wolf = c("Present", "Absent"),
+                       survival = median(yst_dat$survival),
+                       reproduction = median(yst_dat$reproduction),
+                       park = "Fully protected")
+nu_data$wolf <- factor(nu_data$wolf, levels = c("Absent", "Present"))
+prds <- predict(m3, nu_data, se.fit = TRUE)
+nu_data$fit <- prds$fit
+nu_data$low <- prds$fit - prds$se.fit * 1.96
+nu_data$upp <- prds$fit + prds$se.fit * 1.96
+
+p2 <- ggplot(nu_data) +
+  geom_point(aes(x = wolf, y = fit)) +
+  geom_errorbar(aes(x = wolf, ymin = low, ymax = upp), width = 0.1, colour = "white") +
+  scale_y_continuous(limits = c(4.5,NA)) +
+  labs(x = "Wolf presence",
+       y = "Beaver density") +
+  sbs_theme()
+p2
 ggsave(here("Lecture 9 - Multivariate LM/Figures", file = "beaver_no_wolf.png"), plot = p2, width = 650/72, height = 775/72, dpi = 72)

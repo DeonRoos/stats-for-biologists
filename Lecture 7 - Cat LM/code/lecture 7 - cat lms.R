@@ -360,3 +360,107 @@ p6 <- ggplot(df) +
 p6
 ggsave(here("Lecture 7 - Cat LM/figures", file = "multi_contrast.png"), plot = p6, width = 650/72, height = 775/72, dpi = 72)
 
+
+# Confidence intervals ----------------------------------------------------
+N <- 19
+df <- data.frame(
+  x = rep("b0", times = N + 1),
+  true = rep(5, times = N + 1),
+  low = c(runif(n = N, min = 0, max = 4.8), 5.5),
+  upp = c(runif(n = N, min = 5.2, max = 10), 6.5)
+)
+df$state <- 1:nrow(df)
+df$row_state <- 1:nrow(df)
+
+# copying additional rows to slow animation when CI does not overlap
+df <- df |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1) |> 
+  add_row(x = "b0", true = 5, low = 5.5, upp = 6.5, state = 20, row_state = max(df$row_state) + 1)
+
+a1 <- ggplot(df) +
+  geom_point(aes(x = x, y = true)) +
+  geom_errorbar(aes(x = x, ymin = low, ymax = upp), colour = "white", width = 0.1) +
+  annotate("segment", x = 0.75, xend = 1, y = 2.6, yend = 5, arrow = arrow(), colour = "white") +
+  annotate("label", x = 0.75, y = 2.5, 
+           label = "True but\nunknown value\n(The 'post')", size = 5,
+           colour = "white", fill = "#72758d") +
+  labs(x = "Parameter",
+       y = "") +
+  sbs_theme() +  # Use your custom theme
+  ggtitle("Repeat: {closest_state}") +  # Add dynamic title
+  transition_states(row_state, transition_length = 5, state_length = c(rep(1, N), 5)) +
+  ease_aes('bounce-in')
+a1  
+anim_save(here("Lecture 7 - Cat LM/figures", file = "95%CI.gif"), animation = a1)
+
+df <- data.frame(
+  x = "b0",
+  low = 15,
+  upp = 20
+)
+
+p1 <- ggplot(df) +
+  geom_errorbar(aes(x = x, ymin = low, ymax = upp), colour = "white", width = 0.1) +
+  labs(x = "Parameter",
+       y = "") +
+  sbs_theme()
+
+ggsave(here("Lecture 7 - Cat LM/figures", file = "unknown_true_CI.png"), plot = p1, width = 650/72, height = 775/72, dpi = 72)

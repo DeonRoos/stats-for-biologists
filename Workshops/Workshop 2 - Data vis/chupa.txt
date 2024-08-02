@@ -1,0 +1,226 @@
+"year" "site" "alcho_units" "ufo" "chupa"
+1981 "Houston" 7.8 19 1.65
+1982 "Houston" 10.5 0 0.44
+1983 "Houston" 4.9 0 -0.67
+1984 "Houston" 7.1 0 -0.35
+1985 "Houston" 5.8 0 -0.44
+1986 "Houston" 7 0 -0.44
+1987 "Houston" 7.6 0 -0.2
+1988 "Houston" 5.3 0 -0.67
+1989 "Houston" 6.9 0 -0.27
+1990 "Houston" 4.4 0 -0.86
+1991 "Houston" 10.4 0 0.46
+1992 "Houston" 6.4 0 -0.38
+1993 "Houston" 9.7 0 0.33
+1994 "Houston" 6.8 0 -0.29
+1995 "Houston" 7.6 0 -0.09
+1981 "Dallas" 9.7 20 2.34
+1982 "Dallas" 7.8 0 -0.05
+1983 "Dallas" 6.5 4 -0.05
+1984 "Dallas" 7.2 0 -0.14
+1985 "Dallas" 4.3 0 -0.8
+1986 "Dallas" 6.2 2 -0.21
+1987 "Dallas" 4.9 1 -0.58
+1988 "Dallas" 9.3 0 0.43
+1989 "Dallas" 5.8 0 -0.52
+1990 "Dallas" 3.6 2 -0.72
+1991 "Dallas" 6.2 0 -0.26
+1992 "Dallas" 1 0 -1.54
+1993 "Dallas" 6.5 2 -0.08
+1994 "Dallas" 7.3 3 0.23
+1995 "Dallas" 10.5 0 0.27
+1981 "Austin" 8.7 0 -0.13
+1982 "Austin" 11.9 0 0.73
+1983 "Austin" 7.3 2 -0.26
+1984 "Austin" 6.4 0 -0.34
+1985 "Austin" 0 0 -1.6
+1986 "Austin" 8.6 0 -0.01
+1987 "Austin" 7.8 0 -0.14
+1988 "Austin" 8.1 0 0.05
+1989 "Austin" 0 0 -1.74
+1990 "Austin" 7.1 0 -0.24
+1991 "Austin" 11.9 0 0.67
+1992 "Austin" 3.5 0 -1.05
+1993 "Austin" 5.9 0 -0.59
+1994 "Austin" 7.2 0 -0.06
+1995 "Austin" 7.8 0 -0.05
+1981 "San Antonio" 6.8 1 -0.17
+1982 "San Antonio" 7.8 0 -0.19
+1983 "San Antonio" 8.4 2 0.15
+1984 "San Antonio" 12.9 0 0.81
+1985 "San Antonio" 4.7 0 -0.78
+1986 "San Antonio" 8.6 0 -0.01
+1987 "San Antonio" 4.4 0 -0.8
+1988 "San Antonio" 8.9 0 0.12
+1989 "San Antonio" 3.5 0 -1.16
+1990 "San Antonio" 7.4 1 -0.03
+1991 "San Antonio" 10.5 0 0.44
+1992 "San Antonio" 8 0 -0.18
+1993 "San Antonio" 7.7 2 -0.05
+1994 "San Antonio" 5.1 2 -0.56
+1995 "San Antonio" 7.5 0 -0.05
+1981 "Fort Worth" 9.5 0 0.25
+1982 "Fort Worth" 9.5 0 0.27
+1983 "Fort Worth" 7.9 0 -0.16
+1984 "Fort Worth" 10.4 0 0.54
+1985 "Fort Worth" 4.8 0 -0.81
+1986 "Fort Worth" 5.9 0 -0.64
+1987 "Fort Worth" 5.1 2 -0.51
+1988 "Fort Worth" 6.4 0 -0.52
+1989 "Fort Worth" 8.2 0 -0.15
+1990 "Fort Worth" 3.9 0 -0.87
+1991 "Fort Worth" 7.8 0 -0.22
+1992 "Fort Worth" 6.7 0 -0.28
+1993 "Fort Worth" 9.3 0 0.13
+1994 "Fort Worth" 4.7 0 -0.79
+1995 "Fort Worth" 7.3 0 -0.22
+1981 "El Paso" 6.6 0 -0.32
+1982 "El Paso" 9.6 0 0.18
+1983 "El Paso" 7.5 0 -0.46
+1984 "El Paso" 8.2 0 -0.32
+1985 "El Paso" 8.9 0 -0.02
+1986 "El Paso" 8.7 0 0
+1987 "El Paso" 4.6 1 -0.7
+1988 "El Paso" 9.1 0 0.12
+1989 "El Paso" 11.3 0 0.61
+1990 "El Paso" 8.4 6 0.72
+1991 "El Paso" 8.5 0 -0.15
+1992 "El Paso" 8.6 0 0.08
+1993 "El Paso" 12.1 2 0.99
+1994 "El Paso" 7.7 4 0.09
+1995 "El Paso" 8 0 -0.08
+1981 "Arlington" 5.6 0 -0.65
+1982 "Arlington" 9.9 0 0.44
+1983 "Arlington" 9.5 0 0.06
+1984 "Arlington" 9.4 0 0.17
+1985 "Arlington" 7.7 0 -0.11
+1986 "Arlington" 9.6 0 0.09
+1987 "Arlington" 6.1 2 -0.28
+1988 "Arlington" 7.3 0 0.04
+1989 "Arlington" 3.7 0 -0.96
+1990 "Arlington" 9.3 1 0.38
+1991 "Arlington" 8.8 1 0.27
+1992 "Arlington" 5.9 0 -0.45
+1993 "Arlington" 10.6 0 0.51
+1994 "Arlington" 5.7 0 -0.59
+1995 "Arlington" 7 0 -0.28
+1981 "Corpus Christi" 10.5 0 0.34
+1982 "Corpus Christi" 6.1 0 -0.38
+1983 "Corpus Christi" 5.7 0 -0.6
+1984 "Corpus Christi" 9.9 0 0.08
+1985 "Corpus Christi" 5.3 0 -0.66
+1986 "Corpus Christi" 6.9 0 -0.19
+1987 "Corpus Christi" 8.9 0 0.15
+1988 "Corpus Christi" 5.8 0 -0.62
+1989 "Corpus Christi" 7.4 0 -0.13
+1990 "Corpus Christi" 10.3 0 0.35
+1991 "Corpus Christi" 11.8 1 0.64
+1992 "Corpus Christi" 6.8 0 -0.51
+1993 "Corpus Christi" 7.5 0 -0.22
+1994 "Corpus Christi" 7.7 1 0
+1995 "Corpus Christi" 9 0 0.11
+1981 "Plano" 7.3 0 -0.29
+1982 "Plano" 9.4 0 0.05
+1983 "Plano" 5.9 0 -0.56
+1984 "Plano" 12.3 0 0.76
+1985 "Plano" 3.4 0 -1.01
+1986 "Plano" 8.3 0 0.03
+1987 "Plano" 3.8 0 -1.06
+1988 "Plano" 7.6 0 -0.13
+1989 "Plano" 9.1 1 0.23
+1990 "Plano" 8.8 0 -0.07
+1991 "Plano" 8.7 0 0
+1992 "Plano" 7.7 0 -0.09
+1993 "Plano" 10.7 0 0.48
+1994 "Plano" 4.9 0 -0.46
+1995 "Plano" 9.2 0 0.07
+1981 "Laredo" 8 0 -0.1
+1982 "Laredo" 13.2 0 1.01
+1983 "Laredo" 6.1 0 -0.36
+1984 "Laredo" 8.9 0 0.1
+1985 "Laredo" 5.9 0 -0.4
+1986 "Laredo" 8.1 0 -0.03
+1987 "Laredo" 5.9 1 -0.39
+1988 "Laredo" 4.5 0 -0.95
+1989 "Laredo" 7.4 1 0.02
+1990 "Laredo" 5.4 0 -0.53
+1991 "Laredo" 8.4 0 0.05
+1992 "Laredo" 5.2 0 -0.66
+1993 "Laredo" 9.2 0 0.06
+1994 "Laredo" 4.9 46 3.91
+1995 "Laredo" 8.4 0 0.02
+1981 "Lubbock" 5 3 -0.59
+1982 "Lubbock" 10.5 0 0.28
+1983 "Lubbock" 5.5 0 -0.53
+1984 "Lubbock" 8.4 0 -0.16
+1985 "Lubbock" 7.9 0 0
+1986 "Lubbock" 6.1 0 -0.46
+1987 "Lubbock" 8.6 0 0.13
+1988 "Lubbock" 8.2 1 0.06
+1989 "Lubbock" 4.2 0 -0.95
+1990 "Lubbock" 7 0 -0.51
+1991 "Lubbock" 7.8 1 -0.11
+1992 "Lubbock" 8.1 0 -0.31
+1993 "Lubbock" 7.9 0 -0.12
+1994 "Lubbock" 3.7 19 0.98
+1995 "Lubbock" 7.8 1 -0.13
+1981 "Garland" 5.7 0 -0.62
+1982 "Garland" 8.1 0 -0.11
+1983 "Garland" 6.7 0 -0.36
+1984 "Garland" 8.8 0 -0.07
+1985 "Garland" 6.7 0 -0.4
+1986 "Garland" 4.3 0 -0.93
+1987 "Garland" 3.1 0 -1.07
+1988 "Garland" 8.4 0 -0.06
+1989 "Garland" 7.5 1 -0.07
+1990 "Garland" 9.8 0 0.26
+1991 "Garland" 8.4 0 -0.19
+1992 "Garland" 1.8 0 -1.42
+1993 "Garland" 12 0 0.65
+1994 "Garland" 6.7 1 -0.17
+1995 "Garland" 4.3 0 -0.88
+1981 "Irving" 4.4 2 -0.64
+1982 "Irving" 8.1 0 -0.06
+1983 "Irving" 5.6 0 -0.54
+1984 "Irving" 10.5 0 0.33
+1985 "Irving" 8.8 0 0.03
+1986 "Irving" 11.9 0 0.73
+1987 "Irving" 5.6 2 -0.43
+1988 "Irving" 5.8 0 -0.69
+1989 "Irving" 9.2 0 0.35
+1990 "Irving" 6.4 1 -0.26
+1991 "Irving" 3.6 0 -1.01
+1992 "Irving" 2.3 0 -1.17
+1993 "Irving" 11 0 0.6
+1994 "Irving" 8.3 3 0.2
+1995 "Irving" 7.7 0 -0.34
+1981 "Amarillo" 5.8 0 -0.6
+1982 "Amarillo" 12.7 0 0.86
+1983 "Amarillo" 8.6 0 0.04
+1984 "Amarillo" 9.4 0 0.24
+1985 "Amarillo" 6.2 0 -0.34
+1986 "Amarillo" 9.6 0 0.2
+1987 "Amarillo" 6 0 -0.38
+1988 "Amarillo" 4.6 0 -0.67
+1989 "Amarillo" 6.4 1 -0.24
+1990 "Amarillo" 11.7 0 0.6
+1991 "Amarillo" 12.2 0 0.58
+1992 "Amarillo" 7.8 0 -0.09
+1993 "Amarillo" 10.5 0 0.33
+1994 "Amarillo" 3.2 0 -1.08
+1995 "Amarillo" 5.2 0 -0.76
+1981 "Grand Prairie" 5.3 2 -0.52
+1982 "Grand Prairie" 10.1 0 0.27
+1983 "Grand Prairie" 9.7 0 0.32
+1984 "Grand Prairie" 6.6 0 -0.37
+1985 "Grand Prairie" 3.2 0 -1.13
+1986 "Grand Prairie" 6 0 -0.46
+1987 "Grand Prairie" 2.4 0 -1.15
+1988 "Grand Prairie" 5.8 0 -0.45
+1989 "Grand Prairie" 6.5 1 -0.23
+1990 "Grand Prairie" 4.9 0 -0.79
+1991 "Grand Prairie" 9.6 0 0.34
+1992 "Grand Prairie" 8.1 0 -0.06
+1993 "Grand Prairie" 8.5 0 0.14
+1994 "Grand Prairie" 8.3 0 -0.08
+1995 "Grand Prairie" 6 0 -0.54

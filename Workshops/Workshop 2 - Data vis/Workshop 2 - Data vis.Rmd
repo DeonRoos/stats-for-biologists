@@ -1,0 +1,123 @@
+---
+title: "Workshop 2 - Data visualisation"
+author: "Michelle Pinard & Deon Roos"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+# The Good, the Bad and the Beautiful
+
+## Overview
+
+This exercise will have you choose one data to visualise. Your objective is to create three figures.
+
+1. The Good: A highly informative figure, where your goal is to make the message of the figure as clear as possible, as might be used in a scientific paper.
+
+2. The Bad: A highly *uninformative* figure. Basically, make the worst possible figure you can while still, technically, showing the data. This can include things such as misleading axes, ugly design choices, cluttered information, and so on. See [here](https://www.codeconquest.com/blog/12-bad-data-visualization-examples-explained/) for inspiration.
+
+3. The beautiful: Be as creative and artistic as you can to show your chosen dataset. Here your objective is not neccessarily to be informative, but instead to create a figure that is visually attractive. This is probably the hardest of the three, so if you don't quite manage it, don't worry, this one's mostly for fun. Such types of data visulations are normally used in media - sometimes scientists will hire artists to create these figures to help with public engagement. See [here](https://informationisbeautiful.net/) for inspiration.
+
+## Step 1: Get your data
+
+Head over to [MyAberdeen](link) and select the dataset you want to use for this practical. You can use the same dataset as last week, or shake things up and use a new one. The choice is yours.
+
+Download the data and store it in a sensibly named folder (pls no `my_data` folders). Once you have that sorted, copy the file path (in file explorer select the text in the navigation bar). Then load the data into `R`. I'll use a made up dataset - of the growth rate of [Chupacabra's](https://en.wikipedia.org/wiki/Chupacabra) in southern Texas:
+
+```{r}
+# I saved the `chupa.txt` dataset to "H:\003 - Teaching\006-BI3010\Workshops\Workshop 2 - Data vis"
+# Remember to use forward slash and not back slash when specifying file paths in R
+chupa <- read.table("H:/003 - Teaching/006-BI3010/Workshops/Workshop 2 - Data vis/chupa.txt",
+                    header = TRUE, # the first row of the data are the column names
+                    stringsAsFactors = TRUE # read in letters as factors, not characters
+                    )
+```
+
+Have a quick look at the data to make sure it loaded in ok:
+
+```{r}
+head(chupa)
+```
+
+Looks good. The data we have are:
+
+- `year` The year the data was collected in.
+- `city` The Texan city the data was collected in.
+- `alcho_units` The average litres of consumption per adult of pure alcohol per year.
+- `ufo` The number of UFOs (i.e. aliens) reported that year.
+- `chupa` The growth rate of chupacabra populations in each city in each year (Roos et al., unpublished data).
+
+To be clear, this is entirely fake data.
+
+Let's make some plots.
+
+## Step 2: The Good
+
+Let's make an informative scientific figure.
+
+Make sure you have `ggplot2` installs (run `install.packages(ggplot2)` if you haven't done so; note you only need to install it onto your computer once), then load it into `R` so that we can use it.
+
+To make an effective figure, you first need to decide what you want to show. With the variables that we have, I'll make the decision that I'm interested in how UFO sightings are related to chupacabra population growth rates.
+
+From that decision alone, I know I want growth rate on my y-axis, and UFO on my x-axis:
+
+```{r}
+ggplot(chupa, aes(x = ufo, y = chupa)) +
+  geom_point()
+```
+
+At this point, the figure is sufficiently informative from my view, but there are still a few things we can do to make it a *little* more visually appealing.
+
+There are a number of changes I would like to make:
+
+1. Relabel the x- and y-axes so that they're a bit more useful to the reader.
+2. Change the theme of the plot so we don't use the ugly grey background.
+3. Add a little transparency to the points to help to reader gauge where big clusters of observations are.
+4. Add a horizontal line where chupa is zero, to signify the rate where the population is stable.
+
+### Change 1
+
+Relabel the x- and y-axes so that they're a bit more useful to the reader.
+
+```{r}
+ggplot(chupa, aes(x = ufo, y = chupa)) +
+  geom_point() +
+  labs(x = "Total UFO reportings per year and per city",
+       y = "Population growth rate of chupacabra")
+```
+
+### Change 2
+
+Change the theme of the plot so we don't use the ugly grey background.
+
+```{r}
+ggplot(chupa, aes(x = ufo, y = chupa)) +
+  geom_point() +
+  labs(x = "Total UFO reportings per year and per city",
+       y = "Population growth rate of chupacabra") +
+  theme_minimal()
+```
+
+### Change 3
+
+Add a little transparency to the points to help to reader gauge where big clusters of observations are.
+
+```{r}
+ggplot(chupa, aes(x = ufo, y = chupa)) +
+  geom_point(alpha = 0.2) +
+  labs(x = "Total UFO reportings per year and per city",
+       y = "Population growth rate of chupacabra") +
+  theme_minimal()
+```
+
+### Change 2
+
+Add a horizontal line where chupa is zero, to signify the rate where the population is stable.
+
+```{r}
+ggplot(chupa, aes(x = ufo, y = chupa)) +
+  geom_point(alpha = 0.2) +
+  labs(x = "Total UFO reportings per year and per city",
+       y = "Population growth rate of chupacabra") +
+  theme_minimal() +
+  geom_hline(yintercept = 0, linetype = "dashed")
+```

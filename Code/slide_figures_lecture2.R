@@ -233,3 +233,83 @@ p1 <- ggplot(df) +
 p1
 
 ggsave(here("Lecture 2 - lm overview/Figures", file = "normal_dist.png"), plot = p1, width = 650/72, height = 775/72, dpi = 72)
+
+
+
+# Reworked likelihood example ---------------------------------------------
+
+
+
+N <- 50
+
+df <- data.frame(
+  age = runif(n = N, 0, 5)
+)
+df$height <- rnorm(n = N, mean = 36.5 + 14.8 * df$age, sd = 10)
+
+set.seed(88)
+df <- df %>%
+  mutate(age_bin = cut(age, breaks = quantile(age, probs = seq(0, 1, 0.2)), include.lowest = TRUE))
+
+calculate_likelihood <- function(observed, mean, sd = 10) {
+  dnorm(observed, mean = mean, sd = sd)
+}
+
+df1 <- data.frame(
+  intercept = c(30.2, 35.7, 36.5, 46.1, 54.3, 60.7),
+  slope = c(0.1, 5.3, 14.8, 15.2, 16.5, 18.3),
+  grp = factor(1:6)
+)
+
+combined_df <- bind_rows(
+  lapply(1:nrow(df1), function(i) {
+    temp_df <- df
+    temp_df$line <- df1$intercept[i] + df1$slope[i] * temp_df$age
+    temp_df$grp <- df1$grp[i]
+    temp_df$likelihood <- calculate_likelihood(temp_df$height, temp_df$line)
+    temp_df$fit_mean <- df1$intercept[i] + df1$slope[i] * temp_df$age
+    temp_df$intercept <- df1$intercept[i]
+    temp_df$slope <- df1$slope[i]
+    return(temp_df)
+  })
+)
+
+density_df <- bind_rows(
+  lapply(unique(combined_df$grp), function(g) {
+    temp_df <- combined_df %>% filter(grp == g)
+    x_vals <- seq(15, 130, length.out = 75)
+    densities <- dnorm(x_vals, mean = mean(temp_df$fit_mean), sd = 18)
+    data.frame(x = x_vals, y = densities, grp = g)
+  })
+)
+
+
+df1 <- df1 %>%
+  mutate(subtitle_text = paste0("beta[0] == ", round(intercept, 2), ", ", "beta[1] == ", round(slope, 2)))
+
+combined_df <- combined_df %>%
+  left_join(df1, by = "grp")
+
+hist_max_density <- combined_df %>%
+  group_by(grp) %>%
+  summarise(max_density = max(density(height)$y))
+
+# Merge the max density with the density_df to apply scaling
+density_df <- density_df %>%
+  left_join(hist_max_density, by = "grp") %>%
+  mutate(y_scaled = y / max(y) * 0.025)
+
+
+a2 <- ggplot() +
+  geom_histogram(data = combined_df, aes(x = height, y = ..density..), alpha = 0.5, position = "identity") +
+  geom_line(data = density_df, aes(x = x, y = y_scaled), size = 1.5) +
+  labs(x = "Child height (cm)",
+       y = "",
+       subtitle = '{paste("mu =", round(df1[df1$grp == closest_state, "intercept"], 2), "+ ", round(df1[df1$grp == closest_state, "slope"], 2), "* Age")}'
+  ) +
+  sbs_theme() +
+  transition_states(grp) + 
+  ease_aes("cubic-in")
+a2
+
+anim_save(here::here("Figures/Lecture 2 - lm overview/Figures", file = "tweak_params.gif"), animation = animate(a2, width = 650, height = 775))

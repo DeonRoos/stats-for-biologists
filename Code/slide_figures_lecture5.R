@@ -219,7 +219,7 @@ p10 <- ggplot(data = temp_df) +
        title = "Intercept = 40, Slope = -2",
        subtitle = "𝐿=−241,593") +
   scale_x_continuous(limits = c(0, NA)) +
-  scale_y_continuous(limits = c(0, NA)) #+
+  scale_y_continuous(limits = c(0, NA)) +
   sbs_theme()
 
 p9 + p10

@@ -1,0 +1,305 @@
+---
+title: 'Computer workshop 9B: Experimental design:  BACI and linear modelling skills'
+author: "Pinard, Cornulier, Ross, Wouters, Vogwill"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+  html_document:
+    toc: yes
+    code_folding: show
+    theme: readable
+---
+
+```{r setup, include=FALSE}
+#knitr::opts_chunk$set(echo = TRUE) # uncomment if producing answer sheet, the echo = TRUE is when you want the output
+knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="hide") # uncomment if producing workshop sheet
+answer_sheet <- FALSE # Put this to TRUE to generate the workshop sheet with answers, FALSE to generate the workshop sheet without answers
+```
+
+# Learning objectives
+1.	Understanding the principles and interpretation of an example of more advanced experimental design: the BACI experiment.
+
+2.	Reinforcing linear modelling skills acquired over week 2 through the analysis of the BACI experiment.
+
+Mussels growing on the mudflats of the Ythan estuary (Newburgh, Aberdeenshire), are mainly eaten by eider ducks; they are one of the ducks’ preferred prey. In order to test if eider predation has an impact on mussel population size and structure, an experiment was designed using small exclosures that prevent eiders from accessing mussels in selected areas.
+
+The principle of the experiment is that of a before/after control/impact experiment where the comparison of exclosures (control = without eiders) with open plots (impact = with eiders) allows one to estimate the number of mussels removed by eiders, while the before (start = t0) and after (end = t60) measurements allow to one to estimate temporal changes due to variables (e.g., environmental conditions) other than eider predation.
+
+Exclosures were made of rectangular metal grid (60 x 92 cm) raised with 4 pegs 15-17cm above the mussel bed, in order to avoid direct interference with mussel respiration and feeding. The coordinates of 12 experimental plots were drawn at random within the mussel bed and an exclosure set-up at the location determined by these coordinates. For each plot, a (60 x 92 cm) control plot, accessible to eiders, was placed 6 m away from the exclosure plot in a random direction and delimited by 4 pegs.
+
+For all 12 plots, the lengths of the mussels were recorded in each of the control and exclosure sub-plots, once at the time of set up, and finally after 60 days. Mussels were later classified as small medium and large and the count per category recorded.
+
+![A sketch of the experimental design – the oval shape represents the mudflats, the brown rectangles the control plots, the hatched blue rectangles the exclosure plots (not to scale).](C:/Users/for265/OneDrive - University of Aberdeen/Rwork_BI3010/W9_exptldesign/Design.png)
+
+## Research questions 
+**Section A: Does predation by eiders have a detectable impact on mussel population size?**
+
+**Section B (OPTIONAL): Does eider predation impact mussel size classes differentially?**
+
+## Section A – Abundance of medium sized mussels
+In this section we will focus on the mussel size class that eiders are known to prefer: medium-sized mussels (and for now we will ignore the small and large mussels).
+
+### Formulating working hypotheses and a corresponding model
+**1.	If you want to measure changes in mussel abundance due to eider predation alone, which two sets of plots do you want to compare?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# Compare with eiders (impact = no exclosure) plots at t60 with the without eider (control = exclosure) plots at t60; the difference here is the effect of eider predation without taking into account changes related to time or space.
+```
+
+**2.	Do you need to account for differences in initial mussel abundance between control plots and exclosure plots?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# It is best if you can do this.  With the BACI design you are accounting for any initial abundance differences by taking measurements (counts and lengths) at t0 (before the experiment starts) in both the without eider plots and the with eider plots.  The control plots were chosen in a random fashion, so should not have any systematic bias compared to exclosure plots. Furthermore, the pairing of control and exclosure by the design should minimize the risk of random differences between the two. However, because replication is only 12 and due to the high spatial variation in mussel abundance at small scale, there may still be large differences arising by chance. Therefore, accounting for such differences makes the design and subsequent analysis stronger. 
+```
+
+**3.	Do you need to take in to account changes in mussel abundance not due to eider predation, for example by recruitment or mortality from other causes?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# Yes, mussels may die during the course of the experiment due to other causes (e.g. pollution spike) or may grow and change size class. Part of the change in mussel abundance between t0 and t60 may therefore not be due to eider predation.   
+```
+
+**4.	Based on your answers to the above questions, propose an appropriate analytical approach.**
+```{r, include=answer_sheet, class.source="bg-success"}
+# A linear model is preferable, that includes
+# •	a treatment effect (treat:  without eiders, with eiders),
+# •	a time effect (time:  t0, t60),
+# •	a treatment by time interaction, which allows separating the effects of time due to eiders (Yt60,with eiders-Yt0,with eiders) vs. not due to eiders (Yt60,without eiders-Yt0,without eiders), as well as differences in treatment and control due to eiders (Yt60,with eiders-Yt60,without eiders) and not due to eiders (Yt0,with eiders-Yt0,without eiders).
+# Two sample independent T-tests or non-parametric tests only allow to make one comparison at a time and do not provide effect sizes directly. They would therefore not be practical for measuring the contribution of eider predation to changes in mussel abundance. 
+# Chi-squared test would allow detecting significant overall change in the number of mussels between treatments and times, but it would not be specific about the origin(s) of the significant difference and would not take replication and variation between sub-plots into account. For example, one of two sub-plots with extremely large counts could influence the whole analysis dramatically.
+
+```
+
+### Download the data and load into R
+Use a subset of the data to work so that initially you are working only with medium-sized mussels.  The example that was used in the lecture was with the medium sized mussels.  If you prefer to work with either the large or the small, feel free to do so, you will just need to modify the code.
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Use the dropdown menu to set your working directory to your 3010 folder.
+# Load the data:
+Ducks   <-     read.table("eiders.txt", header = TRUE)
+# When loading or subsetting data, it is a good idea to use the str() command to check your data is what you are expecting.
+str(Ducks)
+Med <- subset(Ducks, size == "Medium")
+str(Med)
+```
+
+### Exploring the data (before fitting any model)
+It would be worth ensuring that the two categorical predictors ($treat and $time) are set as factors.  In the linear model, we will want without eiders and time zero to be the reference case. You can check that these features are in place in the dataset.  If not, the code to change a variable to a factor is below, as is the code to specify which group you want to be the reference.  
+
+```{r}
+# to make the predictors factors
+Ducks$treat<-as.factor(Ducks$treat)
+Ducks$time<-as.factor(Ducks$time)
+# to make a specific level within a categorical predictor the reference case
+Ducks$treat<-relevel(Ducks$treat, ref="c.without.eiders")
+Ducks$time<-relevel(Ducks$time, ref="t0")
+str(Ducks)
+Med <- subset(Ducks, size == "Medium")
+str(Med)
+```
+
+Create a relevant graph to get a sense of how mussel count varies with time and treatment.  
+
+```{r, include=answer_sheet, class.source="bg-success"}
+boxplot (Med$obs.count ~ Med$time * Med$treat)
+```
+
+**5.	What do you learn from the graph(s)?  Comment on how the spread of the data varies among the groups.**
+```{r, include=answer_sheet, class.source="bg-success"}
+# From these graphs we can see that the treatment effect (i.e., without eiders) results in an increased abundance of mussels at t60.  We can also see that in the control plots (with eiders) there seems to be a small decrease in mussel abundance between t0 and 60.
+# You might choose to create a plot of means to get a sense of differences (effect sizes).  Alternately, you could create a boxplot or histogram of counts of medium-sized mussels against time and treatment.  An interval plot will also work well for this.  You don’t need to make all of these, they are just to illustrate what you might use to look at the patterns.
+```
+
+**6.	Do these data follow a normal distribution?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# Not really, they are skewed to the right (i.e., a few plots have relatively high abundance) and the variance is much greater than the mean.  We haven’t looked at this type of distribution in class but it appears similar to a negative binomial?  Although our analysis will not require that the data are normally distributed, it will require the residuals to be normally distributed so it may be helpful to use a log transformation of the data in the analysis. 
+hist(Med$obs.count, breaks = 20)
+Med$ln.obs.count=log(Med$obs.count) #this creates a new variable for count that is log-transformed (natural log)
+hist(Med$ln.obs.count)
+```
+
+### Perform your analysis in R on the log-transformed counts, assuming data follow a normal distribution.  
+```{r, include=answer_sheet, class.source="bg-success"}
+Model_med<- lm(Med$ln.obs.count~Med$time * Med$treat)
+summary(Model_med)
+anova(Model_med)
+```
+
+### Check model assumptions 
+**7.	Is this model valid? What plots could you use to check the normality of the residuals, homogeneity of variance, influence of individual observations?**
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Based on the distribution of the residuals, the spread of the residuals versus fits, and the two unusual observations, I would conclude that the model is valid.
+hist(Model_med$residuals)
+hist(Model_med$residuals, breaks = 20)
+qqnorm(Model_med$residuals)
+qqline(Model_med$residuals)
+plot(Model_med$residuals ~ Model_med$fitted.values)
+plot(cooks.distance(Model_med) ~ hatvalues(Model_med))
+```
+
+### Interpret model outputs 
+**8.	What does the coefficient (Intercept) refer to?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# We set the reference case to Without eiders (Exclosure) and t0 when we ran the model so this coefficient is the mean (LN_obs.count) number of mussels for Exclosures at the start of the experiment. Remember the predictors in this model are categorical so the intercepts here relate to mean values. 
+```
+
+**9.	What is the interpretation of the coefficient time t60?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# This is the difference in the mean (LN_obs.count) number of mussels between the end (t60) and start (t0) of the experiment in the exclosures (treatment without eiders).
+```
+
+**10.	What is the interpretation of the coefficient treat with eiders?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# This is the difference in the mean (LN_obs.count) number of mussels between the treat with eiders (without exclosures, impact) and the treat without eiders (exclosures, control) at the start (t0) of the experiment.
+```
+
+**11.	How can you interpret the coefficient time \* treat t60 with eiders?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# This is the effect of eider predation.  The coefficient refers to the difference in mean number of mussels (LN_obs.count) relative to the reference case after we add the effect of time (t60) and the effect of treatment (with eiders).  The coefficient is negative, hence there are fewer mussels at the end (t60) in the with-eider plots (impact) than would be expected from the time and treatment effects alone. 
+# Another way to think of it is that this is the coefficient related to the interaction term in the model.  There is a significant time effect but not a significant treatment effect in the model.  That means if you only considered the effect of the exclosures, the mean mussel abundance is similar between the open plots (with eiders) and the plots with exclosures (without eiders).  We didn’t do this graph but we could do it now (see below).  There is a lot of overlap between the mussel abundance values in the two treatments.  The problem with looking at just the treatment effect is that mussel abundance was changing over time at the mudflats and if we ignore the time effect, we would come to the wrong conclusion about the effects of eider predation on mussel abundance (the results would erroneously suggest no evidence for an effect of eider predation).  Similarly, if we just considered the effects of time, we might conclude that mussel abundance is increasing in the mudflat.  The interaction term lets us see how eider predation is affecting mussel abundance when we control for background noise or changes that are happening over time due to other factors.
+# Assuming you used LN(obs.count) for your transformation, you can back-transform the mean values to convert to a unit that makes more intuitive sense. See slides from the lecture if you want to check your work.
+# Eiders removed 49.3 mussels per plot on average over the course of the experiment.
+```
+
+**12.	What can you infer from this model output, with reference to your research question(s)?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# The interaction being significant, eider predation has a negative effect on mussel abundance  You can confirm this interpretation with barplot or interval plot
+#========================================
+# Barplot / interval plot for Q12 
+#========================================
+# 1. Creating mean and standard error dataframe
+#For our new dataset, we need to define some variables (or vectors if you prefer):
+time <- c("t0","t60", "t0","t60")
+treat <- c("without.eiders", "without.eiders", "with.eiders","with.eiders")
+#We then need to calculate means and standard errors, and also put these into vectors.
+#We can find the means for each combination of treatment levels using:
+ln.obs.count <- as.vector(by(Med$ln.obs.count, list(Med$time, Med$treat), mean))
+
+#We then do a similar calculation to find the standard deviation (the first step in calculating standard error).
+stde <- as.vector(by(Med$ln.obs.count, list(Med$time,Med$treat), sd))
+
+#We then calculate standard error (each treatment combination contains 10 guinea pigs)
+sterr <- stde/sqrt(10)
+#We can combine our four vectors into a dataframe.
+df <- data.frame(time, treat, ln.obs.count, sterr)
+
+#To make our lives easier going forward, we will change our two character vectors into factors.
+df$time <- as.factor(df$time)
+df$treat <- as.factor(df$treat)
+#We are now ready to make a barchart!!!!
+
+
+# 2. Barplot
+library(ggplot2)
+ggplot(df, aes(time, ln.obs.count, fill = treat)) + 
+  geom_col(position=position_dodge()) + 
+  geom_errorbar(aes(ymin=ln.obs.count-sterr, ymax=ln.obs.count+sterr),position=position_dodge() )
+
+# 3. Interval plot
+ggplot() + 
+  geom_errorbar(data=df, mapping=aes(x=time, ymin=ln.obs.count-sterr, ymax=ln.obs.count+sterr), width=0.3, size=0.5, color="black", 
+                position = position_dodge(width = 0.8)) + 
+  geom_point(data=df, mapping=aes(x=time, y=ln.obs.count, col = treat), size=1, fill="white")
+
+
+```
+
+### Check model assumptions (once again)
+**13.	Is this model really valid? Are the observations actually independent of each other?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# Well, strictly speaking there is a lack of independence because the pairs of plots (exclosure and no exclosure) are within a short distance of each other.  As there is enough replication to allow plot to be included as a factor in the analysis, one would be able to control for the lack of independence in the design by incorporating the interaction between treatment*plot. 
+```
+
+## Section B (OPTIONAL): Does eider predation impact mussel size classes differentially?
+
+In this section we will ask if mussel predation by eiders affects the size structure of the mussel population. Another way of asking the same question is “Does eider predation impact mussel size classes differentially?”. From a model perspective, this corresponds to adding interactions with mussel size class (“size”) to the model in the previous section.
+
+For this part, you need to go back to the original data set with all size classes
+
+### Formulating working hypotheses and a corresponding model
+**14.	Is an interaction with mussel size class (“size”) relevant for all the terms in the previous model?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# Yes: the time effect may be different for different size classes due to different recruitment and mortality rates; the initial differences in abundances between with eiders and without eiders plots may be different between size classes; and the predation rate by eiders may be different between size classes too.
+```
+
+### Exploring the data (before fitting any model)
+In this case we are interesting in looking at log-transformed data for the three sizes, but also at the two times and for the two treatments, plus the interaction.  It will be difficult to visualise all of those patterns with a single figure but I might start with three boxplots with the counts of mussels against size, time and treatment.  
+
+```{r, include=answer_sheet, class.source="bg-success"}
+boxplot(Ducks$obs.count~Ducks$size)
+boxplot(Ducks$obs.count~Ducks$time)
+boxplot(Ducks$obs.count~Ducks$treat)
+```
+This view suggests that we should log transform the data.  In this case we have some observations that are zero, so when we transform the data we should add 1 (e.g., LN(x+1)).  This view also asks us to consider the heterogeneity of the variances; we’ll need to see if the transformation improves things.  Redo the boxplots with the transformed data.
+
+```{r, include=answer_sheet, class.source="bg-success"}
+Ducks$ln.obs.count<-log(Ducks$obs.count+1)
+```
+
+```{r, include=answer_sheet, class.source="bg-success"}
+boxplot(Ducks$ln.obs.count~Ducks$size)
+boxplot(Ducks$ln.obs.count~Ducks$time)
+boxplot(Ducks$ln.obs.count~Ducks$treat)
+# The natural log transformation has helped even out the variances and made the distributions within groups more symmetrical.  We can see that in terms of the patterns, the abundances of the three size classes at the start (t0) are different; we can also see that the differences between the with eiders treatment at t60 is much less for the large and small mussels than it is for the medium sized ones.
+#the following code creates plots that provide more insight but it requires gplot
+library(gplots) #if you want to create plots showing the means with 95% CI you can use gplots
+plotmeans(ln.obs.count ~ time, data = Ducks, connect = FALSE, n.label = FALSE,
+          ylim=c(1.5,5))
+grid(nx=NULL, ny=NULL, col="lightgray", lty="dotted", lwd=par("lwd"))
+
+plotmeans(ln.obs.count ~ treat, data = Ducks, connect = FALSE, n.label = FALSE,
+          ylim=c(1.5,5))
+grid(nx=NULL, ny=NULL, col="lightgray", lty="dotted", lwd=par("lwd"))
+
+plotmeans(ln.obs.count ~ interaction(treat, time), data = Ducks, connect = FALSE, n.label = FALSE,
+          ylim=c(1.5,5))
+grid(nx=NULL, ny=NULL, col="lightgray", lty="dotted", lwd=par("lwd")) 
+```
+
+### Perform your analysis in R on the log-transformed counts, assuming data do follow a normal distribution.
+ 
+```{r, include=answer_sheet, class.source="bg-success"}
+model_all<-lm(Ducks$ln.obs.count~Ducks$time*Ducks$treat*Ducks$size)
+summary(model_all)
+anova(model_all)
+
+```
+
+### Check model assumptions 
+**15.	Is this model valid? What plots could you use to check the normality of the residuals, homogeneity of variance, influence of individual observations?**
+```{r, include=answer_sheet, class.source="bg-success"}
+hist(model_all$residuals)
+hist(model_all$residuals, breaks = 20)
+qqnorm(model_all$residuals)
+qqline(model_all$residuals)
+plot(model_all$residuals ~ model_all$fitted.values)#difficult to see the groups here so I will create some boxplots
+abline(1,0)
+abline(0,0)
+abline(-1,0)
+boxplot(model_all$residuals~Ducks$size)
+boxplot(model_all$residuals~Ducks$time)
+boxplot(model_all$residuals~Ducks$treat)
+plot(cooks.distance(model_all) ~ hatvalues(model_all))
+# Even with the log transformed data we can see that there is at least one group whose variance is smaller than the others and the residual plot looks skewed.  Our sample size is low, however, making it difficult to be confident one way or the other.
+```
+
+### Interpret model outputs 
+Given the number of terms in this model, a global interpretation of effects using the ANOVA table will be enough, with the help of a barplot of the means per group to help identify the size and direction of differences.
+
+**16.	Does the effect of exclosure (without eiders) differ between mussel sizes?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# No: treat*size	F2,132= 2.4, p=0.095 
+```
+
+**17.	Does the effect of time differ between mussel sizes?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# No but marginal: time*size	F2,132= 2.87, p=0.06  
+```
+
+**18.	Does the effect of eider predation differ between mussel sizes?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# Yes: treat*time*size	F2,132= 4.53, p=0.013 
+```
+
+**19.	What can you infer from this model output, with reference to your research question(s)?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# A separate ANOVA for each size class would be easier to interpret than a 3-way interaction due to the way effects are coded, but according to the barplot of the means, the direction of effects is not consistent with a negative effect of eider predation on both small and large mussels. In contrast, there is evidence of a negative effect of eider predation on the abundance of medium-sized mussels (Section A).
+```

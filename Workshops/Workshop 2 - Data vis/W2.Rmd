@@ -1,0 +1,207 @@
+---
+title: 'Computer workshop 2: Statistical inference with null hypothesis significance
+  testing (NHST)'
+author: "Pinard, Cornulier, Ross, Wouters, Vogwill"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+  pdf_document:
+    toc: yes
+  html_document:
+    toc: yes
+    code_folding: show
+    theme: readable
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE) # uncomment if producing answer sheet
+#knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="hide") # uncomment if producing workshop sheet
+answer_sheet <- TRUE # Put this to TRUE to generate the workshop sheet with answers, FALSE to generate the workshop sheet without answers
+```
+
+# Learning objectives
+1.  Visual data exploration and quality control using histograms, density and Q-Q plots
+2.  Being able to apply the Null Hypothesis Significance Testing (NHST) approach, using the T-test
+    a.	Identifying research question
+    b.	Specifying null and alternative hypotheses
+    c.	Assessing validity of assumptions
+    d.	Performing test appropriately
+    e.	Reporting results
+3.	Being able to generalise the NHST approach using other statistical tests
+
+Obj. 1 is a useful skill for making first, rapid exploration of a new data set.
+
+Obj. 2 and 3 are important for understanding much of the scientific literature. We will also make use of NHST for interpreting the results of models in the rest of the course, while studying Linear Regression Models.
+
+# Instructions
+We will revisit the penguin dataset, starting with reinforcing the use of quick exploratory data analysis techniques (basic but absolutely essential prior to doing any statistics).
+
+## Getting started
+
+### Setting the working directory and loading the data
+If you need a reminder of how to do this, go back to the earlier workshops.  After reading in the dataset, subset the dataset by species so that you can work with all three of the species separately. 
+
+```{r}
+penguins<-read.table("penguins.txt",header=TRUE)
+Gentoo<-subset(penguins,species=="Gentoo")
+Adelie<-subset(penguins,species=="Adelie")
+Chinstrap<-subset(penguins,species=="Chinstrap")
+```
+
+## Visual exploration of the data: outlier identification
+In the last practical you plotted histograms for the full penguin dataset and for each species separately.  Other useful plots for exploring data are simple plots, boxplots and violin plots. 
+
+Start by using the full penguin dataset, create a boxplot with species as the grouping variable.  The code is provided for specifying the x and y axis labels.
+
+```{r}
+#this is a simple way to code for a boxplot
+boxplot(penguins$body_mass_g~penguins$species, ylab= "body mass (g)")
+#you can also specify a boxplot by groups using the code below
+boxplot(body_mass_g ~ species, data = penguins, 
+        ylab = "body mass (g)", xlab = "species")
+```
+
+In boxplots in R, an outlier is identified as 1.5xIQR (values that fall outside the interquartile range times 1.5.  Some datasets include values that are identified by this method as an outlier but they are real values, accurately measured.  Outliers that are clearly errors or non-sense values should be removed and noted.  Outliers that are not clearly errors probably should not be routinely removed.  
+
+In cases where you decide there is justification to remove them, you should note the removal in your methods and consider whether it is helpful to run the analysis with the outliers included and excluded to see if the decision is important to your statistical inference.
+
+Now, working with the Adelie penguin dataset, create a boxplot with sex as the grouping variable.  Also create a histogram for each sex with an empirical density curve overlaid on the histogram.
+
+Finally, make a violin plot.  To create a violin plot, you need to be sure that you have installed the package, called it into the library, and then you can use vioplot() to create the graph in a way that is similar to how you use the boxplot() command.  You only need to install packages once if you are using your own personal computer.  If you are using a classroom computer, you may need to install a package if it is not already on that machine.  You can install packages two different ways.  First, you could use the Tools>Install Packages menu.  Second, you can use a command (install.packages("vioplot")).  Once a package is installed, you need to call it into the library for each session that you want to use it in.  The vioplot package relies on two other packages (sm and zoo) so be sure to call them into the library, as well.  Violin plots are similar to a boxplot and a density plot combined; the median value is represented by a white circle.
+
+```{r}
+#there are a couple of ways you could code for the boxplot with sex as grouping variable
+boxplot(Adelie$body_mass_g~Adelie$sex,
+        ylab = "body mass (g)", xlab = "sex")
+boxplot(body_mass_g~sex,data=Adelie,
+        ylab= "body mass (g)", xlab= "sex")
+#to create the histogram for each sex you need to start by subsetting the Adelie dataset.
+Adelie_male<-subset(Adelie,sex=="male")
+Adelie_female<-subset(Adelie,sex=="female")
+#to plot separate histograms with kernel density curves (=empirical probability curves), you need to determine the density values and then add the curve to the histogram using the lines() command.  Note that I have included a term for the breaks so that I could specify the x-axis range and bin size.  Remember if you want to know what the minimum and maximum values are for a dataset, you can use the summary() command.
+hist(Adelie_male$body_mass_g)
+hist(Adelie_female$body_mass_g)
+dens_male <- density(Adelie_male$body_mass_g)
+dens_female<-density(Adelie_female$body_mass_g)
+summary(Adelie$body_mass_g)
+brk_m <- seq(from = 2600, to = 5000, by = 200)
+hist(Adelie_male$body_mass_g, breaks = brk_m, xlab = "body mass (g)", main=NULL,
+     freq = FALSE)
+lines(dens_male)
+brk_f <- seq(from = 2600, to = 4000, by = 200)
+hist(Adelie_female$body_mass_g, breaks = brk_f, xlab = "body mass (g)", main=NULL,
+     freq = FALSE)
+lines(dens_female)
+# install.packages("vioplot")#note I have commented this line as you only need to use it once on a computer
+library(sm)
+library(zoo)
+library(vioplot)
+vioplot(body_mass_g ~ sex, data = Adelie, 
+        ylab = "body mass (g)", xlab = "sex",
+        col = "lightblue")
+```
+
+### Question Set One
+**1. Are there potential outliers in any of the species?** 
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# It looks like there are two potential outliers in the Chinstrap species. If you are confident that you have outliers, you can create a copy of the data set and remove them from the copy. If unsure, discuss with a member of staff.  You can create a copy of the data set in excel and reload the new file or you could use a command that removes the maximum or minimum values from a dataset as illustrated in the section on optional activities at the end of the workshop.  
+```
+
+**2.  What observations can you make from the boxplot and histograms of the Adelie male and female body mass?  What is useful about the boxplot with sex as the grouping variable?  What is useful about the histograms with the density curves?  Try to relate the patterns in the boxplot and histograms to the violin plot to help you get used to the advantages/disadvantages of the different types of plots for exploring data.**
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# From the boxplot, one can see that the IQR of the two sexes do not overlap.  One can also see that the median values (dark line in the IQR box) are not central which suggests that there is some skewness in the distributions.  But the whiskers are of similar lengths both above and below the boxes, suggesting that there is reasonable symmetry in the distributions.
+
+# The histograms suggest that the spread of the male body mass values have a larger spread then those for the females.  The density curves suggest that there is reasonable symmetry in the distributions.
+
+# The violin plots confirm reasonably good symmetry, strong central tendency.  The earlier plots tell us much the same thing but we could have used only a violin plot and gotten the insight provided by both the boxplot and the histograms.  The violin plot shows us the distribution similar to the histograms, shows us the symmetry that we can see with the whiskers in the boxplot.
+```
+
+## Testing the effect of sex on body mass
+As in the lecture, we would like to test if the difference in the means for male and female boy mass is statistically significant, or if it could be due to chance.   In the lecture we looked at the Gentoo penguins but for this exercise we will work with Adelie.
+Before running the test, we should remind ourselves of the appropriate null and alternative hypotheses as well as the assumptions of a t test.
+
+### Hypotheses
+The null hypothesis can be written a few different ways.  
+
+*  H~0~: there is no difference between male and female body mass
+*  H~0~: true difference in means between male and females is no different from zero
+
+The alternatives would then be one of the two following:
+
+*  H~A~: there is a difference between male and female body mass
+*  H~A~:  true difference in means between male and females is different from zero
+
+### Assumptions
+We can assume that the data are accurate, samples are independent and that they were collected randomly and are representative of the population.  We have already created histograms which will help us to assess the normality of the distributions.  We can also create QQ plots to give us more information for assessing normality.  
+
+Create a QQ plot for body mass for each sex in the Adelie dataset and examine the plots to assess normality.
+
+```{r}
+# testing assumption of normality
+qqnorm(Adelie_male$body_mass_g)
+qqline(Adelie_male$body_mass_g)
+qqnorm(Adelie_female$body_mass_g)
+qqline(Adelie_female$body_mass_g)
+```
+
+To test the assumption of homogeneity of variance, we can visually examine the spread for each group using the histograms and the boxplot.  We can also determine the standard deviations for each group and consider how similar or different they are from another (difference expressed as a proportion).  We can also determine the F-ratio (SDmale/SDfemale)^2.  The smaller of the two standard deviations should be in the numerator.  The further away from 1 that the F-ratio is, the greater the differences between the two group variances.  To give you an idea of how to interpret a F value, the critical value of 1.61 is associated with samples of 30 for both groups, and an alpha value of 0.05.  For group sample sizes of 60, the critical value is 1.35.  
+
+```{r}
+sd_male<-sd(Adelie_male$body_mass_g)
+sd_female<-sd(Adelie_female$body_mass_g)
+F_ratio<-((sd(Adelie_female$body_mass_g)) / (sd(Adelie_male$body_mass_g)))^2
+```
+
+### T test
+Now let’s run the t test.  Given that the standard deviations for the two groups are quite different, we can include an adjustment to the code to do a t test without the assumption of equal variances.  If you decided that the variances between the two groups were similar, you would just change the final part of the code to TRUE.
+
+```{r}
+# test for unequal variances
+t.test(body_mass_g ~ sex, data=Adelie, 
+         alternative = "two.sided", var.equal = FALSE)
+```
+
+### Question Set Two – Interpretation and reporting
+**3.	What do you conclude from the results of your assessment of the assumptions and the results of the t test?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# That we can reject the null hypothesis and conclude that the body mass is different for male and female Adelie penguins.  By looking at the mean values, we can see that male birds have greater body mass than female birds.  The data met all of the assumptions apart from homogeneity of variance.
+```
+
+**4.	Write out a couple of sentences to report the results, as concise as possible but containing all the required information.  What supporting information would you provide in the form of a table or figure?** 
+```{r, include=answer_sheet, class.source="bg-success"}
+# Body mass (g) was different for male and female Adelie penguins (t = -13.13, df=135.7, p<0.001) with a mean difference of 675 g (95% CI of the difference = [-776, -573].
+
+# A useful plot would be one with mean values with 95% CI for the two sexes side by side or a table with descriptive statistics (e.g., mean, SE, N).
+```
+
+# Optional work
+## Creating a simple plot
+Sometimes it is useful to create a simple plot that shows you the values for a variable as they appear in the dataset.  When you have outliers, it helps to identify which value (e.g., which row) in the dataset is the extreme value.  The code for a simple plot is given below.  The term index refers to the observation number in the dataset.
+
+```{r}
+plot(Adelie_male$body_mass_g)
+plot(Adelie_female$body_mass_g)
+```
+
+## Removing outliers
+In the penguins dataset, the only outliers that were identified are within the Chinstrap species.  The two commands given below remove the minimum value and create a new dataset, and then removes the maximum value and creates a new dataset.  Chinstrap3 has a sample size of 66, compared to Chinstrap2 which has 67 and Chinstrap which has 68.
+```{r}
+Chinstrap2 <- subset(Chinstrap, body_mass_g > min(Chinstrap$body_mass_g))
+Chinstrap3 <- subset(Chinstrap2, body_mass_g < max(Chinstrap$body_mass_g))
+```
+
+## Test for equal variance
+There is a statistical test for comparing two variances.  The test is implemented in way that is very similar to a t-test and the code is given below.  If you want to check your understanding of how to interpret the output, run the test for the Adelie and Gentoo datasets for body mass, grouped by sex.
+
+```{r}
+# test for equal variances
+var.test(body_mass_g ~ sex, data=Adelie, 
+       alternative = "two.sided")
+var.test(body_mass_g ~ sex, data=Gentoo, 
+         alternative = "two.sided")
+```
+
+

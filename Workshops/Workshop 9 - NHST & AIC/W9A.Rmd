@@ -1,0 +1,253 @@
+---
+title: 'Computer workshop 9A: Experimental design:  blocking and linear modelling
+  skills'
+author: "Pinard, Cornulier, Ross, Wouters, Vogwill"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+  html_document:
+    toc: yes
+    code_folding: show
+    theme: readable
+---
+
+```{r setup, include=FALSE}
+#knitr::opts_chunk$set(echo = TRUE) # uncomment if producing answer sheet, the echo = TRUE is when you want the output
+knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="hide") # uncomment if producing workshop sheet
+answer_sheet <- FALSE # Put this to TRUE to generate the workshop sheet with answers, FALSE to generate the workshop sheet without answers
+```
+
+# Learning objectives
+1.  Understanding the principles and interpretation of examples of a blocked design.
+2.	Reinforcing linear modelling skills acquired over week 2 through the analysis of blocked experiments.
+
+# Exercise used in class
+
+**If you prefer to work with a dataset that you have not seen before, a second exercise is provided after this one that takes you through a similar series of steps and questions**
+
+Walter & O’Dowd (1992)[^1]  were interested in the potential mutualistic relationship between predatory mites and plants species that have leaf domatia.  Leaf domatia are plant-produced chambers located in the axils of veins on the underside of leaves.  Predatory mites are known to occur in these chambers.  Many predatory mites feed on phytophagous mites, thereby acting as a type of biological control of pest species.  
+
+[^1]: Walter DE and DJ O’Dowd 1992 Leaves with domatia have more mites.  Ecology 73(4): 1514-1518.  This example was taken from Quinn & Keough 2002
+
+The authors conducted a number of experiments but for the purpose of this exercise, we will focus on one of their experiments.  They were interested in testing a hypothesis that leaves with domatia have more mites than leaves without domatia.  They worked with a plant species (Viburnum tinus) with tuft domatia because tuft domatia can be scraped off without damaging the leaf.  They randomly selected and marked pairs of leaves (blocks) on a shrub of V. tinus; then, they shaved the domatia from a randomly selected leaf in each pair and then censused mite numbers two weeks later.
+
+Use the dataset that is posted on MyAberdeen (mites.txt) to test this hypothesis.  In the dataset, the variable LEAVES identifies the leaf pairs that are then represented as numbers in the variable BLOCK.  The variable TREAT refers to with domatia  (1) and without domatia (2).  MITE is the number of predatory mites counted on each leaf and LMITE is the log transformed value (they used LN(0.5+(MITE\*10)).  The 0.5 was added to the transformation because there were zeroes in the MITE values. 
+
+## Question Set One
+**1.  Restate the hypothesis of interest but including the block effect in your statement.**
+```{r, include=answer_sheet, class.source="bg-success"}
+# H0:  There is no difference between the number of mites on leaves with domatia relative to leaves without domatia, taking account of leaf pairing.
+# There are several ways one could express the null hypothesis.  For example, it would also be correct to state the null hypothesis as the presence of domatia on leaves has no effect on the number of mites per leaf (expressed as the natural log of number) when considering the leaf pairs or blocks.
+```
+
+## Explore the data
+```{r, include=answer_sheet, class.source="bg-success"}
+# Use the dropdown menu to set your working directory to your 3010 folder.
+# Load the data:
+Mites   <-     read.table("mites.txt", header = TRUE)
+# When loading or subsetting data, it is a good idea to use the str() command to check your data is what you are expecting.
+str(Mites)
+hist(Mites$MITE)
+hist(Mites$LMITE)
+boxplot(Mites$MITE   ~    Mites$TREAT)
+boxplot(Mites$MITE   ~   Mites$BLOCK)
+boxplot(Mites$LMITE   ~    Mites$TREAT)
+boxplot(Mites$LMITE   ~   Mites$BLOCK)
+# From the histograms we can see that the log-transformed data are closer to a normal distribution than are the non-transformed data.  From the boxplots we can see that there is a lot of variation across the leaf pairs but the effect of treatment appears to be strong.  We also can see that there is one outlier in treatment one. The boxplots using the log-transformed data show a wider interquartile range for the treatment "without", and therefore, less different from the "with" treatment, suggesting that the log-transformed data may perform better in terms of meeting the assumptions of a linear model. There are few observations in this experiment making histograms less useful than boxplots.
+```
+
+As we have previously done with continuous predictors (i.e., covariates), we can look at interaction between two categorical predictors using an interaction plot.  The code is provided below.
+
+```{r, class.source = c("bg-warning","fold-hide")}
+# creates a plot with one categorical predictor on the x-axis, a second categorical predictor overlaid with different colours and the response variable on the y-axis
+interaction.plot(x.factor     = Mites$TREAT,
+                 trace.factor = Mites$BLOCK,
+                 response     = Mites$LMITE,
+                 fun = mean,
+                 type="b",
+                 col=c(1:14),#Colors for levels of trace var.
+                 pch=c(1:14), #Symbols for levels of trace var.
+                 fixed=TRUE, #Order by factor order in data
+                 leg.bty = "o")
+```
+
+From the interaction plot you will see that for most of the leaf pairs, the leaf without the domatia has fewer mites than the leaf with domatia, however there is one leaf pair where the pattern is the opposite.  The message here is only that there is variability in response.
+
+## Perform an analysis in R using the log-transformed data.
+
+```{r, include=answer_sheet, class.source="bg-success"}
+#Note that we do not include an interaction term in the model.  Although the interaction plot indicates that there is some interaction, we don't have replication within the blocks to allow us adding the interaction term into the model.
+Model <- lm(Mites$LMITE  ~ Mites$BLOCK + Mites$TREAT)
+summary(Model)
+anova(Model)
+```
+
+## Check model assumptions 
+
+```{r, include=answer_sheet, class.source="bg-success"}
+hist(Model$residuals)
+hist(Model$residuals, breaks = 20)
+qqnorm(Model$residuals)
+qqline(Model$residuals)
+plot(Model$residuals ~ Model$fitted.values)
+abline(1,0)
+abline(0,0)
+abline(-1,0)
+plot(cooks.distance(Model) ~ hatvalues(Model))
+library(car)#remember now we can create a QQ plot with confidence intervals
+par(mfrow = c(1,1))
+qqPlot(Model$residuals) 
+```
+
+## Question Set Two
+**2.	Is the model valid?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# Based on the residual x fits plot it is difficult to tell as there are so few observations and the appearance is odd.  If we plot the residuals against TREAT we see that there is reasonably equivalent spread above and below the reference line (0) so the assumption of homogeneity of variance is met.
+# When we look at the histogram of residuals and/or the QQ plot we see good symmetry and all points falling close to the line, therefore can be content that we have met the assumption of normality of residuals.
+# When we plot cook's distance vs hatvalues (i.e., leverage) we see that there is no problem with influential values (i.e., all COOK values are < 1 although the value we identified as an outlier in the initial data exploration does have a cooks distance value much higher than the rest).
+```
+
+## Interpret model outputs for the model 
+
+## Question Set Three
+**3.	Can we reject the null hypothesis?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# Yes, the probability of no effect of shaving is very low (F=11.32, df = 1,13, p = 0.005), after taking BLOCK into account. 
+```
+
+**4.	What does the coefficient “intercept” refer to?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# The Constant 4.49 is the mean LMITE for the reference case, which is TREAT 1 and BLOCK 1.
+```
+
+**5.	What is the interpretation of the coefficient TREATwithout?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# TREAT 2 is the average adjustment to the mean LMITE for the leaves with shaved domatia (without domatia). 
+```
+
+**6.	What should we do with the coefficients related to the different blocks?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# Nothing, we are not interested in the block effect, we are primarily interested in the effect of shaving the domatia.  We may note that the p-values associated with the t-tests for all of the comparisons of the blocks to the reference case are not significant.
+```
+
+**7.	What can you infer from this model output, with reference to your research question(s)?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# First, we conclude that the shaving of the domatia had an effect of reducing the number of mites on a leaf.  There is no significant effect of BLOCK we choose to leave it in the model as it was an important component of the design of the experiment.  
+# Also, we can see that 25.5% of the variability in the dataset was associated with the pairing (BLOCK) and 34.7% of the variability was associated with the treatment.
+```
+
+## Perform the analysis without including block in the model
+## Question Set Four
+**8.	Restate the hypothesis**
+```{r, include=answer_sheet, class.source="bg-success"}
+# H0:  The presence of domatia on a leaf does not affect the number of mites on the leaf.
+# Or 
+# H0: There is no effect of shaving off the domatia on the number of mites on a leaf.
+```
+
+## Explore the data
+
+## Perform your analysis in R on the log-transformed values
+
+```{r, include=answer_sheet, class.source="bg-success"}
+#Only difference: 
+model2 <- lm(Mites$LMITE ~ Mites$TREAT)
+``` 
+
+## Check model assumptions 
+
+```{r, include=answer_sheet, class.source="bg-success"}
+hist(model2$residuals)
+hist(model2$residuals, breaks = 20)
+qqnorm(model2$residuals)
+qqline(model2$residuals)
+plot(model2$residuals ~ model2$fitted.values)
+abline(1,0)
+abline(0,0)
+abline(-1,0)
+plot(cooks.distance(model2) ~ hatvalues(model2))
+```
+
+## Question Set Five
+**9.	Is this model valid? What plots could you use to check the normality of the residuals, homogeneity of variance, influence of individual observations?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# There is problem with the normality of the residuals (skewed to the left) and a problem with the homogeneity of variance (larger variance in residuals for TREAT 2 than TREAT 1).  No problem with influential observations.  The model that included BLOCK was more appropriate in meeting the assumptions of a linear model.
+```
+
+**10.	Does the exclusion of BLOCK as a predictor in the model effect affect the conclusion related to the null hypothesis?**  
+```{r, include=answer_sheet, class.source="bg-success"}
+# No, this second model results in the same conclusion as the first, that removing the domatia reduces the number of mites on a leaf.  If you compare the two model outputs, you see that the model that includes BLOCK explains 60% of the variability in the data whereas the model without BLOCK explains 35%.  The main problem with the second model is that it does not meet the assumptions of a linear model so the first approach is more appropriate. 
+```
+
+# Different example - Seedling emergence
+
+This example comes from a text by Leps & Smilauer (2020), "Biostatistics with R: an introductory guide for field biologists" (Cambridge University Press).
+
+In this study we were interested to determine if the intensity of seedling emergence (SeedlSum) was dependent on manipulations of the vegetation.  The design had control (non-modified, ctrl) plots, plots with the dominant grass removed (rem_NS), plots with litter removed (rem_litt) and plots that had both litter removed and mosses weeded out (rem_litt_moss). The experiment was set up in four blocks, each block containing four plots, one plot per treatment.  
+
+Conduct an analysis that tests whether seedling emergence depends on the treatment, taking block into accounte.
+
+##  Download the data and explore the dataset
+The dataset is called "seedlings.txt" and it includes headers.
+
+## Question Set Six
+**10.	Create some plots to examine how the response variable relates to the predictor(s) and if there is any interaction between predictors.  What do you note?  The code for creating an interaction plot is given in the mites example.**
+```{r, include=answer_sheet, class.source="bg-success"}
+# The histogram of the response shows us that there are not many observations and they don't obviously fit a normal distribution.  In the boxplot comparing seedling emergence wtih treatment, there are big differences in the variability within the treatments, similarly when comparing the blocks. The interaction plot shows that the patterns across the treatments vary with the block.
+seedlings<-read.table("seedling.txt", header=TRUE)
+str(seedlings)
+hist(seedlings$SeedlSum, breaks =10)
+boxplot(seedlings$SeedlSum~seedlings$Treatment)
+boxplot(seedlings$SeedlSum~seedlings$Block)
+interaction.plot(x.factor     = seedlings$Treatment,
+                 trace.factor = seedlings$Block,
+                 response     = seedlings$SeedlSum,
+                 fun = mean,
+                 type="b",
+                 col=c(1:14),#Colors for levels of trace var.
+                 pch=c(1:14), #Symbols for levels of trace var.
+                 fixed=TRUE, #Order by factor order in data
+                 leg.bty = "o")
+```
+
+**11.	Run a model to test the research question of interest.  Check the model assumptions and interpret the output if the model is valid.  What are your conclusions in relation to the research question?** 
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# This model appears to be valid, the residuals are normally distribution and there is reasonably good homogeneity of variance.  The Cook's distance values are all below 1.  Based on the model output, we can conclude that there is a treatment effect on the intensity of seedling emergence. We might also note that the block effect is not significant 
+model_seedlings<-lm(seedlings$SeedlSum~seedlings$Treatment+seedlings$Block)
+anova(model_seedlings)
+summary(model_seedlings)
+hist(model_seedlings$residuals)
+qqnorm(model_seedlings$residuals)
+qqline(model_seedlings$residuals)
+plot(model_seedlings$residuals ~ model_seedlings$fitted.values)
+abline(20,0)
+abline(0,0)
+abline(-20,0)
+library(car)#remember you can now create a QQ plot with a 95% confidence interval
+par(mfrow = c(1,1))
+qqPlot(model_seedlings$residuals) 
+plot(cooks.distance(model_seedlings) ~ hatvalues(model_seedlings))
+```
+
+**12.	Run the model without including block.  Is the model still valid?  Is this model more or less appropriate than the first?  Explain.**
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# This model has a bigger problem with homogeneity of variance than the first.  Because block was integral to the design it would be better to include it in the model despite it not being significant.  
+#run without the block effect
+model_seedlings<-lm(seedlings$SeedlSum~seedlings$Treatment)
+anova(model_seedlings)
+summary(model_seedlings)
+hist(model_seedlings$residuals)
+qqnorm(model_seedlings$residuals)
+qqline(model_seedlings$residuals)
+plot(model_seedlings$residuals ~ model_seedlings$fitted.values)
+abline(20,0)
+abline(0,0)
+abline(-20,0)
+par(mfrow = c(1,1))
+qqPlot(model_seedlings$residuals) 
+plot(cooks.distance(model_seedlings) ~ hatvalues(model_seedlings))
+```
+

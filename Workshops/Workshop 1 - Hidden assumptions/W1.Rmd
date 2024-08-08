@@ -1,0 +1,316 @@
+---
+title: 'Computer workshop 1: Working with probability distributions'
+author: "Pinard, Cornulier, Ross, Wouters, Vogwill"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+  pdf_document:
+    toc: yes
+  html_document:
+    toc: yes
+    code_folding: show
+    theme: readable
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE) # uncomment if producing answer sheet
+#knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="hide") # uncomment if producing workshop sheet
+answer_sheet <- TRUE # Put this to TRUE to generate the workshop sheet with answers, FALSE to generate the workshop sheet without answers
+```
+
+# Learning objectives
+
+1. computation and understanding of quantiles and range intervals;
+2. assessing normality visually using histograms, density and Q-Q plots;
+3. familiarity with approximate inference using descriptive statistics;
+4. distinguishing probability distribution of a sample vs. probability distribution of estimator (and SD vs. SE of the mean).
+
+1, 2 and 3 are useful skills for making first, rapid exploration of a new data set.  Objective 4 addresses a simple but fundamental statistical concept on which most of the statistical methods we use rely.   We will use skills 2 and 4 again and again the rest of the course while studying Linear Models.
+
+# Instructions
+Here we look at probability distributions, using a dataset on penguins that was made available by [Dr. Kristen Gorman](https://www.uaf.edu/cfos/people/faculty/detail/kristen-gorman.php) and the [Palmer Station, Antarctica Long Term Ecological Research Network](https://pallter.marine.rutgers.edu/).  There are data on three species of penguins, collected from three islands in the Palmer Archipelago.  We will work with this dataset for several different exercises during the course.
+
+We would like you to use RStudio.  If you have not used this before, please go to the instructions on Getting Started with R and RStudio.
+
+## Getting started
+
+### Set working directory
+If you haven’t already created a folder for the course on your computer or your university drive, do so now.  You might create a folder for the course (e.g., BI3010) with subfolders within that for each of the workshops (e.g., workshop1).
+
+**To set the working directory to the folder you want to use for saving your work, use the drop down menu in RStudio:  session > set working directory > choose directory**
+
+```{r}
+getwd() #to check which directory RStudio is using
+```
+
+### Download the file
+**Download the datafile from MyAberdeen to your working directory.**
+You will find the file in the module for Topic One, folder for Workshop 1, document labelled Data File.  Using the three dots to the right of the content area that has the file name, download the file and save it to your working directory
+
+### Load file into RStudio
+In order to load the file into RStudio, you need to execute the following line of code:
+
+```{r}
+penguins<-read.table("penguins.txt",header=TRUE) 
+```
+
+If you get an error, some common problems are as follows:  you have misspelled one of the words or used a capital letter instead of lower case; your file is missing a column heading; the file is not the correct format (e.g, use a TAB delimited file); the quotation marks are in the in wrong location; you have missed off the final bracket “)”.
+
+To confirm that the file has been read properly, double click the file name in the upper right panel or read how many observations and variables are there.  In this case, the file has 333 observations of 9 variables.
+
+## Probability distribution of the data
+Let’s visualise all the data by plotting a histogram for male and female heights combined. Then, plot histograms for each species separately.
+
+```{r}
+hist(penguins$body_mass_g) #be sure that you include the file name and variable name spelled correctly 
+```
+
+The default number of bins (which r calls breaks) might not be the best.  Modify the command line to include “breaks” as below.  Breaks is a numeric vector that defines the breakpoints of the bins.
+
+```{r}
+hist(penguins$body_mass_g, breaks = 24)
+```
+
+To make histograms for each species separately, we need to subset the data. We will create separate dataframes (which is R's name for a dataset) for each species.
+
+```{r}
+Adelie <- subset(penguins, species == "Adelie") #be sure to use two equal signs; to check that the file has been subset, you can see the number of observations in upper right panel
+Gentoo<- subset(penguins, species =="Gentoo")
+Chinstrap <- subset(penguins, species =="Chinstrap")
+
+hist(Adelie$body_mass_g, breaks=24)
+hist(Gentoo$body_mass_g, breaks=24)
+hist(Chinstrap$body_mass_g, breaks=24)
+```
+
+You may notice that the x-axes of the three histograms are not the same.  That makes it difficult to visually compare the three distributions.  Therefore, it would be helpful to set the range for the x-axis so that the three histograms can more easily be compared.  The modified code is below, the additional information sets the lower and upper limits for the x-axis.
+
+```{r}
+hist(Adelie$body_mass_g,xlim=c(2000,7000), breaks=24)
+hist(Gentoo$body_mass_g,xlim=c(2000,7000), breaks=24)
+hist(Chinstrap$body_mass_g,xlim=c(2000,7000), breaks=24)
+```
+
+### Question Set One
+1.  How would you describe the distribution of the three species data combined?
+```{r, include=answer_sheet, class.source="bg-success"}
+# The distribution is not symmetrical, the central tendency is towards the left, and the distribution has a tail to the right (skewed).  
+```
+2.  What can you observe from the distributions of the three species separately?  Do they give you insight into how the three species compare in terms of central tendency?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# The distributions of the three species separately are more similar to normal distributions;  the Adelie and Chinstrap penguins appear to have smaller body mass than the Gentoo but it also looks like sample size is smaller (which it is, Adelie n=146; Chinstrap n = 68; Gentoo n=119).
+```
+
+## Descriptive statistics
+For each species, compute some summary statistics to get more of a sense of how the three species body mass compares.  The code is illustrated below for one species combined but you should repeat for all three species.
+```{r}
+summary(Adelie$body_mass_g) #generates min, Q1, median, Q3, maximum
+mean(Adelie$body_mass_g) #returns mean value of the variable
+sd(Adelie$body_mass_g) #returns the standard deviation of the variable
+```
+
+If we want a single quantile, we use:
+```{r}
+quantile(Adelie$body_mass_g, 0.5) # returns the 50% quantile, equivalent to the median.
+```
+
+If we want multiple quantiles:
+```{r}
+quantile(Adelie$body_mass_g, probs = c( 0.025, 0.05, 0.25, 0.5, 0.75, 0.95, 0.975))
+```
+
+### Question Set Two
+3.  What does the 50% quantile represent?  How does the 50% quantile compare across the three species?
+```{r, include=answer_sheet, class.source="bg-success"}
+# The 50% quantile is the same as the median, the value that falls in the middle of the sample data.  The median is 3700 for both Adelie and Chinstrap and is 5050 for Gentoo.  
+```
+
+4. What are the 50% and 95% data range limits for the Adelie and Gentoo species?  Do the 50% data range limits overlap for these two species?   Do the 95% data range limits for these two species overlap?  Based only on these data range limits, if you found a penguin that had a body mass of 4250g, is it more likely to be an Adelie or a Gentoo?
+```{r, include=answer_sheet, class.source="bg-success"}
+# The 50% data range limits are defined by the 25th and 75th quantiles (50% of the data fall between those two values).  Therefore, for Adelie, they are 3362.5 and 4000 and for Gentoo they are 4700 and 5500; no, the 50% data range limits overlap.  That means that the central 50% of the data for the two species do not overlap/  The 95% data range limits are defined by the 2.5% and 97.5% quantiles.  Therefore, for Adelie, the values are 2900 and 4695.4; for Gentoo, the values are 4200 and 6000.  These data range limits also overlap.  If you found a penguin with a body mass of 4250g, it would be difficult to determine which species based on the information we have; it could easily be either of the two species.
+```
+
+5. What are the 68% data range limits for the Chinstrap species? 
+```{r, include=answer_sheet, class.source="bg-success"}
+# The 68% data range limits are defined by 16% and 84% quantiles (to determine these you take the difference between 100-68=32 and divide it by 2).  The code for this calculation is below and the answers are 3386 and 4100.
+quantile(Chinstrap$body_mass_g, probs = c(0.16, 0.84))
+```
+
+## Probabilities of observing extremes
+How likely is it that the more extreme data come from the same population as the rest (for instance, are they genuine data), or that they come from a different population (for instance, if they were measurements of the wrong species of bird)?  
+
+If we go back to the full dataset (penguins), we can use the summary command to identify the minimum and maximum values of body mass.
+```{r}
+summary(penguins$body_mass_g)
+```
+
+The body mass of the smallest penguin in the dataset is 2700 g and the largest is 6300 g.  What is the probability that the 2700 g penguin is part of the population of Adelie penguins?  What is the probability that it is part of the Gentoo population?
+
+To answer those questions we need to assume several things.  Firstly, that the data are normally distributed and that the sample mean and standard deviation values for the Adelie and Gentoo penguins are the true mean and standard deviations for the two species.  With those assumptions, we can use the attributes of the normal distribution to calculate the probability of observing an equal or even smaller value (i.e., anywhere in the left tail of the distribution).  
+
+Cumulative probabilities can be found using the function `pnorm()`. `pnorm()` needs three arguments: the value of interest, the mean, the standard deviation.  Therefore, to determine the probability of sampling an Adelie penguin that has a body mass of 2700g, we would use the following set of commands:
+
+```{r}
+mean(Adelie$body_mass_g)
+sd(Adelie$body_mass_g)
+pnorm(2700, 3706.2, 458.6)
+```
+
+Alternatively
+```{r}
+pnorm(2700, mean(Adelie$body_mass_g), sd(Adelie$body_mass_g))
+pnorm(2700, mean(Gentoo$body_mass_g), sd(Gentoo$body_mass_g))
+```
+
+### Question Set Three
+6. What is the probability of drawing a value equal to or smaller than the smallest female penguin from the full Adelie population?  What is the probability of drawing a value equal to or smaller than the smallest female Adelie penguin from the Gentoo population?  Which species is a penguin of this size more likely to be based on these probabilities?
+```{r, include=answer_sheet, class.source="bg-success"}
+#The question requires that you subset the Adelie dataframe so that only the female birds are included; then you need to determine the minimum size of the female Adelie penguins.  The probability of drawing an Adelie penguin with a body mass of 2850 grams or smaller is 0.031.  The probability of drawing a Gentoo penguin that small or smaller is 0.00000388 (3.88e-06).  Based on these probabilities, it is more likely that a penguin this small would be an Adelie penguin.
+Female_Adelie<-subset(Adelie, sex=="female")
+min(Female_Adelie$body_mass_g)
+pnorm(min(Female_Adelie$body_mass_g), mean(Adelie$body_mass_g), sd(Adelie$body_mass_g))
+pnorm(min(Female_Adelie$body_mass_g), mean(Gentoo$body_mass_g), sd(Gentoo$body_mass_g))
+```
+
+7. Given the probability of finding a Gentoo with a body mass of 2700g that you just determined, how many individuals smaller or equal to 2700g would you expect to get, in a population of 100,000 Gentoo penguins? 
+```{r, include=answer_sheet, class.source="bg-success"}
+#To get the answer you multiply the probability times the population size, 0.0000009x100,000=0.09 penguins (therefore less than one).
+```
+
+8. What is the probability of drawing a value greater than or equal to the body mass of the largest Gentoo penguin?
+```{r, include=answer_sheet, class.source="bg-success"}
+max(Gentoo$body_mass_g)
+1-pnorm(max(Gentoo$body_mass_g), mean(Gentoo$body_mass_g), sd(Gentoo$body_mass_g))
+#The largest penguin is 6300 g and the probability of sampling a penguin that large or larger is 0.008.
+```
+
+## Assessing normality
+
+As discussed in the lecture, one can assess the normality of a distribution of data in several ways.  There are statistical tests that compare the sample distribution to the normal distribution and produce a probability value.  As all statistical calculations, these tests are sensitive to sample size so in this course we encourage you to rely on visual assessments, for example by using QQ plots.
+
+Working with the Adelie dataset, produce another histogram to remind yourself of the shape of the distribution and then produce a QQplot.  Optional activities included at the end of the workshop are to overlay an empirical probability distribution and a normal distribution over the Adelie sample histograms.
+
+```{r}
+hist(Adelie$body_mass_g)
+qqnorm(Adelie$body_mass_g, plot.it=TRUE)#produces a normal QQ plot of sample values
+qqline(Adelie$body_mass_g, distribution=qnorm,probs=c(0.25,0.75))#adds a line to the theoretical quantiles, passing throught the first and third quartiles
+```
+
+
+## Standard error
+The data represent one finite random sample from a population, out of a near-infinite number of possible random samples. The uncertainty about the mean estimated from that sample can itself be estimated by the Standard Error (SE) or “standard error of the mean” (SEM), using the formula given in the lecture, which assumes a very large number of hypothetical repeats of the experiment. 
+
+Oddly, base R does not have a standard error function. So instead we have to calculate it using the command for standard deviation and the square root of the sample size.  Therefore, if we want to calculate the standard error for Adelie penguins, we use the command below.  Note that to determine sample size, we use the command `length()`.
+
+```{r, eval-FALSE}
+se_Adelie<-sd(Adelie$body_mass_g) / sqrt(length(Adelie$body_mass_g)) #returns the standard error of the variable and stores it as an object called se_Adelie
+```
+
+## Confidence intervals
+How good is the estimate of the mean body mass for the Adelie penguins?  Calculate the 95% confidence interval.  You can remind yourself of the calculation by referring back to the lecture material.  You need the mean, standard deviation, and sample size to do the calculation.  You also need to determine the t statistic (i.e., critical value) for the 95% confidence limits. For the upper limit, the associated probability is 0.975 and for the lower limit, the associated probability is 0.025.  
+
+```{r}
+#Confidence Interval = (point estimate)+/-(critical value)*(standard error)
+mean<-mean(Adelie$body_mass_g)
+t<-qt(0.975,length(Adelie$body_mass_g))
+se<-sd(Adelie$body_mass_g)/sqrt(length(Adelie$body_mass_g))
+upr95Adelie<-mean+t*se
+lwr95Adelie<-mean-t*se
+```
+
+
+### Question Set Four
+9.  Based on the Q-Q plot, how well do the Adelie body mass data fit a normal distribution?  
+
+```{r, include=answer_sheet, class.source="bg-success"}
+qqnorm(Adelie$body_mass_g, plot.it=TRUE)#produces a normal QQ plot of sample values
+qqline(Adelie$body_mass_g, distribution=qnorm,probs=c(0.25,0.75))#adds a line to the theoretical quantiles, passing throught the first and third quartiles
+#The majority of the sample points in the central part of the distribution fall on or near the line that represents the normal distribution.  Towards the two tails the sample points fall slightly away from expectation.  
+#If you do the optional plot later in the workshop, you can see the way that the histogram differs from the normal overlay.
+
+#to add a normal curve to the histogram, define the x and y values to use
+hist(Adelie$body_mass_g,xlim=c(2000,7000),breaks=24)#this code creates a histogram
+hist_data<-hist(Adelie$body_mass_g,xlim=c(2000,7000),breaks=24)#this line stores the histogram data into a variable called "hist.data"
+x_values<-seq(min(Adelie$body_mass_g),max(Adelie$body_mass_g),length=100)#this line generates 100 equally spaced x-values ranging from the minimum to the maximum of the body mass values in the Adelie dataframe
+y_values<-dnorm(x_values,mean=mean(Adelie$body_mass_g),sd=sd(Adelie$body_mass_g))#this code calculates the probability density values (y_values) for a normal distribution with a mean and sd from the Adelie body mass data
+y_values<-y_values*diff(hist_data$mids[1:2])*length(Adelie$body_mass_g)#this code scales the probability density values so that they match the histogram; it multiplies the y-values by the difference between the midpoints of the first two bins of the histogram (i.e., scaling it to fit the histogram) and then scales it by the total number of data points; you don't need to commit this code to memory, the explanation is just in case you are interested, the explanation of the code was generated by ChatGPT not Michelle
+lines(x_values,y_values,lwd=2)#overlay normal curve on histogram
+```
+
+
+10. What is the SE of the mean for the Adelie penguins body mass? 
+```{r, include=answer_sheet, class.source="bg-success"}
+#The standard error for the Adelie body mass is 37.96g.
+sd(Adelie$body_mass_g) / sqrt(length(Adelie$body_mass_g))
+```
+
+11. How does the SE compare with the SD of the sample? In which circumstances would you choose to report one or the other in a scientific report?  
+```{r, include=answer_sheet, class.source="bg-success"}
+# The SE is smaller than the SD (37.96 compared to 458.62).  It depends on the purpose.  The standard deviation is useful for describing the variation in the data whereas the standard error expresses the precision of your estimate of the mean so it is useful if you are comparing groups.
+```
+
+12. How would you interpret the SE in words? 
+```{r, include=answer_sheet, class.source="bg-success"}
+# The standard error of the mean quantifies how precisely you know the population mean. The SE does not directly quantify variability among values in a population.
+```
+
+13.  What is 95% confidence interval for the Adelie body mass?  Write out in words the appropriate interpretation of the interval.
+
+```{r, include=answer_sheet, class.source="bg.success"}
+#Confidence Interval = (point estimate)+/-(critical value)*(standard error)
+mean<-mean(Adelie$body_mass_g)
+df<-length(Adelie$body_mass_g)
+t<-qt(0.975,length(Adelie$body_mass_g))#the t value will be the same for the upper and lower limits, it will just be positive for the upper and negative for the lower.  Refer back to the lecture slides if you are uncertain.
+se<-sd(Adelie$body_mass_g)/sqrt(length(Adelie$body_mass_g))
+upr95Adelie<-mean+t*se
+lwr95Adelie<-mean-t*se
+
+# The answer should be [3631,3781].  This means that if you were to repeatedly sample the Adelie penguin population on these islands, the mean body mass would fall between 3631 and 3781 g in 95% of the samples.
+```
+
+
+# Optional work
+## Add a normal curve to a histogram
+Sometimes it is useful to overlay a normal curve onto a histogram, for example, to see how well the sample data conform to the assumptions of a normal distribution.  The normal curve is created from the properties of the data in the histogram (the mean and standard deviation) and assumes that the data are normally distributed.
+
+This example uses the full penguin dataset for the `body_mass_g` variable:
+
+```{r}
+#to add a normal curve to the histogram, define the x and y values to use
+hist(penguins$body_mass_g,xlim=c(2000,7000),breaks=24)
+hist_data<-hist(penguins$body_mass_g,xlim=c(2000,7000),breaks=24)
+x_values<-seq(min(penguins$body_mass_g),max(penguins$body_mass_g),length=100)
+y_values<-dnorm(x_values,mean=mean(penguins$body_mass_g),sd=sd(penguins$body_mass_g))
+y_values<-y_values*diff(hist_data$mids[1:2])*length(penguins$body_mass_g)
+#overlay normal curve on histogram
+lines(x_values,y_values,lwd=2)
+```
+
+This example illustrates that the underlying data for the 3 species combined does not follow a normal distribution.  The reason is that these data are not all from the same population but rather from three separate ones that have been pooled together.
+
+## Add reference lines to a histogram 
+To visualise the various intervals (e.g. 95%, 68%, mean+/-SD, mean+/-2SD or mean+/-3SD), you may add reference lines on the histograms.  Let’s do that for the Chinstrap species, adding a reference line for the mean, median, 0.05 quantile and 0.95 quantile.  
+
+Be sure that the Chinstrap frequency distribution is visible in the lower right frame in RStudio so that the reference lines are added to the correct plot.
+
+```{r}
+hist(Chinstrap$body_mass_g,xlim=c(2000,7000),breaks=24)
+abline(v=mean(Chinstrap$body_mass_g),col="blue",lwd=2) #this adds a reference line for the mean value onto the frequency distribution for the Chinstrap body mass; lwd refers to the width of the line
+abline(v=median(Chinstrap$body_mass_g),col="red",lwd=2)
+abline(v=quantile(Chinstrap$body_mass_g,0.05),col="black",lwd=2)
+abline(v=quantile(Chinstrap$body_mass_g,0.95),col="black",lwd=2)
+```
+
+
+## Add a smoother or empirical density curve
+```{r}
+hist(Adelie$body_mass_g,freq=FALSE) #freq=FALSE changes the plot from a frequency histogram to a density histogram
+lines(density(Adelie$body_mass_g)) #this adds the empirical density curve
+
+hist(penguins$body_mass_g,freq=FALSE)
+lines(density(penguins$body_mass_g))
+
+```
+

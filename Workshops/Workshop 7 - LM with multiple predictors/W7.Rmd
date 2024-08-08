@@ -1,0 +1,267 @@
+---
+title: 'Computer Workshop 7: Model criticism'
+author: "Vogwill, Cornulier, Pinard, Ross, Wouters"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+  pdf_document:
+    toc: yes
+  html_document:
+    toc: yes
+    code_folding: show
+    theme: readable
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE) # uncomment if producing answer sheet
+#knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="hide") # uncomment if producing workshop sheet
+answer_sheet <- TRUE # Put this to TRUE to generate the workshop sheet with answers, FALSE to generate the workshop sheet without answers
+```
+
+# Learning objectives
+1.	reinforcing the practice of a robust statistical modelling process:
+a.	performing basic data exploration
+b.	fitting a linear model with multiple predictors in r
+c.	understanding how to validate the assumptions of the model
+d.	representing the model graphically
+
+
+2.	ability to perform model selection using a reasoned approach
+
+3.	understanding implications of collinearity for model selection
+
+4.	understanding implications of missing values for model selection
+
+5.	being able to interpret the outputs of multiple regression models including categorical, continuous predictors and interactions
+
+
+# Introduction
+We have been working with the finch egg mass data for a few workshops. So far we have found that the mass of an adult female is strongly related to the mass of their eggs, and that there is a small difference between different mating systems with regards to egg mass. But the dataset has several more predictors we have not yet used. Will including additional predictors improve our model? Or will it just make our model unnecessarily complex?
+
+Today we will attempt to find the **minimum adequate model** for the mass of finch eggs. We will be doing what is called **backwards fitting**. We will first fit the most complex model we possibly can. We will then refine our model to find the minimum adequate model.
+
+The process
+
+1)	explore the new variables you could use:
+a.	do the new variables have sufficient datapoints to be useful?
+b.	Are the new variables co-linear with the other variables?
+
+
+2)	Fit the most complex (biological plausible) model
+
+3)	Remove non-significant interaction terms (sequentially or all at once?).
+
+4)	Remove any main effects which do not contribute to significant interaction terms.
+
+5)	Validate the model (check the assumptions)
+
+6)	Interpret/conclude/summarise
+
+
+# Instructions
+
+Download the data and load the data into r studio
+
+The description of all the variables in the data set can be found at the end of this instruction sheet.
+
+```{r}
+eggs<-read.table("FinchEggs.txt", header=TRUE)
+```
+
+# Research questions 
+
+There is not much of a question that egg size (mass) is strongly constrained by the size of a species. However, which measure (or combinations of measures) of species size is most appropriate is debatable. Which are the measures of species size available in the data set and which ones do you think are worth considering as predictors of egg mass?
+
+Two more (non-exclusive) hypotheses could be put forward to explain variation in egg mass:
+
+1)	there is a trade-off between the number of eggs laid per clutch (variable “Clutch_size”) and the mass of individual eggs;
+
+2)	energy investment in individual eggs (reflected by egg mass) is positively related to the amount of parental care provided to the young: if parents take little care of their offspring and leave them to their own fate, they may be better off producing as many offspring as possible to maximize the odds that some will survive. If they invest a lot in caring for the young, they will be more limited by how many offspring they can look after, but the odds that those will survive may be greater.
+
+Two variables may serve as indirect measures of parental investment: Mating_System and Display. Monogamy usually involves the contribution of both parents and hence is associated with higher levels of parental care than polygyny, where care tends to be provided mostly by the female. Display intensity is meant to be a measure of sexual competition between males, which is itself related to the amount of parental investment (more competition usually means less parental investment).
+
+<br>
+
+**IMPORTANT: BEFORE STARTING**
+
+Display intensity (what males do to attract females, such as aerial displays, acrobatics, etc.) is measured on a scale of one to five, which is how it is coded in the finch egg dataset. As a result r studio will assume it is continuous (a covariate)– but in reality it is categorical (a factor).
+
+To correct this:
+
+```{r}
+eggs$Display <- as.factor(eggs$Display)
+```
+
+
+# Exploring the data (before fitting any model)
+
+Some things to look for in the data exploration:
+
+-	Response variable against female mass, using a different colour for each mating system.
+
+-	Boxplot of egg mass against Mating system and Display.
+
+-	Scatterplots of all continuous predictors against each other (useful to diagnose correlations and therefore potential confounding effects). (hint: try using pairs() to plot this. For example pairs(eggs[, 4:8]) tells r to plot the 4th to 8th columns of eggs against each other.
+
+-	Count of missing values per predictor (and for the combination of Clutch_Size and Display)
+
+
+```{r, include=answer_sheet, class.source="bg-success"}
+col=("eggs$Mating_System")
+plot(eggs$Egg_mass~eggs$F_mass, col=(1:3), xlab= "Female Body Mass", ylab= "Egg mass")
+boxplot(eggs$Egg_mass~eggs$Mating_System)
+boxplot(eggs$Egg_mass~eggs$Display)
+pairs(eggs[, 4:8])
+table(eggs$Display)
+summary(eggs$Clutch_size)  
+```
+
+
+
+
+**1. Can you see evidence of correlation between some of the predictors?**
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Yes, F_mass, M_mass, F_tarsus.  
+```
+
+**2. Should you use these together in the same model?** 
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# No, they are likely to be highly collinear, and therefore mostly redundant. It would be hard for the model to tell their respective effects apart, as they are almost interchangeable. Better to choose just one of them, the one we believe to be most appropriate.  
+```
+
+**3. Which predictor(s) would you like to use as indicators of species size?**
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# F_mass, because it seems the most directly relevant to egg mass. M_mass is not so directly relevant for obvious reasons, and tarsus (length of the “leg”) may not be so good an indicator (think of the very long legs of a heron, or the short ones of a duck for example, even though their body mass may be similar).  Clutch size is missing a number of values.
+```
+
+**4. Which predictors would be relevant for testing hypothesis 1? If more than one, should you include them all in the model?**
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Hypothesis 1 – only clutch size is relevant 
+```
+
+**5. Which predictors would be relevant for testing hypothesis 2? If more than one, should you include them all in the model?**
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Hypothesis 2 – mating system and display both potentially relevant. Possibly in separate models but display seems less relevant
+```
+
+**6. Have you got enough data to estimate the effects of all of them?**
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Not enough for “display” - the display style of most finches is unknown. 
+```
+
+
+# **Formulate the most complex model you think is plausible for explaining egg mass**
+
+There are several ways to enter a complex model. Using multipliers between all predictors will fit a model containing all interactions (2-way, 3-way, etc). If you only want two-way interactions, put your predictors in a set of brackets separated by + signs, and add ^2 after the bracket. 
+
+```{r, include=answer_sheet, class.source="bg-success"}
+model<-lm(eggs$Egg_mass~(eggs$F_mass+eggs$Clutch_size+eggs$Mating_System)^2)
+anova(model)
+summary(model)
+```
+
+**8. How would you justify its plausibility, in biological terms? (Can you speculate as to how some variables or their interaction may have an effect on egg mass?)**
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# One might expect there to be a trade-off between clutch size and female body mass, such that female body mass could be responsible for larger eggs or larger clutch sizes.  Mating system might affect nesting success and stress during mating, both could affect egg mass.  Larger clutches would require greater post-hatching care, making monogamous pairing an advantage if both parents feed the chicks.
+```
+
+<br>
+
+It would be a good idea to discuss these points with other students or the teaching staff in your group.
+
+<br>
+
+**Adjust your most complex model to what is possible to do with the simplified data set, including interactions where relevant.**
+
+<br>
+
+Perform model simplification using null hypothesis testing of the effect of individual predictors. Remember that the main effect of a predictor (e.g. “Age”) should not be removed from the model if an interaction involving this predictor is present in the model (e.g. “Age*TobaccoConsumption”). Therefore you should remove non-significant interactions first.
+
+
+```{r, include=answer_sheet, class.source="bg-success"}
+model2<-lm(eggs$Egg_mass~eggs$F_mass
+           +eggs$Clutch_size+eggs$Mating_System+eggs$F_mass*eggs$Mating_System)
+anova(model2)
+summary(model2)
+```
+
+
+**9. What minimum adequate model do you get?**
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# We find significant main effects of female mass and clutch size, but no significant main effect of mating system. However there is a significant interaction between mating system and female mass.
+```
+
+**10. Biological interpretation of the model: what theory do you think this model supports?**
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Egg mass is primarily determined by female body mass. Additionally, there is evidence of a trade-off between the number of eggs laid and the size of individual eggs, such that for a given female mass, eggs tend to be smaller as clutch size increases. There is no evidence that mating system has a direct effect on egg mass, but the effect of female mass is dependent on mating system - the mass  of monogamous birds is more strongly correlated with their egg mass.
+```
+
+**11. Use your model to found out:**
+
+For a monogamous finch with female mass of 100 g, what is the predicted egg mass for a species with an average clutch size of 2? What is the predicted egg mass for a species with an average clutch size of 4? How big is the difference in %?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# (100*0.07) + (2* -0.19) + 1.62 = 8.24
+# (100 *.07)+ (4 * -0.19) + 162 = 7.86
+# 100 * (8.24 - 7.86)/ 8.24 = 0.046; a 4.6% decrease in egg mass
+```
+
+**12. relationships between different measurements of size (so called allometric relationships) are generally analysed after being log transformed (a good way of controlling for outliers and non-homogeneous residuals). Repeat the process of backwards fitting using log transformed egg mass and female mass. Do you find the same minimum adequate model?**
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# The minimum adequate model for log-transformed data only contains female mass and clutch size as significant predictors. By reducing the influence of the large outlier, mating system no longer explains a significant proportion of variance. 
+eggs$ln.Egg_mass<-log(eggs$Egg_mass)
+eggs$ln.F_mass<-log(eggs$F_mass)
+plot(eggs$ln.Egg_mass~eggs$ln.F_mass)
+model3<-lm(eggs$ln.Egg_mass~(eggs$ln.F_mass+eggs$Clutch_size+eggs$Mating_System)^2)
+anova(model3)
+summary(model3)
+model4<-lm(eggs$ln.Egg_mass~eggs$ln.F_mass+eggs$Clutch_size+eggs$Mating_System)
+anova(model4)
+model5<-lm(eggs$ln.Egg_mass~eggs$ln.F_mass+eggs$Clutch_size)
+anova(model5)
+```
+
+**13. Which of the two models do you think is the better? Is one model more likely to be miss-specified? (You may want to compare the assumption checks of both models)**
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Using the log transformed data, the outlier is no longer as influential (compare the cook's distance versus leverage plot for both models).Therefore this model is less miss-specified than the first model - it does a better job representing the dataset as a whole. It is also simpler.
+
+hist(model2$residuals)
+hist(model2$residuals, breaks = 20)
+qqnorm(model2$residuals)
+qqline(model2$residuals)
+plot(model2$residuals ~ model2$fitted.values)
+plot(cooks.distance(model2) ~ hatvalues(model2))
+
+hist(model5$residuals)
+hist(model5$residuals, breaks = 20)
+qqnorm(model5$residuals)
+qqline(model5$residuals)
+plot(model5$residuals ~ model5$fitted.values)
+plot(cooks.distance(model5) ~ hatvalues(model5))
+```
+
+# Notes
+
+Egg_mass, F_mass and M_mass: species-level average mass (in grams) of, respectively, eggs, adult female and adult male birds.
+
+F_tarsus: species-level average tarsus length (mm) of adult female birds.
+
+Mating_System: This scoring is supposed to reflect an intensity of male-male competition for mates, increasing from 1 to 5. Categories taken from Dunn et al. (2001): (1) polyandry; (2) monogamy (<5% polygyny); (3) mostly monogamy, but occasional polygyny (5–15% polygyny); (4) mostly polygyny (> 15% polygyny) and (5) lek or promiscuous. Only categories 2, 3 and 4 are found in finches.
+
+Display: description of male display behaviours on a five point scale as follows: (1) ground displays only, including displays on trees and bushes; (2) ground displays, but with occasional jumps/leaps into the air; (3) both ground and non-acrobatic flight displays; (4) mainly aerial displays, non-acrobatic; (5) mainly aerial displays, acrobatic. This variable is also meant as a proxy for male-male competition.
+
+
+
+

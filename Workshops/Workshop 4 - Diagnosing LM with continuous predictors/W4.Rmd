@@ -1,0 +1,280 @@
+---
+title: 'Computer Workshop 4: Linear models with continuous predictors'
+author: "Vogwill, Cornulier, Pinard, Ross, Wouters"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+  pdf_document:
+    toc: yes
+  html_document:
+    toc: yes
+    code_folding: show
+    theme: readable
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE) # uncomment if producing answer sheet
+#knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="hide") # uncomment if producing workshop sheet
+answer_sheet <- TRUE # Put this to TRUE to generate the workshop sheet with answers, FALSE to generate the workshop sheet without answers
+```
+
+# Learning objectives
+1.  Being able to formulate different types of research questions and when to use them
+2.  Being able to work through a robust statistical modelling process:
+    a.	performing data exploration
+    b.	fitting a linear model with a continuous predictor
+    c.	understanding how to validate the assumptions of the model
+    d.	being able to interpret the parameters of the model
+    d.  representing the model graphically.
+#Background
+Bird eggs are fascinating structures. Their size, structure and colours respond to numerous constraints and selection pressures exerted by the life history of the species, by their physical environment or by parasites, to cite just a few. In fact, if you are interested in birds and evolution, one fascinating natural history bedside reading for this year could be this one: The Most Perfect Thing: Inside (and Outside) a Bird’s Egg (2016) by Tim Birkhead.
+
+This week, we will explore a tiny corner of bird eggs natural history, using a data set of egg mass in finches (Fringillidae). This small data set will take us through the week, illustrating all the topics this course covers, regarding linear models. Today we will look at the relationship between egg mass and female body mass across finch species.
+
+# Instructions
+Download the data and load the data into R.
+The finch egg data can be found in the Content Area of the Course MyABerdeen site.  Look for Topic Four - Linear Model with continuous predictor>Workshop 4...> DATA SETS. The dataset is ready for R. The dataset contains a header.
+Set your working directory; be sure that the datafile was saved into that working directory.
+
+```{r}
+eggs<-read.table("FinchEggs.txt", header=TRUE)
+```
+
+Check the data has loaded correctly.  The dataset contains 195 observations of 10 variables.
+
+(i)	Check the environment panel (top right) – is there a new object with the correct number of variables and observations?
+
+(ii)	use the str() command to display the structure of your new object. Do all the variables appear to be as they should? For example, are the variables you need to use correctly identified as continuous or categorical?
+
+(iii)	Finally, use the head() command to display the first six rows of the data. Does everything look correct?
+
+
+```{r}
+str(eggs)
+head(eggs)
+```
+
+## Research question
+If we are interested in hypothesis-testing, the research question could be formulated as:
+H0: there is no relationship between egg mass and female mass across finch species.
+H1: there is a relationship between egg mass and female mass in finches.
+
+If instead we are interested in estimating the relationship between different variables, one could simply say they are interested in estimating the direction and strength of the effect of female body mass on egg mass.
+
+### Question Set One
+1. Does one of these approaches seem more useful to you for this research question?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# The hypothesis being rather trivial, hypothesis-testing is not particularly helpful here, if not counter-productive (why run a statistical test for something quite so obvious?).  The estimation of the size and shape of the effect is more interesting.  
+```
+
+## Exploring the data
+Before doing any statistical modelling or testing, it is important to understand the properties of both your response and predictor variables.  When a predictor is a continuous variable, it is also called a co-variate.  There are four plots that would be useful to start with:
+
+•	a histogram of response variable
+•	a scatterplot of the response variable against order of observations in the data set
+•	a scatterplot of the predictor variable against order of observation in the data set
+•	a scatterplot of the response variable against predictor.
+
+```{r}
+hist(eggs$Egg_mass) #produces a frequency histogram of the response variable
+plot(eggs$Egg_mass) #produces a scatterplot of the response against order in dataset
+plot(eggs$F_mass) #produces a scatterplot of the predictor against order in dataset
+plot(eggs$Egg_mass~eggs$F_mass)#produces a scatterplot of response against predictor
+```
+
+### Question Set Two
+2. What is the distribution of the response variable?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Far from normal. Skewed to the right. This is not a problem a-priori for a Gaussian linear model. Although the response is assumed to come from (= be generated by) a normal process, the mean of that normal distribution may be different between observations and therefore the raw data need not necessarily follow a normal distribution. Only the residuals (raw data – expected mean) are required to be normally distributed.  
+```
+
+3. Are there any outliers or dubious datapoints?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+#Graph 2: possibly some outliers near the end of the data set with egg masses >6 g or so (hard to tell without further info).
+#Graph 3: possibly some outliers near the end of the data set with female masses >70 g or so (hard to tell without further info).
+#Graph 4: the above were not outliers in the (X, Y) space; In fact, if outliers exist the candidates would rather be in the some of the <60 g species.
+```
+
+4. Before doing any linear modelling, do you need to formally assess the normality of the (i) response variable? (ii) of the predictor? (iii) both? (iv) neither?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# iv Neither is the correct answser.  The response variable is assumed to come from a normal distribution, around the expected mean. Paradoxically, because the expected mean depends on the covariate(s), we don’t expect the raw response variable to look normally-distributed, until we subtract the expected mean. Subtracting the expected mean (the value predicted by the fitted model for that particular observation) is what residuals of the model do, and that’s why the only reliable way to assess the normality assumption is using the residuals of the model. Therefore, we can only check the normality assumption of a linear model AFTER fitting the model.
+#Ideally, we want the covariates to be quite evenly distributed over their range of values. There is no requirement that covariates are normally distributed in a linear model, unlike the residuals (= the response – model prediction).
+
+```
+
+## Fit a model in R that matches the research question.
+When we are using the function lm(), we always create an object for our linear model.  This is so we can access the residuals, fitted values, ANOVA table, etc...
+
+```{r}
+Model<-lm(eggs$Egg_mass~eggs$F_mass) #this code creates an object for our linear model that has egg mass (Egg_mass) as the response and female body mass (F_mass) as the predictor or covariate
+```
+
+## Check the model assumptions
+When fitting a model to data, we have to assume a number of properties to calculate the parameters of the model. If these assumptions are violated, the test statistics, the P-value, and the coefficients of the model may not be very accurate.
+
+(i) assumption 1: normally distributed residuals
+The normality of the residuals (reminder: the residuals refer to the difference between the values predicted by our model and the real values) can be checked in a few different ways. It is worth doing at least two visualisations, as different plots can highlight different issues. We suggest that you create a histogram of the residuals and then a QQ plot of the residuals.
+
+
+```{r}
+hist(Model$residuals)
+qqnorm(Model$residuals)
+qqline(Model$residuals)
+```
+
+(ii) assumption 2 & 3: residuals are centered on zero and have similar levels of variance for all predicted values 
+This is checking whether the model is doing an equally accurate and reliable job for the entire range of response values. Check the lecture slides if you are unsure of what to be aware of when checking these plots.  You want to create a scatterplot of the residuals (y axis) by the fitted values of the model.  It is also helpful to add reference lines to this plot, at y-axis values 1, 0 and -1.
+
+```{r}
+plot(Model$residuals ~ Model$fitted.values)
+abline(1,0)
+abline(0,0)
+abline(-1,0)
+```
+
+(iii) assumption 4: outliers are not having a disproportionate impact
+Having outliers in a dataset is not necessarily a problem, but it is important to be aware of the impact they may be having. The jargon is a bit heavy here, but the key points: (i) is the x-axis is an estimate of how much of an outlier a datapoint is; (ii) the y-axis is a measure of how much the model changes when a datapoint is excluded. 
+
+
+```{r}
+plot(cooks.distance(Model)~hatvalues(Model))
+```
+
+### Question Set Three
+Based on the plots you have generated:
+
+5. Are the residuals normally distributed?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# More or less in the middle, but there is too long a tail particularly to the right and to a lesser extent to the left. Not the best of models but still reasonable.
+```
+
+6. Are the residuals centred on zero all along the fitted values?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Again, more or less but we can spot too many negative residuals for small egg masses (fitted values under and around 2) and slightly too many positive residuals for intermediate egg masses (fitted values between 2 and 4). Not the best of models but still does a good enough job for high-level (not too detailed) inference.  
+```
+
+7. Is the variance homogeneous all along the fitted values?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Some heterogeneity: a few points seem to come from a population with a higher-than-normal variance (the worst offenders being those possible outliers we spotted earlier).
+#It is not clear if the variance changes with the mean because observations with a high predicted egg mass value are few (e.g. species with large body mass). There is some indication that the variance in egg mass for the smallest species is rather smaller than for medium and large species. This is not ideal, especially if we were interested in testing hypotheses (incorrect p-values), but not as much of a concern for approximate estimation of general effect size.
+```
+
+8. Overall, is the model valid fit for the data? Does the model do an equally good job for the entire data range?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# The model is not ideal but if we want to make general inferences, it is probably valid but we should be cautious, especially for species with small body mass and for those with large body mass.  
+```
+
+## Interpret the model outputs
+### Question Set Four
+9. What are the coefficients of the model and what is their interpretation?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+summary(Model)#this line of code gives you the coefficients
+# Intercept is equal to 1.  This is the predicted value of the response (egg mass) for a covariate value (female body mass) of zero.  A female body mass of zero is biologically nonsensical for female body mass but this is the interpretation of this coefficient in this model.
+# The slope is 0.06.  This is the size of increment in the response for a unit increment in the covariate. I.e., when female body mass increases by 1 g, egg mass tends to increase by 0.06 g.
+```
+
+10.  Write out the model equation.
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Egg_mass = 1 + 0.06*F_mass
+```
+
+11.  What do you conclude about the relationship of female body mass to egg mass?  For every gram of adult body mass, how much larger is the average egg?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Egg mass increases (significantly) with female body mass, by about 0.06 g every 1 g increase in body mass.
+```
+
+12. You find two finch eggs on the ground. One weighs 1.5 g and one ways 6.5 g. From your model, how large were the birds which laid each egg?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# The bird that laid the 1.5g egg would have been 8.33g.  The bird that laid the 6.5g egg would have been 91.7g.  To determine the answers to this question, you need to do some algebra.  You start with the model equation, then substitute in the known value for egg mass, then rearrange the equation to solve for female body mass.
+#egg mass = 1 + 0.06*female body mass
+#1.5=1+0.06*female body mass
+#1.5-1=(1+0.06*female body mass)-1
+#0.05=0.06*female body mass
+#0.05/0.06=(0.06*female body mass)/0.06
+#8.33=female body mass
+```
+
+## Plot the fitted model
+Re-plot the raw egg mass data against female body mass and add the fitted line from the model
+
+```{r}
+plot(eggs$Egg_mass~eggs$F_mass)
+abline(Model)
+```
+
+### Question Set Five
+13.	What do you think about this model: does it fit all the data well? Is it useful? Do you need to add any caveats to your conclusions based on the assumptions of the model or the data itself?
+```{r, include=answer_sheet, class.source="bg-success"}
+# Model fit is good overall. There are a few outliers that are poorly fitted to the model (data points 48, 52 and 184). Egg mass tends to be consistently overestimated for the smallest body masses. Model is a useful approximation as long as we are not interested in the details, e.g. for small and medium-low body masses. Some indication that a curved line would fit better.
+```
+# Optional work
+## Does bacterial genome size correlate with bacterial cell size?
+For eukaryotes, there is a strong correlation between cell size and genome size. This is thought to be due to larger cells containing more mitochondria, leading to greater cellular energy levels which can support a greater volume of DNA (admittedly this is often non-coding, junk DNA). But is the true for prokaryotes? There is a data file called “genome_cell_size” in the data folder on myaberdeen, which contains 130 estimates of genome size and cell volume for different species of Pseudomonas bacteria.  Explore the data, run the linear model, check the assumptions, interpret the results.
+
+```{r, include=answer_sheet, class.source="bg-success"}
+#The first thing we need to do is to establish what our hypothesis is.  In reading the text, we identify two variables of interest, genome size and cell volume.  We can see that the suggestion is that cell volume potentially affects genome size, therefore genome size is our response variable (or dependent variable) and cell volume is our predictor (or independent variable).
+#From there we can state our hypotheses as follows:
+#H0: there is no relationship between genome size and cell volume in prokaryotes.
+#H1: there is a relationship between genome size and cell volume in prokaryotes.
+#If instead we are interested in estimating the relationship between different the two variables, we could say we are interested in estimating the direction and strength of the effect of cell volume on genome size.
+
+genome<-read.table("genome_cell_size.txt", header=TRUE)
+#the following plots are useful for exploring the data
+hist(genome$Genome)
+plot(genome$Genome)
+plot(genome$Cell)
+plot(genome$Genome~ genome$Cell)
+#from the plots we can see that we have more observations for smaller values of cell volume relative to large cell volumes.  We also see that our genome size data have central tendency and symmetry but the distribution is relatively flat rather than bell shaped.
+Model_genome <- lm(genome$Genome~genome$Cell)
+#the following lines of code are used for checking the assumptions of the model
+hist(Model_genome$residuals)#this shows reasonably good symmetry and central tendency
+qqnorm(Model_genome$residuals)
+qqline(Model_genome$residuals)#this shows that at both ends of the distribution, the actual values stray away from the normal distribution line
+plot(Model_genome$residuals ~ Model_genome$fitted.values)#while we have relatively good spread above and below the 0 line for smaller fitted values, we have fewer observations for the larger fitted values making it difficult to assess homogeneity of variance across the range of fitted values.  It also looks like the spread has a funnel shape, widest at small fitted values and more narrow at the larger fitted values.  Not great for homogeneity of variance.  It is possible that some transformation of the data would be worth trying.
+abline(1,0)
+abline(0,0)
+abline(-1,0)
+plot(cooks.distance(Model_genome) ~ hatvalues(Model_genome))#we have one observation that is distant from the others in terms of hatvalues and cooks.distance but the magnitude of the values is small (<1 for cooks) suggesting this unusual value doe not have an undue influence on our model
+summary(Model_genome) #from this output we see that the median residual is close to zero and the max and min are similar, suggesting good symmetry; we also see the equation for the model genome size = 4.927 + 0.484*cell volume; we also see that our model does not explain very much of the variability in the data set (R2 = 0.0101).  Another way of thinking about is that cell volume explains only 10% of the variability in genome size.  As cell volume increases by one unit, genome size increases by 0.484 units.
+anova(Model_genome)#this confirms our F=14.45, df = 1,128, p<0.001, therefore we reject the null hypothesis.
+plot(genome$Genome~genome$Cell)
+abline(Model_genome)#this plot confirms what we learn from the R2 - there is a lot of variability around the model
+```
+
+## Repeat of the Linear Model analyses from the lecture, using Galton’s Height data.
+After checking for outlier(s), try to reproduce the analysis in the previous lecture today, to find out how the Height of a child become adult can be predicted from the average height of its parents, using a simple linear model.
+You will find the Galton heights data on MyAberdeen.Do not forget to specify the null and alternative hypotheses, and to check the validity of the model assumptions before interpreting and reporting the results.
+
+```{r, include=answer_sheet, class.source="bg-success"}
+Galton<-read.table("Galton.txt", header=TRUE)
+hist(Galton$Height)
+plot(Galton$Height)
+plot(Galton$Parent.avg)
+plot(Galton$Height~ Galton$Parent.avg)
+Model_Galton <- lm(Galton$Height~ Galton$Parent.avg)
+hist(Model_Galton$residuals)
+qqnorm(Model_Galton$residuals)
+qqline(Model_Galton$residuals)
+plot(Model_Galton$residuals ~ Model_Galton$fitted.values)
+abline(1,0)
+abline(0,0)
+abline(-1,0)
+plot(cooks.distance(Model_Galton) ~ hatvalues(Model_Galton))
+summary(Model_Galton)
+plot(Galton$Height~Galton$Parent.avg)
+abline(Model_Galton)
+```
+

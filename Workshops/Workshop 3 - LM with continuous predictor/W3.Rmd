@@ -1,0 +1,272 @@
+---
+title: 'Computer workshop 3: Analysis of Variance'
+author: "Cornulier, Pinard, Ross, Vogwill & Wouters"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+  html_document:
+    toc: yes
+    code_folding: show
+    theme: readable
+---
+
+```{r setup, include=FALSE}
+#knitr::opts_chunk$set(echo = TRUE) # uncomment if producing answer sheet
+knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="hide") # uncomment if producing workshop sheet
+answer_sheet <- FALSE # Put this to TRUE to generate the workshop sheet with answers, FALSE to generate the workshop sheet without answers
+```
+
+# Learning objectives
+
+1.	perform a one-way ANOVA in Excel and in R;
+2.	validate the assumptions of the model;
+3.	interpret variance components and p-value from the ANOVA outputs.
+
+This session is here to reinforce your understanding of a statistical test and p-values, taking the ANOVA as an example. The approaches covered here will also be useful and re-used in the remainder of the course, when working on Linear Models (Regression).
+
+# Instructions 
+
+## Analysis of variance using Excel
+
+To help consolidate the basic principles of the analysis of variance (for example understanding what residuals and sums of squares are, where the p-value comes from), we will make the calculations of a one-way ANOVA manually using an Excel spreadsheet.
+
+### Dataset
+
+For this workshop we will work with a new dataset, biomass_fert_light.txt.  This dataset was taken from the files made available in association with Andy Hector’s book, The New Statistics with R:  An Introduction for Biologists (Oxford University Press, 2015).  “The experiment examined the mechanisms of loss of plant diversity following fertilisation; the addition of light to the understorey tests whether the loss of diversity can be prevented by counteracting the shading caused by increased biomass production.”  We will use only part of the dataset.  The response variable is aboveground biomass (g m-2).  The treatments are fertilisation (-/+) and light (-/+), with “-“ referring to without and “+” referring to with.  The dataset includes a variable named “FL” which brings both treatments together.  The experiment used a factorial design which we will cover later in the course.  For this workshop, we will just use the FL column as our treatment, with three levels (F-L-; F-L+; F+L-).
+
+You will find the data on MyAberdeen in the folder for this workshop.
+
+![Figure 1.  Simple plot of biomass values of the three treatments, presented as they occur in the dataset.](C:/Users/for265/OneDrive - University of Aberdeen/Rwork_BI3010/W3/Figure1.png)
+
+![Figure 2.  Boxplot of biomass for three treatments.  The treatments codes are as follows;  F-L- is no fertiliser, no additional light; F-L+ is no fertiliser with additional light; and, F+L- is additional fertiliser but no additional light.](C:/Users/for265/OneDrive - University of Aberdeen/Rwork_BI3010/W3/Figure2.png)
+
+### Hypotheses for analysis
+We are interested in comparing the three treatments within the FL column in order to determine if there is evidence that additional light or fertilisation influences the amount of biomass produced by the experimental plants.  As explained earlier, the data are only part of a larger experiment examining the effects of light and fertilisation on plant diversity.
+For a comparison of three groups using an analysis of variance, we can formulate the null and alternative hypotheses in two different ways.  One approach focuses on the difference between the means, the other focuses on the difference between the variance; both are correct but the first set is more commonly used.
+Means:
+H0: there is no difference in biomass between treatments.
+H1: There is a difference in biomass between at least two of the treatments.
+Variance:
+H0: There is at least as much variation within as between treatments.
+H1: There is more variation between treatments than within.
+
+### Conducting an ANOVA manually in Excel
+Download and open the excel spreadsheet in the workshop folder on MyAberdeen.  Start with the sheet that is named “anova with no guidance).  Refer to the lecture material on ANOVA to compute the required values and to fill in the ANOVA table in the excel spreadsheet. An effective approach is to add one column in Excel for the grand mean (repeat the value on each line) and one for the group means in order to compute the different residuals easily.
+
+It is a good exercise to spend a few minutes figuring out how to do this from scratch in the Excel sheet provided above. If you find yourself stuck, the spreadsheet has several sheets, one includes some guidance.  The file also includes a sheet with the answers but try not to look at that until you finish working it through on your own.
+
+If you successfully work through the exercise without the guidance, you will get as far as calculating the p-value.  In the lecture notes, there is no information on how you should do this in excel.  You can look at the note in the p-value cell in the guidance sheet to see the Excel formula that is used to calculate the p-value for a given calculated F statistic with the associated two degrees of freedom.  You can also calculate the R^2 or Coefficient of Determination by taking the SSM/SST.
+
+### Question Set One
+**1. What do you conclude and report from the ANOVA result?** 
+```{r, include=answer_sheet, class.source="bg-success"}
+# There is a difference between the treatments in terms of biomass (g per m2) (F=4.99, df=2,45, p=0.011).  The treatments explained about 18% of the variation in the dataset (calculated as SSR/SST).  Once you complete the workshop, there is more explanation of what you might report and how in later questions.
+```
+
+## Analysis of Biomass data using R
+As in the previous workshops, you need to set your working directory, load the data into R Studio and then spend some time exploring the data.  You can subset the dataset so that the data from each of the three treatments can be explored individually.  If you are unsure where to start with the data exploration, remember you want some plot that will give you insight into the shapes of the treatment distributions and the amount of variability in each treatment.   A boxplot or a violin plot could be a good place to start.  Sample sizes are small so if you use histograms and QQ plots, keep sample size in mind when you interpret them.
+
+```{r, class.source = c("bg-warning","fold-hide")}
+biomass<-read.table("biomass_fert_light.txt",header=TRUE) #loads the dataset
+F0L0<-subset(biomass, FL=="F-L-") # creates a new dataframe with just one treatment
+F0L1<-subset(biomass, FL=="F-L+")
+F1L0<-subset(biomass, FL=="F+L-")
+boxplot(biomass$Biomass.m2~biomass$FL,
+        ylim=c(100,700)) #creates a boxplot, comparing the three treatments, with axis limits set to ensure the whiskers fall within the plot area
+library(vioplot) #loads the violin plot package
+library(sm) # required for vioplot
+library(zoo) # required for vioplot
+vioplot::vioplot(biomass$Biomass.m2~biomass$FL,
+                 xlab="treatments",
+                 ylab="biomass (g per m2",
+                 ylim=c(100,700)) #produces a violin plot with labelled axes and defined range for y-axis; this plot shows the shape of the three treatment distributions, the variability for each treatment (the IQRs for each treatment, and the mean and median values for each treatment
+
+#to get more insight into how the variability compares, you could calculate standard deviation values for each treatment
+sd(F0L0$Biomass.m2)
+sd(F0L1$Biomass.m2)
+sd(F1L0$Biomass.m2)
+by(biomass$Biomass.m2, biomass$FL, sd)#this code does the same as the three previous lines of code, more efficiently
+```
+
+
+### Question Set Two
+**2. Are the biomass values for the three treatments close to being normally distributed?**
+```{r, include=answer_sheet, class.source="bg-success"}
+#Looking at the violin and boxplots, the distributions are reasonably symmetrical and for each there is a central tendency.  The relatively small sample size makes it difficult to be confident in judging this but there are no obvious problems. 
+```
+
+
+**3. Is the variability similar across the three treatments?**
+```{r, include=answer_sheet, class.source="bg-success"}
+#The standard deviations are reasonably similar as are the interquartile ranges, visible in both the boxplot and violin plot. 
+```
+
+
+**4. Are there any outliers in the data?  Do they need to be removed?**
+```{r, include=answer_sheet, class.source="bg-success"}
+#According to the boxplot, there is one potential outlier in F0L0 and another one in F0L1 but given the small sample size and the fact that these values are feasible, I would be reluctant to remove either value for the analysis. 
+```
+
+**5. Based on the plots, how do the mean values compare?**
+```{r, include=answer_sheet, class.source="bg-success"}
+#Difficult to tell if they are different as the mean and median values fall within the interquartile range of the other treatments. 
+```
+
+## Perform a one way analysis of variance in R
+Perform 1-way ANOVA with the biomass data with Biomass.m2 (response) as a function of treatment (FL).
+
+```{r, class.source = c("bg-warning","fold-hide")}
+#perform the analysis of variance
+model <- lm(biomass$Biomass.m2 ~ biomass$FL)
+anova(model)
+summary(model)
+```
+
+### Checking assumptions and interpreting the results.
+
+### Question Set Three
+
+**6. What are the assumptions of an ANOVA?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# The assumptions are 1) homogeneity of variance across the treatments; 2) the observations are drawn from a population that has an underlying normal distribution; and, 3) the observations are independent, come from a random (or representative) sample.
+```
+
+Let's start by checking the assumption of homogeneity of variance.  This assumption relates to data so we want to compare the variability across the three treatments.  We could do this by calculating standard deviations and comparing them.  We could also do this by creating a boxplot or violin plot and comparing the size of the interquartile ranges and lengths of the whiskers.  Finally, we could also run a test for equality of variances, being cognizant of the limitations for considering assumptions.
+
+As we move to linear models next week, we will use a plot of the residuals by the fitted values as a way of assessing homogeneity of variance.  The code is provided below, along with a brief explanation.  We will look at this approach in more detail next week.
+
+
+```{r, class.source = c("bg-warning","fold-hide")}
+# code for calculating the three standard deviation values
+sd_F0L0<-sd(F0L0$Biomass.m2)
+sd_F0L1<-sd(F0L1$Biomass.m2)
+sd_F1L0<-sd(F1L0$Biomass.m2)
+
+# code for creating a boxplot to compare the three treatments
+boxplot(biomass$Biomass.m2~biomass$FL,
+        ylim=c(100,700))
+
+# code for running a Shapiro's test for equality of variances
+res <- bartlett.test(Biomass.m2 ~ FL, data = biomass)#performs a test for equal variances amongst groups in the FL variable 
+res #prints the output of the test
+# As we move into linear models next week, we will use a plot of the residuals by fitted values as the tool for assessing the assumption of homogenity of variances. With the plot we are looking to see if the relative spread of residuals above and below the 0 line on the y-axis is similar for the three groups.
+plot(model$residuals~model$fitted.values)
+# in this case the spread is similar for the three groups, anorher indication that the assumption of homogeneity fo variance is met.
+```
+
+**7. Is the assumption of homogeneity of variance met in this case?**
+```{r, include=answer_sheet, class.source="bg-success"}
+# The standard deviations are 68, 88 and 98 and the boxplots suggest that the interquartile range of F-L- is less than that for F+L-, however, given that we have only 16 observations per treatment, it is difficult to say if the magnitude of the difference is important.  Because the variability is not very different, I would conclude that the assumption is met.  If you conducted the Bartlett test, that also suggests that there is not a problem with this assumption. 
+```
+
+To look at the assumption of normality, we can look at a histogram of the residuals of the analysis.  We could also look at a Q-Q plot of the residuals and Q-Q plots of the data for the three treatments. To look at the residuals by group, we need to subset the data first.  Because of relatively small sample sizes, once we subset the data, it is difficult to judge how important deviations from the normal line are.  If you are confident that the underlying population from which the sample was derived has a normal distribution then some deviation here is unlikely to affect the validity of your model.  There is an optional activity that shows you how to add confidence intervals to the QQ plots; with the confidence intervals you can see more clearly how significant deviations from the line are given the sample size.
+
+```{r, class.source = c("bg-warning","fold-hide")}
+hist(model$residuals)
+qqnorm(model$residuals)
+qqline(model$residuals)
+
+res_F0L0<-subset(model$residuals, biomass$FL=="F-L-")
+res_F0L1<-subset(model$residuals, biomass$FL=="F-L+")
+res_F1L0<-subset(model$residuals, biomass$FL=="F+L-")
+hist(res_F0L0)
+hist(res_F0L1)
+hist(res_F1L0)
+
+qqnorm(res_F0L0)
+qqline(res_F0L0)
+qqnorm(res_F0L1)
+qqline(res_F0L1)
+qqnorm(res_F1L0)
+qqline(res_F1L0)
+
+```
+
+**8. Is the assumption of normality met in this case?**
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Sample size is small so it is difficult to say if the histogram is deviating from a bell-shaped curve enough for it to be a problem.  The data on biomass would be expected to come from a population with a normal distribution.  The Q-Q plot of the residuals indicate that the central part of the distribution are close to the normal distribution but the tails are deviating.  If we look at Q-Q plots per treatment, we see that there are few observations per treatment and that the points do not always fall on the line.  ANOVAs are relatively robust to deviations from normality, especially if the distributions are symmetrical so I would conclude here that we can assume that the assumption is met. For those of you that like to run a normality test, the results from a Shapiro test also suggest we can assume normality.
+shapiro.test(F0L0$Biomass.m2)#conducts a normality test for F0L0 group data on the Biomass.m2 variable
+shapiro.test(F0L1$Biomass.m2)
+shapiro.test(F1L0$Biomass.m2)
+shapiro.test(model$residuals)
+```
+
+**9.What percentage of the sums of squares is accounted for by treatment?  What percentage is not accounted for by treatment (i.e., the error)?**
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Only 18% (SSbiomass$FL / SSresiduals+SSbiomass$FL) = (73211/(73211+329924) = 73211/403135 = 0.18) of the sums of squares is explained by the treatment.   The percentage that is not explained by the treatment is 82% (SSresiduals/SStotal).  The required information can be gleaned from the code below.
+anova(model)
+```
+
+
+**10.What can you conclude with respect to differences between the group means?**
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# We conclude that there is significant difference between the treatments (F2,45 = 4.99, p=0.011).  
+# The ANOVA doesn’t tell us which treatment is different from the other treatments.  
+
+```
+
+**11.Use 95% confidence intervals to draw an inference about which treatments are different from one another.  Write up the results as you would in a report.**
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# We could calculate the 95% confidence intervals for the treatment means and then draw some inferences from those.  If you do that, you can see that the mean for the F-L- treatment is less than the mean for the F+L- treatment.  The F-L+ treatment is intermediate between the two and is not significantly different from either.
+# The code to calculate the confidence intervals is below.  There is an optional activity to create a plot with mean values and 95% CI.
+# Write-up….. There is a significant difference between the treatments (F2,45 = 4.99, p=0.011), with plants in the F+L- treatments (mean = 449.5 g per m2, 95%  CI = (402.6, 496.4)) having greater biomass than plants in the F-L- treatment (mean = 355.9 g per m2, 95% CI = (319.7, 391.9).  Plants in the F-L+ treatment (mean=385.9 g per m2, 95% CI = (333.6, 438.2) had biomass values that were intermediate between the other two treatments.
+# OR
+# There is a significant difference between the treatments (F2,45 = 4.99, p=0.011), with plants in the F+L- treatments having greater biomass than plants in the F-L- treatment, and plants in the F-L+ treatment being intermediate between the other two treatments (Figure x).
+
+#calculates 95% CI for each of the three treatments in order  
+mean_F0L0<-mean(F0L0$Biomass.m2)
+df<-(length(F0L0$Biomass.m2)-1)#creates an object called df that is equal to the sample size of biomass in the F0L0 dataset
+t<-qt(0.975,df)#creates an object called t assuming the t distribution, probability value of 0.975, sample size for the Adelie dataset
+se<-sd(F0L0$Biomass.m2)/sqrt(length(F0L0$Biomass.m2))#calculates the standard error
+upr95F0L0<-mean_F0L0+t*se # calculates the upper confidence limit for the 95% CI
+lwr95F0L0<-mean_F0L0-t*se #calculates the lower limit as above
+
+mean_F0L1<-mean(F0L1$Biomass.m2)
+df<-(length(F0L1$Biomass.m2)-1)#creates an object called df that is equal to the sample size of biomass in the F0L0 dataset
+t<-qt(0.975,df)#creates an object called t assuming the t distribution, probability value of 0.975, sample size for the Adelie dataset
+se<-sd(F0L1$Biomass.m2)/sqrt(length(F0L1$Biomass.m2))#calculates the standard error
+upr95F0L1<-mean_F0L1+t*se # calculates the upper confidence limit for the 95% CI
+lwr95F0L1<-mean_F0L1-t*se #calculates the lower limit as above
+
+mean_F1L0<-mean(F1L0$Biomass.m2)
+df<-(length(F1L0$Biomass.m2)-1)#creates an object called df that is equal to the sample size of biomass in the F0L0 dataset
+t<-qt(0.975,df)#creates an object called t assuming the t distribution, probability value of 0.975, sample size for the Adelie dataset
+se<-sd(F1L0$Biomass.m2)/sqrt(length(F1L0$Biomass.m2))#calculates the standard error
+upr95F1L0<-mean_F1L0+t*se # calculates the upper confidence limit for the 95% CI
+lwr95F1L0<-mean_F1L0-t*se #calculates the lower limit as above
+```
+
+# Optional Work
+## Create a plot of means with 95% confidence interval bars.
+It is possible to create a bar chart with error bars in base R but it is cumbersome.  The package ggplot2 includes a more straight-forward option for creating this type of plot.  If you haven't already you will need to install the package ggplot2.  In the menu under "Tools" you will see an option for installing packages.
+
+Once installed you will need to bring gplots into the library.  The function for creating the plot is given below.  If you want to try to improve the plot's appearance, you can modify the axis labels and change the limits of the y-axis, and add grid lines.
+
+```{r, class.source = c("bg-warning","fold-hide")}
+library(gplots)
+plotmeans(biomass$Biomass.m2~biomass$FL)
+plotmeans(biomass$Biomass.m2~biomass$FL,
+          ylim=c(300,500),
+          xlab="treatments",
+          ylab="Biomass (g per m2)")
+grid(nx=NULL, ny=NULL, col="lightgray", lty="dotted", lwd=par("lwd"))
+
+```
+
+## Creat a Q-Q plot with confidence intervals
+If you load the package car into the library (library(car)), there is a function that will plot a QQplot with 95% confidence intervals (qqPlot()).  Try this with the residuals from your model and the residuals for each of the groups. 
+
+```{r, class.source = c("bg-warning","fold-hide")}
+library(car)
+qqPlot(model$residuals)
+qqPlot(res_F0L0)
+qqPlot(res_F0L1)
+qqPlot(res_F1L0)
+```
+
+

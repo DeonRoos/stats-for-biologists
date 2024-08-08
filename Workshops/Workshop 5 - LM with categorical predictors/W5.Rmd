@@ -1,0 +1,332 @@
+---
+title: 'Computer Workshop 5: Building more complex models'
+author: "Vogwill, Cornulier, Pinard, Ross, Wouters"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+  pdf_document:
+    toc: yes
+  html_document:
+    toc: yes
+    code_folding: show
+    theme: readable
+---
+
+```{r setup, include=FALSE}
+#knitr::opts_chunk$set(echo = TRUE) # uncomment if producing answer sheet
+knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="hide") # uncomment if producing workshop sheet
+answer_sheet <- FALSE # Put this to TRUE to generate the workshop sheet with answers, FALSE to generate the workshop sheet without answers
+```
+
+# Learning objectives
+1.  being able to formulate research questions
+2.	using practice to consolidate your understanding of:
+    a.	the use of multiple predictors in Linear Models
+    b.	the principle and interpretation of treatment contrasts
+3. able to work through a robust statistical modelling process:
+    a.	performing basic data exploration
+    b.	fitting a linear model with continuous and categorical predictors
+    c.	understanding how to validate the assumptions of the model
+    d.	being able to interpret the parameters of the model
+    e.	representing the model graphically
+
+# Manually fitting a model to data using an onlion app.
+To help to understand what adding additional variables to a model is actually doing to the equation of a straight line, we will use an online app to visually explore fitting models to data.  The link to the web app is available in the folder for the workshop on MyAberdeen. The link is also available [here](https://shiny.abdn.ac.uk/biostat/LMgender/)
+
+## Guide to the web app
+On the left-hand side is a tool for changing the parameters of the model. There are four parameters, but only three are needed today. 
+(i)	The intercept of the model for the reference level (daughter).
+(ii)	The coefficient for Male (i.e. how much larger the average son is than the average daughter)
+(iii)	The coefficient for Parent's average height (i.e. the gradient of the line).
+(iv)	The coefficient for Male*Parents average height is not needed until next week – please ignore. 
+
+On the right-hand side note that there are two tabs at the top.  For this exercise you want to use the tab on the left.  You will see four plots, which change when you modify the model parameters. The top two are the same plot, but the left-hand panel is zoomed in. The points are the datapoints which don't move when you adjust the parameters, but the lines (representing lines of best fit for the model) do change when you adjust parameters.
+
+The lower two panels are ways of judging how well the model is fitted. Sum of squares (SSE) is an overall measure of model fit – SSE decreases as model accuracy increases. There are also columns representing the positive and negatives residuals for both sons and daughters – again lower values are better, and positive and negative values should be approximately equal. On the lower right is a histogram of residuals – a well fitted model should have normally distributed residuals, centered on zero.
+
+### Exercise 1
+Estimate the overall means for both the males and females, by setting the Slope at 0 and adjusting the Intercept and Male coefficients so that the sums of squares of the positive and the negative residuals balance out for each gender.
+
+### Question Set One
+1. What values did you get for the daughters and for the sons?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# By setting the coefficients for ‘Parents height’ to zero, and adjusting the coefficients for the Intercept and the ‘Male’ effect so as to minimize the total SSE (this happens when the SS of negative residuals and of the positive residuals are of the same size, so the positive and negative residuals cancel each other), you can obtain the means for the two groups. The main thing to note is that the intercept for the reference level (Daughters) is independent of the other coefficients, while the effect for the indicator variable ‘Male’ measures the difference relative to the daughters’ intercept. The trick is therefore to first adjust the Intercept, and then the coefficient for ‘Male’. The intercept gives you the mean for female, which is the reference level (163 cm). The mean for the sons is given by the value of the Intercept for daughters + the ‘Male’ effect (163 + 13 = 176 cm).  
+```
+
+## Exercise 2
+Head back to the web app, and try fitting the best model with 1 slope and two intercepts for these data. 
+
+### Question Set Two
+
+2. What coefficients in the web app correspond to c1, c2 and m, in the lecture?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+#Coefficient for the reference level (Daughter) is the intercept ‘c1’
+#Coefficient for Male is ‘c2’, the difference between male and female intercepts.
+#Coefficient for Parents average height is the slope ‘m’
+```
+
+3. What are the null hypotheses attached to c1, c2, and m?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+#c1 The null hypothesis is :  the height of daughters is not different from zero.
+#c2 The null hypothesis is:  there is no difference in the heights of sons and daughters.
+#m The null hypothesis is:  the slope of the line relating parents average height to child's height is not different from zero.
+```
+
+4. What was the lowest SSE you managed, and what steps did you need to take to reach it? 
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# This is a bit fiddly, because increasing the slope (m) usually requires decreasing the intercept(s) to ensure a good fit to the data. This requires several iterations, 
+#-	The first is to eyeball the direction of the trend in the data and adjust the ‘Coefficient for Parents average height’ so the model line approximately matches that. 
+#-	Then, decrease the ‘Intercept for the reference level (Daughter)’ to get a better fit
+#-	Repeat the cycle of adjusting m and c1 until the SSE for daughters are approximately balanced. 
+#-	Then adjust c2 (‘Coefficient for Male’) to get the best possible fit (i.e. the smallest SSE, which happen to be when the positive and negative residuals are balanced).
+#-	The slope that gave the best results for daughters may not be the best for daughters and sons together, so you may still be able to improve the model fit by making fine adjustments to all the parameters (perhaps easiest in the order: slope, daughters intercept, sons-daughter difference). 
+#Getting the best possible fit is quite a lengthy process, by hand!
+```
+
+5. What were the values of the coefficients c1, c2 and m for your model with the lowest SSE?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+#I managed to reduce SSE to 3992.9 with the intercept for the daughter at 36, the coefficient for the son (Male) at 13 and the parents' average height coefficient at 0.75.
+```
+
+# Fitting a model in R: how accurate was your manual model?
+To test the accuracy of your manually fitted model, fit the model in R and compare the coefficients. You will need to follow all the steps in the previous workshop. The only difference is when specifying the model, you will need to have both average parent's height and gender as factors separated by a plus sign (for example: model <- lm(Galton$Height ~ Galton$Parent.avg + Galton$Gender).
+
+The data is on myaberdeen in the file "Galton.txt" and is ready for R. The data has a header. 
+
+The steps from last week.
+Set your working directory.
+Load the data into R.
+Check the data has loaded correctly.
+Specify your hypotheses. 
+Visually explore the data.
+Fit the model. 
+Check model assumptions.
+Look at the model summary/coefficients.
+Draw a conclusion
+
+### Question Set Three
+Based on the plots you have generated:
+
+6. Are the coefficients you obtained manually in the web app similar to those estimated by R? (Note, the web app uses a different data set, made of only 150 of the 898 observations from Galton’s original data set, taken at random) 
+
+```{r, include=answer_sheet, class.source="bg-success"}
+#Should be close, but not exactly the same, due to the different data set. The SSE for two different data sets are not comparable at all.
+Galton<-read.table("Galton.txt", header=TRUE)
+#check the data have loaded correctly
+head(Galton)
+str(Galton)
+#specify your hypotheses
+#The height of daughters is not different from zero.
+#There is no difference in the heights of sons and daughters.
+#The slope of the line relating parents average height to child's height is not different from zero.
+#Explore the data
+hist(Galton$Height)
+plot(Galton$Height)
+boxplot(Galton$Height~Galton$Gender)
+stripchart(Galton$Height~Galton$Gender, vertical=TRUE, method="jitter")
+col=Galton$Gender
+plot(Galton$Height~Galton$Parent.avg, 
+     col=(8:9), pch=16)#creates a plot with daughter as colour 8, sons as colour 9, filled symbols
+#Fit the model
+model<-lm(Galton$Height~Galton$Parent.avg + Galton$Gender)
+#Check model assumptions
+hist(model$residuals)
+qqnorm(model$residuals)
+qqline(model$residuals)
+plot(model$residuals~model$fitted.values)
+abline(10,0)
+abline(0,0)
+abline(-10,0)
+plot(cooks.distance(model)~hatvalues(model))
+#Look at the model summary and coefficients, and the ANOVA table
+anova(model)
+summary(model)
+#Plot the model visually with the dataset
+plot(Galton$Height~Galton$Parent.avg, col=c(7,3), pch=16)
+abline(38.6, 0.73, col=7, lwd=2) #the values used are the intercept and slope for the daughters from the model output
+abline(51.7, 0.73, col=3, lwd=2)#these are the coefficients for the sons height
+```
+
+7. Using the model equation, what would be the predicted height of a daughter whose parents averaged 175 cm? And the height of her brother? Check your results with a demonstrator. 
+
+```{r, include=answer_sheet, class.source="bg-success"}
+#The equation is 38.6+13.3∗Male +0.73∗𝐻𝑒𝑖𝑔ℎ𝑡_𝑝𝑎𝑟𝑒𝑛𝑡𝑠. For the daughter, ‘Male ’ takes the value 0, so the predicted height is 38.6+13.3*0+0.73*175=166.35 cm. Her brother (‘Male ’=1) is predicted to be 38.6+13.3*1+0.73*175=179.65 cm.  
+```
+
+## Making a more complex models to improve predictive power
+Back to the finch egg mass data. Based on the previous topic we now know that there is a strong, nearly linear relationship between egg mass and body mass in finches (egg mass = 1 g starting point + an extra 0.06 g for every 1 g in female body mass). 
+
+Here, we will further ask if mating system affects egg mass. Bird mating systems are conventional classified on a five-point scale:
+1. polyandry (multiple males, 1 female).
+2. monogamy (< 5% polygyny (males mate with multiple partners)).
+3. mixed (5 -15% polygyny)
+4. polygyny (15% plus polygyny)
+5. lekking or promiscuous.
+
+No finches use mating system one or five. Because we know that female mass has such a strong effect, it may mask the effect of mating system if the latter is weaker. One way to test this is to include both effects in our models and ask if there is an effect of mating system given (= over and above) female mass.
+
+### Question Set Four
+8. Why might mating system affect egg mass? Which mating system would you expect to have the largest eggs?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+#If energy expended during mating were to affect the health of the female birds, you might expect an impact on egg mass if the trait is plastic (i.e., changeable depending on circumstances).  Alternately, you might expect over evolutionary time that where both parents are tending the chicks, that the species could support young that are smaller at birth.  If this were true, you would expect monogamous species to have smaller eggs and lekking and polyandrous species to have the larger eggs.
+```
+
+## Get Started
+Download the data and load it into R.  Check that the data have loaded correctly.  Identify the research question.
+
+```{r, include=answer_sheet, class.source="bg-success"}
+finch<-read.table("FinchEggs.txt",header=TRUE)
+str(finch)
+head(finch)
+#In a hypothesis-testing type of inference, the research question could be formulated as:
+#H0: for a given female body mass, there is no effect of mating system on egg mass across finch species.
+#H1: there is an effect of mating system on egg mass in addition to the female mass effect in finches.
+#In an estimation-driven type of inference, one could simply say they are interested in estimating (the direction and strength of) the additive effects of mating system and female body mass on egg mass.
+```
+
+### Question Set Five
+
+9. Which of these approached do you think is more relevant for this research question?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+#The hypothesis for the effect of mating system isn’t trivial, therefore hypothesis testing is justified (as is the estimation question).
+```
+
+## Exploring the data
+There are many missing values in the Mating_System variable, therefore, it would be worth creating a subset of the data to exclude the rows that have no mating system recorded.
+
+For data exploration, you might try these types of plots:
+    -	Response variable against female mass, using a different colour for each mating system.
+    -	Boxplot of egg mass against mating system (useful for categorical predictors, to look at differences in mean, variance and distribution between categories).
+    -	Boxplot of female mass against mating system (plots of predictors against each other can be useful to diagnose correlations and therefore potential confounding).
+
+```{r, include=answer_sheet, class.source="bg-success"}
+#finch dataset
+finch<-read.table("FinchEggs.txt",header=TRUE)
+str(finch)
+head(finch)
+list(finch$Mating_System)
+finch2<-subset(finch, Mating_System!="<NA>")
+col=finch2$Mating_System
+plot(finch2$Egg_mass~finch2$F_mass, col=c(3,4,7))
+boxplot(finch2$Egg_mass~finch2$Mating_System, col=c(3,4,7))
+boxplot(finch2$F_mass~finch2$Mating_System, col=c(3,4,7))
+```
+
+### Question Set Six
+
+10.  Are there any outliers or dubious data?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# No. (Thanks to missing values in the mating system variable, the possible outliers seen in the previous topic have disappeared).  The most important graphic here is the relationship between Egg_mass and F_mass if you are looking for statistical outliers. The boxplots show outliers from a statistical point of view, but these are just large species that are biologically relevant and correct. They are not outliers in the (X,Y) space.
+```
+
+11.  Based on these graphs, do you think there will be an effect of mating system?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Probably if mating system is considered alone in the model (graph 2), but maybe not if considered together with female body mass: graph 3 shows that polygyny is associated with larger species in finches, therefore mating system and female body mass are not independent (they covary). The apparent effect of mating system could be entirely driven by its association with body mass.
+```
+
+## Fit a model that matches the research questions and check model assumptions and interpret the model outputs
+To try and tease out the additive effects of female body mass and mating system. 
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# #fit an additive model
+model_finch2<-lm(finch2$Egg_mass~finch2$F_mass+finch2$Mating_System)
+#check the assumptions
+hist(model_finch2$residuals)
+qqnorm(model_finch2$residuals)
+qqline(model_finch2$residuals)
+plot(model_finch2$residuals~model_finch2$fitted.values)
+abline(1,0)
+abline(0,0)
+abline(-1,0)
+plot(cooks.distance(model_finch2)~hatvalues(model_finch2))
+summary(model_finch2)
+anova(model_finch2)
+```
+
+### Question Set Seven
+12.  Is this model valid?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# The model is still a dubious due to heterogeneity of variance.
+```
+
+13.  Are the plots generated for checking assumptions different from those obtained in the previous topic workshop?  Why?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Normality has marginally improved because some previously more problematic observations are now omitted from the data (due to missing mating system value). Other flaws still present because mating system has very little additive effect (effects near zero), hence the predicted values and residuals are very similar.
+```
+
+14.	What are the coefficients of the model and what is their interpretation?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Intercept (1.0441): predicted value of the response for a F_mass value of zero (here, 1 g – biologically nonsensical for female body mass) and for Mating_System 2 (reference level).
+#Slope (“F_mass”): size of increment in the response for a unit increment in the covariate. I.e. when female body mass increases by 1 g, egg mass tends to increase by 0.061 g.
+#The model consists of three parallel fitted lines, one for each mating system category.
+#“Mating_System 3”(-0.07) is the difference in intercept between Mating_System 3 and 2 (reference level). Therefore the intercept for Mating_System 3 is 1.0441-0.07
+#“Mating_System 4”(0.056) is the difference in intercept between Mating_System 4 and 2 (reference level). Therefore the intercept for Mating_System 4 is 1.0441+0.056
+```
+
+15.	What can you infer from this model output, with reference to your research question(s)?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Based on the model summary table, as we knew there is a strong positive effect of female mass on egg mass. There is no difference between mating systems (coefficient SEs greater than coefficient estimates)
+```
+
+16.  Looking a the ANOVA table of the linear model, is there a significant amount of variation explained by mating system categories?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Given that Mating system has more than 2 levels, we need to look at the ANOVA table for a global test of variation explained by mating system. There is no additive effect of mating system on egg mass (p= 0.669) when female body mass is accounted for. 
+```
+
+17. Write down the model equation for each mating system category.
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Mating system 2: egg_mass = 1.0441 + 0.061*female_body_mass
+#Mating system 3: egg_mass = 1.0441 + 0.061*female_body_mass – 0.07
+#Mating system 4: egg_mass = 1.0441 + 0.061*female_body_mass + 0.056
+```
+
+18. Compute predicted egg mass values manually for 
+1) a female body mass of 0g and mating system 2; 
+2) a female body mass of 100g and mating system 3.
+
+```{r, include=answer_sheet, class.source="bg-success"}
+#1.0441 + 0.061*0= 1.0441g
+#1.0441 + 0.061*100 -0.07 = 7.0741g
+```
+
+19. What do you think about this model:  does it fit all of the data well?  Is it useful?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+#Model fit isn’t improved compared to yesterday’s simpler model. Of the two models so far, the simpler seems the best.  The model fits the data in the central part of the range of female body mass but doesn't fit the small species or the very large species very well.  The different types of mating system are not represented across the range of values of female body mass therefore it is difficult to be confident that the model is appropriate.  On the other hand, the model explains 96% of the variation in the dataset, so globally, the model has some value despite its shortcomings.
+
+plot(finch2$Egg_mass~finch2$F_mass, col=c(3,4,7))
+abline(1.04, 0.061, col=3)#this is the model line for mating system 2, the reference case
+abline(0.974, 0.061, col=4)#this is the model line for mating system 3, mixed
+abline(1.1, 0.061, col=7)#this is the model line for mating system 4, polygyny
+```
+
+22.  Why doesn't mating system tell us anything more than female body mass?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+#It looks like mating system is not independent of female body  mass, polygyny is more common in large species.
+```
+
+# Optional work
+## Does clutch size impact egg mass?
+If you are comfortable with the above and would like more practice, repeat the exercise including both female body mass and clutch size as predictors in the model.
+
+```{r, include=answer_sheet, class.source="bg-success"}
+#From exploring the data, with a plot of egg mass x clutch size, it will be apparent that Clutch_size alone doesn’t explain much of the variation in Egg_mass. We know Egg mass is largely explained by female mass (r2= 0.91), so unless Female mass and clutch size are highly correlated (and hence convey similar information), we can’t expect clutch size to explain much on its own. 
+```
+

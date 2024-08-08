@@ -1,0 +1,17 @@
+Block	Treatment	SeedlSum
+b1	ctrl	95
+b1	rem_litt	91
+b1	rem_NS	64
+b1	rem_litt_moss	107
+b2	ctrl	88
+b2	rem_litt	70
+b2	rem_NS	51
+b2	rem_litt_moss	180
+b3	ctrl	44
+b3	rem_litt	57
+b3	rem_NS	55
+b3	rem_litt_moss	173
+b4	ctrl	94
+b4	rem_litt	99
+b4	rem_NS	53
+b4	rem_litt_moss	80

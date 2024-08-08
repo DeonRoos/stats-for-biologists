@@ -1,0 +1,46 @@
+#workshop 7 only R script
+eggs<-read.table("FinchEggs.txt", header=TRUE)
+eggs$Display <- as.factor(eggs$Display)
+str(eggs)
+col=("eggs$Mating_System")
+plot(eggs$Egg_mass~eggs$F_mass, col=(1:3), xlab= "Female Body Mass", ylab= "Egg mass")
+boxplot(eggs$Egg_mass~eggs$Mating_System)
+boxplot(eggs$Egg_mass~eggs$Display)
+pairs(eggs[, 4:8])
+table(eggs$Display)
+summary(eggs$Clutch_size)
+
+model<-lm(eggs$Egg_mass~(eggs$F_mass+eggs$Clutch_size+eggs$Mating_System)^2)
+anova(model)
+summary(model)
+model2<-lm(eggs$Egg_mass~eggs$F_mass
+           +eggs$Clutch_size+eggs$Mating_System
+           +eggs$F_mass*eggs$Mating_System)
+anova(model2)
+summary(model2)
+
+#work on log transformed egg mass and f_mass
+eggs$ln.Egg_mass<-log(eggs$Egg_mass)
+eggs$ln.F_mass<-log(eggs$F_mass)
+plot(eggs$ln.Egg_mass~eggs$ln.F_mass)
+model3<-lm(eggs$ln.Egg_mass~(eggs$ln.F_mass+eggs$Clutch_size+eggs$Mating_System)^2)
+anova(model3)
+summary(model3)
+model4<-lm(eggs$ln.Egg_mass~eggs$ln.F_mass+eggs$Clutch_size+eggs$Mating_System)
+anova(model4)
+model5<-lm(eggs$ln.Egg_mass~eggs$ln.F_mass+eggs$Clutch_size)
+anova(model5)
+
+hist(model2$residuals)
+hist(model2$residuals, breaks = 20)
+qqnorm(model2$residuals)
+qqline(model2$residuals)
+plot(model2$residuals ~ model2$fitted.values)
+plot(cooks.distance(model2) ~ hatvalues(model2))
+
+hist(model5$residuals)
+hist(model5$residuals, breaks = 20)
+qqnorm(model5$residuals)
+qqline(model5$residuals)
+plot(model5$residuals ~ model5$fitted.values)
+plot(cooks.distance(model5) ~ hatvalues(model5))

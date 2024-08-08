@@ -1,0 +1,31 @@
+Nitrogen	Water	Weight	Locality	Fertil	TillerLen	Block	Treatment	SeedlSum	PoaAngus	P	Bav	Row	Column	R-Artemisia	R-Ambrosia	R-Betula
+none	low	23	L1	N	510	b1	ctrl	95	16.65	yes	yes	r1	c1	1	3	2
+none	low	25	L1	N	520	b1	rem_litt	91	4.18	yes	no	r1	c2	2	4	0
+none	low	24	L1	N	525	b1	rem_NS	64	6.64	no	yes	r1	c3	2	3	2
+none	low	26	L1	N	545	b1	rem_litt_moss	107	7.14	no	no	r1	c4	0	1	0
+none	low	19	L1	N	500	b2	ctrl	88	8.10	yes	no	r2	c1	1	2	2
+none	high	32	L1	Y	600	b2	rem_litt	70	4.53	no	no	r2	c2	3	4	3
+none	high	37	L1	Y	610	b2	rem_NS	51	20.41	yes	yes	r2	c3	0	2	0
+none	high	34	L1	Y	620	b2	rem_litt_moss	180	12.61	no	yes	r2	c4	1	3	2
+none	high	35	L1	Y	610	b3	ctrl	44	5.83	no	yes	r3	c1	1	4	4
+none	high	36	L1	Y	605	b3	rem_litt	57	8.90	yes	yes	r3	c2	0	3	2
+added	low	29	L2	N	400	b3	rem_NS	55	4.65	no	no	r3	c3			
+added	low	28	L2	N	420	b3	rem_litt_moss	173	12.22	yes	no	r3	c4			
+added	low	29	L2	N	410	b4	ctrl	94	1.49	no	no	r4	c1			
+added	low	31	L2	N	405	b4	rem_litt	99	2.08	no	yes	r4	c2			
+added	low	30	L2	N	430	b4	rem_NS	53	2.69	yes	no	r4	c3			
+added	high	57	L2	Y	520	b4	rem_litt_moss	80	16.97	yes	yes	r4	c4			
+added	high	59	L2	Y	570											
+added	high	62	L2	Y	560											
+added	high	58	L2	Y	520											
+added	high	59	L2	Y	550											
+			L3	N	680											
+			L3	N	670											
+			L3	N	650											
+			L3	N	660											
+			L3	N	670											
+			L3	Y	670											
+			L3	Y	650											
+			L3	Y	630											
+			L3	Y	645											
+			L3	Y	670											

@@ -286,7 +286,7 @@ p5.2 <- ggplot(df_expanded, aes(x = density, y = addit, group = species, color =
   sbs_theme()
 p5.2
 ggsave(here::here("Figures/Lecture 10 - Interactions", file = "interaction_static_slope_contrast.png"), plot = p5.2, width = 650/72, height = 775/72, dpi = 72)
-
+c("#1B9E77", "#D95F02", "#7570B3", "#E7298A")
 custom_colors <- c("#1B9E77", "grey30", "grey30", "#E7298A")
 
 p5.3 <- ggplot(df_expanded, aes(x = density, y = addit, group = species, color = species)) +

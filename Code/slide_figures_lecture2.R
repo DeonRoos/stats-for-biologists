@@ -313,3 +313,186 @@ a2 <- ggplot() +
 a2
 
 anim_save(here::here("Figures/Lecture 2 - lm overview/Figures", file = "tweak_params.gif"), animation = animate(a2, width = 650, height = 775))
+
+
+
+# Assumption examples -----------------------------------------------------
+
+
+set.seed(88)
+
+N <- 50
+
+df <- data.frame(
+  x = round(runif(N, 0, 100), digits = 2)
+)
+
+df$x_err <- df$x + rnorm(N, 0, 20)
+
+b0 <- 0
+b1 <- 1
+
+df$y <- rnorm(N, mean = b0 + b1 * df$x, sd = 3)
+
+p1 <- ggplot(df) +
+  geom_point(aes(x = x, y = y)) +
+  geom_smooth(aes(x = x, y = y), colour = "white", method = "lm", se = TRUE) +
+  sbs_theme()
+p1
+
+ggsave(here("Figures/Lecture 2 - lm overview/Figures", file = "validity1.png"), plot = p1, width = 650/72, height = 775/72, dpi = 72)
+
+p2 <- ggplot(df) +
+  geom_point(aes(x = x, y = y)) +
+  geom_smooth(aes(x = x, y = y), colour = "white", method = "lm", se = TRUE) +
+  geom_point(aes(x = x_err, y = y), colour = "red") +
+  geom_segment(aes(x = x, xend = x_err, y = y, yend = y), colour = "white") +
+  sbs_theme()
+p2
+
+ggsave(here("Figures/Lecture 2 - lm overview/Figures", file = "validity2.png"), plot = p2, width = 650/72, height = 775/72, dpi = 72)
+
+
+p3 <- ggplot(df) +
+  geom_point(aes(x = x, y = y)) +
+  geom_smooth(aes(x = x, y = y), colour = "white", method = "lm", se = TRUE) +
+  geom_point(aes(x = x_err, y = y), colour = "red") +
+  geom_segment(aes(x = x, xend = x_err, y = y, yend = y), colour = "white") +
+  geom_smooth(aes(x = x_err, y = y), colour = "red", method = "lm", se = TRUE) +
+  sbs_theme()
+p3
+
+ggsave(here("Figures/Lecture 2 - lm overview/Figures", file = "validity3.png"), plot = p3, width = 650/72, height = 775/72, dpi = 72)
+
+p4 <- ggplot(df) +
+  geom_point(aes(x = x_err, y = y), colour = "white") +
+  geom_smooth(aes(x = x_err, y = y), colour = "white", method = "lm", se = TRUE) +
+  labs(x = "x") +
+  sbs_theme()
+p4
+
+ggsave(here("Figures/Lecture 2 - lm overview/Figures", file = "validity4.png"), plot = p4, width = 650/72, height = 775/72, dpi = 72)
+
+
+
+# Representative ----------------------------------------------------------
+
+# Set seed for reproducibility
+set.seed(123)
+
+# Number of individuals in each group
+n_A <- 100  # Group A
+n_B <- 100  # Group B
+
+# Simulate y values from a normal distribution
+y_A <- rnorm(n_A, mean = 50, sd = 10)  # Group A
+y_B <- rnorm(n_B, mean = 55, sd = 12)  # Group B
+
+# Create the "true" dataset
+true_df <- data.frame(
+  Group = c(rep("A", n_A), rep("B", n_B)),
+  y = c(y_A, y_B)
+)
+
+biased_A <- true_df[true_df$Group == "A" & true_df$y > 60, ]
+
+# Sample unbiased data for Group B (all individuals)
+sample_B <- true_df[true_df$Group == "B", ]
+
+# Combine to create the biased "df" dataset
+biased_df <- rbind(biased_A, sample_B)
+
+model_biased <- lm(y ~ Group, data = biased_df)
+
+# Fit linear model on the true dataset
+model_true <- lm(y ~ Group, data = true_df)
+
+pred_biased <- predict(model_biased, 
+                       newdata = data.frame(Group = c("A", "B")), 
+                       interval = "confidence", 
+                       level = 0.95)
+pred_true <- predict(model_true, 
+                     newdata = data.frame(Group = c("A", "B")), 
+                     interval = "confidence", 
+                     level = 0.95)
+
+# Combine predictions into a data frame for plotting
+plot_data <- data.frame(
+  Group = rep(c("A", "B"), 2),
+  Predicted_y = c(pred_biased[, "fit"], pred_true[, "fit"]),
+  Lower_CI = c(pred_biased[, "lwr"], pred_true[, "lwr"]),
+  Upper_CI = c(pred_biased[, "upr"], pred_true[, "upr"]),
+  Model = rep(c("Biased", "True"), each = 2)
+)
+
+plot_data_true <- data.frame(
+  Group = c("A", "B"),
+  Predicted_y = pred_true[, "fit"],
+  Lower_CI = pred_true[, "lwr"],
+  Upper_CI = pred_true[, "upr"]
+)
+
+p1 <- ggplot(plot_data_true, aes(x = Group, y = Predicted_y)) +
+  geom_point(size = 3, color = "white") +
+  geom_jitter(data = true_df, aes(x = Group, y = y), width = 0.1, alpha = 0.5, size = 0.5) +
+  geom_errorbar(aes(ymin = Lower_CI, ymax = Upper_CI), width = 0.1, color = "white") +
+  labs(x = "Group",
+       y = "y") +
+  sbs_theme()
+p1
+ggsave(here("Figures/Lecture 2 - lm overview/Figures", file = "represent1.png"), plot = p1, width = 650/72, height = 775/72, dpi = 72)
+
+p2 <- ggplot(plot_data_true, aes(x = Group, y = Predicted_y)) +
+  geom_point(size = 3, color = "white") +
+  geom_jitter(data = true_df, aes(x = Group, y = y), width = 0.1, alpha = 0.5, size = 0.5) +
+  geom_jitter(data = biased_df, aes(x = Group, y = y), colour = "red", width = 0.1, size = 2) +
+  geom_errorbar(aes(ymin = Lower_CI, ymax = Upper_CI), width = 0.1, color = "white") +
+  labs(x = "Group",
+       y = "y") +
+  sbs_theme()
+p2
+ggsave(here("Figures/Lecture 2 - lm overview/Figures", file = "represent2.png"), plot = p2, width = 650/72, height = 775/72, dpi = 72)
+p3 <- ggplot() +
+  geom_jitter(data = true_df, aes(x = Group, y = y), 
+              width = 0.1, alpha = 0.5, size = 0.5, inherit.aes = FALSE) +
+  geom_jitter(data = biased_df, aes(x = Group, y = y), 
+              colour = "red", width = 0.1, alpha = 0.5, size = 0.5, inherit.aes = FALSE) +
+  geom_point(data = plot_data, aes(x = Group, y = Predicted_y, color = Model, group = Model), 
+             size = 3, position = position_dodge(width = 0.2)) +
+  geom_errorbar(data = plot_data, aes(x = Group, y = Predicted_y, color = Model, group = Model, ymin = Lower_CI, ymax = Upper_CI),
+                width = 0.1, position = position_dodge(width = 0.2)) +
+  labs(x = "Group",
+       y = "y") +
+  sbs_theme() +
+  scale_color_manual(values = c("Biased" = "red", "True" = "white"))
+p3
+ggsave(here("Figures/Lecture 2 - lm overview/Figures", file = "represent3.png"), plot = p3, width = 650/72, height = 775/72, dpi = 72)
+
+
+# Linearity ---------------------------------------------------------------
+
+library(mgcv)
+df <- gamSim(n = 100, dist = "normal")
+
+p1 <- ggplot(df) +
+  geom_smooth(aes(x = x2, y = y), method = "lm", colour = "white") +
+  labs(x = "x") +
+  sbs_theme()
+
+ggsave(here("Figures/Lecture 2 - lm overview/Figures", file = "linear1.png"), plot = p1, width = 650/72, height = 775/72, dpi = 72)
+
+p2 <- ggplot(df) +
+  geom_smooth(aes(x = x2, y = y), method = "lm", colour = "white") +
+  geom_point(aes(x = x2, y = y)) +
+  labs(x = "x") +
+  sbs_theme()
+p2
+ggsave(here("Figures/Lecture 2 - lm overview/Figures", file = "linear2.png"), plot = p2, width = 650/72, height = 775/72, dpi = 72)
+
+p3 <- ggplot(df) +
+  geom_smooth(aes(x = x2, y = y), method = "gam", colour = "white") +
+  geom_point(aes(x = x2, y = y)) +
+  labs(x = "x") +
+  sbs_theme()
+p3
+ggsave(here("Figures/Lecture 2 - lm overview/Figures", file = "linear3.png"), plot = p3, width = 650/72, height = 775/72, dpi = 72)

@@ -1,0 +1,93 @@
+"d_country" "migration"
+"Namibia" 23208
+"South Africa" 20248
+"South Africa" 14262
+"Botswana" 21834
+"South Africa" 17583
+"South Africa" 15342
+"South Africa" 17318000
+"Namibia" 21619
+"Namibia" 21987
+"Botswana" 25174
+"South Africa" 16199
+"Botswana" 21615
+"South Africa" 16820
+"Namibia" 20963
+"Namibia" 21902
+"Namibia" 19330
+"Namibia" 20894
+"Namibia" 23013
+"Namibia" 20897
+"South Africa" 18045
+"South Africa" 17388
+"Botswana" 21645
+"Botswana" 22704
+"South Africa" 18117
+"Namibia" 22538
+"South Africa" 14032
+"Botswana" 22250
+"Namibia" 23930
+"Botswana" 22821
+"Botswana" 25153
+"South Africa" 17817000
+"Namibia" 20667
+"Botswana" 19589
+"South Africa" 15252
+"South Africa" 14862
+"Botswana" 21939
+"South Africa" 18721
+"Namibia" 19755
+"South Africa" 15530
+"South Africa" 14769
+"South Africa" 16705
+"Namibia" 23333
+"Namibia" 23650
+"South Africa" 16879
+"Botswana" 21846
+"South Africa" 18084
+"South Africa" 15678
+"Namibia" 22279
+"South Africa" 16990
+"Botswana" 23373
+"South Africa" 19182
+"Botswana" 21936
+"South Africa" 15855
+"Namibia" 21394
+"Namibia" 23953
+"South Africa" 15659
+"Botswana" 23910
+"South Africa" 14807
+"Namibia" 21809
+"Botswana" 20666
+"South Africa" 18157
+"South Africa" 18026
+"Botswana" 20663
+"Botswana" 22027
+"Namibia" 21828000
+"South Africa" 16336
+"South Africa" 13618
+"South Africa" 15078
+"Botswana" 22734
+"South Africa" 17260
+"Botswana" 20923
+"South Africa" 19825
+"Namibia" 20354
+"Namibia" 20125
+"South Africa" 16890
+"South Africa" 15524
+"Namibia" 24926
+"Botswana" 22277
+"Namibia" 22303
+"Botswana" 21568
+"Namibia" 24867
+"Botswana" 19788
+"South Africa" 18341
+"Namibia" 22890
+"South Africa" 16628
+"South Africa" 17798
+"Namibia" 20997000
+"Namibia" 22518
+"Botswana" 22664
+"Botswana" 20338
+"South Africa" 17321
+"Botswana" 23230

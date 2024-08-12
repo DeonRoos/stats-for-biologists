@@ -1,6 +1,6 @@
 ---
-title: 'Computer workshop 1: Working with probability distributions'
-author: "Pinard, Cornulier, Ross, Wouters, Vogwill"
+title: 'Computer Workshop 1: Getting back into R'
+author: "Roos & Pinard"
 date: 'Last updated: `r Sys.Date()`'
 output:
   word_document:
@@ -13,304 +13,346 @@ output:
     theme: readable
 ---
 
+# Workshop Structures
+
+The workshops on this course will have you learn an analytical workflow, focussing mainly on analysing data using linear models (and eventually generalised linear models). That is, you are going to learn how to go from getting a dataset to extracting evidence to answer your research question. Importantly though, this workflow is not unique to linear models. You would (or at least *should*) use this same general workflow, regardless the scenario, the analytical method, or whichever industry you may be faced with.
+
+The general workflow we'll be using can be broken down into:
+
+1. Think of a research question
+2. *Carry out exploratory data analysis*
+3. Fit an appropriate model
+4. Diagnose the model and check assumptions (that we are able to)
+5. Summarise the results
+6. Interpret and provide inference
+
+For these workshops we tend to skip Step 1 in the workflow for convenience sake, but in your own work Step 1 is key as every subsequent step in the workflow is dependent on your question.
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE) # uncomment if producing answer sheet
 #knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="hide") # uncomment if producing workshop sheet
 answer_sheet <- TRUE # Put this to TRUE to generate the workshop sheet with answers, FALSE to generate the workshop sheet without answers
+library(ggplot2)
+library(here)
 ```
 
 # Learning objectives
 
-1. computation and understanding of quantiles and range intervals;
-2. assessing normality visually using histograms, density and Q-Q plots;
-3. familiarity with approximate inference using descriptive statistics;
-4. distinguishing probability distribution of a sample vs. probability distribution of estimator (and SD vs. SE of the mean).
+1. (Re)familiarise yourself with the basics of `R`;
+2. Use `R` to do simple descriptive summaries of data;
+3. Consider the results of the EDA (Exploratory Data Analysis) to identify any issues;
 
-1, 2 and 3 are useful skills for making first, rapid exploration of a new data set.  Objective 4 addresses a simple but fundamental statistical concept on which most of the statistical methods we use rely.   We will use skills 2 and 4 again and again the rest of the course while studying Linear Models.
+All three of these objectives link to useful skills for doing initial and quick explorations of a new data set. All of these skills will be used through out the course.
+
+```{r datasets, echo = FALSE, message = FALSE}
+# For coordinators -
+# Code below simulates and exports the data used in the workshop
+# alligator bite strength
+# Mean is 2000 lbs (from google)
+# Mean length is 300 cm to 460 cm
+# Simulated as:
+# bite ~ Normal(mu, 60)
+# mu = b0 + b1 * length
+set.seed(2024)
+n <- 78
+ali <- data.frame(
+  length = rnorm(n, mean = 350, sd = 60)
+)
+b0 <- 0
+b1 <- 5.7
+mu <- b0 + b1 * ali$length
+ali$bite = rnorm(n, mean = mu, sd = 60)
+# Creating a data entry mistake caused by a "missing" decimal point
+# Observation 20 is problem sample
+# ggplot(ali) +
+#   geom_histogram(aes(x = length), colour = "white")
+# ggplot(ali) +
+#   geom_histogram(aes(x = bite), colour = "white")
+ali$length <- round(ali$length, digits = 1)
+ali$bite <- round(ali$bite, digits = 2)
+
+mistake <- 20
+ali$bite[mistake] <- ali$bite[mistake] * 100
+ali$length[mistake] <- ali$length[mistake] * 10
+
+write.table(ali, "H:/003 - Teaching/006-BI3010/Workshops/Workshop 1 - Hidden assumptions/Data/alligator_bite.txt", row.names = FALSE)
+```
 
 # Instructions
-Here we look at probability distributions, using a dataset on penguins that was made available by [Dr. Kristen Gorman](https://www.uaf.edu/cfos/people/faculty/detail/kristen-gorman.php) and the [Palmer Station, Antarctica Long Term Ecological Research Network](https://pallter.marine.rutgers.edu/).  There are data on three species of penguins, collected from three islands in the Palmer Archipelago.  We will work with this dataset for several different exercises during the course.
+In this workshop, we're going to be loading in various datasets, carrying out an initial exploration and do "Quality Assurance". When doing real-world analysis, this is an incredibly important step because mistakes are easily made when doing data entry; Imagine entering in 500 near identical rows into an Excel document - it's hard to stay super focused the entire time so mistakes happen regularly. Those mistakes can be a serious problem in analysis, hence why we want to check if this has happened.
 
-We would like you to use RStudio.  If you have not used this before, please go to the instructions on Getting Started with R and RStudio.
+The good news for us is that we don't need any crazy, complicated stats or `R` coding to do some initial screening. We can just load the data into `R` and do some quick checks. For this workshop, this will also help to reintroduce you to `R` and get back into the swing of things.
+
+We would like you to use RStudio.  If you have not used this before, please use the instructions on MyAberdeen called "Getting Started with R and RStudio".
 
 ## Getting started
 
 ### Set working directory
-If you haven’t already created a folder for the course on your computer or your university drive, do so now.  You might create a folder for the course (e.g., BI3010) with subfolders within that for each of the workshops (e.g., workshop1).
+If you haven’t already created a folder for the course on your computer or your university drive, do so now.  You might create a folder for the course (e.g., 'BI3010') with subfolders within that for each of the workshops (e.g., workshop1).
 
-**To set the working directory to the folder you want to use for saving your work, use the drop down menu in RStudio:  session > set working directory > choose directory**
+To set the working directory to the folder you want to use for saving your work, you have two options:
 
-```{r}
+Option 1:
+
+Find the file path for your newly created folder (e.g. `BI3010` > `workshop1`). An easy way to get this is by using File Explorer in Windows, go to your folder, then highlting the address bar. It will probably look something like: 
+
+`H:\BI3010\workshop1`
+
+In `R` backslashes are used for specific purposes, so we want to change the back slashes for forward slashes, so our file path looks like:
+
+`H:/BI3010/workshop1`
+
+We can now write some `R` code to tell `R` that this is the folder that we will be using in the current session, by setting the Working Directory using the function `setwd()`. The `setwd()` function just needs a single piece of information (technically called an "argument"), which is the file path, but because the file path is a "string" (i.e. a bunch of letters, characters and numbers) we need to ensure that we put the file path in quotation marks:
+
+`setwd("H:/BI3010/workshop1")`
+
+The benefit of doing it this way is that we can include this code in our `R` script, so that we don't have to go through this pain every time we come back to work on this.
+
+Option 2:
+
+An easy option is to use the drop down menu in RStudio: session > set working directory > choose directory
+
+This is easier to do the first time, but becomes a pain when you come back to the project, as you'll need to reset the working directory (and maybe make a mistake, causing more pain and frustration).
+
+We'd advise using Option 1. A little more of a fuss the first time but then you don't need to think about it again.
+
+We can check if the working directory has been set correctly by asking `R` what the current directory is:
+
+```{r, eval = F}
 getwd() #to check which directory RStudio is using
 ```
 
 ### Download the file
+
 **Download the datafile from MyAberdeen to your working directory.**
-You will find the file in the module for Topic One, folder for Workshop 1, document labelled Data File.  Using the three dots to the right of the content area that has the file name, download the file and save it to your working directory
+
+You will find a file called `alligator_bite.txt` in the module for Week 1, in the folder for Workshop 1. Using the three dots to the right of the content area that has the file name, download the file and save it to your working directory
 
 ### Load file into RStudio
-In order to load the file into RStudio, you need to execute the following line of code:
 
-```{r}
-penguins<-read.table("penguins.txt",header=TRUE) 
+Now that we've told `R` which folder contains our data, we can load it in. Before we do so, make note of what type of file the data is saved as. The alligator bite strength data is saved as a text file, which we know because of the `.txt` extension. For data saved in this format, we use the `read.table()` function, where the arguments are. To find out which arguments can be provided to a function you can type `?read.table`. If we do so, we can see there are lots of arguments we could use, but the crucial ones are `file` (which is the name of the file we want to load), and another called `header` which is logical (meaning either `TRUE` or `FALSE`) which tells `R` if the first row of our `alligator_bite.txt` file are the column names, which they are.
+
+So to load our data, we use the following code:
+
+```{r, eval = FALSE}
+ali <- read.table("alligator_bite.txt", header = TRUE) 
 ```
 
-If you get an error, some common problems are as follows:  you have misspelled one of the words or used a capital letter instead of lower case; your file is missing a column heading; the file is not the correct format (e.g, use a TAB delimited file); the quotation marks are in the in wrong location; you have missed off the final bracket “)”.
+If you get an error, some common problems are as follows: you may have set the wrong working directory; you may have misspelled one of the words (including using a capital letter instead of lower case); your file is missing a column heading; the file is not in the correct format (e.g, the file is saved as a `.csv` and not a `.txt`); the quotation marks are in the in wrong location; or you may have missed the final bracket “)” in the `read.table()` function.
 
-To confirm that the file has been read properly, double click the file name in the upper right panel or read how many observations and variables are there.  In this case, the file has 333 observations of 9 variables.
+To confirm that the file has been read properly, double click the file name in the Environment panel (normally in the upper right of RStudio).
 
-## Probability distribution of the data
-Let’s visualise all the data by plotting a histogram for male and female heights combined. Then, plot histograms for each species separately.
+If you want to visually look at the data now that it's in `R`, you have a couple of options:
 
-```{r}
-hist(penguins$body_mass_g) #be sure that you include the file name and variable name spelled correctly 
-```
-
-The default number of bins (which r calls breaks) might not be the best.  Modify the command line to include “breaks” as below.  Breaks is a numeric vector that defines the breakpoints of the bins.
+The following will show you the first six rows of your dataset (you can change how many rows by using the argument `n`, e.g. `head(ali, n = 10)`):
 
 ```{r}
-hist(penguins$body_mass_g, breaks = 24)
+head(ali)
 ```
 
-To make histograms for each species separately, we need to subset the data. We will create separate dataframes (which is R's name for a dataset) for each species.
+Or you can open the entire dataset in a new tab by doing:
 
-```{r}
-Adelie <- subset(penguins, species == "Adelie") #be sure to use two equal signs; to check that the file has been subset, you can see the number of observations in upper right panel
-Gentoo<- subset(penguins, species =="Gentoo")
-Chinstrap <- subset(penguins, species =="Chinstrap")
+`View(ali)`
 
-hist(Adelie$body_mass_g, breaks=24)
-hist(Gentoo$body_mass_g, breaks=24)
-hist(Chinstrap$body_mass_g, breaks=24)
-```
+The output of `View()` has the benefit of being visually similar to Excel spreadsheets, with many of the same features such as allowing the user to sort and filter by columns.
 
-You may notice that the x-axes of the three histograms are not the same.  That makes it difficult to visually compare the three distributions.  Therefore, it would be helpful to set the range for the x-axis so that the three histograms can more easily be compared.  The modified code is below, the additional information sets the lower and upper limits for the x-axis.
+Or you can output all rows into the console, simply by doing:
 
-```{r}
-hist(Adelie$body_mass_g,xlim=c(2000,7000), breaks=24)
-hist(Gentoo$body_mass_g,xlim=c(2000,7000), breaks=24)
-hist(Chinstrap$body_mass_g,xlim=c(2000,7000), breaks=24)
-```
+`ali`
+
+We wouldn't recommend this last option as it's not a particularly useful one, given that it floods your console, making it hard to see anything of use.
 
 ### Question Set One
-1.  How would you describe the distribution of the three species data combined?
-```{r, include=answer_sheet, class.source="bg-success"}
-# The distribution is not symmetrical, the central tendency is towards the left, and the distribution has a tail to the right (skewed).  
-```
-2.  What can you observe from the distributions of the three species separately?  Do they give you insight into how the three species compare in terms of central tendency?
 
-```{r, include=answer_sheet, class.source="bg-success"}
-# The distributions of the three species separately are more similar to normal distributions;  the Adelie and Chinstrap penguins appear to have smaller body mass than the Gentoo but it also looks like sample size is smaller (which it is, Adelie n=146; Chinstrap n = 68; Gentoo n=119).
-```
+Question 1: How many variables do we have in this dataset?
 
-## Descriptive statistics
-For each species, compute some summary statistics to get more of a sense of how the three species body mass compares.  The code is illustrated below for one species combined but you should repeat for all three species.
+Question 2: What are the variable names?
+
+Question 3: Are the names captilised?
+
+These questions may seem trivial, but honestly, they're the first questions we ask ourselves when we load in a dataset to `R` for the first time.
+
+## Getting to know the data
+
+Here's what you know about the data. The data contains `nrow(ali)` observations (sometimes refered to as samples) of `nrow(ali)` alligator bite strength, measured in pounds per square inch. All `nrow(ali)` alligators were measured in Parker Island Gator Farm, Florida, USA. For each bite strength, the length of the alligator, from nose to tail, was measured and is provided in centimeters (to one decimal place).
+
+Before we move ahead with the data, let's take a second to become familiar with alligator bite strength. Using your search engine of preference, do a quick search to find out the bite strength of alligators. Specifically
+
+When we do exploratory data analysis, we're specifically looking for things that look *weird*. In order to know if something is *weird*, we need to know what "normal" is; hence why it's a good idea to have some sort of notion of what a "normal" alligator's bite strength may be.
+
+Write down the average bite strength of an alligator, measured in pounds per square inch and the average length of an alligator in centimeters.
+
+With that done, let's move onto understanding our data. For starters, let's check if the data is sensibly structured. In `R` this means that numbers are numbers, words are characters, and so on. Basically, we want to make sure there weren't any bite measurements like `2174.94BIGBITE`, which will mess us up by meaning that `R` thinks that all `bite` values are characters and not numbers.
+
+To do this quickly, we can use the `str()` function (short for "structure"):
+
 ```{r}
-summary(Adelie$body_mass_g) #generates min, Q1, median, Q3, maximum
-mean(Adelie$body_mass_g) #returns mean value of the variable
-sd(Adelie$body_mass_g) #returns the standard deviation of the variable
+str(ali)
+```
+We see that `ali` is a `data.frame` (great - it should be!), with 78 observations (or samples) and two variables. The `$` is used to extract specific variables of a dataframe, so `ali$bite` will give you just the `bite` variable, hence why the second and third line are proceeded by `$`. From this, we can see that both the `length` and `bite` variables are being treated as numbers (the `num` part), and we then get a handful of example values for both `length` and `bite`.
+
+So far, we're not seeing anything unusual which is great - it means we have not identified any problems that we need to fix.
+
+If we so wanted to, we could extract the `length` variable from the dataset, by doing:
+
+```{r}
+ali$length
 ```
 
-If we want a single quantile, we use:
+How would you extract the `bite` variable?
+
+Let's use these extracted variables to calculate some summary statistics, starting with the mean (i.e. average). To do so, we use the `mean()` function. To find the average length of our alligators, we do:
+
 ```{r}
-quantile(Adelie$body_mass_g, 0.5) # returns the 50% quantile, equivalent to the median.
+mean(ali$length)
 ```
 
-If we want multiple quantiles:
+We can see that the average crocodile in Parker Island Gator Farm is `r round(mean(ali$length), digits = )` cm long. 
+
+Compare this value with the mean length of alligators you found from a quick internet search. A little bit longer than we might have expected but maybe it's something to do with these alligators coming from a farm, as opposed to wild ones. Maybe they're given lots of food to help them grow? Who knows, but we wouldn't expect our numbers to match exactly with whatever number we find online, right?
+
+Do the same thing for `bite`; Calculate the average bite strength of our alligators, and let's see if there's anything weird going on there.
+
 ```{r}
-quantile(Adelie$body_mass_g, probs = c( 0.025, 0.05, 0.25, 0.5, 0.75, 0.95, 0.975))
+mean(ali$bite)
 ```
+
+Assuming you also found that alligator bite at roughly 2,000 pounds per square inch, our alligators seem to be biting *on average* with an extra 1,500 pounds per square inch. That seems like *a lot* more. 
+
+This is something that should make us sit up and start paying a little more attention. We don't know there is a problem, but we have reason to believe there *might* be one. It's now up to us to prove that there *isn't* a problem.
+
+There are lots of descriptive techniques we can use to check for odd things in our data, but a convenient "short cut" option is to use the `summary()` function. This function will provide a generic summary of our entire dataset if we supply `ali` as the sole argument. Do so now and let's see if we can track down what's going on in this data.
+
+```{r}
+summary(ali)
+```
+
+Notice anything weird in the above summary?
 
 ### Question Set Two
-3.  What does the 50% quantile represent?  How does the 50% quantile compare across the three species?
-```{r, include=answer_sheet, class.source="bg-success"}
-# The 50% quantile is the same as the median, the value that falls in the middle of the sample data.  The median is 3700 for both Adelie and Chinstrap and is 5050 for Gentoo.  
-```
 
-4. What are the 50% and 95% data range limits for the Adelie and Gentoo species?  Do the 50% data range limits overlap for these two species?   Do the 95% data range limits for these two species overlap?  Based only on these data range limits, if you found a penguin that had a body mass of 4250g, is it more likely to be an Adelie or a Gentoo?
-```{r, include=answer_sheet, class.source="bg-success"}
-# The 50% data range limits are defined by the 25th and 75th quantiles (50% of the data fall between those two values).  Therefore, for Adelie, they are 3362.5 and 4000 and for Gentoo they are 4700 and 5500; no, the 50% data range limits overlap.  That means that the central 50% of the data for the two species do not overlap/  The 95% data range limits are defined by the 2.5% and 97.5% quantiles.  Therefore, for Adelie, the values are 2900 and 4695.4; for Gentoo, the values are 4200 and 6000.  These data range limits also overlap.  If you found a penguin with a body mass of 4250g, it would be difficult to determine which species based on the information we have; it could easily be either of the two species.
-```
+Question 1. How small is the smallest alligator in the farm for which we have data?
 
-5. What are the 68% data range limits for the Chinstrap species? 
-```{r, include=answer_sheet, class.source="bg-success"}
-# The 68% data range limits are defined by 16% and 84% quantiles (to determine these you take the difference between 100-68=32 and divide it by 2).  The code for this calculation is below and the answers are 3386 and 4100.
-quantile(Chinstrap$body_mass_g, probs = c(0.16, 0.84))
-```
+Question 2. What is the biggest?
 
-## Probabilities of observing extremes
-How likely is it that the more extreme data come from the same population as the rest (for instance, are they genuine data), or that they come from a different population (for instance, if they were measurements of the wrong species of bird)?  
+Question 3. What are the minimum and maximum values for bite strength?
 
-If we go back to the full dataset (penguins), we can use the summary command to identify the minimum and maximum values of body mass.
-```{r}
-summary(penguins$body_mass_g)
-```
+## Data detective
 
-The body mass of the smallest penguin in the dataset is 2700 g and the largest is 6300 g.  What is the probability that the 2700 g penguin is part of the population of Adelie penguins?  What is the probability that it is part of the Gentoo population?
+Hopefully you've identified that there is at least one questionable value in our dataset. What do we do now? Throw out the entire dataset? (No... The answer is "No you do not throw out the dataset" - at least for now). Let's try and figure out what's going on here, starting with finding the problem observations.
 
-To answer those questions we need to assume several things.  Firstly, that the data are normally distributed and that the sample mean and standard deviation values for the Adelie and Gentoo penguins are the true mean and standard deviations for the two species.  With those assumptions, we can use the attributes of the normal distribution to calculate the probability of observing an equal or even smaller value (i.e., anywhere in the left tail of the distribution).  
+How do we do that?
 
-Cumulative probabilities can be found using the function `pnorm()`. `pnorm()` needs three arguments: the value of interest, the mean, the standard deviation.  Therefore, to determine the probability of sampling an Adelie penguin that has a body mass of 2700g, we would use the following set of commands:
+Let's start with considering what we think a weird observation may look like. We can use the `summary(ali)` output to help us here. Starting with `length`, we know we have alligator that was apparently `r max(ali$length)` cm long (`r round(max(ali$length)/100, digits = 0)` m - that's longer than a bus!). How do we find that value in our dataset to see if there was anything else weird about it.
+
+This is where we can use the square brackets `[]`. In `R`, square brackets allow us to extract specific observations from, in this case, a dataframe. To use them, first think how you would do this by hand:
+
+1. We'd start by looking at the `ali` dataset
+2. Within the `ali` dataset, find any rows where alligators are `r max(ali$length)` cm long
+3. For any rows where it's true that the length is equal to `r max(ali$length)` cm, then show me all of the information related to that alligator
+
+How does that translate into `R`? Almost exactly - we just write those three steps using code.
+
+1. We'd start by looking at the `ali` dataset
 
 ```{r}
-mean(Adelie$body_mass_g)
-sd(Adelie$body_mass_g)
-pnorm(2700, 3706.2, 458.6)
+ali
 ```
 
-Alternatively
+
+2. Within the `ali` dataset, find the rows where alligators are `r max(ali$length)` cm long. 
+
+This is where we can make use of the square brackets as well as conditional statements. Conditional statements are where we can say "when this condition is met, do *something*". In our case, our condition is an alligator that's `r max(ali$length)` cm long. In `R` we can write this condition as (note that we use double equal signs to say "equal to"  in `R`):
+
 ```{r}
-pnorm(2700, mean(Adelie$body_mass_g), sd(Adelie$body_mass_g))
-pnorm(2700, mean(Gentoo$body_mass_g), sd(Gentoo$body_mass_g))
+ali$length == 123632.0
 ```
+
+The output is a list of `r nrow(ali)` values of `TRUE` and `FALSE` values, one for each row of our `ali` dataset. Any `TRUE` values indicate an alligator that is equal to `r max(ali$length)` cm long, and `FALSE` values are when that is not the case (in `R` we write "not equal to" as `!=`).
+
+3. For any rows where it's true that the length is equal to `r max(ali$length)` cm, then show me all of the information related to that alligator
+
+Here is where we can use the square brackets. Square brackets allow us to extract specific rows, columns or just individual values from datasets. When using square brackets keep in mind that row number goes before the comma and column number goes after (e.g. `ali[row,column]`). If we don't specify a value for either `row` or `column`, `R` will give us all of them. For example, if we want the value from the 30th row and second column, we would do:
+
+```{r}
+ali[30,2]
+```
+We can use these square brackets, in combination with the conditional statement, to extract the entire row for the alligator that's `r max(ali$length)` cm long. What happens in this case is the `TRUE` and `FALSE` values act as a way to tell `R` which rows we want to see. If it's `TRUE`, then we want to see it. If it's `FALSE`, then don't show us. We can do this by writing:
+
+```{r}
+ali[ali$length == 2293,]
+```
+
+What do you make of this observation? We're expecting `length` to be about 200 to 400 centimeters (2 to 4 m), but this alligator is apparently 10 times bigger than that. And `bite` is about 100 times bigger.
+
+Why might that be the case? We'll let's see if we can find a "normal" observation. Let's assume the first observation is the normal one. Use the square brackets to extract the first row of data from the `ali` dataset.
+
+```{r}
+ali[1,]
+```
+
+Well they're clearly different. There are only two possible explanations for this. Either there are giant alligators among us. Or, there has been a data entry mistake.
+
+Using the above, and whichever other methods you can think of, try to figure out what the potential reason is for this observation of an apparently weird, super big alligator.
 
 ### Question Set Three
-6. What is the probability of drawing a value equal to or smaller than the smallest female penguin from the full Adelie population?  What is the probability of drawing a value equal to or smaller than the smallest female Adelie penguin from the Gentoo population?  Which species is a penguin of this size more likely to be based on these probabilities?
+
+Question 1. What may have occurred to have caused this apparent data entry mistake?
+
 ```{r, include=answer_sheet, class.source="bg-success"}
-#The question requires that you subset the Adelie dataframe so that only the female birds are included; then you need to determine the minimum size of the female Adelie penguins.  The probability of drawing an Adelie penguin with a body mass of 2850 grams or smaller is 0.031.  The probability of drawing a Gentoo penguin that small or smaller is 0.00000388 (3.88e-06).  Based on these probabilities, it is more likely that a penguin this small would be an Adelie penguin.
-Female_Adelie<-subset(Adelie, sex=="female")
-min(Female_Adelie$body_mass_g)
-pnorm(min(Female_Adelie$body_mass_g), mean(Adelie$body_mass_g), sd(Adelie$body_mass_g))
-pnorm(min(Female_Adelie$body_mass_g), mean(Gentoo$body_mass_g), sd(Gentoo$body_mass_g))
+# This "giant" alligator is the result of a data entry mistake whereby the decimal points were missing for bite and length. The values should be 229.3 cm long and	1236.32	pounds per square inch. If you look at the raw data, you'll see it has no decimal points.
 ```
 
-7. Given the probability of finding a Gentoo with a body mass of 2700g that you just determined, how many individuals smaller or equal to 2700g would you expect to get, in a population of 100,000 Gentoo penguins? 
-```{r, include=answer_sheet, class.source="bg-success"}
-#To get the answer you multiply the probability times the population size, 0.0000009x100,000=0.09 penguins (therefore less than one).
-```
+## A more refined detective
 
-8. What is the probability of drawing a value greater than or equal to the body mass of the largest Gentoo penguin?
-```{r, include=answer_sheet, class.source="bg-success"}
-max(Gentoo$body_mass_g)
-1-pnorm(max(Gentoo$body_mass_g), mean(Gentoo$body_mass_g), sd(Gentoo$body_mass_g))
-#The largest penguin is 6300 g and the probability of sampling a penguin that large or larger is 0.008.
-```
+The way we identified the above data entry mistake is really useful, but what if we wanted to be a slightly more refined programmer in checking that observation? Basically, what if we didn't want to write out `r max(ali$length)` every single time?
 
-## Assessing normality
-
-As discussed in the lecture, one can assess the normality of a distribution of data in several ways.  There are statistical tests that compare the sample distribution to the normal distribution and produce a probability value.  As all statistical calculations, these tests are sensitive to sample size so in this course we encourage you to rely on visual assessments, for example by using QQ plots.
-
-Working with the Adelie dataset, produce another histogram to remind yourself of the shape of the distribution and then produce a QQplot.  Optional activities included at the end of the workshop are to overlay an empirical probability distribution and a normal distribution over the Adelie sample histograms.
+What we can do instead, is a functions that says what the maximum alligator length was. The function to do just that is called `max()`, and it works the same way as `mean()`, but instead it will tell you the maximum rather than the mean:
 
 ```{r}
-hist(Adelie$body_mass_g)
-qqnorm(Adelie$body_mass_g, plot.it=TRUE)#produces a normal QQ plot of sample values
-qqline(Adelie$body_mass_g, distribution=qnorm,probs=c(0.25,0.75))#adds a line to the theoretical quantiles, passing throught the first and third quartiles
+max(ali$length)
 ```
 
-
-## Standard error
-The data represent one finite random sample from a population, out of a near-infinite number of possible random samples. The uncertainty about the mean estimated from that sample can itself be estimated by the Standard Error (SE) or “standard error of the mean” (SEM), using the formula given in the lecture, which assumes a very large number of hypothetical repeats of the experiment. 
-
-Oddly, base R does not have a standard error function. So instead we have to calculate it using the command for standard deviation and the square root of the sample size.  Therefore, if we want to calculate the standard error for Adelie penguins, we use the command below.  Note that to determine sample size, we use the command `length()`.
-
-```{r, eval-FALSE}
-se_Adelie<-sd(Adelie$body_mass_g) / sqrt(length(Adelie$body_mass_g)) #returns the standard error of the variable and stores it as an object called se_Adelie
-```
-
-## Confidence intervals
-How good is the estimate of the mean body mass for the Adelie penguins?  Calculate the 95% confidence interval.  You can remind yourself of the calculation by referring back to the lecture material.  You need the mean, standard deviation, and sample size to do the calculation.  You also need to determine the t statistic (i.e., critical value) for the 95% confidence limits. For the upper limit, the associated probability is 0.975 and for the lower limit, the associated probability is 0.025.  
+We can use that when extracting the problematic variable by doing:
 
 ```{r}
-#Confidence Interval = (point estimate)+/-(critical value)*(standard error)
-mean<-mean(Adelie$body_mass_g)
-t<-qt(0.975,length(Adelie$body_mass_g))
-se<-sd(Adelie$body_mass_g)/sqrt(length(Adelie$body_mass_g))
-upr95Adelie<-mean+t*se
-lwr95Adelie<-mean-t*se
+ali[ali$length == max(ali$length),]
 ```
 
+Which you can read as saying: "Within the `ali` dataset, extract the rows where the length of an alligator is equal to the maximum length of any alligator".
+
+We can also adapt the conditional statement. For instance, if we wanted to extract all rows with alligators that were *greater* than the average, we could do:
+
+```{r}
+ali[ali$length > mean(ali$length),]
+```
+
+We now get data from more than one alligator as, unsurprisingly, more than one alligator meets our condition of being longer than average. We can also see the "data entry mistake alligator" using this method.
+
+Let's keep refining this method by using a different function; `quantile()`. Go back to the `summary(ali)` output and have a look at the quantiles (`1st Qu.` and `3rd Qu.`) that it reports. These represent the values above and below which contain 25% and 75% of the data. We can get these values by doing:
+
+```{r}
+quantile(ali$length, probs = c(0.25,0.75))
+```
+
+The `probs` argument is where we can specify what probabilities we would like quantiles for. In the above example, we've asked for the 25% (`0.25`) and 75% (`0.75`) quantiles. But because we've asked for two values, we need to "wrap" these in another function - the `c()` function. `c()` combines, or concatenates, more than one value together, hence how we were able to get to values of our the `quantile()` function. If we only wanted a specific quantile, we could write `quantile(ali$length, probs = 0.75)`. Because we only want one value, we don't need to use `c()`.
 
 ### Question Set Four
-9.  Based on the Q-Q plot, how well do the Adelie body mass data fit a normal distribution?  
 
-```{r, include=answer_sheet, class.source="bg-success"}
-qqnorm(Adelie$body_mass_g, plot.it=TRUE)#produces a normal QQ plot of sample values
-qqline(Adelie$body_mass_g, distribution=qnorm,probs=c(0.25,0.75))#adds a line to the theoretical quantiles, passing throught the first and third quartiles
-#The majority of the sample points in the central part of the distribution fall on or near the line that represents the normal distribution.  Towards the two tails the sample points fall slightly away from expectation.  
-#If you do the optional plot later in the workshop, you can see the way that the histogram differs from the normal overlay.
+Using `quantile()` extract all rows in the `ali` dataset where `bite` values are above the 3rd quantile.
 
-#to add a normal curve to the histogram, define the x and y values to use
-hist(Adelie$body_mass_g,xlim=c(2000,7000),breaks=24)#this code creates a histogram
-hist_data<-hist(Adelie$body_mass_g,xlim=c(2000,7000),breaks=24)#this line stores the histogram data into a variable called "hist.data"
-x_values<-seq(min(Adelie$body_mass_g),max(Adelie$body_mass_g),length=100)#this line generates 100 equally spaced x-values ranging from the minimum to the maximum of the body mass values in the Adelie dataframe
-y_values<-dnorm(x_values,mean=mean(Adelie$body_mass_g),sd=sd(Adelie$body_mass_g))#this code calculates the probability density values (y_values) for a normal distribution with a mean and sd from the Adelie body mass data
-y_values<-y_values*diff(hist_data$mids[1:2])*length(Adelie$body_mass_g)#this code scales the probability density values so that they match the histogram; it multiplies the y-values by the difference between the midpoints of the first two bins of the histogram (i.e., scaling it to fit the histogram) and then scales it by the total number of data points; you don't need to commit this code to memory, the explanation is just in case you are interested, the explanation of the code was generated by ChatGPT not Michelle
-lines(x_values,y_values,lwd=2)#overlay normal curve on histogram
-```
+Repeat the above, but for `bite` values *less than or equal to* the 33% quantile. If you're unsure how to specify *less than or equal to* have a quick search online or use your preferred LLM.
+
+Using the tools from above, can you identify any other possible data entry mistakes?
+
+## Be the creator
 
 
-10. What is the SE of the mean for the Adelie penguins body mass? 
-```{r, include=answer_sheet, class.source="bg-success"}
-#The standard error for the Adelie body mass is 37.96g.
-sd(Adelie$body_mass_g) / sqrt(length(Adelie$body_mass_g))
-```
-
-11. How does the SE compare with the SD of the sample? In which circumstances would you choose to report one or the other in a scientific report?  
-```{r, include=answer_sheet, class.source="bg-success"}
-# The SE is smaller than the SD (37.96 compared to 458.62).  It depends on the purpose.  The standard deviation is useful for describing the variation in the data whereas the standard error expresses the precision of your estimate of the mean so it is useful if you are comparing groups.
-```
-
-12. How would you interpret the SE in words? 
-```{r, include=answer_sheet, class.source="bg-success"}
-# The standard error of the mean quantifies how precisely you know the population mean. The SE does not directly quantify variability among values in a population.
-```
-
-13.  What is 95% confidence interval for the Adelie body mass?  Write out in words the appropriate interpretation of the interval.
-
-```{r, include=answer_sheet, class.source="bg.success"}
-#Confidence Interval = (point estimate)+/-(critical value)*(standard error)
-mean<-mean(Adelie$body_mass_g)
-df<-length(Adelie$body_mass_g)
-t<-qt(0.975,length(Adelie$body_mass_g))#the t value will be the same for the upper and lower limits, it will just be positive for the upper and negative for the lower.  Refer back to the lecture slides if you are uncertain.
-se<-sd(Adelie$body_mass_g)/sqrt(length(Adelie$body_mass_g))
-upr95Adelie<-mean+t*se
-lwr95Adelie<-mean-t*se
-
-# The answer should be [3631,3781].  This means that if you were to repeatedly sample the Adelie penguin population on these islands, the mean body mass would fall between 3631 and 3781 g in 95% of the samples.
-```
 
 
-# Optional work
-## Add a normal curve to a histogram
-Sometimes it is useful to overlay a normal curve onto a histogram, for example, to see how well the sample data conform to the assumptions of a normal distribution.  The normal curve is created from the properties of the data in the histogram (the mean and standard deviation) and assumes that the data are normally distributed.
-
-This example uses the full penguin dataset for the `body_mass_g` variable:
-
-```{r}
-#to add a normal curve to the histogram, define the x and y values to use
-hist(penguins$body_mass_g,xlim=c(2000,7000),breaks=24)
-hist_data<-hist(penguins$body_mass_g,xlim=c(2000,7000),breaks=24)
-x_values<-seq(min(penguins$body_mass_g),max(penguins$body_mass_g),length=100)
-y_values<-dnorm(x_values,mean=mean(penguins$body_mass_g),sd=sd(penguins$body_mass_g))
-y_values<-y_values*diff(hist_data$mids[1:2])*length(penguins$body_mass_g)
-#overlay normal curve on histogram
-lines(x_values,y_values,lwd=2)
-```
-
-This example illustrates that the underlying data for the 3 species combined does not follow a normal distribution.  The reason is that these data are not all from the same population but rather from three separate ones that have been pooled together.
-
-## Add reference lines to a histogram 
-To visualise the various intervals (e.g. 95%, 68%, mean+/-SD, mean+/-2SD or mean+/-3SD), you may add reference lines on the histograms.  Let’s do that for the Chinstrap species, adding a reference line for the mean, median, 0.05 quantile and 0.95 quantile.  
-
-Be sure that the Chinstrap frequency distribution is visible in the lower right frame in RStudio so that the reference lines are added to the correct plot.
-
-```{r}
-hist(Chinstrap$body_mass_g,xlim=c(2000,7000),breaks=24)
-abline(v=mean(Chinstrap$body_mass_g),col="blue",lwd=2) #this adds a reference line for the mean value onto the frequency distribution for the Chinstrap body mass; lwd refers to the width of the line
-abline(v=median(Chinstrap$body_mass_g),col="red",lwd=2)
-abline(v=quantile(Chinstrap$body_mass_g,0.05),col="black",lwd=2)
-abline(v=quantile(Chinstrap$body_mass_g,0.95),col="black",lwd=2)
-```
 
 
-## Add a smoother or empirical density curve
-```{r}
-hist(Adelie$body_mass_g,freq=FALSE) #freq=FALSE changes the plot from a frequency histogram to a density histogram
-lines(density(Adelie$body_mass_g)) #this adds the empirical density curve
 
-hist(penguins$body_mass_g,freq=FALSE)
-lines(density(penguins$body_mass_g))
 
-```
+
 

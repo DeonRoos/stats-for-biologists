@@ -5,28 +5,24 @@ date: 'Last updated: `r Sys.Date()`'
 output:
   word_document:
     toc: yes
-  pdf_document:
-    toc: yes
-  html_document:
-    toc: yes
-    code_folding: show
-    theme: readable
+    toc_depth: 2
+    reference_docx: "../sbstemplate.docx"
 ---
 
-# Workshop Structures
+# Workshop Structure
 
-The workshops on this course will have you learn an analytical workflow, focussing mainly on analysing data using linear models (and eventually generalised linear models). That is, you are going to learn how to go from getting a dataset to extracting evidence to answer your research question. Importantly though, this workflow is not unique to linear models. You would (or at least *should*) use this same general workflow, regardless the scenario, the analytical method, or whichever industry you may be faced with.
+The workshops on this course will have you learn an analytical workflow, focussing mainly on analysing data using linear models (and eventually generalised linear models). That is, you are going to learn how to go from getting a dataset to extracting evidence to answer your research question. Importantly though, this workflow is not unique to linear models. You would (or at least *should*) use this same general workflow, regardless the scenario, the analytical method, or whichever industry you may find yourself in.
 
 The general workflow we'll be using can be broken down into:
 
 1. Think of a research question
-2. *Carry out exploratory data analysis*
+2. *Carry out exploratory data analysis* [Focus of today]
 3. Fit an appropriate model
 4. Diagnose the model and check assumptions (that we are able to)
 5. Summarise the results
 6. Interpret and provide inference
 
-For these workshops we tend to skip Step 1 in the workflow for convenience sake, but in your own work Step 1 is key as every subsequent step in the workflow is dependent on your question.
+For the BI3010 workshops we are generally going to skip Step 1 in the workflow for convenience sake, but in your own work Step 1 is key as every subsequent step in the workflow is dependent on your question.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE) # uncomment if producing answer sheet
@@ -39,10 +35,13 @@ library(here)
 # Learning objectives
 
 1. (Re)familiarise yourself with the basics of `R`;
-2. Use `R` to do simple descriptive summaries of data;
-3. Consider the results of the EDA (Exploratory Data Analysis) to identify any issues;
+2. Use `R` to do simple descriptive summaries of data and data processing;
+3. Use the results of the EDA (Exploratory Data Analysis) to identify any issues;
+4. Begin thinking about what assumptions we make with a specific dataset even before we begin using statistics
 
-All three of these objectives link to useful skills for doing initial and quick explorations of a new data set. All of these skills will be used through out the course.
+All of these objectives link to useful skills for doing initial, quick explorations and screening of data sets. Because it's so important to ensure that the data we subsequently use in analysis is suitable for answering our question, the importance of such EDA cannot be overstated.
+
+These skills will be used through out the course.
 
 ```{r datasets, echo = FALSE, message = FALSE}
 # For coordinators -
@@ -75,44 +74,126 @@ mistake <- 20
 ali$bite[mistake] <- ali$bite[mistake] * 100
 ali$length[mistake] <- ali$length[mistake] * 10
 
-write.table(ali, "H:/003 - Teaching/006-BI3010/Workshops/Workshop 1 - Hidden assumptions/Data/alligator_bite.txt", row.names = FALSE)
+write.table(ali, here("Workshops/Workshop 1 - Hidden assumptions/Data", "alligator_bite.txt"), row.names = FALSE)
 ```
 
-# Instructions
-In this workshop, we're going to be loading in various datasets, carrying out an initial exploration and do "Quality Assurance". When doing real-world analysis, this is an incredibly important step because mistakes are easily made when doing data entry; Imagine entering in 500 near identical rows into an Excel document - it's hard to stay super focused the entire time so mistakes happen regularly. Those mistakes can be a serious problem in analysis, hence why we want to check if this has happened.
+# Coding style
 
-The good news for us is that we don't need any crazy, complicated stats or `R` coding to do some initial screening. We can just load the data into `R` and do some quick checks. For this workshop, this will also help to reintroduce you to `R` and get back into the swing of things.
+All instructions for the workshops were made in `R` using something called `RMarkdown`, which were then exported as Word documents. Within these instructions, code will either being `inline` (meaning the code appears in the normal text line, `like this`) or else in "chunks". When in chunks they will have the following colour coding:
 
-We would like you to use RStudio.  If you have not used this before, please use the instructions on MyAberdeen called "Getting Started with R and RStudio".
+```{r, eval = F}
+# Comments are not read as code.
+# They are notes for ourselves and others.
+my_result <- a_function(argument1 = "character1", 
+                        argument2 = variableA,
+                        argument3 = 1234,
+                        argument4 = c(TRUE, FALSE),
+                        argument5 = my_data)
+```
+
+* The brown-ish text preceeded by "#" are comments. These will not be treated by `R` as code, so we are free to write whatever we want.
+
+* The orange code (e.g. `a_function()`) denotes a function. Functions are blocks of re-useable code, often written by someone else, to perform a specific task. Functions are always followed by an open parenthesis "(" and ended with a closed paparenthesis ")".
+
+* The pale blue code (e.g. `argument1 =`) is used to indicate arguments - data, parameters or choices that the function requires to fulfill it's purpose. You can often think of arguments as the information required for the function to do it's task. Multiple arguments are separated using commas.
+
+* Green code, wrapped in quotation marks (e.g. `"character1"`) indicate strings or characters, which are types of data used to represent text.
+
+* Greyish code (e.g. `variableA`, `my_result` and `my_data`) indicate objects in the R environment. Generally, these will be stored single values, columns of data or even entire datasets.
+
+* Finally, the yellow-ish code (e.g. `TRUE` and `FALSE`) are so-called "Boolean" values. These are some of the simplest forms of data and are used to indicate, unsurprisingly, whether something is true or false.
+
+## Commenting guide 
+
+It's good practice to make comments to yourself (and others) while writing code. Comments generally act as notes that help explain your general intent for a section of code, which in three weeks time, can be an absolute life saver. They're also super useful for anyone else reading your code (and your commenting may be evaluated for some jobs).
+
+There are many different opinions as to how to write good comments, but a general principle I subscribe to is; aim to describe your general intent for the task you are attempting to solve. *Why* are you doing X? What do you hope to accomplish? As opposed to writing overly descriptive, pedantic notes which only serve to clutter your script.
+
+For example, I would write:
+
+```{r, eval = F}
+# Load necessary packages
+library(ggplot2)  # For creating plots
+
+# Read in the dataset
+my_data <- read.csv("data/sales_data.csv")
+
+# Plot the data
+ggplot(my_data, aes(x = country, y = total_sales)) +
+  geom_bar()
+```
+
+And not:
+
+```{r, eval = F}
+# Load the ggplot2 package into the R environment so we can create plots later
+# What happened to ggplot1?
+library(ggplot2)
+
+# Use the read.csv function to read the sales_data.csv file from the data directory
+# and store the resulting data frame in a data frame called 'my_data'
+# Remember that it's called my_data and not data. Calling it data made things break :(
+my_data <- read.csv("data/sales_data.csv")
+# my_data <- read.table("data/sales_data.csv") # DONT USE THIS IT DOESNT WORK
+
+# Use ggplot to create a bar plot of the total sales by country for 2024.
+# The x-axis represents the categories, and the y-axis represents the total sales.
+ggplot(my_data, aes(x = country, y = total_sales)) + # using ggplot, take my_data, then plot country on the x and sales on the y
+  geom_bar() # then have the data visualised as bar, using the structure described in the previous line of code
+# When I see comments like this IRL, I die a little bit inside. Keep it clean and concise.
+```
+
+The latter is so overly descriptive that it becomes as much of a chore to read as they actual code itself. In fact, I think the code does a better job quickly and efficiently explaining its purpose than the comments do! Another way to think of it is; Think of comments as post-it notes. You want them to be short, and to act as a signal for sections that you want to dive deeper into (e.g. for debugging).
+
+## On using LLMs
+
+LLMs (Large Language Models), or "AI", are incredibly useful tools for programming. Whenever I am coding, I will normally have a LLM open and ready for any requests I might have. Personally, I find them particularly useful for 1) doing boring or fiddly coding, 2) automating tasks 3) to solve one-off problems and 4) to simplify and tidy my code (see [here](https://nicholas.carlini.com/writing/2024/how-i-use-ai.html) for a discussion on practical use of LLMs in coding). But using them comes with the requirement that you have to know enough to know when the answer they're giving you is useful or when they're... not so useful. We're not quite at the stage where "you don't have to know how to program to write code", simply because a lot of the time the code LLMs produce simply don't work; Especially as the complexity of the code increases beyond "basic". But the learning curve of coding has definitely flattened now that we can use LLMs.
+
+Using LLMs effectively, however, is somewhat a skill in itself, in the same way as knowing what code or error to Google before LLMs came about, was a skill in and of itself. As a tip, make your prompt as detailed as possible. Describe in simple terms what you want to achieve, include the code you tried to use, include any errors, and if possible, what you think the problem might be. It's also worth saying that you are working in `R`, and to mention any packages (more on these on Wednesday) you want to use, or if you want to use base `R` (the basic version of `R`).
+
+From bitter experience, I'd recommend having a separate script open to test the code provided by an LLM. I've been bitten too many times with flawed and broken LLM code that destroys entire scripts because I immediately replaced my original code before testing the LLM's version. Test first, then combine.
+
+# Workshop Instructions
+
+In this workshop, we're going to be loading in various datasets, starting with alligator bite strength, and carrying out so-called Exploratory Data Analysis and performing some simple Data Quality Assurance. Broadly, our aim in such cases is to try and find *weird* things in the data which imply mistakes, such as data entry mistakes. When doing real-world analysis, this is an incredibly important step of analysis because mistakes are so easily made, especially when doing data entry. Imagine entering in 5,000 near identical observations into an Excel document. People get bored, start thinking about other things, get mixed up over which observation they are meant to be adding in, amongst many other reasons. Basically, it's hard to stay super focused doing mundane work for long periods of time. It'd be silly to expect these not to happen, and so long as we check for them, it's often not that big of a deal. The problem though is that if don't spot them, any mistakes can be hugely influential when it comes time to analyse the data.
+
+The good news for us is that we don't need any crazy, complicated stats to check for this, and the `R` coding is *relatively* straightforward. The first step is just loading the data into `R`.
+
+We would like you to use RStudio, an Integrated Development Environment. Basically, a program that makes interacting with `R` (the programming language) a much more pleasant experience. If you have not used RStudio before, please use the instructions on MyAberdeen called "Getting Started with R and RStudio".
 
 ## Getting started
 
 ### Set working directory
-If you haven’t already created a folder for the course on your computer or your university drive, do so now.  You might create a folder for the course (e.g., 'BI3010') with subfolders within that for each of the workshops (e.g., workshop1).
 
-To set the working directory to the folder you want to use for saving your work, you have two options:
+If you haven’t already created a folder for the course on your computer or your university drive, do so now. For example, you might create a folder in your `H` drive for the course, with subfolders for each of the workshops (e.g., `workshop1`), such that the file path to your working directory would be: `H:\BI3010\workshop1`.
 
-Option 1:
+Once in RStudio, create a new R script (`File` > `New File` > `R Script`, or use the hotkeys `Ctrl + Shift + N`). Once open, you can now write code in the script and either press the Run button (top right of the main panel) or use the hotkeys `Ctrl + Enter`. 
 
-Find the file path for your newly created folder (e.g. `BI3010` > `workshop1`). An easy way to get this is by using File Explorer in Windows, go to your folder, then highlting the address bar. It will probably look something like: 
+With your script now open, to set the working directory to the folder you want to use for saving your work, you have two options:
+
+**Option 1:**
+
+Find the file path for your newly created folder (e.g. `H:` > `BI3010` > `workshop1`). If you're not sure, an easy way to get this is by using File Explorer in Windows, go to your `workshop1` folder, then select the address (or file path) from the navigation bar at the top (the equivalent of the URL bar in web browsers). It will probably look something like: 
 
 `H:\BI3010\workshop1`
 
-In `R` backslashes are used for specific purposes, so we want to change the back slashes for forward slashes, so our file path looks like:
+In `R` backslashes are used for specific purposes, so we want to change the back slashes for forward slashes, so getting our file path ready for `R`, it should look like:
 
 `H:/BI3010/workshop1`
 
 We can now write some `R` code to tell `R` that this is the folder that we will be using in the current session, by setting the Working Directory using the function `setwd()`. The `setwd()` function just needs a single piece of information (technically called an "argument"), which is the file path, but because the file path is a "string" (i.e. a bunch of letters, characters and numbers) we need to ensure that we put the file path in quotation marks:
 
-`setwd("H:/BI3010/workshop1")`
+```{r, eval = FALSE}
+setwd("H:/BI3010/workshop1")
+```
 
-The benefit of doing it this way is that we can include this code in our `R` script, so that we don't have to go through this pain every time we come back to work on this.
+The benefit of doing it this way is that because we can include this code in our `R` script, we don't have to go through this pain of setting the working directory every time we come back to work on this script (it also means we can copy and paste this code when we get to subsequent workshops, just changing workshop1 with e.g. workshop2).
 
-Option 2:
+**Option 2:**
 
-An easy option is to use the drop down menu in RStudio: session > set working directory > choose directory
+An easy option is to use the drop down menu in RStudio: `Session` > `Set Working Directory` > `Choose Directory...`
 
-This is easier to do the first time, but becomes a pain when you come back to the project, as you'll need to reset the working directory (and maybe make a mistake, causing more pain and frustration).
+Option 2 is easier if you're just doing a very quick project (i.e. an hour or two), but becomes a pain when you come back to the project, as you'll need to keep setting the working directory each time (and maybe make a mistake, causing more pain and frustration).
 
 We'd advise using Option 1. A little more of a fuss the first time but then you don't need to think about it again.
 
@@ -124,13 +205,17 @@ getwd() #to check which directory RStudio is using
 
 ### Download the file
 
-**Download the datafile from MyAberdeen to your working directory.**
+*You can download the data from MyAberdeen. Make sure to save the file to your working directory.*
 
-You will find a file called `alligator_bite.txt` in the module for Week 1, in the folder for Workshop 1. Using the three dots to the right of the content area that has the file name, download the file and save it to your working directory
+On MyAberdeen in the Tuesday - Workshop folder within Week 1, you'll find a file called `alligator_bite.txt`. Either click on the file to download it or, if that isn't working, use the three dots to the right of the content area that has the file name to download it.
+
+Once downloaded, make sure to move it to your `H:/BI3010/workshop1` folder (or whatever you chose to call your folders).
 
 ### Load file into RStudio
 
-Now that we've told `R` which folder contains our data, we can load it in. Before we do so, make note of what type of file the data is saved as. The alligator bite strength data is saved as a text file, which we know because of the `.txt` extension. For data saved in this format, we use the `read.table()` function, where the arguments are. To find out which arguments can be provided to a function you can type `?read.table`. If we do so, we can see there are lots of arguments we could use, but the crucial ones are `file` (which is the name of the file we want to load), and another called `header` which is logical (meaning either `TRUE` or `FALSE`) which tells `R` if the first row of our `alligator_bite.txt` file are the column names, which they are.
+Now that we've told `R` which folder contains our data (by using `setwd()`), we can load the data into `R`. Before we do so, make note of what type of file the data is saved as. The alligator bite strength data is saved as a text file, which we know because of the `.txt` extension. For data saved in this format, we use the `read.table()` function, where the arguments are predominantly what the file is called, and if the file contains headers. 
+
+To find out which arguments can be provided to a function you can type `?read.table` (or `?any_function_here`). If we do so, we can see there are lots of arguments we could use, but the crucial ones are `file` (which is the name of the file we want to load), and another called `header` which is logical (meaning either `TRUE` or `FALSE`) which tells `R` if the first row of our `alligator_bite.txt` file are the column names, which they are.
 
 So to load our data, we use the following code:
 
@@ -138,7 +223,28 @@ So to load our data, we use the following code:
 ali <- read.table("alligator_bite.txt", header = TRUE) 
 ```
 
-If you get an error, some common problems are as follows: you may have set the wrong working directory; you may have misspelled one of the words (including using a capital letter instead of lower case); your file is missing a column heading; the file is not in the correct format (e.g, the file is saved as a `.csv` and not a `.txt`); the quotation marks are in the in wrong location; or you may have missed the final bracket “)” in the `read.table()` function.
+Note that this is a single line of code on a single line of script. But there's nothing to stop us from spacing this out to make it easier to read, if we so wish:
+
+```{r, eval = FALSE}
+ali <- read.table("alligator_bite.txt", 
+                  header = TRUE) 
+```
+
+There are a few things to make sure of when doing this, but just experiment. The great thing about working in `R` is that nothing is permanent. If you break something, you can just run your code again. The only thing that is "permanent" is your script, hence why it's important to save often (and also to write comments to yourself). Added something new? Save and write a comment saying what it does. Want to remove something but not sure if it'll break your code? Put a # at the start of the line to "comment it out".
+
+When loading your data in, if you get an error, some common problems are: 
+
+* You may have set the wrong working directory; 
+
+* You may have misspelled one of the words (including using a capital letter instead of lower case); 
+
+* Your file may be missing a column heading; 
+
+* The file is not in the correct format (e.g, the file saved as a `.csv` and not a `.txt`); 
+
+* The quotation marks are in the in wrong location; 
+
+* You may have missed the final bracket “)” in the `read.table()` function.
 
 To confirm that the file has been read properly, double click the file name in the Environment panel (normally in the upper right of RStudio).
 
@@ -256,7 +362,7 @@ How does that translate into `R`? Almost exactly - we just write those three ste
 1. We'd start by looking at the `ali` dataset
 
 ```{r}
-ali
+head(ali, n = 10) # just showing 1st 10 rows
 ```
 
 

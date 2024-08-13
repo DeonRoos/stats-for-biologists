@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 output: 
   word_document:
     toc: yes
-    toc_depth: 2
+    toc_depth: 3
 ---
 
 ```{r setup, include=FALSE}
@@ -28,9 +28,29 @@ aspdjasidj
 
 > Quotation area
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>. or [here](http://rmarkdown.rstudio.com)
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+# Lists
+
+* abs
+
+* asodiasd
+
++ askdm
+
++ aspidj
+
+- paksdsa
+
+- aksmdsakd
+
+1. apskdmsa
+
+2. lkaspljmdkopas
+
+3. paosdsad
 
 ```{r cars}
 summary(cars)
@@ -41,7 +61,20 @@ summary(cars)
 You can also embed plots, for example:
 
 ```{r pressure, echo=FALSE}
+# comment
 plot(pressure)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+```{r, eval = F}
+# Comments are not read as code.
+# They are notes for ourselves and others.
+my_result <- a_function(argument1 = "character1", 
+                        argument2 = variableA,
+                        argument3 = 1234,
+                        argument4 = c(TRUE, FALSE),
+                        argument5 = my_data)
+```
+

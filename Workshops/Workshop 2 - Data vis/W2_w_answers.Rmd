@@ -24,7 +24,7 @@ We covered steps 2 and 3 in the previous workshop but we'll expand your toolkit 
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="show")
-answer_sheet <- FALSE
+answer_sheet <- TRUE
 library(ggplot2)
 library(here)
 ```

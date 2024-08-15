@@ -101,7 +101,7 @@ str(boto)
 
 If nothing immediately seems off, we can continue.
 
-## A simple plot
+# A simple plot
 
 We'll build this figure up slowly, one layer at a time, to make the fundamental philosophy of `ggplot2` clear. To begin with, we can simple make a "ggplot":
 
@@ -126,7 +126,7 @@ ggplot(boto) +
 
 Now we're getting somewhere. From an early data analysis perspective, what have we already learnt just from the quick summary stats and from this figure?
 
-# Question Set One
+## Question Set One
 
 1. What variables do we have available to us?
 
@@ -136,7 +136,7 @@ Now we're getting somewhere. From an early data analysis perspective, what have 
 
 4. What range of lengths do boto dolphins reach at maturity?
 
-# Increasing the complexity
+# Additional `geom_` layers
 
 The above figure is great. It's simple and clear (though a bit ugly - we'll come back to that later), but how would we include a categorical variable like `sex`? Can we just copy our code from above and replace `drought` with `sex`? Let's see:
 
@@ -167,9 +167,32 @@ ggplot(boto) +
   geom_jitter(aes(y = length, x = sex), height = 0, width = 0.1)
 ```
 
-We don't add the `height =` and `width =` arguments to `aes()`, as `aes()` is used to reference parts of the actual `boto` dataset. Whenever we want to make changes to a `geom_` that are not related to the data, we do so outside of `aes()`.
+There are two things to note with the above code. First, `geom_jitter()` comes after `geom_violin()`. If we put the violin after the jitter, then we wouldn't see any of the jittered points; They'd be *under* the `geom_violin()` layer. Secondly, in `geom_jitter()`, we don't add the `height =` and `width =` arguments to `aes()`, as `aes()` is used to reference information within the `boto` dataset. Whenever we want to make changes to a `geom_` that are not related to the data, we do so outside of `aes()`.
 
-## Optional: Recreate this figure
+## Question Set Two
+
+1. What's wrong with the following code?
+
+```{r, eval = F}
+ggplot(boto)
+  geom_jitter(aes(y = length, x = sex, height = 0, width = 0.1))
+```
+
+2. Find the error in this code:
+
+```{r, eval = F}
+ggplot(boto) +
+  geom_point(aes(x = length, x = drought))
+```
+
+3. Find the error in this code:
+
+```{r, eval = F}
+ggplot(boto) +
+  geom_point(aes(x = length y = drought))
+```
+
+## Optional: `geom_`s
 
 Have a look [here](https://ggplot2.tidyverse.org/reference/), specifically at the layers section. Using the information in the link, see if you can figure out which `geom_` to use such that you recreate the following figure. There are two things to note here. First this figure is created with a single `geom_` with only `x = ` and `y = ` specified, and no other options. Secondly, if you figure out which `geom_` to use, you will be prompted to install a new package when you run the code (it's fine to install this new package - simply type 1 and enter in the console to do so).
 
@@ -178,3 +201,52 @@ ggplot(boto) +
   geom_hex(aes(x = drought, y = length))
 ```
 
+# The good and the ugly
+
+```{r}
+abdn <- read.csv(here("Workshops/Workshop 2 - Data vis/Data", "abdn_flats.csv"), header = TRUE)
+```
+
+We're going to do something that's, hopefully, fun but also instructive. On MyAberdeen, you find a dataset called `abdn_rent.csv` (note that this is a `.csv` file extension and not a `.txt`, so you'll need to use `read.csv()` rather than `read.table()` when loading the data). This dataset contains 130 records (i.e. observations or samples) of rent prices for properties listed in Aberdeenshire on the ASPC website, and 11 additional variables. The variables included are:
+
+1. `price` - the rent of the listed property
+
+2. `beds` - the number of bedrooms in the property
+
+3. `living` - the number of living rooms in the property
+
+4. `baths` - the number of bathrooms
+
+5. `sqmt` - the total floor area of the property (measured in m^2)
+
+6. `epc` - th Energy Performance Certificate (A is highly energy efficient, G is terrible)
+
+7. `tax` - the council tax band (which is based on the value of the property on 1/4/1991, A is the lowest council tax, H is the highest possible)
+
+8. `date` - the date when the record was *added to the dataset* (note this is not when the property was listed on the site)
+
+9. `link` - web link for the property listing
+
+10. `house` - the property name or address
+
+11. `lat` - the latitude coordinates of the property (note latitude is North to South - think of a "ladder", sounds kinda like "latter" going up)
+
+12. `lon` - the longitude coordinates of the property (note longitude is East to West - think of "the *long* way around")
+
+Spend a bit of time familiarising yourself with the data, i.e. do a quick EDA to make sure there's nothing weird. If you find what you think is a mistake, well in this case, you can check and correct yourself, as you have the *original* data because of the web link! Once you're happy you know the data, let's get to the tasks.
+
+## The good
+
+Using whichever variables you like, make the most informative and visually appealing figure you can. Imagine you have been hired by a real estate company to create a figure that helps potential renters understand what may be determining rent prices, using `R`, `ggplot2` and the `abdn_rent.csv` dataset. Curious how much you might get paid to do this?
+
+![Look at that salary!](H:/003 - Teaching/006-BI3010/Workshops/Workshop 2 - Data vis/athletics.PNG)
+
+See [here](https://www.workingnomads.com/jobs/data-graphics-analyst-the-athletic-media-company) for the full job advert.
+
+Create your most informative and visually appealing figure now. Keep the lecture on effective communication in your mind, and avoid some of the pitfalls we discussed. If you need help figuring out how to implement one of your ideas, see [Intro2R chapter](https://intro2r.com/graphics_r.html) for a more detailed walk through, or else use your LLM or choice to help. If using an LLM, just remember to mention that you are using `R`, `ggplot2` and do not want to use any additional packages. There is nothing wrong with using additional packages, but they can just add lots of extra moving parts to the mix (and cause conflict issues). We'd suggest you try and limit the number of additional packages you have loaded while you're still getting the hang of things, but if you feel comfortable using `R`, then go ahead by all means.
+
+## The bad
+
+Now for the part I'm excited about. Do the same as above, but this time, make it a miserably ugly figure. It still needs to *contain* the information (i.e. no blank figures) and be *somewhat* readable. If you need inspiration, search for "graph crimes", or "chart crimes" in your search engine - there are *lots* of examples you can use for "inspiration".
+
+Once, you're happy with your masterpieces, email you're favourite the whomever is running your session (either Deon or Michelle), and we'll have an "Art Exhibit" to finish the workshop :D.

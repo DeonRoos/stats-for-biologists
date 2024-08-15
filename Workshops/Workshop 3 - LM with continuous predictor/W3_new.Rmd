@@ -1,0 +1,185 @@
+---
+title: 'Computer Workshop 3: Linear models with a continuous predictor'
+author: "Roos & Pinard"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+    reference_docx: "../sbstemplate.docx"
+---
+
+# Workshop Structure
+
+As always, we are using the workflow below to structure the workshops:
+
+1. Formulate a research question.
+2. Perform exploratory data analysis.
+3. Identify any hidden assumptions.
+4. Fit an appropriate model [Focus of today].
+5. Diagnose the model and check assumptions.
+6. Summarise the results.
+7. Interpret and provide inferences.
+
+However, starting this week, we'll begin going through the entire workflow with a single dataset.
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="show")
+answer_sheet <- FALSE
+library(ggplot2)
+library(here)
+boto <- read.table(here("Workshops/Workshop 2 - Data vis/Data", "boto.txt"), header = T)
+```
+
+# 1. Formulate a research question.
+
+For this first workshop using linear models, we'll use a dataset from a previous workshop, simply to start with something familiar; the `boto.txt` dataset from workshop 2. As a reminder, where's what's in the dataset:
+
+* `sex` - the sex of the boto dolphin
+
+* `drought` - the number of years, of the past 20, where there was drought in the region where the dolphin was recorded
+
+* `length` - the length of the boto dolphin to the nearest cm
+
+Specifically, for this first piece of analysis, we're setting out to determine how the number of droughts (in the previous 20 years) impacts the length of boto dolphin. The broader context of this question is that the researchers suspect that droughts may become increasingly common in some areas of the Amazon basin, due to both climate change and the construction of dams. That is, if droughts become more common, will the boto dolphins become smaller and possibly be in "worse" condition?
+
+From this we know two things. The response variable will be `length` and the predictor variable (sometimes called "explanatory variable" or "covariate") is `drought`. That is, we want to understand how `length` changes as `drought` changes.
+
+Before we go any further, let's consider if the data generating process of boto length (i.e. everything that determines how long a boto is) is well approximated by a $Normal$ distribution. That is:
+
+$length_i \sim Normal(\mu_i, \sigma)$
+
+where $length_i$ is the length of dolphin $i$ (or in `R` code: `boto$length[i]`, where `i` might be `i = 1` or `i = 2`, etc.), generated according to a $Normal$ distribution with a mean of $\mu_i$ (i.e. what the model predicts for dolphin $i$) and standard deviation of $\sigma$.
+
+What should we look for to help us decide if a $Normal$ is reasonable to assume? For starters, we ask if $length$ is "continuous" or "discrete". Discrete would imply the only values we could collect for $length$ might be 1 cm, 2 cm, and so on. While the data we've been proviuded are rounded to the nearest cm, the actual dolphins will not have these kinds of increments in length. Instead, $length$ is continuous and the $Normal$ distribution process generates such values.
+
+To see that, run the following code:
+
+```{r}
+rnorm(n = 10, mean = 200, sd = 10)
+```
+
+If you run that code, the values that come out seem pretty similar to our boto data, so the $Normal$ distribution seems pretty good in that regard.
+
+The last question to ask is if there are any natural bounds to the data, and if the model might get close to these bounds. For boto length, there is a natural bound. It's zero. An adult animal, including botos, can never be 0 cm long. This implies a $Normal$ distribution wouldn't be an appropriate option, however, if we look at the minimum length in the data, it's very far away from zero. So the risk that our model would predict dolphins that are zero cm or *less than* zero cm seems pretty unlikely.
+
+So in practice, a $Normal$ distribution is probably pretty safe to use in this case, but (!), we will want to eventually check the predictions to make sure the model isn't telling us something we know is physically impossible.
+
+Going through this process of thinking about the response variable and which distribution to use, can be quite daunting when you're learning stats. But as you gain experience, this decision is often made in seconds and isn't nearly as terrifying as it might seem now.
+
+> To be very clear. Deciding which distribution to use is *entirely* distinct from the "assumption of Normality" (or more formally, the "assumption of Normally distributed residuals"). Deciding which distribution to use can be done without ever seeing the dataset. You can do it just from having a sense of what values the response variable takes on.
+
+## Question Set One
+
+1. Does a $Normal$ distribution generate discrete or continuous values?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# A Normal distribution generates continuous values. These might subsequently be
+# rounded in a dataset, but the process is still best described by a Normal distribution
+```
+
+2. What's the smallest value you generate with `rnorm(n = 100, mean = 50, sd = 20)`?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# You can do this by running:
+# min(rnorm(n = 100, mean = 50, sd = 20))
+```
+
+3. Assume the values generated by `rnorm(n = 100, mean = 50, sd = 20)` were your response variable, could you assume a $Normal$ distribution in your analysis?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# Yes. We've used a Normal distribution to generate the data, so a model which 
+# assumed a Normal distribution (i.e. a linear model) would be entirely appropriate
+# Hopefully this question was very obvious but we wanted to reiterate that the complexity
+# of the boto example revolves around blending the biology with the stats.
+# Botos cannot be 0 or negative cm long but a Normal distribution technically allows for that
+# We can get away with using a Normal in this case because none of our values are 
+# particularly close to 0
+```
+
+4. If your data is generated according to a $Normal$ distribution, does that mean you have met the assumption of Normality?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# No, the assumption of Normality is in regards to the model residuals 
+# (i.e. the difference between observed and predicted) and not the raw data not
+# the distribution you assume generated the data
+```
+
+
+# 2. Perform exploratory data analysis.
+
+Given you've worked with this data before, we can skip the EDA part of the workflow (or alternatively you can either continue using the same script you used in Workshop 2, or copy and paste the parts relevant to the `boto` dataset.
+
+# 3. Identify any hidden assumptions.
+
+Spend some time thinking of the various assumptions we're going to make when using this dataset. As a reminder, these are those assumptions again:
+
+| **Assumption**                   | **Description**                                                                                             | **Example of Violation**                                                                                                                                       |
+|---------------------------------|-------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1. **Validity**                     | The data is able to answer the research question effectively.                      | Using IQ to measure overall intelligence (what does IQ even measure?).                      |
+| 2. **Representativeness**           | The data reflects the population or group being studied.                              | Using survey data from a rural area to draw conclusions about an urban population. |
+| 3. **Additivity**                   | Effects of predictors are additive and there are no interactions between them.         | Assuming that study hours and sleep hours independently affect exam scores without considering their combined effect (imagine a Venn diagram with study and sleep overlapping). |
+| 4. **Linearity**                   | The relationship between predictors and the outcome is linear.                                   | Assuming plant growth will continue to increase indefinitely without ever levelling out.          |
+| 5. **Independence of Errors**       | Observations are independent of each other. (Related to residual errors.)                                                       | If modelling height, the data come from the same group of children over time.               |
+| 6. **Equal Variance of Errors**     | Residuals have constant variance across all levels of predictors ("homoscedasticity"). (Related to residual errors.)  | If modelling income, variability in salaries is not the same across all levels of a company’s hierarchy.              |
+| 7. **Normality of Errors**          | Residuals should be normally distributed.  (Related to residual errors.)                         | If modelling income, the presence of any extremely wealthy individuals will be hard for the model to understand and explain.     
+
+Consider if we are likely to break these assumptions, based on considering the data as well as your EDA.
+
+## Question Set Two
+
+1. Which assumptions do you believe are very likely to be violated?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# Additivity could be one, given last week we saw different sexes may be impacted 
+# differently by drought
+# Independence of errors could be another, given it may be likely that the individuals
+# measured in the same broad area are related (e.g. big dolphins create big dolphins)
+```
+
+2. Which assumptions could we check *after* fitting the model?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# All of the assumptions related to model residuals
+# Remember - residuals are the difference between what the model predict
+# and what we observed. We can't check that until we've run the model
+# We can also check linearity after (but also with EDA) but there is no way 
+# to check the others
+```
+
+# 4. Fit an appropriate model.
+
+With all of this done, here comes the actual statistics. We're going to fit a linear model of the form:
+
+$length_i \sim Normal(\mu_i, \sigma)$
+
+$\mu_i = \beta_0 + \beta_1 \times drought_i$
+
+where $length_i$ is the length of dolphin $i$, generated according to a $Normal$ distribution with a mean of $\mu_i$ (i.e. what the model predicts for dolphin $i$) and standard deviation of $\sigma$, and where $\mu_i$ takes on a linear relationship with $drought_i$ with parameters $\beta_0$ (i.e. the intercept of our line, or how long is a dolphin when the number of droughts is zero) and $\beta_1$ (i.e. the slope, or how much $length$ changes for every additional year of $drought$).
+
+That's cool and all but how to do we from that to a some `R` code? Well, we can do that fairly easily, while also storing the model output so we can use it later without having to run the model each time. To do so, we write:
+
+```{r}
+boto_model <- lm(length ~ drought, data = boto)
+```
+
+Mapping the equation to the code:
+
+* `lm()` is where we say we assume the data was generated according to a $Normal$ distribution
+
+* `length ~ drought` is a crude way to represent $\mu_i = \beta_0 + \beta_1 \times drought_i$ (plus the $length_i \sim $ part)
+
+On to the interesting part; what does the model say? To find out, we can use `summary()` again to summarise our model results:
+
+```{r}
+summary(boto_model)
+```
+
+We get a bunch of information when we do, but the parts we're initially interested in here are the `Estimates`. From this we now know the values estimated for $\beta_0$ and $\beta_1$; they're 213.281 and -5.308. But what does that mean?
+
+## Parameter meanings
+
+Let's go back to our equation of $\mu_i = \beta_0 + \beta_1 \times drought_i$. When there has never been a drought, then drought will be zero (i.e. we can replace $drought$ with $0$). In that case, it doesn't matter what value $\beta_1$ is, because any value multiplied with zero becomes zero. So our equation would end up being $\mu_i = \beta_0 + \beta_1 \times 0$, or just $\mu_i = \beta_0$. That's our intercept! $\beta_0$ is the length of boto dolphins when there has never been a drought, and our model is estimating that dolphins are 213.3 cm long if there's never been a drought!
+
+What about $\beta_1$ then? We'll that's how much boto length changes whenever $drought$ increases by one. From our model summary, we know this is -5.3 cm. So for each year of drought, dolphins get about 5 cm *shorter*.
+
+And that's it. That's all of the stats in one line of code.

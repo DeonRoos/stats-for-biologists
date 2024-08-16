@@ -24,7 +24,7 @@ To keep the workload manageable for this workshop, we'll be using the models you
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="show")
-answer_sheet <- FALSE
+answer_sheet <- TRUE
 library(ggplot2)
 library(here)
 ```

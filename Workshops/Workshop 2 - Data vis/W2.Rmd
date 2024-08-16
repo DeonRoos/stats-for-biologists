@@ -81,7 +81,7 @@ boto$length <- round(rnorm(n, mean = mu, sd = 10), digits = 0)
 # ggplot(boto) +
 #   geom_point(aes(x = drought, y = length)) +
 #   facet_wrap(~sex)
-write.table(boto, here("Workshops/Workshop 2 - Data vis/Data", "alligator_bite.txt"), row.names = FALSE)
+write.table(boto, here("Workshops/Workshop 2 - Data vis/Data", "boto.txt"), row.names = FALSE)
 ```
 
 Go through the same steps as yesterday to load in your data; create a new script in RStudio, set your working (e.g. `setwd("H:/BI3010/workshop2")`), then load the data:
@@ -294,9 +294,11 @@ ggplot(boto) +
 3. Remember that data visualisation can be used for Exploratory Data Analysis to identify if there is anything weird in the data. Having now produced a set of figures exploring the data, do you see anything *weird*?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# No - there's nothing that jumps out as being suspicious.
+# No - there's nothing that jumps out as being "wrong",
+# but it's a bit weird how accurate length is - how do you even measure
+# a dolphin in the Amazon? How do you measure it to 1 cm? Something we'd want
+# to check with our colleagues.
 ```
-
 
 # Optional: `geom_`s
 

@@ -27,6 +27,7 @@ knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="show")
 answer_sheet <- TRUE
 library(ggplot2)
 library(here)
+boto <- read.table(here("Workshops/Workshop 2 - Data vis/Data", "boto.txt"), header = T)
 ```
 
 # Learning Objectives
@@ -48,40 +49,6 @@ It is important to note, however, that `ggplot2` is not the only way to create v
 For the first part of this workshop, we'll be working with data on the Amazon river dolphin, or the boto (*Inia geoffrensis* - I wonder if the person who named the species, named them after their friend Geoff...). Specifically, we're interested here in seeing if there is sexual dimorphism in asymptotic length (i.e. once an animal has stopped growing) between females and males, as well as how the species respond to droughts. As always, before we do any analysis, we need to ensure there is nothing *weird* in the data. In workshop 1 you did this by using simple summary statistics (e.g. `mean()`). While doing so is useful, complimenting this with data visualisations is really powerful.
 
 Start by downloading the data from today's practical folder, called `boto.txt`.
-
-```{r datasets, echo = FALSE, message = FALSE}
-# For coordinators -
-# Code below simulates and exports the data used in the workshop
-# length of boto dolphin by sex
-# See https://www.lajamjournal.org/index.php/lajam/article/view/1523/505 for summary stats
-
-set.seed(2024)
-n <- 71
-boto <- data.frame(
-  sex = sample(c("Male", "Female"), size = n, replace = TRUE, prob = c(0.34, 0.66)),
-  drought = rpois(n = n, lambda = 3)
-)
-
-fem <- ifelse(boto$sex == "Female", 1, 0)
-
-b0 <- 231.5
-b1 <- -31.7
-b2 <- -5
-b3 <- 1
-mu <- b0 + b1 * fem + b2 * boto$drought + b3 * fem * boto$drought
-boto$length = rnorm(n, mean = mu, sd = 10)
-
-# Plots to check sim data (without mistake below)
-# ggplot(boto) +
-#   geom_histogram(aes(x = length), colour = "white")
-# ggplot(boto) +
-#   geom_boxplot(aes(y = length, x = sex))
-# ggplot(boto) +
-#   geom_point(aes(x = drought, y = length))
-# ggplot(boto) +
-#   geom_point(aes(x = drought, y = length)) +
-#   facet_wrap(~sex)
-```
 
 Go through the same steps as yesterday to load in your data; create a new script in RStudio, set your working (e.g. `setwd("H:/BI3010/workshop2")`), then load the data:
 

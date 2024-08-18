@@ -251,7 +251,7 @@ So what does this mean for our model? Are these deviations serious? Not really. 
 
 In most cases, a quick glance at the Q-Q plot is sufficient. If it looks particularly problematic, you might need to reconsider your model. However, if it appears only mildly off, it’s generally not a major issue. This is why Normality of Errors is considered less critical compared to other assumptions.
 
-## Residuals vs Leverage
+## `Residuals vs Leverage`
 
 The last plot doesn’t assess the assumptions we’ve discussed but provides a different kind of insight. It helps identify disproportionately influential data points.
 
@@ -299,13 +299,13 @@ None of our points are close to 1, so we don't have any observations that are pu
 
 4. Is meeting the assumption of Equal Variance of Errors important?
 
-```{r}
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # Less so than Linearity but it can. Having unequal variance errors (or residuals) can inflate the standard error. As you'll see next week, this means your 95% confidence intervals will be inflated which can make drawing inference a bit more challenging. It's the biggest issue when using P-Values and Null Hypothesis Significance Testing, where it leads to inflated type 1 and type 2 errors (thinking something is significant when it's not, or vice versa)
 ```
 
 5. Using the diagnostics from the boto model, are there any diagnostic plots which indicate a problem in the model?
 
-```{r}
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # No, they seem pretty well met across the board. The most questionable assumption that we can check is probably Equal Variance of Errors. There's a tiny suggestion of increasing variation in residuals from the Residuals vs Fitted plot, but nothing that causes me to stress.
 ```
 
@@ -330,7 +330,7 @@ This function offers an alternative to the standard plots and provides an additi
 
 An added benefit is that these plots come with guidance on what to look for in each diagnostic plot. However, remember that not all assumptions are equally important.
 
-# The beetles
+# The Beetles
 
 Having diagnosed the boto model, let's move on to the beetle model from the last workshop. If you haven't run that model yet, do so now. Once you have, go through the process of checking the model diagnostics to determine if you’re willing to place your trust in the model.
 
@@ -341,6 +341,40 @@ Having diagnosed the boto model, let's move on to the beetle model from the last
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # The model has pretty clear non-linearity, and fitting a linear trend really messes up inference because the beetles have a thermal optimum at about 20 degrees. Too cold or too hot are equally bad and result in fewer offspring being produced. Basically, we're trying to fit a straight line through a hump. It just doesn't work.
 ```
+
+```{r, include=answer_sheet, class.source="bg-success", eval = T, echo = F}
+beetles <- read.table(here("Workshops/Workshop 3 - LM with continuous predictor/Data", "beetles.txt"), header = TRUE)
+```
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# Load data
+beetles <- read.table("H:/BI3010/Workshop3/beetles.txt", header = TRUE)
+```
+
+```{r, include=answer_sheet, class.source="bg-success", eval = answer_sheet}
+# EDA
+summary(beetles)
+ggplot(beetles) +
+  geom_point(aes(x = temperature, y = offspring)) +
+  theme_minimal()
+# Relationship looks non-linear
+
+# Model fit
+beetles_mod <- lm(offspring ~ temperature, data = beetles)
+
+# Diagnostics
+plot(beetles_mod)
+
+# Plot predictions (with raw data as points)
+beetles$fit <- predict(beetles_mod)
+ggplot(beetles) +
+  geom_point(aes(x = temperature, y = offspring)) +
+  geom_line(aes(x = temperature, y = fit)) +
+  labs(x = "Temperature",
+       y = "Offspring") +
+  theme_minimal()
+```
+
 
 
 # Assumption table

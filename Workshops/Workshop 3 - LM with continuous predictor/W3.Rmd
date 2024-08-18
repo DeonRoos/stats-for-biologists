@@ -390,7 +390,7 @@ As a tip, don't confuse the length of a script with complexity or the intelligen
 
 # A new challenger
 
-Using the skills you've just developed, you're now going to analyse an entirely new dataset, the `beetles.txt` dataset on MyAberdeen. This data comes from a lab experiment from researchers who were interested in understanding how temperature impacts fecundity in BBB beetles (BBB BBB), ultimately attempting to understanding how the species may respond to climate change.
+Using the skills you've just developed, you're now going to analyse an entirely new dataset, the `beetles.txt` dataset on MyAberdeen. This data comes from a lab experiment from researchers who were interested in understanding how temperature impacts fecundity in burying beetles beetles (*Nicrophorus vespilloides*), ultimately attempting to understanding how short term (i.e. 6 hours) exposures to temperature changes may affect how the species may respond to climate change.
 
 The data contains:
 
@@ -414,10 +414,10 @@ beetles <- data.frame(
   temperature = round(runif(n = n, min = -10, max = 35), digits = 0)
 )
 
-b0 <- 231.5
-b1 <- -31.7
+b0 <- 30
+b1 <- -15
 
-temp_peak <- 20
+temp_peak <- 30
 frequency <- 2 * pi / 50  # Frequency based on the temperature range and desired peak
 phase_shift <- temp_peak
 
@@ -425,10 +425,10 @@ mu <- b0 + b1 * sin(frequency * (beetles$temperature - phase_shift))
 
 plot(mu ~ beetles$temperature)
 
-beetles$offspring <- round(rnorm(n, mean = mu, sd = 30), digits = 0)
+beetles$offspring <- round(rnorm(n, mean = mu, sd = 5), digits = 0)
 
-# plot(beetles$offspring ~ beetles$temperature)
-# hist(beetles$offspring)
+plot(beetles$offspring ~ beetles$temperature)
+hist(beetles$offspring)
 
 write.table(beetles, here("Workshops/Workshop 3 - LM with continuous predictor/Data", "beetles.txt"), row.names = FALSE)
 ```

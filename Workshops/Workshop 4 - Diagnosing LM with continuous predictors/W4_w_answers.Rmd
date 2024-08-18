@@ -190,7 +190,7 @@ For the most part, the Scale-Location plot is similar to the Residuals vs Fitted
 plot(boto_model, which = 3)
 ```
 
-This means that the Scale-Location plot provides another opportunity to check the same assumptions that the Residuals vs Fitted plot did. The reason for having both plots is that sometimes one plot may make diagnosing issues easier than the other. For example, I often find the Scale-Location plot more useful for complex models but somewhat redundant for simpler ones. Indeed, there are times when the Residuals vs Fitted plot may appear problematic, but the checking Scale-Location plot can tell me that the issues are not as severe as they initially seemed.
+This means that the Scale-Location plot provides another opportunity to check the same assumptions that the Residuals vs Fitted plot did but in a different way. The reason for having both plots is that sometimes one plot may make diagnosing issues easier than the other. For example, the Residuals vs Fitted can may spotting non-linearity a bit easier, while the Scale-Location can make checking for equal variance a bit easier. It's often worth checking both.
 
 ## `Q-Q Residuals`
 
@@ -364,6 +364,9 @@ beetles_mod <- lm(offspring ~ temperature, data = beetles)
 
 # Diagnostics
 plot(beetles_mod)
+# Diagnostics look final except for Residuals vs Fitted
+# There seems to be a clear pattern in the residuals
+# Negative to positive to negative again
 
 # Plot predictions (with raw data as points)
 beetles$fit <- predict(beetles_mod)

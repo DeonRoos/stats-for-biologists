@@ -1,0 +1,121 @@
+"habitat" "activity"
+"Rainforest" 10.98
+"Rainforest" 10.47
+"Rainforest" 9.89
+"Rainforest" 9.79
+"Rainforest" 11.16
+"Rainforest" 11.29
+"Rainforest" 10.53
+"Rainforest" 9.87
+"Rainforest" 8.78
+"Rainforest" 8.88
+"Rainforest" 8.33
+"Rainforest" 10.47
+"Rainforest" 10.83
+"Rainforest" 10.29
+"Rainforest" 6.73
+"Rainforest" 9.85
+"Rainforest" 9.07
+"Rainforest" 10.45
+"Rainforest" 8.39
+"Rainforest" 7.99
+"Rainforest" 11.14
+"Rainforest" 10.32
+NA 11.04
+"Rainforest" 9.79
+"Rainforest" 10.4
+"Rainforest" 8.46
+"Rainforest" 9.88
+"Rainforest" 10.68
+"Rainforest" 7.94
+"Rainforest" 9.89
+"Dry Forest" 6.56
+"Dry Forest" 7.67
+"Dry Forest" 7.49
+"Dry Forest" 9.2
+"Dry Forest" 7.5
+"Dry Forest" 8.39
+"Dry Forest" 8.34
+"Dry Forest" 7.51
+"Dry Forest" 7.43
+"Dry Forest" 8.43
+"Dry Forest" 7.13
+"Dry Forest" 8
+"Dry Forest" 8.5
+"Dry Forest" 9.97
+"Dry Forest" 6.8
+"Dry Forest" 8.13
+"Dry Forest" 8.33
+"Dry Forest" 8.67
+"Dry Forest" 8.64
+"Dry Forest" 9.94
+"Dry Forest" 7.45
+"Dry Forest" 7.23
+"Dry Forest" 7.35
+"Dry Forest" 6.97
+"Dry Forest" 7.32
+"Dry Forest" 6.57
+"Dry Forest" 8.9
+"Dry Forest" 7.76
+"Dry Forest" 9
+"Dry Forest" 7.97
+"Spiny Forest" 7.59
+"Spiny Forest" 6.86
+"Spiny Forest" 6.54
+"Spiny Forest" 6.18
+"Spiny Forest" 7.65
+"Spiny Forest" 5.87
+"Spiny Forest" 4
+"Spiny Forest" 6.71
+"Spiny Forest" 6.49
+"Spiny Forest" 3.88
+"Spiny Forest" 7.13
+"Spiny Forest" 4.79
+"Spiny Forest" 6.3
+"Spiny Forest" 6.08
+"Spiny Forest" 6.2
+"Spiny Forest" 5.69
+"Spiny Forest" 7.42
+"Spiny Forest" 6.68
+"Spiny Forest" 4.96
+"Spiny Forest" 6.02
+"Spiny Forest" 4.76
+"Spiny Forest" 6.99
+"Spiny Forest" 6.86
+"Spiny Forest" 4.24
+"Spiny Forest" 6.15
+"Spiny Forest" 7.11
+"Spiny Forest" 5.82
+"Spiny Forest" 5.74
+"Spiny Forest" 5.75
+"Spiny Forest" 6.82
+"Mangrove" 5.77
+"Mangrove" 6.48
+"Mangrove" 6.3
+"Mangrove" 7.69
+"Mangrove" 7.55
+"Mangrove" 4.93
+"Mangrove" 5.83
+"Mangrove" 5.82
+"Mangrove" 6.97
+"Mangrove" 8.15
+"Mangrove" 9.21
+"Mangrove" 7.44
+"Mangrove" 8.04
+"Mangrove" 7.13
+"Mangrove" 5.73
+"Mangrove" 7.37
+"Mangrove" 6.8
+"Mangrove" 8.15
+"Mangrove" 6.44
+"Mangrove" 5.86
+"Mangrove" 5.71
+"Mangrove" 8.12
+"Mangrove" 6.3
+"Mangrove" 6.97
+"Mangrove" 6.38
+"Mangrove" 5.17
+"Mangrove" 8.9
+"Mangrove" 7.53
+"Mangrove" 6.74
+"Mangrove" 7.91

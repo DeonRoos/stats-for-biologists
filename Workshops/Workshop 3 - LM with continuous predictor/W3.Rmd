@@ -267,6 +267,10 @@ $\mu_i = \underline{\phantom{\beta_0}} + \underline{\phantom{\beta_0}} \times dr
 # The boto with 7 years of drought will be 26.5 cm shorter *according to our model*
 ```
 
+# 5. Diagnose the model and check assumptions.
+
+We'll cover this on Friday.
+
 # 6. Summarise the results.
 
 We'll come back to "5. Diagnose the model and check assumptions." on Friday. For today we'll go through how to take these results and convert them into a figure.

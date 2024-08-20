@@ -1,0 +1,267 @@
+---
+title: 'Computer Workshop 6: Diagnosing linear models with a categorical predictor'
+author: "Roos & Pinard"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+    reference_docx: "../sbstemplate.docx"
+---
+
+# Workshop Structure
+
+As always, we are using the workflow below to structure the workshops:
+
+1. Formulate a research question.
+2. Perform exploratory data analysis.
+3. Identify any hidden assumptions.
+4. Fit an appropriate model.
+5. Diagnose the model and check assumptions [Focus of today].
+6. Summarise the results.
+7. Interpret and provide inferences.
+
+For this workshop, we'll continue with the models you ran on Tuesday, going back to step 5 to complete our workflow.
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="show")
+answer_sheet <- TRUE
+library(ggplot2)
+library(here)
+```
+
+If you didn't manage to finish Workshop 5, please do so now before moving on to diagnosing your model.
+
+# A Reminder of the Model
+
+On Tuesday you ran a model attempting to understand if Java mongoose may be decreasing the average weight of Amami rabbits on two islands, south of mainland Japan. Our model took the form:
+
+$weight_i \sim Normal(\mu_i, \sigma)$
+
+$\mu_i = \beta_0 + \beta_1 \times Present_i$
+
+where $\beta_0$ was the average weight of rabbits when mongoose were absent (i.e. when $Present = 0$), and $\beta_1$ was the difference from that average weight when mongoose were present (i.e. when $Present = 1$).
+
+Having fit the model, we can replace the two, previously unknown, parameters $\beta_0$ and $\beta_1$ with what we now estimate these values to be:
+
+$\mu_i = 269.6 + -2.9 \times Present_i$
+
+> If you get different parameter estimates, you've likely missed one or both data entry mistakes present in the data. Carry out an EDA to identify and resolve these before running the model.
+
+We then used that model to create predictions and plotted these:
+
+```{r, echo = F}
+rabbit <- read.table(here("Workshops/Workshop 5 - LM with categorical predictors/Data", "rabbits.txt"), header = T)
+rabbit$mongoose[7] <- "Present"
+rabbit$weight[rabbit$weight > 350] <- rabbit$weight[rabbit$weight > 350] - 100
+rabbit_mod <- lm(weight ~ mongoose, data = rabbit)
+fake <- data.frame(mongoose = unique(rabbit$mongoose))
+preds <- predict(rabbit_mod, newdata = fake, se.fit = TRUE)
+fake$fit <- preds$fit
+fake$low95 <- preds$fit - 1.96 * preds$se.fit
+fake$upp95 <- preds$fit + 1.96 * preds$se.fit
+ggplot(fake) +
+  geom_errorbar(aes(x = mongoose, ymin = low95, ymax = upp95), width = 0.1) +
+  geom_point(aes(x = mongoose, y = fit)) +
+  labs(x = "Java mongoose",
+       y = "Predicted weight of rabbits (g)") +
+  theme_minimal()
+```
+
+But, as ever, can we convince ourselves that this model is worthy of our trust before we present it to others?
+
+# Diagnosing
+
+The process of diagnosing is exactly the same as with linear models with a continuous predictor, the only difference coming in one plot. Let's go through these plots to remind ourselves what we're looking for, how important it is to meet a respective assumption, and whether that should influence how we see the model.
+
+```{r}
+par(mfrow = c(2,2)) # split figure into a 2 x 2
+plot(rabbit_mod)
+par(mfrow = c(1,1)) # reset to 1 x 1
+```
+
+## `Residuals vs Fitted`
+
+```{r, echo = F}
+plot(rabbit_mod, which = 1)
+```
+
+As a reminder, the y-axis is residual errors (the difference between an actual measurement and the prediction for that same measurement).
+
+The x-axis represents the `Fitted values`, which is just a different way of saying "Predicted values". Here, our fitted values are the predicted weight of rabbits on either island with or without mongoose. 
+
+### Linearity
+
+One of the main differences from last week is that our model doesn't have a linear trend - there's no line that we can draw between mongoose being present and mongoose being absent. So we're actually not assuming linearity here. One less thing to check for :).
+
+### Equal Variance of Errors
+
+We can, however, check for equal variance of errors.
+
+```{r}
+plot(rabbit_mod, which = 1)
+```
+
+What we're looking for here is whether each category has broadly equal spread above and below a residual error of zero. The two lines you see here are the two groups. Remember that there was about a two to three gramm difference between the island with mongoose and the one without, and we can see that here - when mongoose are absent the model predicts they should weigh about 269 g and when there are mongoose the model predicts rabbits weigh 266 g. In both groups, there are rabbits that weigh about 40 g more or less than the model expects, so it looks pretty good for meeting our assumption of equal variance of errors.
+
+## `Scale-Location`
+
+Remember that the Scale-Location plot offers us another chance to evaluate the equal variance assumption.
+
+```{r, echo = F}
+plot(rabbit_mod, which = 3)
+```
+
+From the plot above, it seems like the assumption is maybe less well met than the Residuals vs Fitted plot would suggest, but it still looks good.
+
+## `Q-Q Residuals`
+
+Next to the Q-Q plot. 
+
+```{r, echo = F}
+plot(rabbit_mod, which = 2)
+```
+
+Keep in mind that we're assuming that the residuals of our model take on a $Normal$ distribution, so that's what this plot is looking for. What having $Normally$ distributed residuals actually means, though, is whether or not our model is predicting the individual rabbits of our dataset accurately, which 99% of the time, we're not too bothered about.
+
+Never-the-less, we still want the points to broadly lie on the dashed line, but we don't stress out too much if it's not perfect. If we ever did see utterly bizarre patterns in the points, that implies one of two things. Either you need to choose a different distribution for your data generating process and fit a "Generalised Linear Model" (GLM), or your model is missing some important predictor variables (more on both of these options later in the course).
+
+## `Residuals vs Leverage`
+
+The last plot doesn’t assess the assumptions we’ve discussed but provides a different kind of insight. It helps identify disproportionately influential data points.
+
+```{r, echo = F}
+plot(rabbit_mod, which = 5)
+```
+
+Just like last week, we're looking to see if we can spot the contour lines indicating a Cook's distance of 1. In the plot above, these contour lines are no-where in sight, so we don't have any issues here either.
+
+If you want an alternative way to check Cook's distance, without showing Leverage, then you can do:
+
+```{r}
+plot(rabbit_mod, which = 4)
+```
+
+None of our points are close to 1, so we don't have any observations that are pulling our line one way or another.
+
+## Question Set One
+
+1. Which assumption(s) can be checked for using the Residuals vs Fitted plot when fitting a linear model with only a categorical predictor variable?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# Equal Variance of Errors. We have no linear trend, so there's no assumption of linearity.
+```
+
+2. Which assumption(s) can be check for using the Scale-Location plot when fitting a linear model with only a categorical predictor variable?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# Equal Variance of Errors
+```
+
+3. Which assumption(s) can be check for using the Q-Q Residuals plot?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# Normality of Errors
+```
+
+4. Is meeting the assumption of Equal Variance of Errors important?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# Having unequal variance errors (or residuals) can inflate the standard error. This means your 95% confidence intervals will be inflated which can make drawing inference a bit more challenging. It's a bigger issue when using P-Values and Null Hypothesis Significance Testing, where it leads to inflated type 1 and type 2 errors (thinking something is significant when it's not, or vice versa)
+```
+
+5. Using the diagnostics from the Amami rabbit model, are there any diagnostic plots which indicate a problem in the model?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# No, they seem pretty well met across the board.
+```
+
+6. Does meeting the assumptions of these plots mean the model is trustworthy?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# No, it just means we have not found any issues related to a subset of our assumptions. Keep in mind that on Tuesday we were concerned about the validity of mongoose being absent on one of the islands. That's the biggest hurdle for this model, and these diagnostic plots don't help us at all with that.
+```
+
+# A More Visually Appealing Alternative
+
+If you preferred the plots made by `performance` using `check_model()` you can use them for the rabbit model, but note that it doesn't work particularly well for our simple model. For instance, it tries to draw a green line between our two groups, which looks pretty wiggly, but that doesn't actually mean anything here.
+
+```{r}
+library(performance)
+check_model(rabbit_mod)
+```
+
+# The Lemurs
+
+Having diagnosed the Amami rabbit model, let's move on to the lemur model from the last workshop. If you haven't run that model yet, do so now. Once you have, go through the process of checking the model diagnostics to determine if you’re willing to place your trust in the model.
+
+## Question Set Two
+
+1. Do any of the diagnostic plots for the beetle model suggest a reason to not trust the results?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# The model has pretty clear non-linearity, and fitting a linear trend really messes up inference because the beetles have a thermal optimum at about 20 degrees. Too cold or too hot are equally bad and result in fewer offspring being produced. Basically, we're trying to fit a straight line through a hump. It just doesn't work.
+```
+
+```{r, include=answer_sheet, class.source="bg-success", eval = T, echo = F}
+lemur <- read.table(here("Workshops/Workshop 5 - LM with categorical predictors/Data", "lemurs.txt"), header = TRUE)
+```
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# Load data
+lemur <- read.table("H:/BI3010/Workshop3/lemur.txt", header = TRUE)
+```
+
+```{r, include=answer_sheet, class.source="bg-success", eval = answer_sheet}
+# EDA
+summary(lemur)
+ggplot(lemur) +
+  geom_point(aes(x = habitat, y = activity)) +
+  theme_minimal()
+# One data entry mistake where "Rainforest" has been entered as "Rain forest"
+# Fixing:
+lemur$habitat[lemur$habitat == "Rain forest"] <- "Rainforest"
+ggplot(lemur) +
+  geom_point(aes(x = habitat, y = activity)) +
+  theme_minimal()
+# Entry mistake corrected
+
+# Model fit
+lemur_mod <- lm(activity ~ habitat, data = lemur)
+
+# Diagnostics
+plot(lemur_mod)
+# Diagnostics look good
+# Can't think of any hidden assumptions that could be violated
+
+# Plot predictions & 95% CI
+fake <- data.frame(habitat = lemur$habitat)
+preds <- predict(lemur_mod, newdata = fake, se.fit = TRUE)
+fake$fit <- preds$fit
+fake$low95 <- preds$fit - 1.96 * preds$se.fit
+fake$upp95 <- preds$fit + 1.96 * preds$se.fit
+ggplot(fake) +
+  geom_errorbar(aes(x = habitat, ymin = low95, ymax = upp95)) +
+  geom_point(aes(x = habitat, y = fit)) +
+  labs(x = "Lemur habitat",
+       y = "Predicted hours active") +
+  theme_minimal()
+
+# Most time spent active in rainforest, then dry forest, then mangrove and only ca. 6 hours in spiny forest
+# If we were looking at which habitat to conserve for lemurs, it seems like rainforest would be top choice
+# based on this model and data alone (keep in mind spiny could still be important despite not being used for 
+# long periods of time)
+```
+
+
+
+# Assumption table
+
+| **Assumption**                   | **Description**                                                                                             | **Example of Violation**                                                                                                                                       |
+|---------------------------------|-------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1. **Validity**                     | The data is able to answer the research question effectively.                      | Using IQ to measure overall intelligence (what does IQ even measure?).                      |
+| 2. **Representativeness**           | The data reflects the population or group being studied.                              | Using survey data from a rural area to draw conclusions about an urban population. |
+| 3. **Additivity**                   | Effects of predictors are additive and there are no interactions between them.         | Assuming that study hours and sleep hours independently affect exam scores without considering their combined effect (imagine a Venn diagram with study and sleep overlapping). |
+| 4. **Linearity**                   | The relationship between predictors and the outcome is linear.                                   | Assuming plant growth will continue to increase indefinitely without ever levelling out.          |
+| 5. **Independence of Errors**       | Observations are independent of each other. (Related to residual errors.)                                                       | If modelling height, the data come from the same group of children over time.               |
+| 6. **Equal Variance of Errors**     | Residuals have constant variance across all levels of predictors ("homoscedasticity"). (Related to residual errors.)  | If modelling income, variability in salaries is not the same across all levels of a company’s hierarchy.              |
+| 7. **Normality of Errors**          | Residuals should be normally distributed.  (Related to residual errors.)                         | If modelling income, the presence of any extremely wealthy individuals will be hard for the model to understand and explain.     

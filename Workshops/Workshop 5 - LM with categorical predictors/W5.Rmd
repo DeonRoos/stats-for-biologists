@@ -77,14 +77,14 @@ They ask you to resolve these issues but also to check for any other possible mi
 
 1. What `mongoose` value should the first mistake have?
 
-```{r, include=answer_sheet, class.source="bg-success", eval = F}
+```{r, include=answer_sheet, class.source="bg-success", eval = T}
 # The rabbit was from Oshima, not Tokunoshima, so mongoose should be Present not Absent
 rabbit$mongoose[7] <- "Present"
 ```
 
 2. Which rabbit had the incorrect weight?
 
-```{r, include=answer_sheet, class.source="bg-success", eval = F}
+```{r, include=answer_sheet, class.source="bg-success", eval = T}
 # If we do a plot of the data:
 ggplot(rabbit) +
   geom_histogram(aes(x = weight))
@@ -406,10 +406,10 @@ activity_levels <- round(c(
 
 # Create the data frame
 lemur <- data.frame(habitat = habitat_types, activity = activity_levels)
-
+lemur$habitat <- as.character(lemur$habitat)
 lemur$habitat[23] <- "Rain forest"
 
-write.table(lemur,  here("Workshops/Workshop 5 - LM with categorical predictors/Data", "lemurs.txt"), row.names = FALSE)
+write.table(lemur, here("Workshops/Workshop 5 - LM with categorical predictors/Data", "lemurs.txt"), row.names = FALSE)
 ```
 
 # Assumption table

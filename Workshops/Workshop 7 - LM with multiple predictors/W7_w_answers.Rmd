@@ -22,7 +22,7 @@ As always, we are using the workflow below to structure the workshops:
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="show")
-answer_sheet <- FALSE
+answer_sheet <- TRUE
 library(ggplot2)
 library(here)
 ```

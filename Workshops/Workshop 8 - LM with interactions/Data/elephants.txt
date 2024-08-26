@@ -1,0 +1,202 @@
+"veg_cover" "prox_town" "activity"
+84 "Far" 15.7
+32 "Very Near" -9.2
+68 "Very Near" -15.2
+70 "Far" 11.9
+46 "Very Near" -10.1
+70 "Near" 0.6
+42 "Far" 11.6
+30 "Very Near" -4.8
+88 "Far" 16.9
+12 "Far" 8.8
+90 "Near" -5
+95 "Very Near" -16.1
+70 "Very Near" -17.3
+52 "Far" 9.9
+45 "Far" 12.7
+84 "Far" 9.4
+11 "Near" 2.4
+86 "Far" 10.7
+13 "Far" 6.2
+30 "Near" 3.6
+5 "Very Near" -2.8
+11 "Far" 11.3
+68 "Far" 13.4
+85 "Near" -3.7
+80 "Far" 11
+29 "Near" 1.7
+62 "Near" -2.3
+82 "Far" 7.9
+0 "Near" -1.5
+2 "Very Near" -4.9
+44 "Very Near" -9.2
+29 "Far" 9.1
+18 "Far" 7.8
+97 "Far" 11.1
+68 "Near" -2.4
+68 "Very Near" -11.5
+5 "Very Near" -1.6
+97 "Far" 15
+2 "Far" 7.5
+65 "Very Near" -8.5
+87 "Far" 14
+91 "Near" -3.5
+62 "Far" 7
+39 "Far" 5.9
+85 "Very Near" -11.1
+45 "Far" 10.1
+42 "Far" 2.4
+28 "Far" 6.7
+65 "Far" 8.8
+65 "Very Near" -9
+6 "Near" -6.1
+74 "Far" 11.6
+45 "Very Near" -8
+49 "Near" -2.3
+75 "Very Near" -11.5
+72 "Very Near" -20.1
+2 "Very Near" -2
+19 "Far" 11
+46 "Near" -0.6
+28 "Near" -0.2
+7 "Near" 2.1
+43 "Very Near" -8
+37 "Near" -0.1
+64 "Far" 9.6
+31 "Far" 10.8
+81 "Very Near" -11.4
+89 "Near" -5.2
+72 "Near" 2.5
+31 "Very Near" -9
+29 "Very Near" -6.2
+65 "Far" 11.2
+20 "Near" -5.2
+63 "Near" 0
+44 "Far" 11.6
+31 "Very Near" -8.1
+71 "Very Near" -7.3
+28 "Near" -3
+4 "Near" 2.9
+67 "Far" 11.6
+22 "Very Near" -8.4
+19 "Near" -4.7
+25 "Very Near" -7
+50 "Very Near" -13.9
+2 "Very Near" -3.2
+69 "Far" 11.2
+48 "Very Near" -15.4
+98 "Near" -4.3
+31 "Very Near" -5
+12 "Near" 0.9
+86 "Very Near" -11.5
+55 "Far" 11.4
+91 "Very Near" -13.9
+63 "Very Near" -16.2
+4 "Near" -0.2
+75 "Very Near" -15.7
+18 "Very Near" -5.6
+74 "Far" 12.8
+51 "Very Near" -12.1
+97 "Very Near" -15.2
+57 "Very Near" -7.7
+29 "Near" -0.6
+67 "Far" 11.3
+22 "Very Near" -7.4
+53 "Very Near" -12.2
+26 "Near" -5.8
+82 "Far" 11.8
+15 "Far" 6.8
+6 "Far" 3
+25 "Very Near" -2.9
+80 "Near" -9.6
+8 "Very Near" -5
+62 "Near" -6.5
+81 "Far" 9.1
+9 "Far" 4.6
+41 "Very Near" -10.7
+90 "Near" -1.3
+84 "Very Near" -14
+17 "Very Near" -10.5
+49 "Far" 7.6
+26 "Near" 0.3
+94 "Very Near" -16.8
+6 "Very Near" 0.8
+81 "Near" -7.2
+12 "Near" 1.6
+70 "Very Near" -10.8
+2 "Near" -3
+57 "Far" 13.8
+81 "Near" -8.6
+95 "Near" -4.8
+100 "Very Near" -18.1
+45 "Far" 6
+1 "Near" -0.1
+2 "Far" 7.6
+45 "Far" 9
+76 "Near" -2.6
+68 "Near" -2.8
+69 "Far" 7.5
+9 "Near" -0.5
+2 "Very Near" -9.5
+60 "Very Near" -9
+87 "Far" 16
+35 "Very Near" -8.2
+11 "Very Near" 1
+46 "Very Near" -9.8
+62 "Far" 10.7
+99 "Near" -9
+53 "Near" -8.7
+26 "Far" 7.4
+58 "Very Near" -10.3
+38 "Far" 14.4
+38 "Far" 13.9
+44 "Far" 5.7
+92 "Near" -5.6
+18 "Very Near" -5.7
+75 "Very Near" -16.5
+44 "Far" 10.1
+15 "Far" 5.4
+1 "Very Near" -4.3
+51 "Near" -4.8
+17 "Near" -3.3
+11 "Near" -3.3
+77 "Very Near" -15
+84 "Far" 13.8
+17 "Far" 6.2
+81 "Very Near" -15.8
+80 "Very Near" -14.6
+4 "Very Near" -5.4
+62 "Near" -3
+56 "Far" 10.7
+39 "Near" -3.2
+87 "Very Near" -13.7
+71 "Near" -5.7
+43 "Very Near" -11.1
+81 "Very Near" -15.6
+40 "Near" -4.7
+64 "Very Near" -10.9
+40 "Far" 7.3
+1 "Very Near" -7.4
+79 "Very Near" -13
+58 "Very Near" -10
+11 "Very Near" -7
+93 "Near" -1.8
+30 "Near" -0.7
+74 "Far" 11.6
+24 "Very Near" -6
+99 "Near" -8.5
+75 "Near" -4.8
+74 "Near" -2.8
+71 "Near" -3.2
+13 "Near" 2.7
+2 "Very Near" -1.8
+3 "Far" 4.2
+12 "Far" 7.2
+8 "Near" -1.1
+12 "Far" 5.4
+4 "Far" 10.6
+49 "Near" -4.7
+48 "Very Near" -9
+88 "Near" -5.8
+92 "Far" 15
+99 "Far" 17.7

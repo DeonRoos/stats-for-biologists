@@ -1,5 +1,5 @@
 ---
-title: 'Computer Workshop 1.1: Hidden Assumptions'
+title: 'Computer Workshop 2: Data visualisation'
 author: "Roos & Pinard"
 date: 'Last updated: `r Sys.Date()`'
 output:
@@ -20,7 +20,7 @@ As always, we are using the workflow below to structure the workshops:
 6. Summarise the results.
 7. Interpret and provide inferences.
 
-We covered steps 2 and 3 in the previous workshop but we'll expand your toolkit for doing so today suing data visualisation.
+We covered steps 2 and 3 in the previous workshop but we'll expand your toolkit for doing so today using data visualisation.
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="show")
@@ -41,11 +41,11 @@ These skills will be used throughout the course.
 
 `ggplot2` is an implementation of the "Grammar of Graphics," a framework for data visualisation. It allows you to build plots layer by layer, starting with a base plot and then adding additional elements such as scales, themes, and geometries. Familiarity with `ggplot2` is occasionally asked for by employers; we've even seen job adverts from companies such as Spotify listing this an an essential criteria.
 
-It is important to note, however, that `ggplot2` is not the only way to create visualisations. It's just an increasingly preferred one. Many of the figures you will make on this course can be near-perfectly recreated using the visualisation framework offered by `base R`. We simply prefer `ggplot2` as we feel it is a more intuiative way to create figures; indeed, nearly every single figure you have and will see on this course were produced in `ggplot2`.
+It is important to note, however, that `ggplot2` is not the only way to create visualisations. It's just an increasingly preferred one. Many of the figures you will make on this course can be near-perfectly recreated using the visualisation framework offered by `base R`. We simply prefer `ggplot2` as we feel it is a more intuitive way to create figures; indeed, nearly every single figure you have and will see on this course were produced in `ggplot2`.
 
 ## Load the data
 
-For the first part of this workshop, we'll be working with data on the Amazon river dolphin, or the boto (*Inia geoffrensis* - I wonder if the person who named the species, named them after their friend Geoff...). For this first interaction with this data we'll broadly say that we're interested in seeing if there is sexual dimorphism in asymptotic length (i.e. once an animal has stopped growing) between females and males, as well as how the species respond to droughts. As always, before we do any analysis, we need to ensure there is nothing *weird* in the data. In workshop 1 you did this by using simple summary statistics (e.g. `mean()`). While doing so is useful, complimenting this with data visualisations is really powerful.
+For the first part of this workshop, we'll be working with data on the Amazon river dolphin, or the boto (*Inia geoffrensis* - I wonder if the person who named the species had a friend called Geoff...). For this first interaction with this data we'll broadly say that we're interested in seeing if there is sexual dimorphism in asymptotic length (i.e. once an animal has stopped growing) between females and males, as well as how the species respond to droughts. As always, before we do any analysis, we need to ensure there is nothing *weird* in the data. In workshop 1 you did this by using simple summary statistics (e.g. `mean()`). While doing so is useful, complimenting this with data visualisations is really powerful.
 
 Start by downloading the data from today's practical folder, called `boto.txt`.
 
@@ -165,7 +165,7 @@ ggplot(boto) +
   geom_point(aes(y = length, x = sex))
 ```
 
-Kind of? It's a bit hard to see the spread of data for each sex. A better way to show this is to use some sort of tool which will show help the reader understand the range of `length` for each `sex` but also how the data is spread. There are two common options people use for this; boxplots and violin plots. It's trivially easy to swap between these, because all we need to do is change the geometry function from `geom_point()` to either `geom_boxplot()` or `geom_violin()`:
+Kind of? It's a bit hard to see the spread of data for each sex. A better way to show this is to use some sort of tool which will help the reader understand the range of `length` for each `sex` but also how the data is spread. There are two common options people use for this; boxplots and violin plots. It's trivially easy to swap between these, because all we need to do is change the geometry function from `geom_point()` to either `geom_boxplot()` or `geom_violin()`:
 
 ```{r}
 # Boxplot
@@ -177,7 +177,7 @@ ggplot(boto) +
   geom_violin(aes(y = length, x = sex))
 ```
 
-Both of these present the same information in different ways. The boxplot uses boxes and lines to indicate the range, the first and third quantiles and the median. Conversely, the violin plot also shows the spread of data but by creating density plots which are mirrored. Boxplots have a long history and use in science, but people are increasingly using violin plots, simply because they're more transparent than boxplots.
+Both of these present the same information in different ways. The boxplot uses boxes and lines to indicate the range, the first and third quantiles and the median. Conversely, the violin plot also shows the spread of data but by creating density plots which are mirrored. Boxplots have a long history and use in science, but people are increasingly using violin plots, simply because they're more transparent and clear than boxplots.
 
 With either boxplots and violin plots, it's fairly common that people will add the data points to the figure as well - to really hammer home the spread of data. But we've seen before that using `geom_point()` basically gives us a line of points that doesn't help us understand the spread at all. An alternative is to use something called "jiterring". When we jitter points, we add a small random value to either or both the x and y position to spread the data out a little bit. With our boto data above, we wouldn't want to add anything to y (as we're interested in the length of the dolphins, so we don't want to mess that up) but we can happily add something to x (or `sex`). To do so, we can use `geom_jitter()` but we want to specify that "noise" should only be added to x and not y. Here's how we do that:
 
@@ -201,7 +201,7 @@ ggplot(boto) +
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # The code still runs, but with a warning saying:
 # "Ignoring unknown aesthetics: height and width"
-# height and width are specified inside the aesethics - should be outside
+# height and width are specified inside the aesthetics - should be outside
 ```
 
 2. Find the error in this code:

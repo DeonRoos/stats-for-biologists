@@ -437,6 +437,79 @@ hist(beetles$offspring)
 write.table(beetles, here("Workshops/Workshop 3 - LM with continuous predictor/Data", "beetles.txt"), row.names = FALSE)
 ```
 
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# The code below captures the full workflow as if I were analysing this myself:
+
+# Deon Roos
+# Analysis of burying beetle fecundity
+# How does temperature associate with fecundity?
+
+# Packages -------------------------------------
+library(ggplot2)    # For plotting
+library(ggeffects)  # For quick plotting of model fit
+
+# Data -----------------------------------------
+# (Not running these here because of how this document is created)
+# setwd(H:/BI3010/)
+# beetles <- read.table("beetles.txt", header = TRUE)
+
+# EDA ------------------------------------------
+
+str(beetles)
+# n = 234
+summary(beetles)
+# minimum is 1 offspring, seems a bit low?
+
+ggplot(beetles) +
+  geom_histogram(aes(x = offspring), colour = "white", binwidth = 1) +
+  theme_minimal()
+# After plotting, offspring of 1 seems reasonable - just on the low end
+
+ggplot(beetles) +
+  geom_histogram(aes(x = temperature), colour = "white", binwidth = 1) +
+  theme_minimal()
+# Fairly even spread of temperatures between -10 and 35 C
+
+ggplot(beetles) +
+  geom_point(aes(x = temperature, y = offspring)) +
+  theme_minimal()
+# Looks like a pretty clear non-linear trend
+# Offspring increases then decreases as temp increases
+
+## NOTE ##
+# Assumption of linearity very likely broken
+# Parameter estimates likely biased meaning results of model are likely not suitable for inference
+# CAUTION when interpreting model results
+
+# Hidden assumption ----------------------------
+# - See above - Linearity almost certainty broken
+# - Equal variance is possible? As temp increases maybe offspring begins to fluctuate a lot (plot looks ok though)
+# - Representativeness maybe? This is a lab population, so care needed when extrapolating to wild populations
+
+# Model fit ------------------------------------
+beet_mod <- lm(offspring ~ temperature, data = beetles)
+
+# Diagnose -------------------------------------
+# We'll cover this on Friday
+
+# Summarise ------------------------------------
+summary(beet_mod)
+# Model predicts 25.3 offspring are produced at 0 degrees (intercept is when X is 0, or temp is 0)
+# For every 1 degree change in temperature, we gain an additional 0.5 baby beetles
+# BUT(!) this model is biased, and so these parameters are unreliable, so we should not use this model
+
+preds <- ggpredict(beet_mod)
+plot(preds, add.data = TRUE)
+# The plot above includes the raw data (via add.data = TRUE)
+# The linear fit to the non-linear relationship is pretty clear
+
+# Interpret -----------------------------------
+# This model, as is, should not be used to make any kind of inference
+# (In reality, we'd need to change the model to allow temperature to have a non-linear effect)
+# (But given you don't know how to do that, we should stop here and advice/insist the results are not interpreted)
+```
+
+
 # Assumption table
 
 

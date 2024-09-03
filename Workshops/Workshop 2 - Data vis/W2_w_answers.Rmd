@@ -1,5 +1,5 @@
 ---
-title: 'Computer Workshop 1.1: Hidden Assumptions'
+title: 'Computer Workshop 2: Data visualisation'
 author: "Roos & Pinard"
 date: 'Last updated: `r Sys.Date()`'
 output:
@@ -10,8 +10,6 @@ output:
 
 # Workshop Structure
 
-As always, we are using the workflow below to structure the workshops:
-
 1. Formulate a research question.
 2. Perform exploratory data analysis [Focus of today].
 3. Identify any hidden assumptions [Focus of today].
@@ -20,14 +18,13 @@ As always, we are using the workflow below to structure the workshops:
 6. Summarise the results.
 7. Interpret and provide inferences.
 
-We covered steps 2 and 3 in the previous workshop but we'll expand your toolkit for doing so today suing data visualisation.
+We covered steps 2 and 3 in the previous workshop but we'll expand your toolkit for doing so today using data visualisation.
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="show")
 answer_sheet <- TRUE
 library(ggplot2)
 library(here)
-boto <- read.table(here("Workshops/Workshop 2 - Data vis/Data", "boto.txt"), header = T)
 ```
 
 # Learning Objectives
@@ -40,19 +37,55 @@ These skills will be used throughout the course.
 
 # Introduction to `ggplot2`
 
-`ggplot2` is an implementation of the "Grammar of Graphics," a framework for data visualisation. It allows you to build plots layer by layer, starting with a base plot and then adding additional elements such as scales, themes, and geometries. Familiarity with `ggplot2` is occasionally asked for by employers; we've even seen job adverts from companies such as Spotify listing this an an essential criteria.
+`ggplot2` is an implementation of the "Grammar of Graphics," a framework for data visualisation. It allows you to build plots layer by layer, starting with a base plot and then adding additional elements such as scales, themes, and geometries. Using this framework, you can create pretty sophisticated figures with surprisingly little effort. It's such a popular tool that familiarity with `ggplot2` is sometimes asked for by employers; we've even seen job adverts from companies such as Spotify listing this an an essential criteria.
 
-It is important to note, however, that `ggplot2` is not the only way to create visualisations. It's just an increasingly preferred one. Many of the figures you will make on this course can be near-perfectly recreated using the visualisation framework offered by `base R`. We simply prefer `ggplot2` as we feel it is a more intuiative way to create figures; indeed, nearly every single figure you have and will see on this course were produced in `ggplot2`.
+It is important to note, however, that `ggplot2` is not the only way to create visualisations. It's just an increasingly preferred one. Many of the figures you will make on this course can be near-perfectly recreated using the visualisation framework offered by `base R`. We simply prefer `ggplot2` as we feel it is a more intuitive way to create figures; indeed, nearly every single figure you have and will see on this course were produced in `ggplot2`.
 
 ## Load the data
 
-For the first part of this workshop, we'll be working with data on the Amazon river dolphin, or the boto (*Inia geoffrensis* - I wonder if the person who named the species, named them after their friend Geoff...). Specifically, we're interested here in seeing if there is sexual dimorphism in asymptotic length (i.e. once an animal has stopped growing) between females and males, as well as how the species respond to droughts. As always, before we do any analysis, we need to ensure there is nothing *weird* in the data. In workshop 1 you did this by using simple summary statistics (e.g. `mean()`). While doing so is useful, complimenting this with data visualisations is really powerful.
+For the first part of this workshop, we'll be working with data on the Amazon river dolphin, or the boto (*Inia geoffrensis* - I wonder if the person who named the species had a friend called Geoff...). For this first interaction with this data we'll broadly say that we're interested in seeing if there is sexual dimorphism in asymptotic length (i.e. once an animal has stopped growing) between females and males, as well as how the species respond to droughts. As always, before we do any analysis, we need to ensure there is nothing *weird* in the data. In workshop 1 you did this by using simple summary statistics (e.g. `mean()`). While doing so is useful, complimenting this with data visualisations is really powerful.
 
 Start by downloading the data from today's practical folder, called `boto.txt`.
+
+```{r datasets, echo = FALSE, message = FALSE}
+# For coordinators -
+# Code below simulates and exports the data used in the workshop
+# length of boto dolphin by sex
+# See https://www.lajamjournal.org/index.php/lajam/article/view/1523/505 for summary stats
+
+set.seed(2024)
+n <- 71
+boto <- data.frame(
+  sex = sample(c("Male", "Female"), size = n, replace = TRUE, prob = c(0.34, 0.66)),
+  drought = rpois(n = n, lambda = 3)
+)
+
+fem <- ifelse(boto$sex == "Female", 1, 0)
+
+b0 <- 231.5
+b1 <- -31.7
+b2 <- -5
+b3 <- 1
+mu <- b0 + b1 * fem + b2 * boto$drought + b3 * fem * boto$drought
+boto$length <- round(rnorm(n, mean = mu, sd = 10), digits = 0)
+
+# Plots to check sim data (without mistake below)
+# ggplot(boto) +
+#   geom_histogram(aes(x = length), colour = "white")
+# ggplot(boto) +
+#   geom_boxplot(aes(y = length, x = sex))
+# ggplot(boto) +
+#   geom_point(aes(x = drought, y = length))
+# ggplot(boto) +
+#   geom_point(aes(x = drought, y = length)) +
+#   facet_wrap(~sex)
+write.table(boto, here("Workshops/Workshop 2 - Data vis/Data", "boto.txt"), row.names = FALSE)
+```
 
 Go through the same steps as yesterday to load in your data; create a new script in RStudio, set your working (e.g. `setwd("H:/BI3010/workshop2")`), then load the data:
 
 ```{r, eval = FALSE}
+setwd("H:/BI3010/workshop2")
 boto <- read.table("boto.txt", header = TRUE) 
 ```
 
@@ -131,7 +164,7 @@ ggplot(boto) +
   geom_point(aes(y = length, x = sex))
 ```
 
-Kind of? It's a bit hard to see the spread of data for each sex. A better way to show this is to use some sort of tool which will show help the reader understand the range of `length` for each `sex` but also how the data is spread. There are two common options people use for this; boxplots and violin plots. It's trivially easy to swap between these, because all we need to do is change the geometry function from `geom_point()` to either `geom_boxplot()` or `geom_violin()`:
+Kind of? It's a bit hard to see the spread of data for each sex. A better way to show this is to use some sort of tool which will help the reader understand the range of `length` for each `sex` but also how the data is spread. There are two common options people use for this; boxplots and violin plots. It's trivially easy to swap between these, because all we need to do is change the geometry function from `geom_point()` to either `geom_boxplot()` or `geom_violin()`:
 
 ```{r}
 # Boxplot
@@ -143,7 +176,7 @@ ggplot(boto) +
   geom_violin(aes(y = length, x = sex))
 ```
 
-Both of these present the same information in different ways. The boxplot uses boxes and lines to indicate the range, the first and third quantiles and the median. Conversely, the violin plot also shows the spread of data but by creating density plots which are mirrored. Boxplots have a long history and use in science, but people are increasingly using violin plots, simply because they're more transparent than boxplots.
+Both of these present the same information in different ways. The boxplot uses boxes and lines to indicate the range, the first and third quantiles and the median. Conversely, the violin plot also shows the spread of data but by creating density plots which are mirrored. Boxplots have a long history and use in science, but people are increasingly using violin plots, simply because they're more transparent and clear than boxplots.
 
 With either boxplots and violin plots, it's fairly common that people will add the data points to the figure as well - to really hammer home the spread of data. But we've seen before that using `geom_point()` basically gives us a line of points that doesn't help us understand the spread at all. An alternative is to use something called "jiterring". When we jitter points, we add a small random value to either or both the x and y position to spread the data out a little bit. With our boto data above, we wouldn't want to add anything to y (as we're interested in the length of the dolphins, so we don't want to mess that up) but we can happily add something to x (or `sex`). To do so, we can use `geom_jitter()` but we want to specify that "noise" should only be added to x and not y. Here's how we do that:
 
@@ -167,7 +200,7 @@ ggplot(boto) +
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # The code still runs, but with a warning saying:
 # "Ignoring unknown aesthetics: height and width"
-# height and width are specified inside the aesethics - should be outside
+# height and width are specified inside the aesthetics - should be outside
 ```
 
 2. Find the error in this code:
@@ -189,17 +222,25 @@ ggplot(boto) +
 ggplot(boto) +
   geom_point(aes(x = length y = drought))
 ```
+
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # Gives an error saying:
 # "unexpected symbol in: ... geom_point(aes(x = length y"
 # We're missing a comma between the x and y arguments
 ```
 
+4. If I wanted to produce a histogram of boto lengths, what should my code look like?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+ggplot(boto) +
+  geom_histogram(aes(x = length))
+```
+
 # Adding more information
 
 With these basic figures in place, we can begin expanding on them. There's no shortage available to us. We can change the colours of most `geoms_`, we can have the colour of a `geom_` change based on another variable, the shape, the size, the transparency, and so on. More than we have the time to cover in this workshop.
 
-With that in mind, let's use a few of these options, starting with colour. We'll keep `x = drought` and `y = length`, and colour the points according to `sex`. Because `sex` is a variable within our `boto` dataset, we'll include this within `aes()`. Remember, anything that we want to change in the figure based on a variable in our dataset, is included via `aes().
+With that in mind, let's use a few of these options, starting with colour. We'll keep `x = drought` and `y = length`, and colour the points according to `sex`. Because `sex` is a variable within our `boto` dataset, we'll include this within `aes()`. Remember, anything that we want to change in the figure based on a variable in our dataset, is included via `aes()`.
 
 ```{r}
 ggplot(boto) +
@@ -259,9 +300,11 @@ ggplot(boto) +
 3. Remember that data visualisation can be used for Exploratory Data Analysis to identify if there is anything weird in the data. Having now produced a set of figures exploring the data, do you see anything *weird*?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# No - there's nothing that jumps out as being suspicious.
+# No - there's nothing that jumps out as being "wrong",
+# but it's a bit weird how accurate length is - how do you even measure
+# a dolphin in the Amazon? How do you measure it to 1 cm? Something we'd want
+# to check with our colleagues.
 ```
-
 
 # Optional: `geom_`s
 
@@ -318,8 +361,83 @@ See [here](https://www.workingnomads.com/jobs/data-graphics-analyst-the-athletic
 
 Create your most informative and visually appealing figure now. Keep the lecture on effective communication in your mind, and avoid some of the pitfalls we discussed. If you need help figuring out how to implement one of your ideas, see [Intro2R chapter](https://intro2r.com/graphics_r.html) for a more detailed walk through, or else use your LLM or choice to help. If using an LLM, just remember to mention that you are using `R`, `ggplot2` and do not want to use any additional packages. There is nothing wrong with using additional packages, but they can just add lots of extra moving parts to the mix (and cause conflict issues). We'd suggest you try and limit the number of additional packages you have loaded while you're still getting the hang of things, but if you feel comfortable using `R`, then go ahead by all means.
 
+```{r, include=answer_sheet, class.source="bg-success", eval = answer_sheet}
+# Here's my version of the best looking and most informative figure using the boto data
+p1 <- ggplot(boto) +
+  geom_histogram(aes(x = length, fill = sex), 
+                 position = position_dodge(), binwidth = 10) +
+  scale_fill_brewer(palette = "Dark2") +
+  theme_classic() +
+  labs(x = "Boto length (cm)",
+       y = "Frequency",
+       fill = "Sex")
+
+p2 <- ggplot(boto) +
+  geom_histogram(aes(x = drought), 
+                 position = position_dodge(), binwidth = 1, colour = "white") +
+  scale_fill_brewer(palette = "Dark2") +
+  theme_classic() +
+  labs(x = "Number of droughts",
+       y = "Frequency")
+
+p3 <- ggplot(boto) +
+  geom_point(aes(x = drought, y = length)) +
+  theme_classic() +
+  labs(x = "Number of droughts",
+       y = "Boto length (cm)")
+
+p4 <- ggplot(boto) +
+  geom_violin(aes(x = sex, y = length, fill = sex), alpha = 0.3, show.legend = FALSE) +
+  geom_jitter(aes(x = sex, y = length), height = 0, width = 0.05) +
+  scale_fill_brewer(palette = "Dark2") +
+  theme_classic() +
+  labs(x = "Sex",
+       y = "Boto length (cm)")
+
+p5 <- ggplot(boto) +
+  geom_point(aes(x = drought, y = length, colour = sex)) +
+  theme_classic() +
+  scale_colour_brewer(palette = "Dark2") +
+  labs(x = "Number of droughts",
+       colour = "Sex",
+       y = "Boto length (cm)") +
+  facet_wrap(~sex)
+
+library(patchwork) # Patchwork allows you to "stitch" ggplots together
+
+(p1 + p2) / (p3 + p4) / p5
+```
+
+
 ## The bad
 
 Now for the part I'm excited about. Do the same as above, but this time, make it a miserably ugly figure. It still needs to *contain* the information (i.e. no blank figures) and be *somewhat* readable. If you need inspiration, search for "graph crimes", or "chart crimes" in your search engine - there are *lots* of examples you can use for "inspiration".
 
 Once, you're happy with your masterpieces, email you're favourite the whomever is running your session (either Deon or Michelle), and we'll have an "Art Exhibit" to finish the workshop :D.
+
+```{r, include=answer_sheet, class.source="bg-success", eval = answer_sheet}
+# Here's my "best" attempt at making something disgusting
+# Most of this is done by messing around with theme()
+ggplot(boto) +
+  geom_point(aes(x = drought, y = length, colour = sex), shape = 24, size = 10, alpha = 1) +
+  theme(
+    panel.background = element_rect(fill = "yellow"),
+    plot.background = element_rect(fill = "pink"),
+    panel.grid.major = element_line(colour = "red", size = 2),
+    panel.grid.minor = element_line(colour = "blue", size = 1),
+    axis.title.x = element_text(size = 20, angle = 90, vjust = 0.5, colour = "purple"),
+    axis.title.y = element_text(size = 20, angle = 0, hjust = 0.5, colour = "orange"),
+    axis.text = element_text(size = 15, colour = "green"),
+    legend.background = element_rect(fill = "cyan", colour = "black", size = 2),
+    legend.title = element_text(size = 15, colour = "brown", face = "italic"),
+    legend.text = element_text(size = 10, colour = "darkred"),
+    strip.background = element_rect(fill = "grey", colour = "black", size = 1.5),
+    strip.text = element_text(size = 20, colour = "red", face = "bold")
+  ) +
+  scale_colour_manual(values = c("pink", "green", "cyan")) +
+  labs(x = "Y-axis", 
+       y = "X-axis", 
+       colour = "[REMEMBER TO CHANGE THIS]") +
+  facet_wrap(~sex, scales = "free_y")
+```
+

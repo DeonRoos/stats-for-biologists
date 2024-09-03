@@ -82,7 +82,21 @@ ggplot(chup, aes(x = year, y = chup, colour = city, group = city)) +
 chup$alcohol_consumption <- round(chup$alcohol_consumption, digits = 1)
 chup$chup <- round(chup$chup, digits = 2)
 
-colnames(chup) <- c("year", "site", "alcho_units", "ufo", "chupa")
+colnames(chup) <- c("year", "city", "alc", "ufo", "chupa")
 
-write.table(chup, here::here("Workshops/Workshop 2 - Data vis", file = "chupa.txt"),
+head(chup)
+
+ggplot(chup, aes(x = alc, y = chupa)) +
+  geom_point()
+
+m1 <- lm(chupa ~ alc + ufo, data = chup)
+plot(m1)
+
+m1 <- lm(chupa ~ city, data = chup)
+plot(m1)
+summary(m1)
+
+model.matrix(chupa ~ city, data = chup)
+
+write.table(chup, here::here("Workshops/Workshop tutorials", file = "chupa.txt"),
             row.names = FALSE)

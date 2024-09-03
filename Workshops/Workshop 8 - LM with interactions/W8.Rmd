@@ -422,7 +422,95 @@ eleph$veg_cover <- round(eleph$veg_cover, digits = 0)
 write.table(eleph, here("Workshops/Workshop 8 - LM with interactions/Data", "elephants.txt"), row.names = FALSE)
 ```
 
-Go through the process of analysing this dataset to predict if elephants are more or less active based on proximity to towns and vegation cover (and their interaction). Consider how best to visualise your results and create a figure that is able to effectively do so.
+Go through the process of analysing this dataset to predict if elephants are more or less active based on proximity to towns and vegetation cover (and their interaction). Consider how best to visualise your results and create a figure that is able to effectively do so.
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# This is how I would analyse the elephant data
+
+# Deon Roos
+# Analysis of elephant activity by proximity to towns and vegetation cover
+# Interaction between proximity and vegetation deemed likely
+
+# Packages -------------------------------------
+library(ggplot2)    # For plotting
+library(ggeffects)  # For quick plotting of model fit
+
+# Data -----------------------------------------
+# (Not running these here because of how this document is created)
+# setwd(H:/BI3010/)
+# eleph <- read.table("elephants.txt", header = TRUE)
+
+# EDA ------------------------------------------
+# No issues found during EDA
+
+str(eleph)
+# n = 201
+summary(eleph)
+# No apparent issues
+
+ggplot(eleph) +
+  geom_density(aes(x = activity)) +
+  theme_minimal()
+
+ggplot(eleph) +
+  geom_density(aes(x = activity, fill = prox_town),
+               alpha = 0.5) + 
+  theme_minimal()
+
+ggplot(eleph) +
+  geom_boxplot(aes(y = activity, x = prox_town)) +
+  theme_minimal()
+
+ggplot(eleph) +
+  geom_point(aes(y = activity, x = veg_cover)) +
+  theme_minimal()
+
+ggplot(eleph) +
+  geom_point(aes(y = activity, x = veg_cover, colour = prox_town)) +
+  facet_wrap(~prox_town) +
+  theme_minimal()
+# Figure above implies interaction very likely
+
+
+# Hidden assumption ----------------------------
+# - Validity - Activity is compared to a "baseline" activity. Activity variable in general pretty vague. Would want more clarification on this variable from data collectors.
+# - Representativeness - Not entirely clear to me what this data represents, given activity of a herd is compared to baseline of elephants in "pristine" environment.
+
+# Model fit ------------------------------------
+el_mod <- lm(activity ~ veg_cover * prox_town, data = eleph)
+
+# Diagnose -------------------------------------
+par(mfrow = c(2,2))
+plot(el_mod)
+par(mfrow = c(1,1))
+# All in all, pretty good diagnostics. Nothing to be concerned about.
+
+# Summarise ------------------------------------
+summary(el_mod)
+# All parameters are difference in observed herds from elephants in a "pristine" environment
+# FAR AWAY PARAMETERS --------------------------
+# Model predicts 6.1 more hours of activity when elephants far away and 0% vegetation cover (compared to pristine)
+# When herds are Far away from towns, every additional percent of vegetation increases activity by 0.08 hours
+# NEAR PARAMETERS ------------------------------
+# When herds are near to towns, they are active for 6.3 hours *less* compared to Far away
+# For additional vegetation cover, they spend 0.12 *less* compared to the equivalent cover for Far elephants
+# VERY NEAR PARAMETERS -------------------------
+# When herds are very near, they are active for 9.7 hours *less* compared to Far away
+# For additional vegetation, the spend 0.21 *less* hours compared to the herds that are Far away
+
+# Main effects plots
+preds <- ggpredict(el_mod)
+plot(preds)
+# Interaction plot
+preds <- ggpredict(el_mod, terms = c("veg_cover", "prox_town"))
+plot(preds)
+
+# Interpret -----------------------------------
+# When elephants are far away from towns, the number of hours they are active for increases as vegetation cover increases, compared to the baseline levels of activity researchers had on elephants in "pristine" environments.
+# This changes when elephants are deemed "near" or "very near" to towns, whereby they are less active with increasing vegetation cover.
+# This may indicate that elephants attempt to avoid conflict with humans.
+```
+
 
 # Assumption table
 

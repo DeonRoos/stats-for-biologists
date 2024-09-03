@@ -194,14 +194,6 @@ check_model(rabbit_mod)
 
 Having diagnosed the Amami rabbit model, let's move on to the lemur model from the last workshop. If you haven't run that model yet, do so now. Once you have, go through the process of checking the model diagnostics to determine if you’re willing to place your trust in the model.
 
-## Question Set Two
-
-1. Do any of the diagnostic plots for the beetle model suggest a reason to not trust the results?
-
-```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# The model has pretty clear non-linearity, and fitting a linear trend really messes up inference because the beetles have a thermal optimum at about 20 degrees. Too cold or too hot are equally bad and result in fewer offspring being produced. Basically, we're trying to fit a straight line through a hump. It just doesn't work.
-```
-
 ```{r, include=answer_sheet, class.source="bg-success", eval = T, echo = F}
 lemur <- read.table(here("Workshops/Workshop 5 - LM with categorical predictors/Data", "lemurs.txt"), header = TRUE)
 ```
@@ -211,45 +203,82 @@ lemur <- read.table(here("Workshops/Workshop 5 - LM with categorical predictors/
 lemur <- read.table("H:/BI3010/Workshop3/lemur.txt", header = TRUE)
 ```
 
-```{r, include=answer_sheet, class.source="bg-success", eval = answer_sheet}
-# EDA
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# This is how I would analyse the lemur data
+
+# Deon Roos
+# Analysis of lemur activity by habitat type
+# In which habitat are lemurs most active
+
+# Packages -------------------------------------
+library(ggplot2)    # For plotting
+library(ggeffects)  # For quick plotting of model fit
+
+# Data -----------------------------------------
+# (Not running these here because of how this document is created)
+# setwd(H:/BI3010/)
+# lemur <- read.table("lemurs.txt", header = TRUE)
+
+# EDA ------------------------------------------
+
+str(lemur)
+# n = 120
 summary(lemur)
+# No apparent issues
+
 ggplot(lemur) +
-  geom_point(aes(x = habitat, y = activity)) +
+  geom_histogram(aes(x = activity), colour = "white", binwidth = 0.5) +
   theme_minimal()
-# One data entry mistake where "Rainforest" has been entered as "Rain forest"
-# Fixing:
+
+ggplot(lemur) +
+  geom_histogram(aes(x = activity, fill = habitat), 
+                 colour = "white", binwidth = 0.5) + 
+  theme_minimal()
+# Data entry mistake spotted
+# One habitat is recorded as "Rain forest" and not "Rainforest"
+# Obviously a mistake, so happy to correct without confirmation
+
+# Correcting data entry mistake -----------------
 lemur$habitat[lemur$habitat == "Rain forest"] <- "Rainforest"
+
+# Check if correction worked
 ggplot(lemur) +
-  geom_point(aes(x = habitat, y = activity)) +
-  theme_minimal()
-# Entry mistake corrected
-
-# Model fit
-lemur_mod <- lm(activity ~ habitat, data = lemur)
-
-# Diagnostics
-plot(lemur_mod)
-# Diagnostics look good
-# Can't think of any hidden assumptions that could be violated
-
-# Plot predictions & 95% CI
-fake <- data.frame(habitat = lemur$habitat)
-preds <- predict(lemur_mod, newdata = fake, se.fit = TRUE)
-fake$fit <- preds$fit
-fake$low95 <- preds$fit - 1.96 * preds$se.fit
-fake$upp95 <- preds$fit + 1.96 * preds$se.fit
-ggplot(fake) +
-  geom_errorbar(aes(x = habitat, ymin = low95, ymax = upp95)) +
-  geom_point(aes(x = habitat, y = fit)) +
-  labs(x = "Lemur habitat",
-       y = "Predicted hours active") +
+  geom_histogram(aes(x = activity, fill = habitat), 
+                 colour = "white", binwidth = 0.5) + 
   theme_minimal()
 
-# Most time spent active in rainforest, then dry forest, then mangrove and only ca. 6 hours in spiny forest
-# If we were looking at which habitat to conserve for lemurs, it seems like rainforest would be top choice
-# based on this model and data alone (keep in mind spiny could still be important despite not being used for 
-# long periods of time)
+# Hidden assumption ----------------------------
+# - Validity - Unsure how activity is measured but must be hard. Seems possible that accuracy changes in different 
+# habitats? E.g. easier to keep track of lemurs in dry forest than rain forest?
+# - Equal variance? - Seems likely that some amount of variation may differ between habitats? Something to check.
+
+# Model fit ------------------------------------
+lem_mod <- lm(activity ~ habitat, data = lemur)
+
+# Diagnose -------------------------------------
+par(mfrow = c(2,2))
+plot(lem_mod)
+par(mfrow = c(1,1))
+# Super obvious non-linear relationship, especially in Residuals vs Fitted
+# Can kinda also see weird waves in Scale-Location but less obvious
+# Q-Q looks fine (but also generally care least about this one)
+# Residuals vs Leverage looks good as well (far from contour lines - can't even see them)
+
+# Summarise ------------------------------------
+summary(lem_mod)
+# Model predicts 7.9 hours of activity in Dry forests
+# 1.05 hours *less* activity in Mangroves (so 6.85 hours total)
+# 1.8 hours *more* activity in Rainforests (so 9.7 hours total)
+# 1.8 hours *less* activity in Spiny Forests (so 6.1 hours total)
+
+preds <- ggpredict(lem_mod)
+plot(preds)
+
+# Interpret -----------------------------------
+# No issues identified in EDA (diagnoses on Friday) so can provide inference
+# Lemurs most active in rain forests and least in spiny forests
+# May not imply rain forests are more important - this is just where they are most active
+# Potential that this may be biased by how easy it is to record activity in different habitats
 ```
 
 

@@ -466,13 +466,6 @@ lem_mod <- lm(activity ~ habitat, data = lemur)
 
 # Diagnose -------------------------------------
 # Left for Friday
-par(mfrow = c(2,2))
-plot(lem_mod)
-par(mfrow = c(1,1))
-# Super obvious non-linear relationship, especially in Residuals vs Fitted
-# Can kinda also see weird waves in Scale-Location but less obvious
-# Q-Q looks fine (but also generally care least about this one)
-# Residuals vs Leverage looks good as well (far from contour lines - can't even see them)
 
 # Summarise ------------------------------------
 summary(lem_mod)

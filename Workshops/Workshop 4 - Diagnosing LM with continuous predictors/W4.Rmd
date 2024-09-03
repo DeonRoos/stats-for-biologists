@@ -347,35 +347,82 @@ beetles <- read.table(here("Workshops/Workshop 3 - LM with continuous predictor/
 ```
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# Load data
-beetles <- read.table("H:/BI3010/Workshop3/beetles.txt", header = TRUE)
-```
+# This is a continuation of the beetles script from the last workshop.
+# It now includes diagnostics
 
-```{r, include=answer_sheet, class.source="bg-success", eval = answer_sheet}
-# EDA
+# Deon Roos
+# Analysis of burying beetle fecundity
+# How does temperature associate with fecundity?
+
+# Packages -------------------------------------
+library(ggplot2)    # For plotting
+library(ggeffects)  # For quick plotting of model fit
+
+# Data -----------------------------------------
+# (Not running these here because of how this document is created)
+# setwd(H:/BI3010/)
+# beetles <- read.table("beetles.txt", header = TRUE)
+
+# EDA ------------------------------------------
+
+str(beetles)
+# n = 234
 summary(beetles)
+# minimum is 1 offspring, seems a bit low?
+
+ggplot(beetles) +
+  geom_histogram(aes(x = offspring), colour = "white", binwidth = 1) +
+  theme_minimal()
+# After plotting, offspring of 1 seems reasonable - just on the low end
+
+ggplot(beetles) +
+  geom_histogram(aes(x = temperature), colour = "white", binwidth = 1) +
+  theme_minimal()
+# Fairly even spread of temperatures between -10 and 35 C
+
 ggplot(beetles) +
   geom_point(aes(x = temperature, y = offspring)) +
   theme_minimal()
-# Relationship looks non-linear
+# Looks like a pretty clear non-linear trend
+# Offspring increases then decreases as temp increases
 
-# Model fit
-beetles_mod <- lm(offspring ~ temperature, data = beetles)
+## NOTE ##
+# Assumption of linearity very likely broken
+# Parameter estimates likely biased meaning results of model are likely not suitable for inference
+# CAUTION when interpreting model results
 
-# Diagnostics
-plot(beetles_mod)
-# Diagnostics look final except for Residuals vs Fitted
-# There seems to be a clear pattern in the residuals
-# Negative to positive to negative again
+# Hidden assumption ----------------------------
+# - See above - Linearity almost certainty broken
+# - Equal variance is possible? As temp increases maybe offspring begins to fluctuate a lot (plot looks ok though)
+# - Representativeness maybe? This is a lab population, so care needed when extrapolating to wild populations
 
-# Plot predictions (with raw data as points)
-beetles$fit <- predict(beetles_mod)
-ggplot(beetles) +
-  geom_point(aes(x = temperature, y = offspring)) +
-  geom_line(aes(x = temperature, y = fit)) +
-  labs(x = "Temperature",
-       y = "Offspring") +
-  theme_minimal()
+# Model fit ------------------------------------
+beet_mod <- lm(offspring ~ temperature, data = beetles)
+
+# Diagnose -------------------------------------
+par(mfrow = c(2,2))
+plot(beet_mod)
+par(mfrow = c(1,1))
+# Super obvious non-linear relationship, especially in Residuals vs Fitted
+# Can kinda also see weird waves in Scale-Location but less obvious
+# Q-Q looks fine (but also generally care least about this one)
+# Residuals vs Leverage looks good as well (far from contour lines - can't even see them)
+
+# Summarise ------------------------------------
+summary(beet_mod)
+# Model predicts 25.3 offspring are produced at 0 degrees (intercept is when X is 0, or temp is 0)
+# For every 1 degree change in temperature, we gain an additional 0.5 baby beetles
+# BUT(!) this model is biased, and so these parameters are unreliable, so we should not use this model
+
+preds <- ggpredict(beet_mod)
+plot(preds, add.data = TRUE)
+# The plot above includes the raw data (via add.data = TRUE)
+# The linear fit to the non-linear relationship is pretty clear
+
+# Interpret -----------------------------------
+# This model, as is, should not be used to make any kind of inference
+# (In reality, we'd need to change the model to allow temperature to have a non-linear effect)
+# (But given you don't know how to do that, we should stop here and advice/insist the results are not interpreted)
 ```
 
 

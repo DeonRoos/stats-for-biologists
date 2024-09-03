@@ -77,14 +77,14 @@ They ask you to resolve these issues but also to check for any other possible mi
 
 1. What `mongoose` value should the first mistake have?
 
-```{r, include=answer_sheet, class.source="bg-success", eval = F}
+```{r, include=answer_sheet, class.source="bg-success", eval = T}
 # The rabbit was from Oshima, not Tokunoshima, so mongoose should be Present not Absent
 rabbit$mongoose[7] <- "Present"
 ```
 
 2. Which rabbit had the incorrect weight?
 
-```{r, include=answer_sheet, class.source="bg-success", eval = F}
+```{r, include=answer_sheet, class.source="bg-success", eval = T}
 # If we do a plot of the data:
 ggplot(rabbit) +
   geom_histogram(aes(x = weight))
@@ -406,10 +406,89 @@ activity_levels <- round(c(
 
 # Create the data frame
 lemur <- data.frame(habitat = habitat_types, activity = activity_levels)
-
+lemur$habitat <- as.character(lemur$habitat)
 lemur$habitat[23] <- "Rain forest"
 
-write.table(lemur,  here("Workshops/Workshop 5 - LM with categorical predictors/Data", "lemurs.txt"), row.names = FALSE)
+write.table(lemur, here("Workshops/Workshop 5 - LM with categorical predictors/Data", "lemurs.txt"), row.names = FALSE)
+```
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# This is how I would analyse the lemur data
+
+# Deon Roos
+# Analysis of lemur activity by habitat type
+# In which habitat are lemurs most active
+
+# Packages -------------------------------------
+library(ggplot2)    # For plotting
+library(ggeffects)  # For quick plotting of model fit
+
+# Data -----------------------------------------
+# (Not running these here because of how this document is created)
+# setwd(H:/BI3010/)
+# lemur <- read.table("lemurs.txt", header = TRUE)
+
+# EDA ------------------------------------------
+
+str(lemur)
+# n = 120
+summary(lemur)
+# No apparent issues
+
+ggplot(lemur) +
+  geom_histogram(aes(x = activity), colour = "white", binwidth = 0.5) +
+  theme_minimal()
+
+ggplot(lemur) +
+  geom_histogram(aes(x = activity, fill = habitat), 
+                 colour = "white", binwidth = 0.5) + 
+  theme_minimal()
+# Data entry mistake spotted
+# One habitat is recorded as "Rain forest" and not "Rainforest"
+# Obviously a mistake, so happy to correct without confirmation
+
+# Correcting data entry mistake -----------------
+lemur$habitat[lemur$habitat == "Rain forest"] <- "Rainforest"
+
+# Check if correction worked
+ggplot(lemur) +
+  geom_histogram(aes(x = activity, fill = habitat), 
+                 colour = "white", binwidth = 0.5) + 
+  theme_minimal()
+
+# Hidden assumption ----------------------------
+# - Validity - Unsure how activity is measured but must be hard. Seems possible that accuracy changes in different 
+# habitats? E.g. easier to keep track of lemurs in dry forest than rain forest?
+# - Equal variance? - Seems likely that some amount of variation may differ between habitats? Something to check.
+
+# Model fit ------------------------------------
+lem_mod <- lm(activity ~ habitat, data = lemur)
+
+# Diagnose -------------------------------------
+# Left for Friday
+par(mfrow = c(2,2))
+plot(lem_mod)
+par(mfrow = c(1,1))
+# Super obvious non-linear relationship, especially in Residuals vs Fitted
+# Can kinda also see weird waves in Scale-Location but less obvious
+# Q-Q looks fine (but also generally care least about this one)
+# Residuals vs Leverage looks good as well (far from contour lines - can't even see them)
+
+# Summarise ------------------------------------
+summary(lem_mod)
+# Model predicts 7.9 hours of activity in Dry forests
+# 1.05 hours *less* activity in Mangroves (so 6.85 hours total)
+# 1.8 hours *more* activity in Rainforests (so 9.7 hours total)
+# 1.8 hours *less* activity in Spiny Forests (so 6.1 hours total)
+
+preds <- ggpredict(lem_mod)
+plot(preds)
+
+# Interpret -----------------------------------
+# No issues identified in EDA (diagnoses on Friday) so can provide inference
+# Lemurs most active in rain forests and least in spiny forests
+# May not imply rain forests are more important - this is just where they are most active
+# Potential that this may be biased by how easy it is to record activity in different habitats
 ```
 
 # Assumption table

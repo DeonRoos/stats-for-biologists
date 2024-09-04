@@ -1,79 +1,501 @@
-"length" "bite"
-408.9 2268.5
-378.1 2156.24
-343.5 1883.48
-337.2 1981.71
-419.5 2442.91
-427.5 2331.68
-382.1 2186.78
-342.4 2018.16
-276.5 1565.13
-282.7 1596.19
-249.7 1408.15
-378.1 2204.37
-399.9 2205.96
-367.6 2063.94
-153.5 832.91
-341.1 1985.59
-294.2 1709.82
-377.3 2026.39
-253.6 1375.76
-229.3 1236.32
-418.4 2383.09
-368.9 2172.06
-412.6 2484.12
-337.2 1948.57
-373.8 2193.4
-257.4 1474.61
-342.9 1878.66
-391.1 2251.63
-226.7 1279.97
-343.4 2026.86
-263.6 1468.89
-330.5 1815.47
-319.7 1744.59
-422.3 2474.34
-320.1 1782.29
-373.4 2126.51
-370.2 2072.87
-320.6 1717.85
-315.8 1914.08
-375.7 2173.3
-297.7 1680.73
-349.7 2047.82
-379.7 2148.5
-468.4 2649.99
-278.2 1507.45
-357.8 2027.77
-369.7 2064.85
-390.1 2225.24
-388.3 2149.13
-466.4 2593.13
-316.7 1771.21
-304.1 1764.3
-311.2 1715.62
-288.3 1651.6
-309.1 1723.15
-264 1506.91
-403.7 2402.71
-335.7 1862.66
-410 2265.09
-348 2015.54
-445.6 2559.36
-401.6 2271.19
-382.3 2212.23
-360.5 1980.14
-448.8 2510.11
-342.3 2055.52
-230.3 1364.38
-392.9 2283.28
-379.5 2267.27
-222.9 1278.67
-417.9 2434.23
-277.5 1644.81
-367.8 2027.94
-354.5 2018.12
-361.8 2205.7
-331.2 1962.7
-435.3 2435.05
-391 2051.66
+"species" "weight" "speed"
+"Peregrine Falcon" 1068 364.49
+"Saiga Antelope" 45855 74.41
+"Saiga Antelope" 47513 83.01
+"Cheetah" 46874 78.84
+"Saiga Antelope" 46427 88.61
+"Saiga Antelope" 47923 64.54
+"Saiga Antelope" 47626 71.53
+"Peregrine Falcon" 744 403.71
+"Peregrine Falcon" 832 391.14
+"Cheetah" 46336 109.02
+"Saiga Antelope" 46829 75.3
+"Cheetah" 46299 88.45
+"Saiga Antelope" 47345 61.05
+"Peregrine Falcon" 839 382.6
+"Peregrine Falcon" 1022 357.11
+"Peregrine Falcon" 654 393.94
+"Peregrine Falcon" 976 420.34
+"Peregrine Falcon" 896 413.84
+"Peregrine Falcon" 931 425.68
+"Saiga Antelope" 48494 73.71
+"Saiga Antelope" 47767 68.85
+"Cheetah" 45531 107.05
+"Cheetah" 43576 85.05
+"Saiga Antelope" 47368 66.55
+"Peregrine Falcon" 675 380.35
+"Saiga Antelope" 47442 78.63
+"Cheetah" 45146 97.14
+"Peregrine Falcon" 674 384.73
+"Cheetah" 46236 113.06
+"Cheetah" 45665 99.71
+"Saiga Antelope" 46860 40.57
+"Peregrine Falcon" 1173 392.34
+"Cheetah" 44690 94.35
+"Saiga Antelope" 45982 72.27
+"Saiga Antelope" 47017 103.71
+"Cheetah" 47210 122.95
+"Saiga Antelope" 47607 55.72
+"Peregrine Falcon" 726 380.89
+"Saiga Antelope" 46624 73.78
+"Saiga Antelope" 49032 79.88
+"Saiga Antelope" 45628 45.41
+"Peregrine Falcon" 966 395.74
+"Peregrine Falcon" 1205 370.97
+"Saiga Antelope" 47763 107.24
+"Cheetah" 46940 134.92
+"Saiga Antelope" 46357 60
+"Saiga Antelope" 46155 85.98
+"Peregrine Falcon" 1177 389.85
+"Saiga Antelope" 47071 76.8
+"Cheetah" 46076 109.59
+"Saiga Antelope" 46946 64.7
+"Cheetah" 47937 77.65
+"Saiga Antelope" 48580 80.96
+"Peregrine Falcon" 1245 394.1
+"Peregrine Falcon" 1231 377.95
+"Saiga Antelope" 47306 73.87
+"Cheetah" 45439 105.52
+"Saiga Antelope" 46235 105.04
+"Peregrine Falcon" 644 433.25
+"Cheetah" 46220 114.86
+"Saiga Antelope" 46728 101.5
+"Saiga Antelope" 48046 69.37
+"Cheetah" 46857 95.45
+"Cheetah" 48387 98.34
+"Peregrine Falcon" 1089 407.68
+"Saiga Antelope" 46716 78.46
+"Saiga Antelope" 49660 54.89
+"Saiga Antelope" 46446 77.88
+"Cheetah" 47988 121.49
+"Saiga Antelope" 48226 75.21
+"Cheetah" 45808 95.4
+"Saiga Antelope" 47909 55.3
+"Peregrine Falcon" 1051 394.63
+"Peregrine Falcon" 1103 392.89
+"Saiga Antelope" 46534 73.35
+"Saiga Antelope" 48549 74.23
+"Peregrine Falcon" 698 407.48
+"Cheetah" 46228 93.53
+"Peregrine Falcon" 1110 394.76
+"Cheetah" 44518 107.81
+"Peregrine Falcon" 627 386.46
+"Cheetah" 46490 95.28
+"Saiga Antelope" 45991 85.66
+"Peregrine Falcon" 1351 387.69
+"Saiga Antelope" 47490 88.56
+"Saiga Antelope" 46467 70.77
+"Peregrine Falcon" 1220 373.72
+"Peregrine Falcon" 826 407.54
+"Cheetah" 47536 121.48
+"Cheetah" 45367 101.76
+"Saiga Antelope" 46351 68.43
+"Cheetah" 47908 102.1
+"Cheetah" 45836 83.25
+"Saiga Antelope" 47493 123.73
+"Cheetah" 47882 76.3
+"Cheetah" 44965 143.44
+"Cheetah" 44635 83.69
+"Saiga Antelope" 48298 76.25
+"Cheetah" 46474 76.6
+"Peregrine Falcon" 1157 386.92
+"Peregrine Falcon" 701 407.84
+"Saiga Antelope" 47329 84.56
+"Cheetah" 45670 107.85
+"Peregrine Falcon" 1122 409.18
+"Cheetah" 46656 90.37
+"Saiga Antelope" 47894 82.24
+"Saiga Antelope" 47704 82.66
+"Cheetah" 47332 114.04
+"Peregrine Falcon" 1148 379.28
+"Peregrine Falcon" 901 389.64
+"Cheetah" 44846 95.35
+"Peregrine Falcon" 1055 401.21
+"Peregrine Falcon" 1299 360.31
+"Saiga Antelope" 46045 71.85
+"Cheetah" 47159 72.87
+"Peregrine Falcon" 917 397.75
+"Peregrine Falcon" 1110 391.03
+"Cheetah" 45912 93.27
+"Cheetah" 46820 117.5
+"Saiga Antelope" 47481 62.62
+"Peregrine Falcon" 1031 370.4
+"Peregrine Falcon" 675 363.2
+"Saiga Antelope" 46043 76.38
+"Peregrine Falcon" 547 392.38
+"Cheetah" 47277 110.05
+"Saiga Antelope" 48161 78.86
+"Saiga Antelope" 48258 82.92
+"Peregrine Falcon" 894 386.13
+"Saiga Antelope" 47586 56.26
+"Saiga Antelope" 49864 94.24
+"Peregrine Falcon" 1265 392.56
+"Saiga Antelope" 47432 94.26
+"Cheetah" 46612 124.71
+"Saiga Antelope" 47353 94.65
+"Peregrine Falcon" 864 373.24
+"Cheetah" 47005 107.38
+"Saiga Antelope" 46157 73.42
+"Peregrine Falcon" 344 398.88
+"Saiga Antelope" 45468 54.45
+"Peregrine Falcon" 1011 382.37
+"Peregrine Falcon" 819 356.9
+"Saiga Antelope" 47442 82.92
+"Peregrine Falcon" 594 404.18
+"Saiga Antelope" 47660 57.53
+"Cheetah" 46406 81.58
+"Saiga Antelope" 49384 71.69
+"Saiga Antelope" 49199 89.11
+"Peregrine Falcon" 586 392.73
+"Saiga Antelope" 46273 86.34
+"Saiga Antelope" 47176 99.92
+"Cheetah" 46282 95.83
+"Peregrine Falcon" 799 389.92
+"Saiga Antelope" 47866 88.09
+"Saiga Antelope" 46180 84.46
+"Cheetah" 45867 120.28
+"Cheetah" 46787 99.92
+"Saiga Antelope" 47742 77.1
+"Cheetah" 46089 109.97
+"Peregrine Falcon" 865 383.57
+"Saiga Antelope" 47125 89.22
+"Cheetah" 46560 100.31
+"Saiga Antelope" 47793 90.32
+"Saiga Antelope" 46736 69.58
+"Peregrine Falcon" 893 375.91
+"Cheetah" 46788 99.95
+"Cheetah" 46242 102
+"Saiga Antelope" 46671 67.49
+"Saiga Antelope" 46573 90.46
+"Saiga Antelope" 46730 94.67
+"Peregrine Falcon" 971 387.65
+"Saiga Antelope" 47633 86.69
+"Saiga Antelope" 47344 59.8
+"Peregrine Falcon" 764 398.19
+"Cheetah" 45509 99.9
+"Saiga Antelope" 46589 96.15
+"Saiga Antelope" 46968 67.86
+"Peregrine Falcon" 1143 384.62
+"Saiga Antelope" 47482 88.73
+"Peregrine Falcon" 887 376.48
+"Peregrine Falcon" 593 393.01
+"Saiga Antelope" 3 108.38
+"Peregrine Falcon" 1333 398.91
+"Cheetah" 46143 104.37
+"Cheetah" 46628 100.17
+"Saiga Antelope" 47529 72.09
+"Saiga Antelope" 47066 78.94
+"Saiga Antelope" 47502 69.48
+"Peregrine Falcon" 511 399.92
+"Cheetah" 45336 104.62
+"Cheetah" 45240 94.78
+"Saiga Antelope" 46782 101.7
+"Saiga Antelope" 46886 82.72
+"Cheetah" 47288 110.32
+"Saiga Antelope" 46677 64.82
+"Peregrine Falcon" 1194 389.38
+"Saiga Antelope" 46592 68.4
+"Saiga Antelope" 47667 72.01
+"Cheetah" 46695 92.87
+"Saiga Antelope" 46918 86.98
+"Saiga Antelope" 46734 83.13
+"Saiga Antelope" 47465 70.35
+"Saiga Antelope" 47755 76.76
+"Cheetah" 45212 99.04
+"Peregrine Falcon" 618 392.33
+"Saiga Antelope" 47192 76.29
+"Cheetah" 46590 126.04
+"Peregrine Falcon" 1093 391.22
+"Cheetah" 46495 77.5
+"Cheetah" 44698 88.18
+"Cheetah" 46834 72.33
+"Saiga Antelope" 48449 110.35
+"Peregrine Falcon" 988 409.44
+"Peregrine Falcon" 1282 385.38
+"Peregrine Falcon" 1058 387.49
+"Cheetah" 47242 89.97
+"Peregrine Falcon" 1083 367.5
+"Saiga Antelope" 47783 79.21
+"Saiga Antelope" 47214 82.21
+"Cheetah" 46022 105.36
+"Peregrine Falcon" 1261 382.06
+"Peregrine Falcon" 718 402.53
+"Cheetah" 47578 100.3
+"Cheetah" 45214 86.9
+"Saiga Antelope" 47958 83.08
+"Peregrine Falcon" 1391 372.57
+"Peregrine Falcon" 1082 394.75
+"Saiga Antelope" 46325 73.28
+"Cheetah" 44894 86.54
+"Cheetah" 49015 81.78
+"Peregrine Falcon" 820 425.69
+"Peregrine Falcon" 933 405.52
+"Saiga Antelope" 47152 106.43
+"Cheetah" 46990 106.66
+"Peregrine Falcon" 859 NA
+"Cheetah" 47058 131.52
+"Cheetah" 45374 102.49
+"Cheetah" 45351 115.92
+"Saiga Antelope" 47811 67.62
+"Cheetah" 47382 87.2
+"Peregrine Falcon" 883 390.58
+"Cheetah" 46574 119.43
+"Peregrine Falcon" 1365 379.38
+"Cheetah" 46533 124.4
+"Saiga Antelope" 47615 83.17
+"Cheetah" 46512 120.75
+"Cheetah" 45652 129.35
+"Peregrine Falcon" 1011 383.36
+"Cheetah" 47055 96.05
+"Cheetah" 46570 116.68
+"Saiga Antelope" 48600 91.98
+"Cheetah" 46298 91.67
+"Cheetah" 47412 94.97
+"Cheetah" 45493 84.32
+"Peregrine Falcon" 904 391.2
+"Saiga Antelope" 48639 68.13
+"Cheetah" 47114 100.34
+"Cheetah" 46612 123.77
+"Peregrine Falcon" 1119 381.64
+"Saiga Antelope" 47154 57.66
+"Saiga Antelope" 47832 80.83
+"Saiga Antelope" 47255 81.22
+"Cheetah" 45101 115.67
+"Peregrine Falcon" 883 37569
+"Cheetah" 47726 78.28
+"Peregrine Falcon" 1030 400.53
+"Saiga Antelope" 47245 75.83
+"Saiga Antelope" 49235 90.96
+"Cheetah" 46067 91.32
+"Peregrine Falcon" 779 386.42
+"Cheetah" 45492 102.22
+"Cheetah" 46476 125.34
+"Saiga Antelope" 46734 81.12
+"Peregrine Falcon" 1026 415.45
+"Cheetah" 47554 124.13
+"Cheetah" 44684 102.99
+"Peregrine Falcon" 1081 366.51
+"Peregrine Falcon" 742 391.77
+"Cheetah" 46905 125.09
+"Peregrine Falcon" 803 376.36
+"Saiga Antelope" 47781 61.14
+"Peregrine Falcon" 970 383.45
+"Peregrine Falcon" 382 414.19
+"Cheetah" 43766 93.45
+"Saiga Antelope" 47018 82.88
+"Peregrine Falcon" 805 388.95
+"Saiga Antelope" 47778 106.14
+"Saiga Antelope" 48444 70.83
+"Peregrine Falcon" 829 391.54
+"Peregrine Falcon" 527 364.99
+"Saiga Antelope" 47727 91.57
+"Peregrine Falcon" 905 389.54
+"Cheetah" 45426 113.28
+"Cheetah" 48077 89.67
+"Saiga Antelope" 47416 72.19
+"Cheetah" 47339 116.22
+"Cheetah" 46774 67.53
+"Cheetah" 45959 114.92
+"Saiga Antelope" 48122 94.78
+"Peregrine Falcon" 857 416.34
+"Peregrine Falcon" 512 382.69
+"Saiga Antelope" 47567 76.41
+"Cheetah" 47301 123.45
+"Saiga Antelope" 47364 108.1
+"Saiga Antelope" 48829 66.6
+"Saiga Antelope" 46785 91.65
+"Peregrine Falcon" 1046 391.24
+"Cheetah" 46526 124.87
+"Cheetah" 47921 88.33
+"Saiga Antelope" 47278 105.71
+"Saiga Antelope" 47735 82.37
+"Cheetah" 46915 94.37
+"Peregrine Falcon" 1157 400.41
+"Peregrine Falcon" 1031 410.23
+"Peregrine Falcon" 1318 387.03
+"Cheetah" 47446 99.31
+"Saiga Antelope" 47417 85.15
+"Saiga Antelope" 47461 70.78
+"Cheetah" 46829 99.92
+"Cheetah" 47350 96.9
+"Cheetah" 45859 105.62
+"Peregrine Falcon" 1214 386.98
+"Saiga Antelope" 48013 67.32
+"Peregrine Falcon" 892 387.64
+"Cheetah" 45693 103.09
+"Peregrine Falcon" 824 408.3
+"Cheetah" 47425 127.72
+"Cheetah" 47292 104.87
+"Peregrine Falcon" 908 368.63
+"Cheetah" 46815 130.99
+"Saiga Antelope" 47727 65.19
+"Cheetah" 46421 103.53
+"Cheetah" 47219 118.08
+"Cheetah" 47184 97.05
+"Cheetah" 46990 85.53
+"Peregrine Falcon" 1279 412.69
+"Peregrine Falcon" 0 389.78
+"Saiga Antelope" 48290 58.03
+"Cheetah" 46268 87.26
+"Peregrine Falcon" 1054 393.39
+"Peregrine Falcon" 857 370.9
+"Peregrine Falcon" 958 390.92
+"Peregrine Falcon" 1178 371.7
+"Peregrine Falcon" 605 385.8
+"Cheetah" 47168 90.98
+"Saiga Antelope" 45190 52.95
+"Saiga Antelope" 46948 78.5
+"Peregrine Falcon" 637 394.55
+"Saiga Antelope" 47309 54.25
+"Saiga Antelope" 46044 56.42
+"Peregrine Falcon" 1011 389.12
+"Cheetah" 46501 122.37
+"Peregrine Falcon" 757 382.39
+"Saiga Antelope" 45564 83.23
+"Saiga Antelope" 48721 60.74
+"Peregrine Falcon" 886 399
+"Peregrine Falcon" 636 396.72
+"Cheetah" 46895 102.52
+"Saiga Antelope" 46436 97.06
+"Saiga Antelope" 47405 96.42
+"Peregrine Falcon" 853 374.67
+"Peregrine Falcon" 912 397.83
+"Saiga Antelope" 48572 67.5
+"Saiga Antelope" 47604 120.1
+"Cheetah" 49091 77.98
+"Cheetah" 48134 130.44
+"Peregrine Falcon" 833 429.73
+"Peregrine Falcon" 745 403.48
+"Cheetah" 48252 88.75
+"Cheetah" 47180 87.08
+"Saiga Antelope" 45135 64.91
+"Saiga Antelope" 47850 81.58
+"Saiga Antelope" 46390 59.36
+"Cheetah" 47084 99.79
+"Cheetah" 47388 109.84
+"Saiga Antelope" 47232 100.68
+"Peregrine Falcon" 946 396.5
+"Peregrine Falcon" 526 396.43
+"Saiga Antelope" 47678 59.65
+"Cheetah" 47847 116.39
+"Peregrine Falcon" 1049 397.8
+"Saiga Antelope" 46648 96.5
+"Cheetah" 48213 115.47
+"Saiga Antelope" 46967 87.75
+"Peregrine Falcon" 1181 388.06
+"Peregrine Falcon" 720 392.22
+"Saiga Antelope" 47034 70.29
+"Cheetah" 46892 116.59
+"Saiga Antelope" 46980 76.06
+"Cheetah" 47551 111.96
+"Cheetah" 46402 94.71
+"Cheetah" 46911 111.83
+"Peregrine Falcon" 926 395.41
+"Cheetah" 45681 77.08
+"Saiga Antelope" 47084 65.89
+"Peregrine Falcon" 822 393.58
+"Peregrine Falcon" 1048 383.15
+"Cheetah" 47601 118.04
+"Cheetah" 45416 101.49
+"Peregrine Falcon" 621 355.76
+"Saiga Antelope" 47488 71.3
+"Saiga Antelope" 45429 77.05
+"Peregrine Falcon" 1253 397.54
+"Saiga Antelope" 47608 80.35
+"Peregrine Falcon" 1080 386.38
+"Saiga Antelope" 46905 91.99
+"Cheetah" 46164 98.82
+"Cheetah" 46511 115.79
+"Peregrine Falcon" 1063 395.21
+"Saiga Antelope" 47601 71.95
+"Cheetah" 43836 107.09
+"Saiga Antelope" 49671 87.17
+"Peregrine Falcon" 621 399.35
+"Cheetah" 45983 95.05
+"Peregrine Falcon" 1093 394.47
+"Peregrine Falcon" 944 364.07
+"Cheetah" 48431 94.32
+"Saiga Antelope" 48771 83.48
+"Cheetah" 47167 96.34
+"Peregrine Falcon" 762 366.34
+"Cheetah" 47780 100.5
+"Saiga Antelope" 47733 100.21
+"Saiga Antelope" 47987 101.73
+"Cheetah" 45514 125.15
+"Cheetah" 47850 90.69
+"Cheetah" 46661 98.19
+"Saiga Antelope" 45613 82.75
+"Peregrine Falcon" 791 375.93
+"Peregrine Falcon" 1140 387.86
+"Cheetah" 46645 121.73
+"Peregrine Falcon" 1283 393.4
+"Saiga Antelope" 49847 47.83
+"Peregrine Falcon" 1200 402.54
+"Saiga Antelope" 48476 113.71
+"Saiga Antelope" 47968 76.75
+"Cheetah" 46759 126.32
+"Saiga Antelope" 47040 67.04
+"Saiga Antelope" 49188 62.03
+"Cheetah" 45036 96.89
+"Peregrine Falcon" 1086 401.94
+"Cheetah" 46855 116.88
+"Cheetah" 45999 100.06
+"Cheetah" 48863 94.06
+"Saiga Antelope" 48563 61.04
+"Cheetah" 47982 109.5
+"Cheetah" 47971 91.38
+"Cheetah" 45484 113.02
+"Peregrine Falcon" 860 359.96
+"Saiga Antelope" 47935 52.98
+"Cheetah" 46477 120.46
+"Peregrine Falcon" 1281 378.87
+"Saiga Antelope" 47280 92.41
+"Peregrine Falcon" 977 354.47
+"Saiga Antelope" 45963 86.28
+"Cheetah" 46559 107.48
+"Saiga Antelope" 48140 83.86
+"Cheetah" 46897 81.46
+"Peregrine Falcon" 775 400.84
+"Cheetah" 46422 97.52
+"Peregrine Falcon" 818 383.5
+"Cheetah" 47354 91.84
+"Saiga Antelope" 48057 94.73
+"Saiga Antelope" 47876 80.99
+"Cheetah" 46143 108.56
+"Saiga Antelope" 47566 77.71
+"Peregrine Falcon" 1245 400.59
+"Saiga Antelope" 48053 79.87
+"Cheetah" 46510 81.11
+"Saiga Antelope" 47902 89.13
+"Peregrine Falcon" 925 388.09
+"Cheetah" 44631 111.57
+"Peregrin Took" 883 381.09
+"Cheetah" 45509 123.39
+"Cheetah" 47566 71.58
+"Saiga Antelope" 47156 92.77
+"Peregrine Falcon" 831 393.1
+"Cheetah" 45966 73.91
+"Peregrine Falcon" 1102 385.64
+"Cheetah" 46957 116.48
+"Peregrine Falcon" 1033 401.95
+"Saiga Antelope" 48153 72.39
+"Cheetah" 47228 124.07
+"Peregrine Falcon" 982 399.99
+"Saiga Antelope" 47017 72.19
+"Saiga Antelope" 48118 89.71
+"Peregrine Falcon" 1290 378.42
+"Saiga Antelope" 47195 77.7
+"Cheetah" 46610 99.01
+"Peregrine Falcon" 946 391.68
+"Cheetah" 46460 109.67
+"Peregrine Falcon" 743 373.11
+"Cheetah" 46029 120.12
+"Peregrine Falcon" 400 374.27
+"Saiga Antelope" 47336 83
+"Peregrine Falcon" 896 416.7
+"Peregrine Falcon" 903 383.56
+"Peregrine Falcon" 628 393.55
+"Saiga Antelope" 47179 67.87
+"Saiga Antelope" 48083 87.83
+"Cheetah" 45191 102.01
+"Saiga Antelope" 48110 106.45

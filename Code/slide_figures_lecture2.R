@@ -496,3 +496,29 @@ p3 <- ggplot(df) +
   sbs_theme()
 p3
 ggsave(here("Figures/Lecture 2 - lm overview/Figures", file = "linear3.png"), plot = p3, width = 650/72, height = 775/72, dpi = 72)
+
+
+
+lemur <- read.table(here("Workshops/Workshop 5 - LM with categorical predictors/Data", "lemurs.txt"), header = TRUE)
+
+p <- ggplot(lemur) +
+  geom_histogram(aes(x = activity, fill = habitat), 
+                 colour = "white", binwidth = 0.5) + 
+  theme_minimal() +
+  sbs_theme()
+ggsave(here("Figures/Lecture 3 - data_vis/Figures", file = "EDA.png"), plot = p, width = 650/72, height = 775/72, dpi = 72)
+
+lem_mod <- lm(activity ~ habitat, data = lemur)
+
+# Diagnose -------------------------------------
+par(mfrow = c(2,2), bg = "black", col = "white", col.axis = "white", col.lab = "white")
+plot(lem_mod)
+
+theme_set(sbs_theme())
+
+library(ggeffects)
+preds <- ggpredict(lem_mod)
+p1 <- plot(preds, colors = "white") + 
+  scale_colour_manual(values = "white") +
+  sbs_theme()
+ggsave(here("Figures/Lecture 3 - data_vis/Figures", file = "fit.png"), plot = p1, width = 650/72, height = 775/72, dpi = 72)

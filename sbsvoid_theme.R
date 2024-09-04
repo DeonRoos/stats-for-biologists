@@ -1,6 +1,7 @@
 function () 
 {
     update_geom_defaults("point", list(colour = "white", size = 3))
+    update_geom_defaults("errorbar", list(colour = "white"))
     update_geom_defaults("line", list(colour = "white", linewidth = 1.25))
     update_geom_defaults("path", list(colour = "white", linewidth = 1.25))
     update_geom_defaults("bar", list(fill = "#72758d", colour = "white"))

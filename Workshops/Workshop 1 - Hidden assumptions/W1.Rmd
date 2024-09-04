@@ -775,7 +775,7 @@ fast$speed[miss] <- NA
 
 # Exporting so data used here is same as the one students have
 # Should always be the same unless values above are changed (including seed)
-write.table(ali, here("Workshops/Workshop 1 - Hidden assumptions/Data", "animal_speed.txt"), row.names = FALSE)
+write.table(fast, here("Workshops/Workshop 1 - Hidden assumptions/Data", "animal_speed.txt"), row.names = FALSE)
 ```
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}

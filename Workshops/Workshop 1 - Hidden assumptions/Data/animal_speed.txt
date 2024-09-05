@@ -1,5 +1,5 @@
 "species" "weight" "speed"
-"Peregrine Falcon" 1068 364.49
+"Peregrin Took" 1068 364.49
 "Saiga Antelope" 45855 74.41
 "Saiga Antelope" 47513 83.01
 "Cheetah" 46874 78.84
@@ -13,7 +13,7 @@
 "Cheetah" 46299 88.45
 "Saiga Antelope" 47345 61.05
 "Peregrine Falcon" 839 382.6
-"Peregrine Falcon" 1022 357.11
+"Peregrine Falcon" 1022 35711
 "Peregrine Falcon" 654 393.94
 "Peregrine Falcon" 976 420.34
 "Peregrine Falcon" 896 413.84
@@ -160,7 +160,7 @@
 "Peregrine Falcon" 865 383.57
 "Saiga Antelope" 47125 89.22
 "Cheetah" 46560 100.31
-"Saiga Antelope" 47793 90.32
+"Saiga Antelope" 47793 NA
 "Saiga Antelope" 46736 69.58
 "Peregrine Falcon" 893 375.91
 "Cheetah" 46788 99.95
@@ -179,7 +179,7 @@
 "Saiga Antelope" 47482 88.73
 "Peregrine Falcon" 887 376.48
 "Peregrine Falcon" 593 393.01
-"Saiga Antelope" 3 108.38
+"Saiga Antelope" 47533 108.38
 "Peregrine Falcon" 1333 398.91
 "Cheetah" 46143 104.37
 "Cheetah" 46628 100.17
@@ -232,7 +232,7 @@
 "Peregrine Falcon" 933 405.52
 "Saiga Antelope" 47152 106.43
 "Cheetah" 46990 106.66
-"Peregrine Falcon" 859 NA
+"Peregrine Falcon" 859 379.92
 "Cheetah" 47058 131.52
 "Cheetah" 45374 102.49
 "Cheetah" 45351 115.92
@@ -259,9 +259,9 @@
 "Peregrine Falcon" 1119 381.64
 "Saiga Antelope" 47154 57.66
 "Saiga Antelope" 47832 80.83
-"Saiga Antelope" 47255 81.22
+"Saiga Antelope" 3 81.22
 "Cheetah" 45101 115.67
-"Peregrine Falcon" 883 37569
+"Peregrine Falcon" 883 375.69
 "Cheetah" 47726 78.28
 "Peregrine Falcon" 1030 400.53
 "Saiga Antelope" 47245 75.83
@@ -334,7 +334,7 @@
 "Cheetah" 47184 97.05
 "Cheetah" 46990 85.53
 "Peregrine Falcon" 1279 412.69
-"Peregrine Falcon" 0 389.78
+"Peregrine Falcon" 564 389.78
 "Saiga Antelope" 48290 58.03
 "Cheetah" 46268 87.26
 "Peregrine Falcon" 1054 393.39
@@ -421,7 +421,7 @@
 "Cheetah" 47780 100.5
 "Saiga Antelope" 47733 100.21
 "Saiga Antelope" 47987 101.73
-"Cheetah" 45514 125.15
+"Cheetah" 0 125.15
 "Cheetah" 47850 90.69
 "Cheetah" 46661 98.19
 "Saiga Antelope" 45613 82.75
@@ -469,7 +469,7 @@
 "Saiga Antelope" 47902 89.13
 "Peregrine Falcon" 925 388.09
 "Cheetah" 44631 111.57
-"Peregrin Took" 883 381.09
+"Peregrine Falcon" 883 381.09
 "Cheetah" 45509 123.39
 "Cheetah" 47566 71.58
 "Saiga Antelope" 47156 92.77

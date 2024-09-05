@@ -35,7 +35,7 @@ library(here)
 
 1. (Re)familiarise yourself with the basics of `R`;
 2. Use `R` to perform simple descriptive summaries of data and data processing;
-3. Use the results of the EDA (Exploratory Data Analysis) to identify any issues;
+3. Use the results of the EDA (Exploratory Data Analysis) to identify any issues in the data;
 4. Begin thinking about the assumptions we make with a specific dataset even before we begin using statistics
 
 All of these objectives link to useful skills for **initial, quick explorations** and screening of datasets. Because it's so important to ensure that the data we subsequently use in analysis is suitable for answering our question, the importance of such EDA cannot be overstated.
@@ -169,11 +169,11 @@ Before we begin the workshop, let's make sure that you are set up to work with `
 
 Once you have `R` and RStudio set up, open RStudio. You should see a window with four main panes:
 
-* Source: This is where you write your scripts or RMarkdown documents.
+* Source: This is where you write your scripts.
 
 * Console: This is where you can type and execute R code directly.
 
-* Environment/History: This pane shows you the objects and functions that are currently stored in R's memory.
+* Environment/History: This pane shows you the objects that are currently stored in R's memory.
 
 * Files/Plots/Packages/Help/Viewer: This is a multi-tabbed pane that allows you to navigate files, view plots, manage packages, and access documentation.
 
@@ -189,53 +189,6 @@ To run code from a script, you can:
 
 - Click the "Run" button at the top of the Source pane to run the selected line or code chunk.
 - Press `Ctrl + Enter` (or `Cmd + Enter` on a Mac) to run the current line or selected code.
-
-## Basic R Commands
-
-Let's start with some basic `R` commands to get you familiar with the console and scripting.
-
-```{r, eval = F}
-2 + 2       # Addition
-3 - 1       # Subtraction
-5 * 3       # Multiplication
-10 / 2      # Division
-```
-
-These are simple operations, but they illustrate the basic structure of `R` code: functions and operators with arguments. For example, `+`, `-`, `*`, and `/` are operators that take numbers as arguments and return their sum, difference, product, or quotient, respectively.
-
-```{r, eval = F}
-# Assigning values to variables
-x <- 10       # The arrow <- is used for assignment
-y <- 5
-
-# Performing operations with variables
-z <- x + y
-z
-```
-
-In the code above, we assign the value 10 to the variable `x` and the value 5 to the variable `y`. We then add `x` and `y`, and store the result in a new variable `z`.
-
-Note: In `R`, `<-` is the preferred assignment operator. While `=` can also be used, `<-` is more common and avoids some potential pitfalls in certain situations.
-
-## Using Functions
-
-Functions are the workhorses of `R`. They take inputs (called arguments), perform some operations, and return a result. Let's look at a basic example:
-
-```{r, eval = F}
-# Using the sum() function
-total <- sum(1, 2, 3, 4, 5)
-total
-```
-
-In this case, the `sum()` function takes several numbers as arguments and returns their sum. Functions often have multiple arguments, some of which are optional.
-
-```{r, eval = F}
-# Using the mean() function with optional arguments
-average <- mean(c(1, 2, 3, 4, 5), na.rm = TRUE)
-average
-```
-
-Here, the mean() function calculates the average of a vector of numbers. The argument `na.rm = TRUE` tells R to ignore any `NA` (missing) values when calculating the mean.
 
 # Workshop Instructions
 
@@ -445,7 +398,7 @@ There are many descriptive techniques to check for anomalies in our data, but a 
 summary(ali)
 ```
 
-Keep in mind, with EDA where looking for anything *weird* in the data.
+Keep in mind, with EDA we're looking for anything *weird* in the data.
 
 ## Question Set Two
 
@@ -676,7 +629,7 @@ Within MyAberdeen, there is an additional dataset called `animal_speed.txt`. You
 
 As before, start by getting a feel for the data. What data do you have? What kind of values seem sensible, or what kind of values might seem *weird*? 
 
-Can you find them all?
+Can you find them all? Once you have, take a look at the instructions with answers to see what the values should be and attempt to resolve them.
 
 ## Information about the dataset:
 
@@ -752,30 +705,24 @@ fast$speed <- round(fast$speed, digits = 2)
 # Clearly wrong weight for a saiga
 # Missing value for one speed
 
-# Function to randomly select a row to add mistake to
-rng <- function(x) {
-  number <- round(runif(n = 1, min = 0, max = nrow(fast)), digits = 0)
-  return(number)
-}
-
-miss <- rng()
+miss <- 15
 fast$speed[miss] <- fast$speed[miss] * 100
 
-miss <- as.numeric(sample(row.names(fast[fast$species == "Peregrine Falcon",]), size = 1))
+miss <- 1
 fast$species[miss] <- "Peregrin Took"
 
-miss <- rng()
+miss <- 423
 fast$weight[miss] <- 0
 
-miss <- as.numeric(sample(row.names(fast[fast$species == "Saiga Antelope",]), size = 1))
+miss <- 261
 fast$weight[miss] <- 3
 
-miss <- rng()
+miss <- 162
 fast$speed[miss] <- NA
 
 # Exporting so data used here is same as the one students have
 # Should always be the same unless values above are changed (including seed)
-write.table(ali, here("Workshops/Workshop 1 - Hidden assumptions/Data", "animal_speed.txt"), row.names = FALSE)
+write.table(fast, here("Workshops/Workshop 1 - Hidden assumptions/Data", "animal_speed.txt"), row.names = FALSE)
 ```
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
@@ -799,14 +746,17 @@ fast$weight[fast$weight < quantile(fast$weight, probs = 0.01)]
 fast[fast$weight == 0,]
 
 # Assume you confirm with the data provider and correct this value
-# The correct weight should be 285.6 g
-fast$weight[fast$weight == 0] <- 285.6
+# The correct weight should be 45514 g
+# Note in the code below we don't have a "," after == 0? That's because we
+# are working with a single column of data, the weight column, so there's
+# no need to say "and all columns" by using the "," at the end.
+fast$weight[fast$weight == 0] <- 45514
 
 # Problem 2: Investigate the suspiciously low weight (3.0 grams)
 fast[fast$weight == 3,]
 
 # Correct the weight after confirmation with the data provider
-fast$weight[fast$weight == 3] <- 3846.2
+fast$weight[fast$weight == 3] <- 47255
 
 # Problem 3: Correct the species name "Peregrin Took" to "Peregrine Falcon"
 # Identify the unique species names to find the typo
@@ -816,19 +766,21 @@ unique(fast$species)
 fast$species[fast$species == "Peregrin Took"] <- "Peregrine Falcon"
 
 # Characters can be converted into factors. In many cases it doesn't make a
-# difference, but it can be harder to correct factors compared to characters
-# A general rule, leave strings as characters until your confident they are
-# "correct", and then convert to factors.
+# difference, but it can be harder to correct factors compared to characters.
+# A general rule, leave strings as characters until you're confident they are
+# "correct", and then convert to factors if you really want "factors" but 
+# in general there's rarely any downsides to leaving them as characters.
 fast$species <- factor(fast$species)
 
-# Problem 4: Investigate the extremely high speed value (33346.0 km/h)
+# Problem 4: Investigate the extremely high speed value (35711 km/h)
 fast[fast$speed == max(fast$speed, na.rm = TRUE),]
 
 # Correct the speed after identifying it as a decimal point error
 # This is actually quite tricky to do because of the NA value in speed
-# Instead of using conditional statements, which would need to deal with the NA,
-# we can just use the row number that we can see on the left of the above output
-fast$speed[263] <- fast$speed[263] / 100
+# Instead of using conditional statements, which would need to deal with the 
+# NA, we can just use the row number that we can see on the left of the above 
+# output
+fast$speed[15] <- fast$speed[15] / 100
 
 # Problem 5: Handling missing values (NA) in the speed column
 # NA is used to indicate "Not Available" or simply "missing"
@@ -837,5 +789,28 @@ fast$speed[263] <- fast$speed[263] / 100
 
 # Final Summary of the dataset after corrections
 summary(fast)
+```
+
+## Question Set Six
+
+If you haven't done so already, have a look at the instructions with the answers which contains what the actual values should be for four of the five data issues that you identified. Correct those values now (either using the code provided in the answer or create your own solution - there are multiple ways to correct the data here) then answer the following questions:
+
+1. What is the median weight in this dataset?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+median(fast$weight)
+```
+
+2. What is the median speed in this dataset?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+median(fast$speed, na.rm = TRUE)
+```
+
+3. Which species is most common in this dataset?
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# We can use the table() function to answer this but lots of different ways
+table(fast$species)
 ```
 

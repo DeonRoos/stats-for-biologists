@@ -103,7 +103,14 @@ If nothing immediately seems off, we can continue.
 
 # A simple plot
 
-We'll build this figure up slowly, one layer at a time, to make the fundamental philosophy of `ggplot2` clear. To begin with, we can simple make a "ggplot":
+We'll build this figure up slowly, one layer at a time, to make the fundamental philosophy of `ggplot2` clear. But before we can do this, we first need to install the package (if you haven't done so already) and then load it ready to use:
+
+```{r, eval = F}
+install.packages("ggplot2") # Install the software
+library(ggplot2) # Load the software
+```
+
+Once we have `ggplot2` installed and loaded, we can make a simple "ggplot":
 
 ```{r}
 ggplot()
@@ -164,7 +171,7 @@ ggplot(boto) +
   geom_point(aes(y = length, x = sex))
 ```
 
-Kind of? It's a bit hard to see the spread of data for each sex. A better way to show this is to use some sort of tool which will help the reader understand the range of `length` for each `sex` but also how the data is spread. There are two common options people use for this; boxplots and violin plots. It's trivially easy to swap between these, because all we need to do is change the geometry function from `geom_point()` to either `geom_boxplot()` or `geom_violin()`:
+Kind of? It's a bit hard to see the spread of data for each sex. A better way to show this is to use some sort of tool which will help the reader understand the range of `length` for each `sex` but also how the data is spread. There are two common options that people use for this; boxplots and violin plots. It's trivially easy to swap between these, because all we need to do is change the geometry function from `geom_point()` to either `geom_boxplot()` or `geom_violin()`:
 
 ```{r}
 # Boxplot
@@ -178,7 +185,7 @@ ggplot(boto) +
 
 Both of these present the same information in different ways. The boxplot uses boxes and lines to indicate the range, the first and third quantiles and the median. Conversely, the violin plot also shows the spread of data but by creating density plots which are mirrored. Boxplots have a long history and use in science, but people are increasingly using violin plots, simply because they're more transparent and clear than boxplots.
 
-With either boxplots and violin plots, it's fairly common that people will add the data points to the figure as well - to really hammer home the spread of data. But we've seen before that using `geom_point()` basically gives us a line of points that doesn't help us understand the spread at all. An alternative is to use something called "jiterring". When we jitter points, we add a small random value to either or both the x and y position to spread the data out a little bit. With our boto data above, we wouldn't want to add anything to y (as we're interested in the length of the dolphins, so we don't want to mess that up) but we can happily add something to x (or `sex`). To do so, we can use `geom_jitter()` but we want to specify that "noise" should only be added to x and not y. Here's how we do that:
+With either boxplots and violin plots, it's fairly common that people will add the data points to the figure as well - to really hammer home the spread of data. But we've seen before that using `geom_point()` basically gives us a line of points that doesn't help us understand the spread at all. An alternative is to use something called "jiterring". When we jitter points, we add a small random value to either or both the x and y position to spread the data out a little bit. With our boto data above, we wouldn't want to add anything to y (as we're interested in the length of the dolphins, so we don't want to mess that up) but we can happily add something to x (or `sex`). To do so, we can use `geom_jitter()` but we want to specify that "noise" should only be added to x and not y - which can can specify by saying `height = 0` (i.e. zero noise added to "height", or the y-axis), and `width = 0.1` (i.e. points can move 0.1 units to the left and right on the x-axis). Here's how we do that:
 
 ```{r}
 ggplot(boto) +
@@ -227,6 +234,8 @@ ggplot(boto) +
 # Gives an error saying:
 # "unexpected symbol in: ... geom_point(aes(x = length y"
 # We're missing a comma between the x and y arguments
+# Note that we're free to put x = length before y = drought
+# (Technically, we're also putting our response variable on the x axis)
 ```
 
 4. If I wanted to produce a histogram of boto lengths, what should my code look like?
@@ -247,7 +256,7 @@ ggplot(boto) +
   geom_point(aes(y = length, x = drought, colour = sex))
 ```
 
-With a really minor additional to the code, we now have points arbitrarily coloured red and blue for female and male. In doing so, we can see some evidence for sexual dimorphism but also that drought has a negative relationship for both species.
+With a really minor additional to the code, we now have points arbitrarily coloured red and blue for female and male. In doing so, we can see some evidence for sexual dimorphism but also that drought has a negative relationship for both sexes.
 
 Let's assume we think the points are a bit too small for our audience to read. Well in that case, we can specify a value for `size =`, where `1.5` is the default. Should `size =` be specified within `aes()` or outside? Well, we're not using a variable in our dataset to determine the size of the point, so we include `size =` outside of `aes()`. Giving us:
 
@@ -306,19 +315,23 @@ ggplot(boto) +
 # to check with our colleagues.
 ```
 
-# Optional: `geom_`s
+# `geom_`s
 
-Have a look [here](https://ggplot2.tidyverse.org/reference/), specifically at the layers section. Using the information in the link, see if you can figure out which `geom_` to use such that you recreate the following figure. There are two things to note here. First this figure is created with a single `geom_` with only `x = ` and `y = ` specified, and no other options. Secondly, if you figure out which `geom_` to use, you will be prompted to install a new package when you run the code (it's fine to install this new package - simply type 1 and enter in the console to do so).
+Have a look [here](https://ggplot2.tidyverse.org/reference/), specifically at the layers section. Using the information in the link, see if you can figure out which `geom_` to use such that you recreate the following figure. There are two things to note here. First this figure is created with a single `geom_` with only `x = ` and `y = ` specified, and no other options. Secondly, if you figure out which `geom_` to use, you will be prompted to install a new package when you run the code (it's fine to install this new package - simply type 1 and enter in the console when prompted).
 
 ```{r, eval = T, echo = F}
+
+```
+
+```{r, include=answer_sheet, class.source="bg-success", eval = T}
 ggplot(boto) +
   geom_hex(aes(x = drought, y = length))
 ```
 
 # The good and the bad
 
-```{r}
-abdn <- read.csv(here("Workshops/Workshop 2 - Data vis/Data", "abdn_flats.csv"), header = TRUE)
+```{r, include = FALSE}
+abdn <- read.table(here("Workshops/Workshop 2 - Data vis/Data", "abdn_flats.txt"), header = TRUE)
 ```
 
 We're going to do something that's, hopefully, fun but also instructive. On MyAberdeen, you find a dataset called `abdn_rent.csv` (note that this is a `.csv` file extension and not a `.txt`, so you'll need to use `read.csv()` rather than `read.table()` when loading the data). This dataset contains $> 100$ records (i.e. observations or samples) of rent prices for properties listed in Aberdeenshire on the ASPC website. In additional to the rent, 11 additional variables were recorded as well. These variables are:
@@ -353,55 +366,55 @@ Once you're happy you know the data relatively well, let's get to the tasks.
 
 ## The good
 
-Using whichever variables you like, make the most informative and visually appealing figure you can. Imagine you have been hired by a real estate company to create a figure that helps potential renters understand what may be determining rent prices, using `R`, `ggplot2` and the `abdn_rent.csv` dataset. Curious how much you might get paid to do this?
+Using whichever variables you like, make the most informative and visually appealing figure you can. Imagine you have been hired by a real estate company to create a figure that helps potential renters understand what may be determining rent prices, using `R`, `ggplot2` and the `abdn_rent.csv` dataset.
 
-![Look at that salary!](H:/003 - Teaching/006-BI3010/Workshops/Workshop 2 - Data vis/athletics.PNG)
+Create your most informative and visually appealing figure now - note that your "audience" here are not scientists, they're members of the public, so we want something that effectively communicates the information but is also eye catching. Keep the lecture on effective communication in your mind, and avoid some of the pitfalls we discussed. If you need help figuring out how to implement one of your ideas, see [Intro2R chapter](https://intro2r.com/graphics_r.html) for a more detailed walk through, or else use your LLM or choice to help. If using an LLM, just remember to mention that you are using `R`, `ggplot2` and do not want to use any additional packages. There is nothing wrong with using additional packages, but they can just add lots of extra moving parts to the mix (and cause conflict issues). We'd suggest you try and limit the number of additional packages you have loaded while you're still getting the hang of things, but if you feel comfortable using `R`, then go ahead by all means.
 
-See [here](https://www.workingnomads.com/jobs/data-graphics-analyst-the-athletic-media-company) for the full job advert.
 
-Create your most informative and visually appealing figure now. Keep the lecture on effective communication in your mind, and avoid some of the pitfalls we discussed. If you need help figuring out how to implement one of your ideas, see [Intro2R chapter](https://intro2r.com/graphics_r.html) for a more detailed walk through, or else use your LLM or choice to help. If using an LLM, just remember to mention that you are using `R`, `ggplot2` and do not want to use any additional packages. There is nothing wrong with using additional packages, but they can just add lots of extra moving parts to the mix (and cause conflict issues). We'd suggest you try and limit the number of additional packages you have loaded while you're still getting the hang of things, but if you feel comfortable using `R`, then go ahead by all means.
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+abdn <- read.table("abdn_flats.txt", header = TRUE)
+```
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = answer_sheet}
-# Here's my version of the best looking and most informative figure using the boto data
-p1 <- ggplot(boto) +
-  geom_histogram(aes(x = length, fill = sex), 
-                 position = position_dodge(), binwidth = 10) +
+# Here's my version of the best looking and most informative figure using the abdn flat data
+p1 <- ggplot(abdn) +
+  geom_density(aes(x = price), fill = "#EC1365", alpha = 0.8) +
   scale_fill_brewer(palette = "Dark2") +
   theme_classic() +
-  labs(x = "Boto length (cm)",
-       y = "Frequency",
-       fill = "Sex")
+  labs(x = "Rental price (£)",
+       y = "Density")
 
-p2 <- ggplot(boto) +
-  geom_histogram(aes(x = drought), 
-                 position = position_dodge(), binwidth = 1, colour = "white") +
+p2 <- ggplot(abdn) +
+  geom_density(aes(x = price, fill = tax), alpha = 0.7, show.legend = FALSE) +
+  scale_fill_brewer(palette = "Set2") +
+  theme_classic() +
+  labs(x = "Rental price (£)",
+       fill = "Tax\nband",
+       y = "Density")
+
+p3 <- ggplot(abdn) +
+  geom_point(aes(x = commute_time_minutes, y = price), colour = "#EC1365") +
+  theme_classic() +
+  labs(x = "Walk time to Uni (mins)",
+       y = "Rental price (£)")
+
+p4 <- ggplot(abdn) +
+  geom_boxplot(aes(x = epc, y = price, fill = epc), outliers = FALSE,
+              show.legend = FALSE) +
+  geom_jitter(aes(x = epc, y = price),
+              alpha = 0.3, size = 0.5, height = 0, width = 0.05) +
   scale_fill_brewer(palette = "Dark2") +
   theme_classic() +
-  labs(x = "Number of droughts",
-       y = "Frequency")
+  labs(x = "EPC",
+       y = "Rental price (£)")
 
-p3 <- ggplot(boto) +
-  geom_point(aes(x = drought, y = length)) +
+p5 <- ggplot(abdn) +
+  geom_point(aes(x = sqmt, y = price, colour = beds)) +
   theme_classic() +
-  labs(x = "Number of droughts",
-       y = "Boto length (cm)")
-
-p4 <- ggplot(boto) +
-  geom_violin(aes(x = sex, y = length, fill = sex), alpha = 0.3, show.legend = FALSE) +
-  geom_jitter(aes(x = sex, y = length), height = 0, width = 0.05) +
-  scale_fill_brewer(palette = "Dark2") +
-  theme_classic() +
-  labs(x = "Sex",
-       y = "Boto length (cm)")
-
-p5 <- ggplot(boto) +
-  geom_point(aes(x = drought, y = length, colour = sex)) +
-  theme_classic() +
-  scale_colour_brewer(palette = "Dark2") +
-  labs(x = "Number of droughts",
-       colour = "Sex",
-       y = "Boto length (cm)") +
-  facet_wrap(~sex)
+  scale_colour_viridis_c() +
+  labs(x = "Square meters",
+       colour = "Number of bedrooms",
+       y = "Rental price (£)")
 
 library(patchwork) # Patchwork allows you to "stitch" ggplots together
 
@@ -413,20 +426,20 @@ library(patchwork) # Patchwork allows you to "stitch" ggplots together
 
 Now for the part I'm excited about. Do the same as above, but this time, make it a miserably ugly figure. It still needs to *contain* the information (i.e. no blank figures) and be *somewhat* readable. If you need inspiration, search for "graph crimes", or "chart crimes" in your search engine - there are *lots* of examples you can use for "inspiration".
 
-Once, you're happy with your masterpieces, email you're favourite the whomever is running your session (either Deon or Michelle), and we'll have an "Art Exhibit" to finish the workshop :D.
+Once, you're happy with your masterpieces, add your figures onto the MyAberdeen discussion board, and we'll have an "Art Exhibit" to finish the workshop :D.
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = answer_sheet}
 # Here's my "best" attempt at making something disgusting
 # Most of this is done by messing around with theme()
-ggplot(boto) +
-  geom_point(aes(x = drought, y = length, colour = sex), shape = 24, size = 10, alpha = 1) +
+ggplot(abdn) +
+  geom_point(aes(x = living, y = sqmt, colour = lat), shape = 24, size = 10, alpha = 1) +
   theme(
     panel.background = element_rect(fill = "yellow"),
     plot.background = element_rect(fill = "pink"),
     panel.grid.major = element_line(colour = "red", size = 2),
     panel.grid.minor = element_line(colour = "blue", size = 1),
     axis.title.x = element_text(size = 20, angle = 90, vjust = 0.5, colour = "purple"),
-    axis.title.y = element_text(size = 20, angle = 0, hjust = 0.5, colour = "orange"),
+    axis.title.y = element_text(size = 4, angle = 0, hjust = 0.5, colour = "orange"),
     axis.text = element_text(size = 15, colour = "green"),
     legend.background = element_rect(fill = "cyan", colour = "black", size = 2),
     legend.title = element_text(size = 15, colour = "brown", face = "italic"),
@@ -434,10 +447,10 @@ ggplot(boto) +
     strip.background = element_rect(fill = "grey", colour = "black", size = 1.5),
     strip.text = element_text(size = 20, colour = "red", face = "bold")
   ) +
-  scale_colour_manual(values = c("pink", "green", "cyan")) +
+  scale_colour_gradient(low = "pink", high = "green") +
   labs(x = "Y-axis", 
        y = "X-axis", 
-       colour = "[REMEMBER TO CHANGE THIS]") +
-  facet_wrap(~sex, scales = "free_y")
+       colour = "[?]") +
+  facet_wrap(~epc, scales = "free_y")
 ```
 

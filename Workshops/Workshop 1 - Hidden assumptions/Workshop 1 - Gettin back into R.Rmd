@@ -424,6 +424,7 @@ Question 2. What are the minimum and maximum values for bite strength?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # 832.9 PSI to 123632.0 PSI
+range(ali$bite)
 ```
 
 Question 3. Do any of these minimums or maximums seem strange?
@@ -467,27 +468,27 @@ This is where we can use square brackets `[]` in conjunction with conditional st
 In our case, the condition is finding alligators that are `r max(ali$length)` cm long. In `R`, we write this condition using double equal signs (`==`) to denote "equal to". This is basically the same as your eyes going down the Excel column looking for `r max(ali$length)`, noting any instances where it was true or not. For example:
 
 ```{r}
-ali$length == 123632.0
+ali$length == 2293.0
 ```
 
 The output will be a list of `r nrow(ali)` values, each being either `TRUE` or `FALSE`, corresponding to each row in the `ali` dataset. `TRUE` values indicate rows where the alligator is `r max(ali$length)` cm long, and `FALSE` values indicate rows where the alligator is not `r max(ali$length)` cm long (in `R`, "not equal to" is denoted as `!=`).
 
 3. Once we've found these rows, examine all the information related to those alligators.
 
-Once we've identified the rows we're interested in, we can use square brackets to extract the relevant information. Square brackets in `R` let us select specific rows, columns, or individual values from datasets. When using square brackets, remember that the row number comes before the comma, and the column number comes after (e.g., `ali[row, column]`). If we omit either the row or column number, `R` will return all rows or all columns respectively. For instance, to view all the information (i.e., all columns) for the 30th row, you would use:
+Once we've identified the rows we're interested in (the simplest but least elegant way is to just count what row the `TRUE` is from in the above list), we can use square brackets to extract the relevant information. Square brackets in `R` let us select specific rows, columns, or individual values from datasets. When using square brackets, remember that the row number comes before the comma, and the column number comes after (e.g., `ali[row, column]`). If we omit either the row or column number, `R` will return all rows or all columns respectively. For instance, to view all the information (i.e., all columns) for the 30th row, you would use:
 
 
 ```{r}
-ali[30,]
+ali[20,]
 ```
 
-We can use these square brackets in combination with the conditional statement to extract the entire row for the alligator that's `r max(ali$length)` cm long. In this case, the `TRUE` and `FALSE` values act as indicators for which rows we want to display. If a value is `TRUE`, it means we want to see that row; if it's `FALSE`, we don't. We can achieve this by writing:
+To make life a bit easier for ourselves, we can use these square brackets in combination with the conditional statement to extract the entire row for the alligator that's `r max(ali$length)` cm long. In this case, the `TRUE` and `FALSE` values act as indicators for which rows we want to display. If a value is `TRUE`, it means we want to see that row; if it's `FALSE`, we don't. We can achieve this by writing:
 
 ```{r}
 ali[ali$length == 2293,]
 ```
 
-What do you make of this observation? We're expecting `length` to be about 200 to 400 centimeters (2 to 4 m), but this alligator is apparently 10 times bigger than that. And `bite` is about 100 times bigger. Neither seems to have a decimal point (or at least `R` has given them values of zero after the decimal point).
+What do you make of this observation? We're expecting `length` to be about 200 to 400 centimeters (2 to 4 m), but this alligator is apparently 10 times bigger than that. And `bite` is about 100 times bigger. Neither of the two values seem to have a decimal point (or at least `R` has given them values of zero after the decimal point).
 
 Why might that be the case? Let's see if we can find a "normal" observation to compare this giant alligator to. 
 
@@ -499,17 +500,14 @@ ali[1, ]
 
 This command extracts the data from the first row of the `ali` dataset, allowing us to compare it with the giant alligator's values.
 
-Well, they're clearly different. The first alligator in our dataset looks pretty normal. Maybe a bit on the big side, but not weirdly so. There are only two possible explanations for this. Either there are giant alligators among us. Or, there has been a data entry mistake.
+Well, they're clearly different. The first alligator in our dataset looks pretty normal. Maybe a bit on the big side (just over 4 m long), but not weirdly so. There are only two possible explanations for this. Either there are giant alligators among us. Or, there has been a data entry mistake.
 
 ## Question Set Three
 
 Question 1. What may have occurred to have caused this apparent data entry mistake?
 
 ```{r, include=answer_sheet, class.source="bg-success"}
-# This "giant" alligator is the result of a data entry mistake whereby 
-# the decimal points were missing for bite and length. The values should be 
-# 229.3 cm long and	1236.32	pounds per square inch. If you look at the raw data, 
-# you'll see it has no decimal points.
+# This "giant" alligator is the result of a data entry mistake whereby the decimal points were missing for bite and length. The values should be 229.3 cm long and	1236.32	pounds per square inch. If you look at the raw data, you'll see it has no decimal points.
 ```
 
 # A More Refined Detective
@@ -517,7 +515,6 @@ Question 1. What may have occurred to have caused this apparent data entry mista
 The method we used to identify the data entry mistake is effective, but what if we want to be a more refined programmer and avoid repeatedly writing out `r max(ali$length)`?
 
 Instead, we can use a function that returns the maximum alligator length. The function to do just that is called `max()`:
-
 
 ```{r}
 # Get the maximum alligator length
@@ -581,7 +578,7 @@ So, we've identified a problem. What now? Do we delete the observation? Declare 
 
 But we do need to do something. Row 20 of our dataset is clearly a mistake, but correcting it is a really sensitive topic. Part of the reason for that sensitivity is because a non-trivial number of scientists have been found to actually *fake* their data in order to further their own careers and prestige (e.g. see [here](https://www.science.org/content/article/university-investigation-found-prominent-spider-biologist-fabricated-falsified-data), [here](https://www.science.org/content/article/does-ocean-acidification-alter-fish-behavior-fraud-allegations-create-sea-doubt), and most ironically [here](https://behavioralscientist.org/harvard-professor-under-scrutiny-for-alleged-data-fraud/) for examples).
 
-We want to be better than these kinds of people and don't want to risk it looking like we're manipulating our data to serve our own selfish needs. So how do we resolve our issue? First, go back to the original data or the data provider. Not the dataset we downloaded (`alligator_bite.txt`) but the original values (hopefully) written in a notebook. Here, we'd contact Parker Island Gator Farm and ask them to confirm our suspicion that row 20 was simply missing decimal points.
+We want to be better than these kinds of people and don't want to risk it looking like we're manipulating our data to serve our own selfish needs. So how do we resolve our issue? First, go back to the original data or the data provider. Not the dataset we downloaded (`alligator_bite.txt`) but the original values (hopefully) written in a notebook to double check what the original values were. Here, we'd contact Parker Island Gator Farm and ask them to confirm our suspicion that row 20 was simply missing decimal points.
 
 In the interest of time, I'll confirm that it's missing decimal points so we can move on to fixing the problem. Specifically, `bite` should have two decimal points, and `length` should have one.
 
@@ -609,7 +606,6 @@ ali$bite[20] <- ali$bite[20] / 100
 ## Question Set Five
 
 1. Resolve the data entry mistake for `ali$length`. Be sure to add a clear comment indicating that you have made this change, so that if anyone reviews your code, they understand the reason for the modification and don't suspect any foul play.
-
 
 ```{r, include=answer_sheet, class.source="bg-success"}
 # Correcting missing decimal point

@@ -22,10 +22,10 @@ p1 <- ggplot(df) +
   geom_line(data = df, aes(x = x, y = L)) +
   labs(x = "Adult Emporer Penguin Height (m)",
        y = "") +
-  annotate("segment", x = 1.7, xend = 1.7, y = 0.4, yend = dnorm(2, mean = 1.14, sd = 0.3)+0.01,
+  annotate("segment", x = 1.7, xend = 1.56, y = 0.4, yend = dnorm(2, mean = 1.14, sd = 0.3)+0.01,
            arrow = arrow(type = "closed", length = unit(0.2, "cm")), color = "white", size = 1) +
   annotate("text", x = 1.7, y = dnorm(1.7, mean = 1.14, sd = 0.3) + 0.35, 
-           label = "Our 1.7 m\ntall penguin", color = "white", hjust = 0.5, size = 8) +
+           label = "Our 1.56 m\ntall penguin", color = "white", hjust = 0.5, size = 8) +
   sbs_theme()
 p1
 ggsave(here::here("Figures/Lecture 11 - NHST & AIC", file = "distribution.png"), plot = p1, width = 650/72, height = 775/72, dpi = 72)
@@ -36,10 +36,10 @@ p2 <- ggplot(df) +
   #geom_area(data = subset(df, x >= ci_low & x <= ci_high), aes(x = x, y = L), fill = "blue", alpha = 0.5) +
   labs(x = "Adult Emporer Penguin Height (m)",
        y = "") +
-  annotate("segment", x = 1.7, xend = 1.7, y = 0.4, yend = dnorm(2, mean = 1.14, sd = 0.3)+0.01,
+  annotate("segment", x = 1.7, xend = 1.56, y = 0.4, yend = dnorm(2, mean = 1.14, sd = 0.3)+0.01,
            arrow = arrow(type = "closed", length = unit(0.2, "cm")), color = "white", size = 1) +
   annotate("text", x = 1.7, y = dnorm(1.7, mean = 1.14, sd = 0.3) + 0.35, 
-           label = "Our 1.7 m\ntall penguin", color = "white", hjust = 0.5, size = 8) +
+           label = "Our 1.56 m\ntall penguin", color = "white", hjust = 0.5, size = 8) +
   annotate("segment", x = 0.75, xend = 1.14, y = 1.2, yend = dnorm(1.14, mean = 1.14, sd = 0.3) - 0.01,
            arrow = arrow(type = "closed", length = unit(0.2, "cm")), color = "white", size = 1) +
   annotate("text", x = 0.3, y = 1.2, 
@@ -62,16 +62,16 @@ p3 <- ggplot(df) +
   #          label = "Our 2m tall penguin", color = "white", hjust = 0.5, size = 8) +
   annotate("segment", x = 0.75, xend = 1.14, y = 1.2, yend = dnorm(1.14, mean = 1.14, sd = 0.3) - 0.01,
            arrow = arrow(type = "closed", length = unit(0.2, "cm")), color = "white", size = 1) +
-  annotate("text", x = 0.3, y = 1.2, 
-           label = "99.75% of the area\nunder the curve", color = "white", hjust = 0.5, size = 8) +
+  annotate("text", x = 0.32, y = 1.2, 
+           label = "99.5% of the area\nunder the curve", color = "white", hjust = 0.5, size = 8) +
   annotate("segment", x = 0.5, xend = ci_low-0.1, y = 0.3, yend = 0.05,
            arrow = arrow(type = "closed", length = unit(0.2, "cm")), color = "white", size = 1) +
   annotate("text", x = 0.3, y = 0.5, 
-           label = "0.025% of the area\nunder the curve", color = "white", hjust = 0.5, size = 8) +
+           label = "0.25% of the area\nunder the curve", color = "white", hjust = 0.5, size = 8) +
   annotate("segment", x = 1.8, xend = ci_high+0.1, y = 0.3, yend = 0.05,
            arrow = arrow(type = "closed", length = unit(0.2, "cm")), color = "white", size = 1) +
   annotate("text", x = 2.1, y = 0.5, 
-           label = "0.025% of the area\nunder the curve", color = "white", hjust = 0.5, size = 8) +
+           label = "0.25% of the area\nunder the curve", color = "white", hjust = 0.5, size = 8) +
   sbs_theme() +
   geom_vline(xintercept = ci_low, linetype = "dashed", color = "white") +
   geom_vline(xintercept = ci_high, linetype = "dashed", color = "white")
@@ -82,10 +82,10 @@ ggsave(here::here("Figures/Lecture 11 - NHST & AIC", file = "95_distribution.png
 
 # Create data frame for df1 with varying means
 df1 <- data.frame(
-  x = seq(0.5, 2.5, by = 0.01),
+  x = seq(0.5, 2.5, by = 0.01)
 )
 
-df1$L <- dnorm(df1$x, mean = 1.5, sd = 0.15)
+df1$L <- dnorm(df1$x, mean = 1.56, sd = 0.15)
 
 means <- c(1.95, 1.8, 1.7, 2.2, 1.6)
 
@@ -101,10 +101,10 @@ p5 <- ggplot() +
   geom_line(data = df, aes(x = x, y = L)) +
   geom_line(data = df1, aes(x = x, y = L, group = mean), color = "#D95F02") +
   labs(x = "Adult Emperor Penguin Height (m)", y = "") +
-  annotate("segment", x = 1.7, xend = 1.7, y = 0.4, yend = dnorm(2, mean = 1.14, sd = 0.3) + 0.01,
+  annotate("segment", x = 1.7, xend = 1.56, y = 0.4, yend = dnorm(2, mean = 1.14, sd = 0.3) + 0.01,
            arrow = arrow(type = "closed", length = unit(0.2, "cm")), color = "white", size = 1) +
   annotate("text", x = 1.7, y = dnorm(2, mean = 1.14, sd = 0.3) + 0.55, 
-           label = "Our 1.7 m\ntall penguin", color = "white", hjust = 0.5, size = 8) +
+           label = "Our 1.56 m\ntall penguin", color = "white", hjust = 0.5, size = 8) +
   sbs_theme() +
   transition_states(mean, transition_length = 2, state_length = 1)
 p5

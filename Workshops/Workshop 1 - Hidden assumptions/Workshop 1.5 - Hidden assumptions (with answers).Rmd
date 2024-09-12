@@ -1,5 +1,5 @@
 ---
-title: 'Workshop 1.5: Hidden Assumptions'
+title: 'Workshop 1.5: Hidden Assumptions (with answers)'
 author: "Roos & Pinard"
 date: 'Last updated: `r Sys.Date()`'
 output:

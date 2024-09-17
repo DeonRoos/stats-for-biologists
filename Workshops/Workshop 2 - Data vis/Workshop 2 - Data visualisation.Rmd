@@ -22,7 +22,7 @@ We covered steps 2 and 3 in the previous workshop, but we'll expand your toolkit
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="show")
-answer_sheet <- TRUE
+answer_sheet <- FALSE
 library(ggplot2)
 library(here)
 ```
@@ -329,7 +329,7 @@ ggplot(boto) +
 abdn <- read.table(here("Workshops/Workshop 2 - Data vis/Data", "abdn_flats.txt"), header = TRUE)
 ```
 
-We're going to do something that's, hopefully, fun but also instructive. On MyAberdeen, you find a dataset called `abdn_rent.csv` (note that this is a `.csv` file extension and not a `.txt`, so you'll need to use `read.csv()` rather than `read.table()` when loading the data). This dataset contains $> 100$ records (i.e. observations or samples) of rent prices for properties listed in Aberdeenshire on the ASPC website. In addition to the rent price, 11 additional variables were recorded as well. The variables are:
+We're going to do something that's, hopefully, fun but also instructive. On MyAberdeen, you find a dataset called `abdn_rent.txt`. This dataset contains $> 100$ records (i.e. observations or samples) of rent prices for properties listed in Aberdeenshire on the ASPC website. In addition to the rent price, 11 additional variables were recorded as well. The variables are:
 
 1. `price` - the rent of the listed property
 
@@ -370,7 +370,7 @@ Create your most informative and visually appealing figure now - note that your 
 abdn <- read.table("abdn_flats.txt", header = TRUE)
 ```
 
-```{r, include=answer_sheet, class.source="bg-success", eval = answer_sheet, fig.width = 10, fig.height = 12}
+```{r, include=answer_sheet, class.source="bg-success", eval = answer_sheet, fig.width = 10, fig.height = 10}
 # Here's my version of the best looking and most informative figure using the abdn flat data
 p1 <- ggplot(abdn) +
   geom_density(aes(x = price), fill = "#EC1365", alpha = 0.8) +

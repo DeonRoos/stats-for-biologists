@@ -24,7 +24,7 @@ For this workshop, we'll continue with the models you ran on Tuesday, going back
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="show")
-answer_sheet <- FALSE
+answer_sheet <- TRUE
 library(ggplot2)
 library(here)
 ```
@@ -60,7 +60,7 @@ fake$fit <- preds$fit
 fake$low95 <- preds$fit - 1.96 * preds$se.fit
 fake$upp95 <- preds$fit + 1.96 * preds$se.fit
 ggplot(fake) +
-  geom_errorbar(aes(x = mongoose, ymin = low95, ymax = upp95), width = 0.1) +
+  geom_errorbar(aes(x = mongoose, ymin = low95, ymax = upp95)) +
   geom_point(aes(x = mongoose, y = fit)) +
   labs(x = "Java mongoose",
        y = "Predicted weight of rabbits (g)") +
@@ -101,7 +101,55 @@ We can, however, check for equal variance of errors.
 plot(rabbit_mod, which = 1)
 ```
 
-What we're looking for here is whether each category has broadly equal spread above and below a residual error of zero. The two lines you see here are the two groups. Remember that there was about a two to three gramm difference between the island with mongoose and the one without, and we can see that here - when mongoose are absent the model predicts they should weigh about 269 g and when there are mongoose the model predicts rabbits weigh 266 g. In both groups, there are rabbits that weigh about 40 g more or less than the model expects, so it looks pretty good for meeting our assumption of equal variance of errors.
+What we're looking for here is whether each category has broadly equal spread above and below a residual error of zero. The two lines you see here are the two groups. Remember that there was about a five gram difference between the island with mongoose and the one without, and we can see that here - when mongoose are absent the model predicts they should weigh about 269 g and when there are mongoose the model predicts rabbits weigh 266 g. In both groups, there are rabbits that weigh about 40 g more or less than the model expects, so it looks pretty good for meeting our assumption of equal variance of errors.
+
+What would a "bad" example look like? Well, consider the following example where the blue dots show the predicted response variable for groups A and B:
+
+```{r, echo = FALSE}
+df <- data.frame(x = sample(0:1, size = 50, replace = TRUE))
+df$y <- rnorm(n = nrow(df), mean = 0 + 2.5 * df$x, sd = 1 + 1.5 * df$x)
+df$x <- factor(ifelse(df$x == 0, "Group A", "Group B"))
+m1 <- lm(y ~ x, data = df)
+fake <- data.frame(x = c("Group A", "Group B"))
+fake$fit <- predict(m1, newdata = fake)
+ggplot() +
+  geom_jitter(data = df, aes(x = x, y = y), size = 0.5, height = 0, width = 0.1) +
+  geom_point(data = fake, aes(x = x, y = fit), colour = "blue", size = 3) +
+  labs(x = "Explanatory variable",
+       y = "Response variable") +
+  theme_minimal()
+```
+
+When we look at the Residuals vs Fitted plot, we can see:
+
+```{r, echo = FALSE}
+plot(m1, which = 1)
+```
+
+The amount of variation in the error (or residuals) is not equal here. When the predicted values (x-axis) are $< 0$, we see very little variation around those predictions (residuals within ca. 2 units from the observed value), while at the other end of the figure (corresponding to Group B), we can see a lot more variation in errors, up to 8 units from the true value.
+
+When we add in the 95% confidence intervals to the plot:
+
+```{r, echo = FALSE}
+df <- data.frame(x = sample(0:1, size = 50, replace = TRUE))
+df$y <- rnorm(n = nrow(df), mean = 0 + 2.5 * df$x, sd = 1 + 1.5 * df$x)
+df$x <- factor(ifelse(df$x == 0, "Group A", "Group B"))
+m1 <- lm(y ~ x, data = df)
+fake <- data.frame(x = c("Group A", "Group B"))
+prds <- predict(m1, newdata = fake, se.fit = TRUE)
+fake$fit <- prds$fit
+fake$low <- prds$fit - prds$se.fit * 1.96
+fake$upp <- prds$fit + prds$se.fit * 1.96
+ggplot() +
+  geom_jitter(data = df, aes(x = x, y = y), size = 0.5, height = 0, width = 0.1) +
+  geom_point(data = fake, aes(x = x, y = fit), colour = "blue", size = 3) +
+  geom_errorbar(data = fake, aes(x = x, ymin = low, ymax = upp), colour = "blue") +
+  labs(x = "Explanatory variable",
+       y = "Response variable") +
+  theme_minimal()
+```
+
+We can see that the amount of uncertainty is equal in both groups, but in reality, the confidence intervals for Group A should probably be much smaller. This is the result of violating the assumption of equal variance of errors.
 
 ## `Scale-Location`
 
@@ -185,7 +233,7 @@ None of our points are close to 1, so we don't have any observations that are pu
 
 If you preferred the plots made by `performance` using `check_model()` you can use them for the rabbit model, but note that it doesn't work particularly well for our simple model. For instance, it tries to draw a green line between our two groups, which looks pretty wiggly, but that doesn't actually mean anything here.
 
-```{r}
+```{r, fig.width = 10, fig.height = 12}
 library(performance)
 check_model(rabbit_mod)
 ```
@@ -259,10 +307,7 @@ lem_mod <- lm(activity ~ habitat, data = lemur)
 par(mfrow = c(2,2))
 plot(lem_mod)
 par(mfrow = c(1,1))
-# Super obvious non-linear relationship, especially in Residuals vs Fitted
-# Can kinda also see weird waves in Scale-Location but less obvious
-# Q-Q looks fine (but also generally care least about this one)
-# Residuals vs Leverage looks good as well (far from contour lines - can't even see them)
+# No blatant issues from diagnostics. Errors seem fairly equal.
 
 # Summarise ------------------------------------
 summary(lem_mod)
@@ -275,10 +320,7 @@ preds <- ggpredict(lem_mod)
 plot(preds)
 
 # Interpret -----------------------------------
-# No issues identified in EDA (diagnoses on Friday) so can provide inference
-# Lemurs most active in rain forests and least in spiny forests
-# May not imply rain forests are more important - this is just where they are most active
-# Potential that this may be biased by how easy it is to record activity in different habitats
+# No issues identified in EDA. Lemurs most active in rain forests and least in spiny forests. Could be interpreted as meaning rainforests are the preferred habitat, but could also imply this is just where they are most active (e.g. spend more time foraging for equivalent amount of food). Potential that this may be biased by how easy it is to record activity in different habitats but cannot confirm with data as is.
 ```
 
 

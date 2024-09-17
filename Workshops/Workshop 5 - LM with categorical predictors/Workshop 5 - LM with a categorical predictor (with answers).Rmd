@@ -27,7 +27,6 @@ library(ggplot2)
 library(here)
 ```
 
-
 ```{r, include = FALSE}
 set.seed(2024)
 n <- 56
@@ -54,7 +53,7 @@ write.table(rabbit, here("Workshops/Workshop 5 - LM with categorical predictors/
 
 # 1. Formulate a Research Question
 
-For this workshop on fitting a linear model with a single categorical explanatory variable (or "predictor", etc), we're going to be using a new dataset.Our dataset this week comes from Japan, specifically the Ryukyu islands, far to the south of mainland Japan. Two islands, in particular, are home to the Amami rabbit (*Pentalagus furnessi*), a particularly ancient species of rabbit and designated a "natural monument" of Japan, currently threatened due to the invasive Java mongoose. 
+For this workshop on fitting a linear model with a single categorical explanatory variable (or "predictor", etc), we're going to be using a new dataset. Our dataset this week comes from Japan, specifically the Ryukyu islands, far to the south of mainland Japan. Two islands, in particular, are home to the Amami rabbit (*Pentalagus furnessi*), a particularly ancient species of rabbit and designated a "natural monument" of Japan, currently threatened due to the invasive Java mongoose. 
 
 We've been contacted by researchers in Japan asking us if we can help answer if the invasive species may be causing rabbit size to decline. For this they are providing a dataset of rabbit weights from two islands; Oshima, where mongoose are present, and Tokunoshima, where mongoose are believed to be absent. Mongoose are known to be present on Oshima (multiple captures with a control program underway) while on the smaller island of Tokunoshima there have been no reported sightings by locals of mongoose.
 
@@ -78,29 +77,59 @@ They ask you to resolve these issues but also to check for any other possible mi
 1. What `mongoose` value should the first mistake have?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = T}
-# The rabbit was from Oshima, not Tokunoshima, so mongoose should be Present not Absent
-rabbit$mongoose[7] <- "Present"
+# We've been told this is the 7th row, so we can use square brackets to check this row. Here, I'll also ask for all columns of the 7th row (by not speciying anything after the ,):
+rabbit[7,]
 ```
 
-2. Which rabbit had the incorrect weight?
+
+1.5  Correct the above data entry mistake and confirm that you're correction has worked
+
+```{r, include=answer_sheet, class.source="bg-success", eval = T}
+# The rabbit was from Oshima, not Tokunoshima, so mongoose should be Present not Absent
+
+# We can resolve this in a number of ways, but here are two options:
+rabbit$mongoose[7] <- "Present"
+rabbit[7,1] <- "Present"
+# Both do the exact same thing. If you're not sure why, ask a demonstrator.
+
+# To check if this worked, we can do:
+rabbit[7,]
+```
+
+2. Which rabbit had the incorrect weight? (Correct the data entry mistake at the same time)
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = T}
 # If we do a plot of the data:
 ggplot(rabbit) +
   geom_histogram(aes(x = weight))
-# We can clearly see there's one rabbit that's much larger than the others
-# From the figure, we can also see that it's the only rabbit that's larger than
-# 350 g, so we can use that as our condition and subtract 100 g
-rabbit$weight[rabbit$weight > 350] <- rabbit$weight[rabbit$weight > 350] - 100
-# Replot to confirm it worked:
+# We can clearly see there's one rabbit that's much larger than the others. From the figure, we can also see that it's the only rabbit that's larger than 350 g, so we can use that as our condition and subtract 100 g. We also learn that this is on row 41 (the number oto the left of the output).
+rabbit[rabbit$weight > 350,]
+```
+
+2.5  Correct the above data entry mistake and confirm that you're correction has worked
+
+```{r, include=answer_sheet, class.source="bg-success", eval = T}
+# There are a couple of different ways we can do this correction:
+rabbit$weight[rabbit$weight > 350]  <- rabbit$weight[rabbit$weight > 350] - 100
+# Or we can do:
+# rabbit[41,2] <- rabbit[41,2]-100 #Not run
+
+# To check if this worked, we can do:
+rabbit[41,]
+# Or:
 ggplot(rabbit) +
   geom_histogram(aes(x = weight))
 ```
 
+3. Can you find any additional data entry mistakes?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = T}
+# No, nothing that I can spot at least.
+```
 
 # 3. Identify Any Hidden Assumptions
 
-Having resolved any data issues, it's time to think more carefully about that data and identify any hidden assumptions.
+Having resolved any data issues, it's time to think more carefully about that data and identify any hidden assumptions. Note that when people talk about "hidden assumptions" they generally mean those assumptions that generally can't be easily checked for using diagnostic plots; so especially validity and representativeness, but it can really mean any assumption we make when we use a dataset to try and understand the world.
 
 ## Question Set Two
 
@@ -190,34 +219,34 @@ $weight_i \sim Normal(\mu_i, \sigma)$
 $\mu_i = \underline{\phantom{\beta_0}} + \underline{\phantom{\beta_0}} \times Present_i$
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# The first blank should be 269.113 and the second blank should be -2.002
-# Or mu = 269.1 + -2.0 * Present
+# The first blank should be 272.447 and the second blank should be -5.335
+# Or mu = 272.5 + -5.3 * Present
 ```
 
 2. Using your completed equation from 1., what value of $\mu$ (or Amami rabbit weight) would you predict if there are mongoose present?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # We can just replace the drought from the above equation with zero:
-# 269.1 + -2.0 * 1 = 267.1
+# 272.5 + -5.3 * 1 = 267.2
 ```
 
 3. Using your completed equation from 1., what value of $\mu$ would you predict if mongoose were absent?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # We can just replace the drought from the above equation with eight:
-# 269.1 + -2.0 * 0 = 269.1
+# 272.5 + -5.3 * 0 = 272.5
 ```
 
 4. Is the presence mongoose associated with a decline in weight as the Japanese researchers hypothesised?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# Based on the model, yes, mongoose appear to reduce the average weight of rabbits by two grams.
+# Based on the model, yes, mongoose appear to reduce the average weight of rabbits by about 5 grams.
 ```
 
 5. Is the association sufficient to be of biological concern?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# Two grams is pretty small, given the rabbits weight on average 2.7 kg. Combined with the uncertainty of whether or not mongoose are actually absent from Tokunoshima, we're not really sure what we've learned here.
+# Five grams is pretty small, given the rabbits weight on average 2.7 kg. Combined with the uncertainty of whether or not mongoose are actually absent from Tokunoshima, we're not really sure what we've learned here.
 
 # I.e. we identified before running the model that the mongoose variable might not be reliable, and we now find a tiny effect of mongoose on rabbit weight. So what should we take away from this? I'm not sure myself.
 ```
@@ -250,19 +279,27 @@ Then ask `ggeffects` to predict rabbit weight for each of our `mongoose` categor
 preds <- ggpredict(rabbit_mod)
 ```
 
-Now we just need to plot it:
+When we run the above code, we get a `Warning` (but not an `Error`) saying that, basically, `ggeffects` isn't happy about using a `character` to do this predictions. Instead it recommends to convert these variables to factors before fitting the model. Doing so is easy enough, we'd just do:
+
+```{r}
+rabbit$mongoose <- factor(rabbit$mongoose)
+```
+
+And then rerun our model. In truth, I've never found fitting a model with characters to be especially problematic, though some packages will not allow you to do this at all. So generally, I do convert my categorical variables to factors before fitting models. Whether you want to or not is up to you, but given how little effort it takes, I lean towards just converting to `factor`.
+
+Regardless of whether you refit the model with `mongoose` as a `factor` or `character`, now we just need to plot it:
 
 ```{r}
 plot(preds)
 ```
 
-Just like last week, we get a figure quickly and easily that shows our model predictions.
+Just like last week, we get a figure quickly and easily that shows our model predictions along with the 95% confidence intervals.
 
 ## Create the prediction and figure yourself.
 
-We can also, broadly, repeat the process we used last week, with only a few minor tweaks to account for the different type of explanatory varibale (from continuous to categorical).
+We can also, broadly, repeat the process we used last week, with only a few minor tweaks to account for the different type of explanatory variable (from continuous to categorical).
 
-For starters, when we make our *fake* dataset, the values of `mongoose` need to only be `Present` or `Absent` (just like in our actual dataset). We don't need to create a range of values to predict over this time. To create our `mongoose` variable, we can either use `c("Absent", "Present")` or we can use the `unique()` function that you may have used in the very first Workshop. `unique()` will return all unique values within a column of data, so `unique(rabbit$mongoose)`, will also return `"Absent"` and `"Present"`. The benefit of using `unique()` is when we have categorical variables with many groups (or levels) and it becomes a real pain to write out all of the different groups.
+For starters, when we make our *fake* dataset, the values of `mongoose` need to only be `Present` or `Absent` (just like in our actual dataset). To create our `mongoose` variable, we can either use `c("Absent", "Present")` or we can use the `unique()` function that you may have used in the very first Workshop. `unique()` will return all unique values within a column of data, so `unique(rabbit$mongoose)`, will return `"Absent"` and `"Present"`. The benefit of using `unique()` is when we have categorical variables with many groups (or levels) and it becomes a real pain to write out all of the different groups.
 
 Let's use `unique()` now to create our fake dataset to predict from:
 
@@ -293,9 +330,11 @@ fake$fit <- preds$fit
 
 # Confidence intervals
 
-This next part is new. We're going to use the standard error of the fit to calculate the 95% confidence intervals. If you need a reminder of what 95% CI are, then have a quick look at the lecture material.
+This next part is new. We're going to use the standard error of the fit to calculate the 95% confidence intervals. If you need a reminder of what 95% CI are, then have a quick look at the lecture material, but very briefly, confidence intervals represent the probability that an interval will contain the true parameter values *before the model has been run*. Once the model has been run, well, then either the intervals contains the true value or it doesn't. We don't know if it does. 
 
-The important thing to remember is that 95% CI take the standard error, multiplied by 1.96, and either *subtract* this from `fit` to get our *lower* 95% CI, or we *add* it to `fit` to get our *upper* 95% CI. Here's how we do that:
+If that's confusing (which is fair, 95% CI are weird), then think of the example we went through in the lecture with the ring toss game, where if we make the hoop "big" we'll have a 95% chance of hitting the target, but once we've thrown the hoop, it's either on target or it isn't.
+
+The important technical thing to remember is that 95% CI take the standard error, multiplied by 1.96, and either *subtract* this from `fit` to get our *lower* 95% CI, or we *add* it to `fit` to get our *upper* 95% CI. Here's how we do that:
 
 ```{r}
 fake$low95 <- preds$fit - 1.96 * preds$se.fit

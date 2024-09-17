@@ -21,7 +21,7 @@ As always, we’re using our tried-and-tested workflow to guide today’s worksh
 7. Interpret and draw conclusions.
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="show")
+knitr::opts_chunk$set(echo = TRUE, results = "show", fig.show="show")
 answer_sheet <- FALSE
 library(ggplot2)
 library(here)
@@ -73,7 +73,9 @@ Notice that we’re using `rooms` in the model, but this variable isn’t in the
 abdn$rooms <- abdn$beds + abdn$living
 ```
 
-The statistical notation for this model is pretty miserable due to the many levels of `epc` and `tax`. Here’s what it looks like:
+Another thing to note in this dataset are the `epc` and `tax` variables. In both of these variables, the underlying "values" are continuous (e.g. the property was worth £100,000 in 1991) but these have been discretised, or converted into groups (e.g. instead of £100,000 it's recorded as `tax` equal to `a`). 
+
+Whenever this discretisation is done, when it comes to the actual model, it can make our life pretty horrible, which you can see when we write out the full notation. In our case, here’s what our model looks like:
 
 $price_i \sim Normal(\mu_i, \sigma)$
 
@@ -90,7 +92,9 @@ Where:
 - $\beta_{3,...,7}$ are the effects of each EPC rating compared to B.
 - $\beta_{8,...,13}$ are the effects of each tax band compared to A.
 
-As you can see, discretizing continuous variables can make your model crazily more complex. If EPC and tax were continuous variables, we’d estimate just four parameters instead of 14. A general tip: avoid creating categorical variables out of continuous ones when possible — it’ll save you headaches down the road (and often makes your analyses more reliable).
+As you can see, `epc` and `tax` being recorded as categories has made our model stupidly and crazily more complicated than it would otherwise be. If EPC and tax were continuous variables, we’d need to estimate just *four* parameters instead of 14! 
+
+A general tip: avoid creating categorical variables out of continuous ones when possible — it’ll save you headaches down the road (and often makes your analyses more reliable).
 
 Despite the complexity, running this model in R is straightforward:
 
@@ -104,7 +108,9 @@ Now let’s take a look at the estimated parameters using `summary()`:
 summary(rent_mod)
 ```
 
-This produces a whole list of estimated parameters; reminding us why it’s best to avoid excessive categorization. Keep this in mind for your future work (including your Honour's project), both for simplicity and for more meaningful analyses!
+This produces a giant list of estimated parameters; reminding us why it’s best to avoid excessive categorization. Keep this in mind for your future work (including your Honour's project), both for simplicity and for more meaningful analyses!
+
+The complication with predictive models is that these parameters estimates don't have a "biological" or "real world" meaning. We wouldn't read these as "increasing X causes Y to increase" by whatever the parameter value is. Instead it's what the model would predict the increase would be. If that's unclear the lecture slides on causal inference may help clarify.
 
 ## 5. Diagnose the model and check assumptions.
 

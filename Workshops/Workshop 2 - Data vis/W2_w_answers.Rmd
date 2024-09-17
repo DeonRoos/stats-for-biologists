@@ -18,7 +18,7 @@ output:
 6. Summarise the results.
 7. Interpret and provide inferences.
 
-We covered steps 2 and 3 in the previous workshop but we'll expand your toolkit for doing so today using data visualisation.
+We covered steps 2 and 3 in the previous workshop, but we'll expand your toolkit for doing so today using data visualisation.
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="show")
@@ -37,13 +37,13 @@ These skills will be used throughout the course.
 
 # Introduction to `ggplot2`
 
-`ggplot2` is an implementation of the "Grammar of Graphics," a framework for data visualisation. It allows you to build plots layer by layer, starting with a base plot and then adding additional elements such as scales, themes, and geometries. Using this framework, you can create pretty sophisticated figures with surprisingly little effort. It's such a popular tool that familiarity with `ggplot2` is sometimes asked for by employers; we've even seen job adverts from companies such as Spotify listing this an an essential criteria.
+`ggplot2` is an implementation of the "Grammar of Graphics," a framework for data visualisation. It allows you to build plots layer by layer, starting with a base plot and then adding additional elements such as scales, themes, and geometries. Using this framework, you can create pretty sophisticated figures with surprisingly little effort. It's such a popular tool that familiarity with `ggplot2` is sometimes asked for by employers; we've even seen job adverts from companies such as Spotify listing this an an essential criterion.
 
 It is important to note, however, that `ggplot2` is not the only way to create visualisations. It's just an increasingly preferred one. Many of the figures you will make on this course can be near-perfectly recreated using the visualisation framework offered by `base R`. We simply prefer `ggplot2` as we feel it is a more intuitive way to create figures; indeed, nearly every single figure you have and will see on this course were produced in `ggplot2`.
 
 ## Load the data
 
-For the first part of this workshop, we'll be working with data on the Amazon river dolphin, or the boto (*Inia geoffrensis* - I wonder if the person who named the species had a friend called Geoff...). For this first interaction with this data we'll broadly say that we're interested in seeing if there is sexual dimorphism in asymptotic length (i.e. once an animal has stopped growing) between females and males, as well as how the species respond to droughts. As always, before we do any analysis, we need to ensure there is nothing *weird* in the data. In workshop 1 you did this by using simple summary statistics (e.g. `mean()`). While doing so is useful, complimenting this with data visualisations is really powerful.
+For the first part of this workshop, we'll be working with data on the Amazon River dolphin, or the boto (*Inia geoffrensis* - I wonder if the person who named the species had a friend called Geoff...). For this first interaction with this data, we'll broadly say that we're interested in seeing if there is sexual dimorphism in asymptotic length (i.e. once an animal has stopped growing) between females and males, as well as how the species respond to droughts. As always, before we do any analysis, we need to ensure there is nothing *weird* in the data. In workshop 1 you did this by using simple summary statistics (e.g. `mean()`). While doing so is useful, complimenting this with data visualisations is really powerful.
 
 Start by downloading the data from today's practical folder, called `boto.txt`.
 
@@ -122,7 +122,7 @@ Cool... A completely empty canvas. Well, it shouldn't really come as a surprise 
 ggplot(boto)
 ```
 
-Still nothing. What we're missing here is where we tell `ggplot2` a couple of things. First, we need to say in what form we want to the data to be shown. Do we want points? Or lines? Or errorbars? Secondly, we need to say which specific data, or "aesthetics" (shortened to `aes()` in `ggplot2`), we want shown and where. Do we want `length` included? On the x or y axis?
+Still nothing. What we're missing here is where we tell `ggplot2` a couple of things. First, we need to say in what form we want the data to be shown. Do we want points? Or lines? Or errorbars? Secondly, we need to say which specific data, or "aesthetics" (shortened to `aes()` in `ggplot2`), we want shown and where. Do we want `length` included? On the x or y axis?
 
 Let's have `length` be on the y-axis and `drought` be on the x-axis. And the form (or geometry) that we want this data to be shown will be as points:
 
@@ -171,7 +171,7 @@ ggplot(boto) +
   geom_point(aes(y = length, x = sex))
 ```
 
-Kind of? It's a bit hard to see the spread of data for each sex. A better way to show this is to use some sort of tool which will help the reader understand the range of `length` for each `sex` but also how the data is spread. There are two common options that people use for this; boxplots and violin plots. It's trivially easy to swap between these, because all we need to do is change the geometry function from `geom_point()` to either `geom_boxplot()` or `geom_violin()`:
+Kind of? It's a bit hard to see the spread of data for each sex. A better way to show this is to use some sort of tool which will help the reader understand the range of `length` for each `sex` but also how the data is spread. There are two common options that people use for this: boxplots and violin plots. It's trivially easy to swap between these, because all we need to do is change the geometry function from `geom_point()` to either `geom_boxplot()` or `geom_violin()`:
 
 ```{r}
 # Boxplot
@@ -183,9 +183,13 @@ ggplot(boto) +
   geom_violin(aes(y = length, x = sex))
 ```
 
-Both of these present the same information in different ways. The boxplot uses boxes and lines to indicate the range, the first and third quantiles and the median. Conversely, the violin plot also shows the spread of data but by creating density plots which are mirrored. Boxplots have a long history and use in science, but people are increasingly using violin plots, simply because they're more transparent and clear than boxplots.
+Both of these present the same information in different ways. The boxplot uses boxes and lines to indicate the range (the first and third quantiles) and the median. Conversely, the violin plot also shows the spread of data but by creating density plots which are mirrored. Boxplots have a long history and use in science, but people are increasingly using violin plots, simply because they're more transparent and clearer than boxplots.
 
-With either boxplots and violin plots, it's fairly common that people will add the data points to the figure as well - to really hammer home the spread of data. But we've seen before that using `geom_point()` basically gives us a line of points that doesn't help us understand the spread at all. An alternative is to use something called "jiterring". When we jitter points, we add a small random value to either or both the x and y position to spread the data out a little bit. With our boto data above, we wouldn't want to add anything to y (as we're interested in the length of the dolphins, so we don't want to mess that up) but we can happily add something to x (or `sex`). To do so, we can use `geom_jitter()` but we want to specify that "noise" should only be added to x and not y - which can can specify by saying `height = 0` (i.e. zero noise added to "height", or the y-axis), and `width = 0.1` (i.e. points can move 0.1 units to the left and right on the x-axis). Here's how we do that:
+With either boxplots or violin plots, it's fairly common that people will add data points to the figure as well - to really hammer home the spread of data. But we've seen before that using `geom_point()` basically gives us a line of points that doesn't help us understand the spread at all. 
+
+An alternative is to use something called "jiterring". When we jitter points, we add a small random value to either or both the x and y position to spread the data out a little bit. With our boto data above, we wouldn't want to add anything to y (as we're interested in the length of the dolphins, so we don't want to mess that up) but we can happily add something to x (or `sex`). 
+
+To do so, we can use `geom_jitter()` but we want to specify that "noise" should only be added to x and not y - which can can specify by saying `height = 0` (i.e. zero noise added to "height", or the y-axis), and `width = 0.1` (i.e. points can move 0.1 units to the left and right on the x-axis). Here's how we do that:
 
 ```{r}
 ggplot(boto) +
@@ -197,6 +201,8 @@ There are two things to note with the above code. First, `geom_jitter()` comes a
 
 ## Question Set Two
 
+The questions below have issues in the code which will either cause errors or will not do what ever was intended. To help with this, try to spot the error on your own first. If you're really struggling, try running the code to see what happens.
+
 1. What's wrong with the following code?
 
 ```{r, eval = F}
@@ -207,7 +213,7 @@ ggplot(boto) +
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # The code still runs, but with a warning saying:
 # "Ignoring unknown aesthetics: height and width"
-# height and width are specified inside the aesthetics - should be outside
+# This means height and width are specified inside the aesthetics, but they should be outside
 ```
 
 2. Find the error in this code:
@@ -238,7 +244,7 @@ ggplot(boto) +
 # (Technically, we're also putting our response variable on the x axis)
 ```
 
-4. If I wanted to produce a histogram of boto lengths, what should my code look like?
+4. If I wanted to produce a histogram of boto lengths, what should my code look like? (If you're stuck, try typing `??geom_` into the console and scroll through the Help page, or type `geom_` into your script and wait for RStudio to give you a pop-up autocomplete prompt, or just do a quick google).
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 ggplot(boto) +
@@ -265,7 +271,7 @@ ggplot(boto) +
   geom_point(aes(y = length, x = drought, colour = sex), size = 2)
 ```
 
-Easy enough but the figure still looks kinda ugly. Let's go about making it more visually appealing. A really easy way to do this is to use select on of many themes built into `ggplot2`. Personally, I tend to use `theme_bw()` or `theme_minimal()` but have a look online for other options if you don't like these. The next question, though, is how do we include these themes? As an additional layer. And because themes change the overall look of a figure, we can place it anywhere in our layers (though traditionally they're placed at the end). At the same time, let's change the labels to make it look less like "code" and more polished. To do so, we can create another layer using the `labs()` (short for labels) function:
+Easy enough but the figure still looks kinda ugly. Let's go about making it more visually appealing. A really easy way to do this is to use select one of many themes built into `ggplot2`. Personally, I tend to use `theme_bw()` or `theme_minimal()` but have a look online for other options if you don't like these. The next question, though, is how do we include these themes? As an additional layer. And because themes change the overall look of a figure, we can place it anywhere in our layers (though traditionally they're placed at the end). At the same time, let's change the labels to make it look less like "code" and more polished. To do so, we can create another layer using the `labs()` (short for labels) function:
 
 ```{r}
 ggplot(boto) +
@@ -276,7 +282,7 @@ ggplot(boto) +
   theme_bw()
 ```
 
-The last graphing option we'll cover in this workshop is facetting. Facetting allows us to split a figure into multiple smaller figures (technically called "multiple") based on a variable in our dataset. There are two options for facetting; `facet_wrap()` and `facet_grid()`. The difference between the two is that `facet_grid()` gives you fairly precise control, especially when you want to facet based on two variables, `facet_wrap()` will automate some of the decisions for you. Generally, `facet_wrap()` works well and is a good option to start with. In either, we need to specify how we want to split our figure into multiples, and to do so we use `~` (called "tilde"). For instance, if we use the code `facet_wrap(~sex)` then it's like we're saying "split the figure into multiple facets based on sex". If we do that we get:
+The last graphing option we'll cover in this workshop is facetting. Facetting allows us to split a figure into multiple smaller figures (technically called "multiple") based on a variable in our dataset. There are two options for facetting; `facet_wrap()` and `facet_grid()`. The difference between the two is that `facet_grid()` gives you fairly precise control, especially when you want to facet based on two variables, `facet_wrap()` will automate some of the decisions for you. Generally, `facet_wrap()` works well and is a good option to start with. In either, we need to specify how we want to split our figure into multiples, and to do so we use `~` (called "tilde"). For instance, if we use the code `facet_wrap(~sex)` then it's like we're saying, "split the figure into multiple facets based on sex". If we do that we get:
 
 ```{r}
 ggplot(boto) +
@@ -293,37 +299,26 @@ ggplot(boto) +
 1. Imagine a line drawn through females and males in the faceted figure. Do you think they would have the same slope?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# Unlikely, male boto length looks like it has a stronger negative 
-# relationship with drought than females.
+# Unlikely, male boto length looks like it has a stronger negative relationship with drought than females.
 ```
 
 2. Depending on your answer to 1., do you think this might violate any of our assumptions?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# Yes - we're likely to break the assumption of addidivity
-# I.e. the length of a boto is more than just the additive effect of sex
-# and drought independently. It looks like drought impacts males more than female.
-# The contrast would be that if imagined slopes were identical for both females and males.
+# Yes - we're likely to break the assumption of addidivity - I.e. the length of a boto is more than just the additive effect of sex and drought independently. It looks like drought impacts males more than female. The contrast would be that if imagined slopes were identical for both females and males.
 ```
 
 3. Remember that data visualisation can be used for Exploratory Data Analysis to identify if there is anything weird in the data. Having now produced a set of figures exploring the data, do you see anything *weird*?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# No - there's nothing that jumps out as being "wrong",
-# but it's a bit weird how accurate length is - how do you even measure
-# a dolphin in the Amazon? How do you measure it to 1 cm? Something we'd want
-# to check with our colleagues.
+# No - there's nothing that jumps out as being "wrong", but it's a bit weird how accurate length is - how do you even measure a dolphin in the Amazon? How do you measure it to 1 cm? Something we'd want to check with our colleagues.
 ```
 
 # `geom_`s
 
-Have a look [here](https://ggplot2.tidyverse.org/reference/), specifically at the layers section. Using the information in the link, see if you can figure out which `geom_` to use such that you recreate the following figure. There are two things to note here. First this figure is created with a single `geom_` with only `x = ` and `y = ` specified, and no other options. Secondly, if you figure out which `geom_` to use, you will be prompted to install a new package when you run the code (it's fine to install this new package - simply type 1 and enter in the console when prompted).
+Have a look [here](https://ggplot2.tidyverse.org/reference/), specifically at the layers section. Using the information in the link, see if you can figure out which `geom_` to use such that you recreate the following figure. There are two things to note here. First this figure is created with a single `geom_` with only `x = ` and `y = ` specified, and no other options. Secondly, if you figure out which `geom_` to use, you will be prompted to install a new package when you run the code (it's fine to install this new package - simply type 1 and enter in the console when prompted) and you may be asked “Do you want to install from sources the package which needs compilation?”, if so just say no.
 
-```{r, eval = T, echo = F}
-
-```
-
-```{r, include=answer_sheet, class.source="bg-success", eval = T}
+```{r}
 ggplot(boto) +
   geom_hex(aes(x = drought, y = length))
 ```
@@ -334,7 +329,7 @@ ggplot(boto) +
 abdn <- read.table(here("Workshops/Workshop 2 - Data vis/Data", "abdn_flats.txt"), header = TRUE)
 ```
 
-We're going to do something that's, hopefully, fun but also instructive. On MyAberdeen, you find a dataset called `abdn_rent.csv` (note that this is a `.csv` file extension and not a `.txt`, so you'll need to use `read.csv()` rather than `read.table()` when loading the data). This dataset contains $> 100$ records (i.e. observations or samples) of rent prices for properties listed in Aberdeenshire on the ASPC website. In additional to the rent, 11 additional variables were recorded as well. These variables are:
+We're going to do something that's, hopefully, fun but also instructive. On MyAberdeen, you find a dataset called `abdn_rent.csv` (note that this is a `.csv` file extension and not a `.txt`, so you'll need to use `read.csv()` rather than `read.table()` when loading the data). This dataset contains $> 100$ records (i.e. observations or samples) of rent prices for properties listed in Aberdeenshire on the ASPC website. In addition to the rent price, 11 additional variables were recorded as well. The variables are:
 
 1. `price` - the rent of the listed property
 
@@ -344,7 +339,7 @@ We're going to do something that's, hopefully, fun but also instructive. On MyAb
 
 4. `baths` - the number of bathrooms
 
-5. `sqmt` - the total floor area of the property (measured in m^2)
+5. `sqmt` - the total floor area of the property (measured in m$^2$)
 
 6. `epc` - th Energy Performance Certificate (A is highly energy efficient, G is terrible)
 
@@ -368,14 +363,14 @@ Once you're happy you know the data relatively well, let's get to the tasks.
 
 Using whichever variables you like, make the most informative and visually appealing figure you can. Imagine you have been hired by a real estate company to create a figure that helps potential renters understand what may be determining rent prices, using `R`, `ggplot2` and the `abdn_rent.csv` dataset.
 
-Create your most informative and visually appealing figure now - note that your "audience" here are not scientists, they're members of the public, so we want something that effectively communicates the information but is also eye catching. Keep the lecture on effective communication in your mind, and avoid some of the pitfalls we discussed. If you need help figuring out how to implement one of your ideas, see [Intro2R chapter](https://intro2r.com/graphics_r.html) for a more detailed walk through, or else use your LLM or choice to help. If using an LLM, just remember to mention that you are using `R`, `ggplot2` and do not want to use any additional packages. There is nothing wrong with using additional packages, but they can just add lots of extra moving parts to the mix (and cause conflict issues). We'd suggest you try and limit the number of additional packages you have loaded while you're still getting the hang of things, but if you feel comfortable using `R`, then go ahead by all means.
+Create your most informative and visually appealing figure now - note that your "audience" here are not scientists, they're members of the public, so we want something that effectively communicates the information but is also eye catching. Keep the lecture on effective communication in your mind and avoid some of the pitfalls we discussed. If you need help figuring out how to implement one of your ideas, see [Intro2R chapter](https://intro2r.com/graphics_r.html) for a slightly more detailed walk through on `ggplot2`, or else use your LLM of choice to help. If using an LLM, just remember to mention that you are using `R`, `ggplot2` and do not want to use any additional packages. There is nothing wrong with using additional packages, but they can just add lots of extra moving parts to the mix (and cause conflict issues). We'd suggest you try and limit the number of additional packages you have loaded while you're still getting the hang of things, but if you feel comfortable using `R`, then go ahead by all means.
 
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 abdn <- read.table("abdn_flats.txt", header = TRUE)
 ```
 
-```{r, include=answer_sheet, class.source="bg-success", eval = answer_sheet}
+```{r, include=answer_sheet, class.source="bg-success", eval = answer_sheet, fig.width = 10, fig.height = 12}
 # Here's my version of the best looking and most informative figure using the abdn flat data
 p1 <- ggplot(abdn) +
   geom_density(aes(x = price), fill = "#EC1365", alpha = 0.8) +
@@ -426,7 +421,7 @@ library(patchwork) # Patchwork allows you to "stitch" ggplots together
 
 Now for the part I'm excited about. Do the same as above, but this time, make it a miserably ugly figure. It still needs to *contain* the information (i.e. no blank figures) and be *somewhat* readable. If you need inspiration, search for "graph crimes", or "chart crimes" in your search engine - there are *lots* of examples you can use for "inspiration".
 
-Once, you're happy with your masterpieces, add your figures onto the MyAberdeen discussion board, and we'll have an "Art Exhibit" to finish the workshop :D.
+Once you're happy with your masterpieces, add your figures onto the MyAberdeen discussion board, and we'll have an "Art Exhibit" to finish the workshop :D.
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = answer_sheet}
 # Here's my "best" attempt at making something disgusting

@@ -75,9 +75,9 @@ As an additional step, which we'll explain in more detail soon, we'll also use t
 boto$predicted <- predict(boto_model)
 ```
 
-# Diagnosing
+# Diagnosing the four horseman
 
-We're now ready to perform some diagnostics. The code to fo this is relatively straightforward: you just need to `plot()` the model. Pay close attention to your R console when you do this. You'll see a prompt that says `Hit <Return> to see next plot:`. If you press Return (or Enter) on your keyboard four times, you'll see a total of four plots. Alternatively, you can "partition" you figure into two rows and two columns by doing:
+We're now ready to perform some diagnostics using those "four horseman" (of the apocalypse) plots. The code to fo this is relatively straightforward: you just need to `plot()` the model. Pay close attention to your R console when you do this. You'll see a prompt that says `Hit <Return> to see next plot:`. If you press Return (or Enter) on your keyboard four times, you'll see a total of four plots. Alternatively, you can "partition" you figure into two rows and two columns by doing:
 
 ```{r}
 par(mfrow = c(2,2)) # split figure into a 2 x 2
@@ -127,9 +127,9 @@ But what should we look for in this figure? Several assumptions might become app
 
 ### Linearity
 
-One of the key assumptions we examine is Linearity, which is one of the more important assumption we generally care about. (It's often combined with additivity because they share similar properties and consequences.) For the linearity assumption, if the residuals display any kind of "wavy" pattern, it suggests that drawing a straight line through them isn't capturing the relationship well, or that the relationship is *not linear*. For example, here's a simulated dataset that clearly violates the linearity assumption:
+One of the key assumptions we examine is Linearity, which is one of the more important assumptions we generally care about. (It's often combined with additivity because they share similar properties and consequences.) For the linearity assumption, if the residuals display any kind of "wavy" pattern, it suggests that drawing a straight line through them isn't capturing the relationship well, or that the relationship is *not linear*. For example, here's a simulated dataset that clearly violates the linearity assumption:
 
-```{r, message = F}
+```{r, message = F, echo = F}
 df <- data.frame(x = 0:100)
 df$y <- rnorm(n = nrow(df), mean = 0 + 2.5 * df$x + 0.05 * df$x^2 + -0.003 * df$x^3, sd = 100)
 ggplot(df, aes(x = x, y = y)) +
@@ -141,7 +141,6 @@ ggplot(df, aes(x = x, y = y)) +
 ```
 
 Based on the raw data (the points), we can see that the relationship appears fairly flat until the "Explanatory variable" (whatever that might be) reaches around 50, after which it begins to decline. The blue line represents the linear model fit to the data, where we're trying to use a straight line to describe the trend in the points. In this example, when the explanatory variable is less than roughly 25, the model tends to overpredict (resulting in negative residuals). Beyond that point, the residuals become positive, and then negative again as the explanatory variable increases further. Here's what the diagnostic plot for this model would look like:
-
 
 ```{r}
 m1 <- lm(y ~ x, data = df)
@@ -181,6 +180,8 @@ We have highly accurate predictions at the left side of the figure and comparati
 The consequence of violating the Equal Variance of Errors assumption is generally less severe than violating the Linearity assumption. It results in inflated standard errors for the parameters, though the parameters themselves are rarely biased. If our main goal in running a model is to just estimate the parameters, this assumption isn't particularly critical. However, it becomes a problem if we need to account for or appreciate uncertainty (which we will cover next week) or if we are using Null Hypothesis Significance Testing (NHST) and P-values (which we will discuss in the last week of the course).
 
 The important point is to consider whether breaking this assumption is a significant concern for your analysis. If you are not using P-values and you're not terribly concerned about uncertainty, then break this assumption may not be a major issue.
+
+Hopefully that makes sense, so we'll get back to diagnosing our boto model.
 
 ## `Scale-Location`
 
@@ -321,7 +322,7 @@ install.packages("performance")
 
 Then we can load it and use a function called `check_model()` on our stored model object:
 
-```{r}
+```{r, fig.width = 10, fig.height = 12}
 library(performance)
 check_model(boto_model)
 ```

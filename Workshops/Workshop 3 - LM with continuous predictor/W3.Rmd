@@ -77,23 +77,15 @@ Working through the process of selecting an appropriate distribution might feel 
 1. Does a $Normal$ distribution generate discrete or continuous values?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# A Normal distribution generates continuous values. While these values might 
-# subsequently be rounded in a dataset (e.g., to the nearest cm), the underlying 
-# process is still generating continuous values.
+# A Normal distribution generates continuous values. While these values might subsequently be rounded in a dataset (e.g., to the nearest cm), the underlying process is still generating continuous values.
 ```
 
 2. Using `rnorm(n = 100, mean = 50, sd = 20)`, what's the smallest value you generate when running it? Try changing the standard deviation (`sd = `) to see what impact this has.
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# Because this involves randomly generated numbers, your results will vary each 
-# time you run the code. However, there's a good chance that some of your 
-# generated values will be below zero, especially if you increase the standard 
-# deviation. 
+# Because this involves randomly generated numbers, your results will vary each time you run the code. However, there's a good chance that some of your generated values will be below zero, especially if you increase the standard deviation. 
 
-# The point of this question is to emphasize that a Normal distribution can produce 
-# values below zero. This is important because it means that, in theory, our 
-# model could predict that botos are zero or even negative centimeters long, 
-# which is biologically impossible.
+# The point of this question is to emphasize that a Normal distribution can produce values below zero. This is important because it means that, in theory, our model could predict that botos are zero or even negative centimeters long, which is biologically impossible.
 
 # You can quickly find the minimum value using the `min()` function:
 # min(rnorm(n = 100, mean = 50, sd = 20))
@@ -129,7 +121,7 @@ Working through the process of selecting an appropriate distribution might feel 
 
 # 2. Perform Exploratory Data Analysis
 
-Since you've already worked with this dataset in a previous workshop, we can skip the exploratory data analysis (EDA) step in today’s workflow. However, if you’d like a refresher, you can either continue using the script from Workshop 2 or copy and paste the relevant EDA code into your new script for today.
+Since you've already worked with this dataset in a previous workshop (this is the same data you used to learn `ggplot2` and data visualisation, which is a key part of getting to know your data set), we can skip the exploratory data analysis (EDA) step in today’s workflow. However, if you’d like a refresher, you can either continue using the script from Workshop 2 or copy and paste the relevant EDA code into your new script for today.
 
 # 3. Identify Any Hidden Assumptions
 
@@ -142,29 +134,16 @@ Consider whether we are likely to break any of these assumptions based on your u
 1. Which assumptions do you believe are very likely to be violated?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# One potential issue could be the assumption of additivity. Last week, we saw
-# that different sexes might be affected differently by drought, suggesting an 
-# it is the overlap between sex and drought. In instances where you have "overlap"
-# between two or more variables, the assumption of addivity is likely to be broken.
+# One potential issue could be the assumption of additivity. Last week, we saw that different sexes might be affected differently by drought, suggesting an it is the overlap between sex and drought. In instances where you have "overlap" between two or more variables, the assumption of addivity is likely to be broken.
 ```
 
 2. Which assumptions could we check *after* fitting the model?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# All of the assumptions related to model residuals
-# Remember - residuals are the difference between what the model predict
-# and what we observed. We can't check that until we've run the model
-# We can also check linearity after (but also with EDA) but there is no way 
-# to check the others
+# All of the assumptions related to model residuals. Remember - residuals are the difference between what the model predict
+# and what we observed. We can't check that until we've run the model. We can also check linearity after (but also with EDA) but there is no way to check the others
 
-# Another concern could be the independence of errors. It’s possible that 
-# dolphins measured in the same region are related (e.g., larger dolphins might 
-# produce larger offspring), which could lead to correlated errors. For instance, 
-# if a parent is smaller than predicted by the model, and we don’t fully understand 
-# why, their offspring may also be smaller than expected for the same unknown 
-# reasons. This shared unexplained variation would violate the assumption of 
-# independence in our model (i.e. misunderstanding one dolphin should not make us 
-# more likely to misunderstand another dolphin).
+# Another concern could be the independence of errors. It’s possible that dolphins measured in the same region are related (e.g., larger dolphins might produce larger offspring), which could lead to correlated errors. For instance, if a parent is smaller than predicted by the model, and we don’t fully understand why, their offspring may also be smaller than expected for the same unknown reasons. This shared unexplained variation would violate the assumption of independence in our model (i.e. misunderstanding one dolphin should not make us more likely to misunderstand another dolphin).
 ```
 
 # 4. Fit an appropriate model.
@@ -181,6 +160,8 @@ Where:
 - $\mu_i$ represents the linear relationship between $drought_i$ (the number of drought years) and dolphin length, defined by two parameters:
     - $\beta_0$: The intercept of our line (how long we expect a dolphin to be when the number of droughts is zero).
     - $\beta_1$: The slope (how much $length$ is expected to change for each additional year of drought).
+
+> If you need a refresher, feel free to go back to the lecture slides or recording.
 
 That’s the conceptual model. But how do we translate that into some `R` code? It's pretty straightforward, and we can also store the model output so we can use it again later on without having to rerun the model each time. Here’s how we do it:
 
@@ -221,7 +202,24 @@ And we're left with $\beta_0$. This is why $\beta_0$ represents the estimated le
 
 If $\beta_0$ represent the length of botos when drought is zero, then $\beta_1$ must be the value that describes how much the length of the dolphins changes with each additional year of drought. From our model summary, $\beta_1$ is -5.308. This means that for each additional year of drought, the length of an average dolphins decreases by roughly 5.3 cm. 
 
-So if we were to draw, we'd start at $drought = 0$ and $length = 213$, then for every additional year (or a "unit increase") $length$ would reduce by 5.3.
+So if we were to draw a line, we'd start at $drought = 0$ and $length = 213$, then for every additional year (or a "unit increase") $length$ would reduce by 5.3.
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+fake <- data.frame(drought = 0:8)
+fake$fit <- predict(boto_model, newdata = fake)
+ggplot(fake) +
+  annotate("text", x = 0.1, y = 195, label = expression(beta[0] == 213.3), vjust = -1.5, hjust = -0.1) +
+  annotate("segment", x = 0.5, xend = 0, y = 200, yend = 212, arrow = arrow(length = unit(0.2, "cm")),
+           colour = "red") +
+  annotate("text", x = 5.5, y = (213.3 - 5.3 * 4.5) + 1, label = expression(beta[1] == -5.3), vjust = -1)  +
+  annotate("polygon", x = c(4, 5, 5), y = c(213.3 - 5.3 * 4, 213.3 - 5.3 * 4, 213.3 - 5.3 * 5),
+           fill = "transparent", colour = "red") +
+  geom_line(aes(x = drought, y = fit), size = 1) +
+  theme_minimal() +
+  labs(x = "Number of drought years",
+       y = "Predicted length of boto (cm)")
+```
+
 
 And that’s it! All the actual statistics we need has been run and summarised in just two lines of code using `lm()` and `summary()`. What now?
 

@@ -101,9 +101,9 @@ We can, however, check for equal variance of errors.
 plot(rabbit_mod, which = 1)
 ```
 
-What we're looking for here is whether each category has broadly equal spread above and below a residual error of zero. The two lines you see here are the two groups. Remember that there was about a five gram difference between the island with mongoose and the one without, and we can see that here - when mongoose are absent the model predicts they should weigh about 269 g and when there are mongoose the model predicts rabbits weigh 266 g. In both groups, there are rabbits that weigh about 40 g more or less than the model expects, so it looks pretty good for meeting our assumption of equal variance of errors.
+What we're looking for here is whether each category (here where mongoose are `Present` or `Absent`) has broadly equal spread above and below a residual error of zero. The two lines you see here are the two groups. Remember that there was about a five gram difference between the island with mongoose and the one without, and we can see that here - when mongoose are absent the model predicts they should weigh about 269 g and when there are mongoose the model predicts rabbits weigh 266 g. In both groups, there are rabbits that weigh about 40 g more or less than the model expects, so it looks pretty good for meeting our assumption of equal variance of errors.
 
-What would a "bad" example look like? Well, consider the following example where the blue dots show the predicted response variable for groups A and B:
+What would a "bad" example look like? Well, consider the following example using a simulated dataset where the blue dots show the predicted response variable for groups A and B:
 
 ```{r, echo = FALSE}
 df <- data.frame(x = sample(0:1, size = 50, replace = TRUE))
@@ -149,7 +149,9 @@ ggplot() +
   theme_minimal()
 ```
 
-We can see that the amount of uncertainty is equal in both groups, but in reality, the confidence intervals for Group A should probably be much smaller. This is the result of violating the assumption of equal variance of errors.
+We can see that the amount of uncertainty (the 95% CI) is equal in both groups, but in reality, the confidence intervals for Group A should probably be much smaller. Keep in mind that inflated standard errors (which we use to calculate 95% CI) are a consequence of violating the assumption of equal variance of errors. However, the point estimate (the mean of groups A and B) are estimated accurately (which I only know for sure in this case because I simulated the data). So if we only cared about estimating the means of the groups accurately (and are not too concerned about uncertainty), then we wouldn't be too worried about having unequal variance of errors. 
+
+It's worth saying that we generally do care about estimating uncertainty accurately. Keep in mind, we never really know if the means are "True" (as in they accurately reflect reality), so having some measure of uncertainty is generally the responsible approach to science. If you need a reminder of why it's important, have a look at the lecture where we spoke about being given the option of two drugs with different probabilities of unintended mortality, and how our decision would change depending on if we showed uncertainty or not.
 
 ## `Scale-Location`
 
@@ -159,11 +161,17 @@ Remember that the Scale-Location plot offers us another chance to evaluate the e
 plot(rabbit_mod, which = 3)
 ```
 
-From the plot above, it seems like the assumption is maybe less well met than the Residuals vs Fitted plot would suggest, but it still looks good.
+From the plot above, it seems like the assumption is very slightly less well met than the Residuals vs Fitted plot would suggest, simply because predictions at about 270 g seem to have residuals that are the tiniest bit larger than when the rabbits are predicted to weigh roughly 265 g (representing the mean predicted weights for our two mongoose categories, `Present` and `Absent` respectively). Importantly though, this is no where near "substantial" enough for me to be worried about.
+
+For example, compare it to the data I simulated above that includes unequal variance of errors by design. Here's what the Scale-Location plot looks like in that case:
+
+```{r, echo = FALSE}
+plot(m1, which = 3)
+```
 
 ## `Q-Q Residuals`
 
-Next to the Q-Q plot. 
+Next to the Q-Q plot for the rabbit model. 
 
 ```{r, echo = F}
 plot(rabbit_mod, which = 2)
@@ -171,7 +179,7 @@ plot(rabbit_mod, which = 2)
 
 Keep in mind that we're assuming that the residuals of our model take on a $Normal$ distribution, so that's what this plot is looking for. What having $Normally$ distributed residuals actually means, though, is whether or not our model is predicting the individual rabbits of our dataset accurately, which 99% of the time, we're not too bothered about.
 
-Never-the-less, we still want the points to broadly lie on the dashed line, but we don't stress out too much if it's not perfect. If we ever did see utterly bizarre patterns in the points, that implies one of two things. Either you need to choose a different distribution for your data generating process and fit a "Generalised Linear Model" (GLM), or your model is missing some important predictor variables (more on both of these options later in the course).
+Never-the-less, we still want the points to broadly lie on the dashed line, but we don't stress out too much if it's not exactly perfect. If we ever did see utterly bizarre patterns in the points, that implies one of two things. Either you need to choose a different distribution for your data generating process and fit a "Generalised Linear Model" (GLM), or your model is missing some important predictor variables (more on both of these options later in the course).
 
 ## `Residuals vs Leverage`
 

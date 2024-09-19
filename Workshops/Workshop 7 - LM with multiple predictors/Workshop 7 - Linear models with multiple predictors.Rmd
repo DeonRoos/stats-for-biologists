@@ -21,15 +21,15 @@ As always, we’re using our tried-and-tested workflow to guide today’s worksh
 7. Interpret and draw conclusions.
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="show")
-answer_sheet <- TRUE
+knitr::opts_chunk$set(echo = TRUE, results = "show", fig.show="show")
+answer_sheet <- FALSE
 library(ggplot2)
 library(here)
 ```
 
 ### A Slight Tweak to Our Workflow
 
-Today, we’re going to explore two different approaches to modelling using the same dataset. You might recognize this dataset from the first week of the course — it contains information about flat prices in Aberdeen.
+Today, we’re going to explore two different approaches to modelling using the same dataset with both models being fit using a linear model. You might recognize this dataset from the first week of the course — it contains information about rental prices in Aberdeen.
 
 The two models we’re focusing on are:
 
@@ -40,7 +40,7 @@ This exercise will show that the same statistical tools can be used for differen
 
 # Predictive Modelling
 
-Predictive models are a great starting point because they’re usually more straightforward — no need to worry about tricky causal assumptions here (don’t tell the Machine Learning folks I said that!).
+Predictive models are a great starting point when considering models with multiple explanatory variables because they’re usually more straightforward — no need to worry about tricky causal assumptions here (don’t tell the Machine Learning folks I said that!).
 
 ```{r, echo = FALSE}
 abdn <- read.table(here("Workshops/Workshop 2 - Data vis/Data", "abdn_flats.txt"), header = TRUE)
@@ -48,15 +48,25 @@ abdn <- read.table(here("Workshops/Workshop 2 - Data vis/Data", "abdn_flats.txt"
 
 ## 1. Formulate a Research Question
 
-This one’s simple: We just want to predict rent price. We’re not interested in why a flat is more or less expensive; we just want to predict prices as accurately as possible.
+This one’s simple: We just want to predict rent price. We’re not interested in why a rented property (either a flat or house) is more or less expensive; we just want to predict the listed price as accurately as possible.
 
 ## 2. Perform Exploratory Data Analysis (EDA)
 
 As usual, spend a few minutes exploring the dataset. Check for any obvious errors or odd values. Since you have a link to each property, you can even verify unusual entries yourself; a rare luxury in science!
 
+As a warning, there are properties that when listed were given a specific price but by the time you look at a particular link, it may have had it's priced reduced. For example, there is one property that when I first added it to the dataset was listed at a whopping £3,200 a month but at the time of writing this, that price had dropped to £2,900 (because no one was willing to pay £3.2k in rent). In these cases, you'll need to decide for yourself how you want to deal with these. Your options are; 1) retain the original price if you think it wasn't a data entry mistake, 2) update the price with the newly lowered rent, or 3) create an entirely new observation for this "new" listing. Note that option 3) will lead to an assumption being violated. Do you know which assumption would be broken if creating a new observation for any properties that had their price lowered?
+
 ## 3. Identify Any Hidden Assumptions
 
 Even in a predictive model, we need to think about potential hidden assumptions. If our data is flawed or not representative, our predictions will be flawed too. Take a moment to consider limitations. For example, can we use this model to predict rent prices in London?
+
+Another hidden aspect of the data that you may want to consider (and potentially resolve if you are unhappy with it), is that the data contains both rental prices for both houses and flats, with no distinction made between them. Unless you decide to go through all `nrow(abdn)` properties and classify them as house or flat, I'd suggest you leave this distinction out of the data. But if we do so, what do you think this lack of distinction will do in our predictive model?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# A property being either an entire house or just a flat will almost certainly have a big impact on how much the landlord asks for in rent. By not including this, we're leaving an "important" variable out of the model, so our predictions are likely going to be less accurate. Maybe by a lot, maybe by a little, but definitely by "some" amount.
+
+# The other issue is that this will likely create some unequal variance of errors, with predictions being worse (i.e. less accurate, i.e. more residual error) at higher predicted rent prices (as most houses cost more to rent, the model will likely struggle to understand *why* they are so expensive [or cheap], leading to more error).
+```
 
 ## 4. Fit an Appropriate Model
 
@@ -73,7 +83,9 @@ Notice that we’re using `rooms` in the model, but this variable isn’t in the
 abdn$rooms <- abdn$beds + abdn$living
 ```
 
-The statistical notation for this model is pretty miserable due to the many levels of `epc` and `tax`. Here’s what it looks like:
+Another thing to note in this dataset are the `epc` and `tax` variables. In both of these variables, the underlying "values" are continuous (e.g. the property was worth £100,000 in 1991) but these have been discretised, or converted into groups (e.g. instead of £100,000 it's recorded as `tax` equal to `a`). 
+
+Whenever this discretisation is done, when it comes to the actual model, it can make our life pretty horrible, which you can see when we write out the full notation. In our case, here’s what our model looks like:
 
 $price_i \sim Normal(\mu_i, \sigma)$
 
@@ -90,7 +102,9 @@ Where:
 - $\beta_{3,...,7}$ are the effects of each EPC rating compared to B.
 - $\beta_{8,...,13}$ are the effects of each tax band compared to A.
 
-As you can see, discretizing continuous variables can make your model crazily more complex. If EPC and tax were continuous variables, we’d estimate just four parameters instead of 14. A general tip: avoid creating categorical variables out of continuous ones when possible — it’ll save you headaches down the road (and often makes your analyses more reliable).
+As you can see, `epc` and `tax` being recorded as categories has made our model stupidly and crazily more complicated than it would otherwise be. If EPC and tax were continuous variables, we’d need to estimate just *four* parameters instead of 14! 
+
+A general tip: avoid creating categorical variables out of continuous ones when possible — it’ll save you headaches down the road (and often makes your analyses more reliable).
 
 Despite the complexity, running this model in R is straightforward:
 
@@ -104,7 +118,9 @@ Now let’s take a look at the estimated parameters using `summary()`:
 summary(rent_mod)
 ```
 
-This produces a whole list of estimated parameters; reminding us why it’s best to avoid excessive categorization. Keep this in mind for your future work (including your Honour's project), both for simplicity and for more meaningful analyses!
+This produces a giant list of estimated parameters; reminding us why it’s best to avoid excessive categorization. Keep this in mind for your future work (including your Honour's project), both for simplicity and for more meaningful analyses!
+
+The complication with predictive models is that these parameters estimates don't have a "biological" or "real world" meaning. We wouldn't read these as "increasing X causes Y to increase" by whatever the parameter value is. Instead it's what the model would predict the increase would be. If that's unclear the lecture slides on causal inference may help clarify.
 
 ## 5. Diagnose the model and check assumptions.
 
@@ -163,21 +179,23 @@ coef(rent_mod)
 # By comparing the two models, you can see the effect these observations had. For example, removing them means that the effect of sqmt changes from about 10p per extra square meter to £2.34 per extra square meter.
 ```
 
-Before moving ahead, remove any observations from your dataset and rerun your model. As a hint, if I believed the flats on rows 10 and 50 of the dataset were causing issues in the model, I could remove them by doing:
+Given your dataset may be slightly different to the one I used above (given how you dealt with any changes in listed price, houses versus flats, etc.), you may have seen some issues in the Residuals verses Leverage plot (though you may not, which would be fine). If you did see any problemtic observations, before moving ahead, remove any observations from your dataset where the associated Cook's distance was $\geq 1$ and rerun your model. As a hint, if I believed the flats on rows 1 and 2 of the dataset were causing issues in the model, I could remove them by doing (observations 1 and 2 chosen here at random just to demonstrate how to remove them):
 
 ```{r, eval = F}
-abdn <- abdn[-c(10, 50),]
+abdn <- abdn[-c(1, 2),]
 ```
 
-The `-` before `c()` basically means "remove", so here we're removing rows 10 and 50 (remember that square brackets are organised as `[row,column]`).
+The `-` before `c()` basically means "remove", so here we're removing rows 1 and 2 (remember that square brackets are organised as `[row,column]`).
 
-Having removed these and rerun the model. Do a quick quick of the diagnostic plots to see if this has resolved the issue.
+Having removed these and rerun the model (unless your previous checks suggested no issues and you did not need to remove any observations). Do a quick check of the diagnostic plots to see if this has resolved the issue.
 
 ```{r, echo = FALSE}
 abdn <- abdn[-c(112, 88),]
 rent_mod <- lm(price ~ sqmt + rooms + epc + tax, data = abdn)
 plot(rent_mod)
 ```
+
+Hopefully removing those observations has resolved the disproportionately influential observations. There's some important nuance about removing observations from a dataset. For details on this, see the answer sheet for question 5 above.
 
 ## 6. Summarise the results.
 
@@ -195,17 +213,19 @@ Given the number of explanatory variables we have in our predictive model, we'll
 library(ggeffects)
 ```
 
-Then ask `ggeffects` to predict rabbit weight for each of our `mongoose` categories:
+Then ask `ggeffects` to show the predicted relationship (or association) between rent price and each of our explanatory varibales:
 
 ```{r}
 preds <- ggpredict(rent_mod)
 ```
 
-Now we just need to plot it:
+Now we just need to plot it (note you may need to press the blue arrow buttons in the Plots pane in RStudio to page through the different figures):
 
 ```{r}
 plot(preds)
 ```
+
+We get the same message that we saw previously, where `ggeffects` isn't terribly happy using strings that are recorded as `characters` rather than `factors`. If you want to appease `ggeffects`, feel free to convert your categorical variables to `factors` and rerun your analysis.
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # To make these predictions manually we still do things the same way as before. The only extra complication is that we do this for each explanatory variable in turn. Additionally, we need to specify values for all explanatory variables, even those we aren't making predictions for:
@@ -272,10 +292,9 @@ If you want to see how this kind of model could be translated into something you
 
 # Causal Modelling
 
-We're now going to switch over to causal modelling using the same dataset. Hopefully the differences and similarities between the two approaches will become clear.
+Having run a model that aims to predict rent price, we're now going to switch over to causal modelling using the same dataset. Hopefully the differences and similarities between the two approaches will become clear.
 
-To be responsible, be sure to re-load the data again, so that any changes we made to it for the predictive model are not carried into our new analysis.
-
+To be responsible, be sure to re-load the data again, so that any changes we made to it specifically for the predictive modelling are not carried into our new analysis. However, if there were any issues that you previously resolved, do so again now.
 
 ```{r, echo = FALSE}
 abdn <- read.table(here("Workshops/Workshop 2 - Data vis/Data", "abdn_flats.txt"), header = TRUE)
@@ -285,11 +304,11 @@ abdn <- read.table(here("Workshops/Workshop 2 - Data vis/Data", "abdn_flats.txt"
 
 Our research question is going to be to understand the causal effect of square meters on rent price, or "What is the causal effect of the size of a rental property, in square meters, on the listed rental price?".
 
-Because we've already done an EDA and thought about hidden assumptions, we can skip these steps but before we get to fitting the model, we have an extra step when we want a model to potentially understand causation.
+Because we've already carried out an EDA and thought about hidden assumptions with regards to this data, we can skip these steps but before we get to fitting the model, we have an extra step when we want a model to potentially understand causation.
 
 ## Extra: Creating a DAG
 
-Because our question is causal, we can't just use the approach we did above and throw everything into the model and read off every parameter estimate as being causal (something called the "Type 2 Fallacy"). Instead, we need to think about confounding and how to responsibly deal with that in our model. One of the least technical ways of doing this (but not the only way) is to create a Directed Acylic Graph (or DAG). This can often be a pretty laborious process, especially if you create your DAG in PowerPoint, but thankfully there's a much easier way to do this in `R` using the package we've used previously - `performance`. 
+Because our question is causal, we can't just use the approach we did above and throw everything into the model and read off every parameter estimate as being causal (a practice that is called the "Type 2 Fallacy", so named because the second table of a paper often contains parameter estimates, which authors may then read as being causal). Instead, we need to think about confounding and how to responsibly deal with that in our model. One of the least technical ways of doing this (but not the only way) is to create a Directed Acylic Graph (or DAG) and use this in combination with the Backdoor Criterion to inform which explanatory variables should, could or should not be included in the model to understand the causal effect of interest. This process of drawing a DAG can sometimes be intellectually challenging (e.g. does the square meters of a property cause the number of rooms, or is it the number of rooms that cause the square meters?) and is often be a pretty laborious process. The intellectual challenge in drawing a DAG is one of the big downsides (and a good argument to use experiments when possible when trying to determine causation), but just drawing the DAGS can be a real pain especially if you create your DAG in PowerPoint. Thankfully there's a much easier way to do this in `R` using the package we've used previously - `performance`. 
 
 However, a slight complication is that we're using a "developer" version of `performance` that hasn't yet been put onto CRAN (the central repository where `R` packages are kept), so we'll need to install the package directly from the developers. To do so, we'll need to do a minor tweak to our `install.packages()` code where we say where the version is available from. At the same time, we'll need to download an extra package called `see` from the same developers, which works with `performance` on some things in the background.
 
@@ -316,12 +335,12 @@ Here's what your code might look like (but note that your DAG might look differe
 library(performance)
 library(see)
 rent_dag <- check_dag(
-  Rent ~ Rooms + Sqmt + Tax + EPC,
-  Rooms ~ Sqmt,
-  EPC ~ Sqmt,
-  Tax ~ Sqmt,
-  exposure = "Sqmt",
-  outcome = "Rent"
+  price ~ rooms + sqmt + tax + epc,
+  rooms ~ sqmt,
+  epc ~ sqmt,
+  tax ~ sqmt,
+  exposure = "sqmt",
+  outcome = "price"
 )
 ```
 
@@ -331,13 +350,33 @@ Once we're happy that we have a DAG that seems sensible, we can then plot it:
 plot(rent_dag)
 ```
 
-And we can use it to identify which model we should run to answer our research question:
+> Note that the exact positions of the variables in the figure  are semi-random, so your figure might not look exactly the same as mine, e.g. `sqmt` might be on the right instead of the left of `tax` but the arrow should still go from `sqmt` to `tax`.
+
+The left hand figure shows the version of the DAG if we ran the model:
+
+```{r, eval = F}
+lm(price ~ sqmt, data = abdn)
+```
+
+while the figure on the right shows the version of the DAG that would required if we wanted to understand the *total causal effect* that changing `sqmt` would have on the `price`. In this case, they look identical? Why is that? Well, note that `sqmt` drives a lot of causal relationships in our DAG: `sqmt` → `rooms` → `price`, and `sqmt` → `tax` → `price`, etc. So according to this DAG, if a landlord increased the square meters of their property it will have lots of "knock on" effects, e.g. increasing `sqmt` will increase how many rooms you have, resulting in a higher listing price. These are all "piped confounds" (sometimes called "mediators"). Remember the example of what to do with pipes? We normally want information to "flow", so we don't "block" them. Here we keep them "unblocked" by not including the respective explanatory variable.
+
+The reason for doing so here is that all of these ways in which changing `sqmt` will *cause* a change in `price` are relevant to understanding the *total causal effects* of changing `sqmt`. If we've increased the square meters of a property, and that results in an extra room, isn't that part of how `sqmt` causes a `price` change? So in this case, the model we want to run, to identify the *total causal effect* that changing `sqmt` would have on the `price` is:
+
+```{r, eval = F}
+lm(price ~ sqmt, data = abdn)
+```
+
+> Note that it won't always work out that to understand the causal effect of X on Y requires the model Y ~ X. In fact, most of the time it doesn't. It's just that according to this particular DAG, to understand sqmt on price we would run the model price ~ sqmt.
+
+For a slightly more detailed summary of the DAG, we can simply pull up the DAG object in `R` to use it to identify which model we should run to answer our research question:
 
 ```{r}
 rent_dag
 ```
 
-This tells us that to estimate for the *direct* effect of Sqmt on Rent, we would also need to include EPC and Rooms, but we aren't interested in just the direct effect, we want to understand what would happen to Rent if we increased a property by 10 square meters, so we want the *total* effects. For that, `check_dag()` has suggested that the initial model is correctly specified, where our initial model was `Rent ~ Sqmt`.
+We get two pieces of information here
+
+This tells us that to estimate for the *direct* effect of `sqmt` on `price`, we would also need to include EPC and Rooms, but we aren't interested in just the direct effect. For clarity, the *direct* effect would be the effect of adding extra square meters to a property not including the fact that this will likely influence the number of rooms, the EPC, the tax band, etc. Instead, based on our research question we want to understand what would happen to `price` if we increased a property by, say, 10 square meters, and all the different ways those extra 10 m result in a change in price. So we want the *total* effects. For that, `check_dag()` has suggested that the initial model is correctly specified, where our initial model was `price ~ sqmt`.
 
 ## 4. Fit an appropriate model.
 
@@ -357,9 +396,9 @@ plot(rent_causal_mod)
 par(mfrow = c(1,1))
 ```
 
-Most of the diagnostics look ok. Not great, but good enough to work with, with the exception of the Residuals vs Leverage plot.
+Most of the diagnostics look ok. Not great, but maybe just about good enough to work with, with the exception of the Residuals vs Leverage plot.
 
-Choose how to deal with the Residuals vs Leverage plot and rerun your analysis if necessary. For the remainder of this workshop instructions, I will remove any problematic observations and rerun the analysis (noting how much the results change).
+As for the predictive model, decide how you want to deal with the Residuals vs Leverage plot and rerun your analysis if necessary.
 
 ```{r, include = F}
 # If your row numbers are different to mine, make sure you re-loaded the data in before starting with the causal model
@@ -405,14 +444,16 @@ Repeat the above process, but where our research question is focused on understa
 Because we're doing a new analysis, be sure to re-load the data before proceeding.
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# This is the same DAG as above. Nothing actually changes in the DAG even though our reseasrch question has.
 rent_dag <- check_dag(
-  Rent ~ Rooms + Sqmt + Tax + EPC,
-  Rooms ~ Sqmt,
-  EPC ~ Sqmt,
-  Tax ~ Sqmt,
-  exposure = "EPC",
-  outcome = "Rent"
+  price ~ rooms + sqmt + tax + epc,
+  rooms ~ sqmt,
+  epc ~ sqmt,
+  tax ~ sqmt,
+  exposure = "epc",
+  outcome = "price"
 )
+
 rent_dag
 # To estimate the causal effect of EPC, we need to include sqmt in the model:
 epc_mod <- lm(price ~ epc + sqmt, data = abdn)
@@ -422,16 +463,18 @@ summary(epc_mod)
 plot(ggpredict(epc_mod, terms = "epc"))
 # The causal effects seem to be all over the place. This either suggests that the DAG may be more complex than I've assumed, or we need more data to estimate this relationship properly.
 
-# As an example, a more fleshed out version of the DAG would look like:
+# Note that we do not interpret sqmt in this model. sqmt is included simply to deal with confounded relationships, so under this version of the model is it now confounded. If we did interpret sqmt from this model we would be falling into the "Table 2 Fallacy".
+
+# As an example of how drawing a DAG can be challenging, below is a more fleshed out version of the DAG that has had more thought given to it:
 better_dag <- check_dag(
-  Rent ~ Rooms + Sqmt + Tax + EPC + PropertyType,
+  Price ~ Rooms + Sqmt + Tax + EPC + PropertyType,
   Rooms ~ Sqmt + PropertyAge,
   EPC ~ Sqmt + PropertyAge,
   Tax ~ HistoricPrice,
   HistoricPrice ~ PropertyAge + PropertyType + Rooms + Sqmt,
   Sqmt ~ PropertyAge + PropertyType,
   exposure = "EPC",
-  outcome = "Rent"
+  outcome = "Price"
 )
 # (But keep in mind, this doesn't include things like how nicely it's decorated, it's general maintainence, how greedy the landlord is, etc, etc)
 plot(better_dag)
@@ -440,9 +483,8 @@ better_dag
 # Rent ~ EPC + PropertyType + Rooms + Sqmt + Tax
 # Rent ~ EPC + HistoricPrice + PropertyType + Rooms + Sqmt
 # Rent ~ EPC + PropertyAge + Sqmt
-# The easiest of which would be the first, given PropertyType is the easiest variable to collect (property age is difficult, and historic price is probably impossible to get)
-# The means that unless we get PropertyType, we can't currently understand the causal effect of EPC with the data as is
-# This is a nice example of where doing the DAG *before* data collection helps to prevent headaches later on by identifying which variables to collect!
+
+# The easiest of which would be the first, given PropertyType is the easiest variable to collect (property age is difficult, and historic price may well beimpossible to get). The means that unless we get PropertyType, we can't currently understand the causal effect of EPC with the data as is. This is a nice example of where doing the DAG *before* data collection helps to prevent headaches later on by identifying which variables to collect!
 ```
 
 # Assumption table

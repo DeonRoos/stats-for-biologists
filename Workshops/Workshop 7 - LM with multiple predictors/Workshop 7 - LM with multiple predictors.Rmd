@@ -21,8 +21,8 @@ As always, we’re using our tried-and-tested workflow to guide today’s worksh
 7. Interpret and draw conclusions.
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show="show")
-answer_sheet <- TRUE
+knitr::opts_chunk$set(echo = TRUE, results = "show", fig.show="show")
+answer_sheet <- FALSE
 library(ggplot2)
 library(here)
 ```
@@ -73,7 +73,9 @@ Notice that we’re using `rooms` in the model, but this variable isn’t in the
 abdn$rooms <- abdn$beds + abdn$living
 ```
 
-The statistical notation for this model is pretty miserable due to the many levels of `epc` and `tax`. Here’s what it looks like:
+Another thing to note in this dataset are the `epc` and `tax` variables. In both of these variables, the underlying "values" are continuous (e.g. the property was worth £100,000 in 1991) but these have been discretised, or converted into groups (e.g. instead of £100,000 it's recorded as `tax` equal to `a`). 
+
+Whenever this discretisation is done, when it comes to the actual model, it can make our life pretty horrible, which you can see when we write out the full notation. In our case, here’s what our model looks like:
 
 $price_i \sim Normal(\mu_i, \sigma)$
 
@@ -90,7 +92,9 @@ Where:
 - $\beta_{3,...,7}$ are the effects of each EPC rating compared to B.
 - $\beta_{8,...,13}$ are the effects of each tax band compared to A.
 
-As you can see, discretizing continuous variables can make your model crazily more complex. If EPC and tax were continuous variables, we’d estimate just four parameters instead of 14. A general tip: avoid creating categorical variables out of continuous ones when possible — it’ll save you headaches down the road (and often makes your analyses more reliable).
+As you can see, `epc` and `tax` being recorded as categories has made our model stupidly and crazily more complicated than it would otherwise be. If EPC and tax were continuous variables, we’d need to estimate just *four* parameters instead of 14! 
+
+A general tip: avoid creating categorical variables out of continuous ones when possible — it’ll save you headaches down the road (and often makes your analyses more reliable).
 
 Despite the complexity, running this model in R is straightforward:
 
@@ -104,7 +108,9 @@ Now let’s take a look at the estimated parameters using `summary()`:
 summary(rent_mod)
 ```
 
-This produces a whole list of estimated parameters; reminding us why it’s best to avoid excessive categorization. Keep this in mind for your future work (including your Honour's project), both for simplicity and for more meaningful analyses!
+This produces a giant list of estimated parameters; reminding us why it’s best to avoid excessive categorization. Keep this in mind for your future work (including your Honour's project), both for simplicity and for more meaningful analyses!
+
+The complication with predictive models is that these parameters estimates don't have a "biological" or "real world" meaning. We wouldn't read these as "increasing X causes Y to increase" by whatever the parameter value is. Instead it's what the model would predict the increase would be. If that's unclear the lecture slides on causal inference may help clarify.
 
 ## 5. Diagnose the model and check assumptions.
 
@@ -163,19 +169,19 @@ coef(rent_mod)
 # By comparing the two models, you can see the effect these observations had. For example, removing them means that the effect of sqmt changes from about 10p per extra square meter to £2.34 per extra square meter.
 ```
 
-Before moving ahead, remove any observations from your dataset and rerun your model. As a hint, if I believed the flats on rows 10 and 50 of the dataset were causing issues in the model, I could remove them by doing:
+Before moving ahead, if you identified any overly influential observations, remove them from your dataset, store this "trimmed" dataset, and rerun your model with this trimmed dataset. As a hint, if I believed the flats on rows 10 and 50 (10 and 50 are purely examples) of the dataset were causing issues in the model, I could remove them by doing:
 
 ```{r, eval = F}
-abdn <- abdn[-c(10, 50),]
+abdn_trimmed <- abdn[-c(10, 50),]
 ```
 
 The `-` before `c()` basically means "remove", so here we're removing rows 10 and 50 (remember that square brackets are organised as `[row,column]`).
 
-Having removed these and rerun the model. Do a quick quick of the diagnostic plots to see if this has resolved the issue.
+Having removed these and rerun the model. Do a quick check of the diagnostic plots to see if this has resolved the issue.
 
 ```{r, echo = FALSE}
-abdn <- abdn[-c(112, 88),]
-rent_mod <- lm(price ~ sqmt + rooms + epc + tax, data = abdn)
+abdn_trimmed <- abdn[-c(112, 88),]
+rent_mod <- lm(price ~ sqmt + rooms + epc + tax, data = abdn_trimmed)
 plot(rent_mod)
 ```
 
@@ -195,17 +201,20 @@ Given the number of explanatory variables we have in our predictive model, we'll
 library(ggeffects)
 ```
 
-Then ask `ggeffects` to predict rabbit weight for each of our `mongoose` categories:
+Then ask `ggeffects` to predict rent for each of our explanatory variables:
 
 ```{r}
 preds <- ggpredict(rent_mod)
 ```
+
+You'll see a message saying that the explanatory variables are characters, with `ggeffects` suggesting that we convert these to factors. If you want to do so you can do this by doing, `factor(abdn$tax)` as well as any other categorical variables in your model.
 
 Now we just need to plot it:
 
 ```{r}
 plot(preds)
 ```
+
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # To make these predictions manually we still do things the same way as before. The only extra complication is that we do this for each explanatory variable in turn. Additionally, we need to specify values for all explanatory variables, even those we aren't making predictions for:
@@ -283,7 +292,7 @@ abdn <- read.table(here("Workshops/Workshop 2 - Data vis/Data", "abdn_flats.txt"
 
 ## 1. Formulate a Research Question
 
-Our research question is going to be to understand the causal effect of square meters on rent price, or "What is the causal effect of the size of a rental property, in square meters, on the listed rental price?".
+Our research question is going to be to understand the causal effect of square meters on rent price, or "How much would rent be if a property were larger or smaller?". The important thing here is that we're going to try and and ask a *causal* question and not simply exploit associations (i.e. correlations) to make accurate predictions.
 
 Because we've already done an EDA and thought about hidden assumptions, we can skip these steps but before we get to fitting the model, we have an extra step when we want a model to potentially understand causation.
 
@@ -359,7 +368,7 @@ par(mfrow = c(1,1))
 
 Most of the diagnostics look ok. Not great, but good enough to work with, with the exception of the Residuals vs Leverage plot.
 
-Choose how to deal with the Residuals vs Leverage plot and rerun your analysis if necessary. For the remainder of this workshop instructions, I will remove any problematic observations and rerun the analysis (noting how much the results change).
+Choose how to deal with the Residuals vs Leverage plot and rerun your analysis if necessary.
 
 ```{r, include = F}
 # If your row numbers are different to mine, make sure you re-loaded the data in before starting with the causal model
@@ -394,7 +403,7 @@ ggplot(fake) +
   theme_bw()
 ```
 
-So what we learn is that for every additional meter square "added" the rent increases by roughly £8.50. So long as we assume that our DAG is accurate, this £8.50 increase is the *causal* effect of square meters on rent.
+So what we learn is that for every additional meter square "added" the rent increases by roughly £8.50. So long as we assume that our DAG is accurate (a potentially big assumption), this £8.50 increase is the *causal* effect of square meters on rent.
 
 Compare that with our predictive model that found "adding" an extra square meter to a property would increase the price by £2.30. At the time, we noted that £2.30 seemed on the "cheap" side and the reason for the predictive modelling estimating it as being "cheap" was because, according to out DAG, m$^2$ was confounded by the number of rooms in a flat. To be clear, that confounding didn't matter for the first model because our aim was to make predictions, not to understand the causal effect.
 

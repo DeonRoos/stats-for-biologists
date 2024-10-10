@@ -1,0 +1,472 @@
+---
+title: "Computer Workshop 9: Null Hypothesis Significance Testing and An (Akaike's) Information Criterion"
+author: "Roos & Pinard"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+    reference_docx: "../sbstemplate.docx"
+---
+
+# Workshop Structure
+
+As always, we are using the workflow below to structure the workshops:
+
+1. Formulate a research question.
+2. Perform exploratory data analysis.
+3. Identify any hidden assumptions.
+4. Fit an appropriate model.
+5. Diagnose the model and check assumptions.
+6. Summarise the results [Focus of today].
+7. Interpret and provide inferences.
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, results = "show", fig.show="show")
+answer_sheet <- TRUE
+library(ggplot2)
+library(here)
+```
+
+Today we'll have two parts to the workshop. In the first part, you'll use Null Hypothesis Significance Testing (NHST) to get a feel for how it works, and in the latter, you'll use An Information Criterion (sometimes called Akaike's Information Criterion). Don't worry though, you'll use the same dataset for both, so we should get through this quickly enough.
+
+# Null Hypothesis Significance Testing
+
+# 1. Formulate a Research Question
+
+For this workshop you will be using a new dataset on Monarch butterfly wing length. This data is collected by researchers who are concerned by potential impacts of habitat degradation and pesticide use (specifically, glyphosphate) on the migration/flight ability of the butterflies, with fears that their wingspan may be decreasing, ultimately impacting whether the butterflies are able to complete their migration from central America to north America.
+
+The researchers want to identify if either of the two explanatory variables are statistically significant, with fears that the increasing amount of meadows/farmland may be detrimental for the species.
+
+```{r, echo = FALSE}
+library(ggplot2)
+library(here)
+set.seed(2024)
+n <- 200
+body_length <- rnorm(n, mean = 30, sd = 5)
+habitat_type <- sample(c("Forest", "Meadow", "Wetland"), size = n, replace = TRUE)
+habitat_effect <- ifelse(habitat_type == "Forest", 1,
+                         ifelse(habitat_type == "Meadow", -0.5, 0))
+glyphosphate <- rgamma(n, rate = 1, shape = 0.5)
+wing_length <- 0.5 * body_length + 
+  habitat_effect + 
+  -0.05 * glyphosphate +
+  rnorm(n, mean = 0, sd = 2)
+
+butterfly <- data.frame(body_length = round(body_length, digits = 2),
+                        habitat = habitat_type,
+                        glyphosphate = round(glyphosphate, digits = 1),
+                        wing_length = round(wing_length, digits = 2))
+# head(butterfly)
+# hist(butterfly$wing_length)
+# hist(butterfly$body_length)
+# boxplot(butterfly$wing_length ~ butterfly$habitat)
+# plot(butterfly$wing_length ~ butterfly$body_length)
+# plot(butterfly$wing_length ~ butterfly$glyphosphate)
+# summary(lm(wing_length ~ body_length + glyphosphate + habitat, data = butterfly))
+butterfly$habitat[46] <- "forest"
+write.table(butterfly, here("Workshops/Workshop 9 - NHST & AIC/Data", "butterfly.txt"), row.names = FALSE)
+```
+
+
+# 2. Perform Exploratory Data Analysis
+
+If using the butterfly dataset, carry out a quick EDA, as per usual to familiarise yourself with the data and look for anything weird.
+
+```{r, include=answer_sheet, class.source="bg-success", eval = T}
+# There is a data entry mistake where habitat on row 46 is labelled as "forest" and not "Forest". We're pretty safe to assume this should be "Forest", so we can change it quickly by doing:
+butterfly$habitat[46] <- "Forest"
+```
+
+# 3. Identify Any Hidden Assumptions
+
+Having resolved any data issues, it's time to think more carefully about that data and identify any hidden assumptions.
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# Nothing jumps out at me with this dataset; I can't find any reason not to continue with the analysis.
+```
+
+# 4. Fit an appropriate model.
+
+Given our objective (determine if either of the three explanatory variables are statistically significant), what will our complete model be?
+
+$wing_i \sim Normal(\mu_i, \sigma)$
+
+$\mu_i = \beta_0 + \beta_1 \times body_i + \beta_2 \times glyph_i + \underline{\phantom{LONGWORDHERE}}$
+
+## Question Set One
+
+1. What replaces the blank part of the above equation?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# The full model will be:
+# wing_i ~ Normal(mu_i, sigma)
+# mu_i = beta_0 + beta_1 * body + beta_2 * glyphosphate + \beta_3 * meadow_i + beta_4 * wetland_i
+```
+
+2. What does the parameter $\beta_0$ represent?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# This is the wing length of our butterflies when body length is zero, glyphosphate is zero and the butterflies are in forests.
+```
+
+Let's run our linear model:
+
+```{r}
+butter_mod <- lm(wing_length ~ body_length + glyphosphate + habitat, data = butterfly)
+```
+
+Having run the model, let's see what the parameters $\beta_0$ and $\beta_1$ have been estimated as, using `summary()`:
+
+```{r}
+summary(butter_mod)
+```
+
+## Question Set Two
+
+1. Which of our parameters are statistically significant?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# We have three significant parameters:
+
+# Parameter 1:
+# body_length is significant; the < 2e-16 is scientific notation for: < 0.0000000000000002 (or 2 followed by 15 zeros after the decimal point). So much smaller than 0.05, which is the arbitrary "significance" threshold
+
+# Parameter 2:
+# The next significant parameter is habitatMeadow, with a P value of 8.09e-06 (or 0.00000809). Again, much smaller than the 0.05 threshold.
+
+# Parameter 3:
+# The final significant parameter is habitatWetland, with a P value of 0.000112. Comfortably below the 0.05 threshold.
+```
+
+2. What does statistical significance mean?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# A parameter being statistically significant just means there is a 5% chance, or less, that the Estimate could be zero.
+```
+
+3. What does statistical significance mean for the three statistically significant parameters in our model?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# This is where understanding what the parameters actually are becomes really important.
+
+# body_length describes how much wing length increases as body length increases. It's a slope (which we know because body length is continuous).
+# So NHST and P-values are simply asking, "could our body length slope be zero?". So for our body length slope, there's a tiny chance, according to P-values, that the slope is zero - the probability is less than 1%, never mind 5%.
+
+# habitatMeadow is a bit more complicated because it is one level in our categorical variable. Remember that with categorical variables, we use one as a reference point (here R has used Forest as the reference) and the Estimate is the difference between Forest and Meadows. Our model thinks butterflies in meadows have wings that are about 1 mm smaller compared to forest monarch butterflies.
+# The P-value is doing the same thing, it's asking "could the difference between forests and meadow butterflies be zero?". The actual probability it calculates is 0.03% (0.000339 * 100), again well below our 5% threshold.
+
+# habitatWetland is the exact same as for habitatMeadow. It is asking if the difference to *Forest* is zero or not.
+```
+
+4. What does statistical significance (or the lack thereof) mean for an intercept?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# P-values in models always asks the same thing: "is this number (i.e. parameter estimate) different to zero?". Statistical significance just adds: "is the probability that the parameter is different to zero less than a 5% chance?".
+```
+
+5. What does statistical significance (or the lack thereof) mean for *our* intercept?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# Again, this is where we need to know what the parameter represents in order to make any kind of sensible interpretation of the P-value. 
+
+# Our intercept is where body length is zero (i.e. a butterfly that is zero mm long - basically, it doesn't exist) that is present in our reference level of our categorical variable (Forest for this model).
+# More simply, the intercept is; "The wing length of a butterfly that is 0 mm long and lives in a forest"
+# So the P-value for our intercept is asking:
+# "Is the wing length of a butterfly that is zero mm long and lives in a Forest, different from zero mm?"
+
+# This is a rediculous statement. Why would we ever care if the wing length of a butterfly that's body is zero mm long and lives in a forest, is different from zero? Well, we only "care" about this parameter in the sense that we need it to draw a line, or show differences between habitats. So it's an important *parameter* but we don't care what the actual value is, per se, nor do wee care if it's different to zero or not.
+
+# In many (but not) models, if you're using NHST, you won't care about the intercept's P-value. For example, if you were modelling childrens height as a function of their age (height ~ age), the intercept would be the average childs height when they are born. The hypothesis, in NHST, would be the equivalent to saying you think that it's possible that children could be 0 cm tall when they're born. You don't need a P-value to know that's not true.
+
+# There are instances where that's also true for other parameters. Keep in mind that you need to consider the "Null hypothesis" to be a sensible possibility, in order for "statistical significance" to actually mean anything. For example, do you think it's a legitimate biological hypothesis to assume that human children grow zero cm every year? If not, then NHST will just tell you something you already knew and claiming "statistical significance" is just performative.
+```
+
+# 5. Diagnose the model and check assumptions.
+
+We always diagnose the model, so let's do it quickly now.
+
+```{r}
+par(mfrow = c(2,2))
+plot(butter_mod)
+par(mfrow = c(1,1))
+```
+
+Everything should look good but if you find any issues, investigate and see if you can resolve it. As a hint, there is a data entry mistake that you might have missed while doing EDA.
+
+# 6. Summarise the results.
+
+Before we begin interpreting, let's quickly make the plots to see what's going on in the model. To do so, we'll need three `fake` datasets; one to show the relationship with body length, one to show the relationship with glyphosphate and another to show habitat. Just like when we did the linear models with multiple explanatory variables, we need to keep all other explanatory variables constant when we're trying to show the relationship for our chosen variable.
+
+Meaning:
+
+For the `body_length` figure:
+
+- set `habitat` to `Forest` (Forest chosen arbitrarily)
+
+- set `glyphosphate` to the median `glyphosphate` value
+
+For the `glyphosphate` figure:
+
+- set `habitat` to `Forest` (Forest chosen arbitrarily)
+
+- set `body_length` to the median `body_length` value
+
+For the `habitat` figure:
+
+- set `glyphosphate` to the median `glyphosphate` value
+
+- set `body_length` to the median `body_length` value
+
+Make these figures now.
+
+```{r, include=TRUE, class.source="bg-success", eval = T, echo=FALSE}
+fake_1 <- data.frame(
+  body_length = seq(from = min(butterfly$body_length),
+                    to = max(butterfly$body_length),
+                    by = 0.1),
+  glyphosphate = median(butterfly$glyphosphate),
+  habitat = "Forest"
+)
+
+preds <- predict(butter_mod, newdata = fake_1, se.fit = TRUE)
+fake_1$fit <- preds$fit
+fake_1$low <- preds$fit - preds$se.fit * 1.96
+fake_1$upp <- preds$fit + preds$se.fit * 1.96
+
+ggplot(fake_1) +
+  geom_ribbon(aes(x = body_length, 
+                  ymin = low, 
+                  ymax = upp),
+              fill = "lightgrey",
+              alpha = 0.8) +
+  geom_line(aes(x = body_length,
+                y = fit),
+            colour = "black") +
+  labs(x = "Body length (mm)",
+       y = "Predicted wing length (mm)") +
+  theme_minimal()
+
+fake_2 <- data.frame(
+  body_length = median(butterfly$body_length),
+  glyphosphate = seq(from = min(butterfly$glyphosphate),
+                    to = max(butterfly$glyphosphate),
+                    by = 0.1),
+  habitat = "Forest"
+)
+
+preds <- predict(butter_mod, newdata = fake_2, se.fit = TRUE)
+fake_2$fit <- preds$fit
+fake_2$low <- preds$fit - preds$se.fit * 1.96
+fake_2$upp <- preds$fit + preds$se.fit * 1.96
+
+ggplot(fake_2) +
+  geom_ribbon(aes(x = glyphosphate, 
+                  ymin = low, 
+                  ymax = upp),
+              fill = "lightgrey",
+              alpha = 0.8) +
+  geom_line(aes(x = glyphosphate,
+                y = fit),
+            colour = "black") +
+  labs(x = "glyphosphate (ml)",
+       y = "Predicted wing length (mm)") +
+  theme_minimal()
+
+fake_3 <- data.frame(
+  body_length = median(butterfly$body_length),
+  glyphosphate = median(butterfly$glyphosphate),
+  habitat = unique(butterfly$habitat)
+)
+
+preds <- predict(butter_mod, newdata = fake_3, se.fit = TRUE)
+fake_3$fit <- preds$fit
+fake_3$low <- preds$fit - preds$se.fit * 1.96
+fake_3$upp <- preds$fit + preds$se.fit * 1.96
+
+ggplot(fake_3) +
+  geom_errorbar(aes(x = habitat, 
+                    ymin = low, 
+                    ymax = upp),
+                width = 0.1) +
+  geom_point(aes(x = habitat,
+                y = fit),
+            colour = "black") +
+  labs(x = "Habitat",
+       y = "Predicted wing length (mm)") +
+  theme_minimal()
+```
+
+# 7. Interpret and provide inferences.
+
+In terms of the scientific question, what have we learnt?
+
+## Question Set Three
+
+1. What happens to wing length as body length increases?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# Wings get bigger as bodies get bigger.
+```
+
+2. In which habitat do Monarch butterflies have the longest wings?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# Forests by about 1 to 2 mm
+```
+
+3. Why might wings be smaller in some habitats compared to others?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# This is where we need some biological knowledge of the system. Monarch butterflies are reliant on milkweed plants, which are killed off by herbicides. Milkweeds are going to be more common in meadows (and farmlands), so that could be a reason, but we're speculating with this result.
+```
+
+4. Does glyphosphate effect wing length?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# We might be tempted to say no, but we actually don't know. All we know is that we don't have any evidence to support the hypothesis that glyphosphate effects wing length. So it seems unlikely, but not definitive.
+
+# There are many ways an effect can be obscured one of which includes possible confounding. Another common reason is if an effect is weak, then you need a lot of data to be able to detect it. Here we don't have a massive dataset, so it's not impossible that there is an effect, it's just too weak for us to detect in our data and model.
+```
+
+5. What would you advise if a government wanted to try and conserve Monarch butterflies?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# This is actually an insanely difficult question to answer, mostly because even with the model, we can't be sure we actually understand the system. But given that we've tried to be as responsible as possible (thinking about and checking assumptions, ensuring data quality is reasonable, etc.), then we might feel confident enough to give tentative advice.
+
+# What that advice is will be up to you. You might suggest trying to get more forests along the migration path, or in the areas where they settle. You might suggest doing additional research in meadows and wetlands to try and figure out, in more detail, why wings are so much shorter in those habitats. It's up to you, and there's no right answer here.
+```
+
+Going back to NHST, those P-values and the associated statistical significance are maybe a bit clearer now. 
+
+The slope for `body_length` is clearly not zero; a slope of zero would just be a flat line, instead we have a pretty strong positive relationship (which shouldn't come as a big shock - bigger butterflies have bigger wings). And we can also see the statistically significant difference between Forest and Meadows quite clearly (even with the 95% CI, the average wing lengths aren't particularly close to each other), while Forest and Wetlands look pretty similar.
+
+The question here is, what have we gained from using NHST? We can tell just from looking at the figures above, that bigger butterflies have bigger wings, and that butterflies in Forests have bigger wings than Meadow and Wetland butterflies. Do we really need a P-value to tell us that? Imagine a similar scenario where we have statistical significance, but the difference in wing length was 0.001 mm. Are we going to claim that a 0.001 mm difference is important just because it's statistically significant?
+
+As with most things in statistics, P-values can be [misused and abused](https://www.jstor.org/stable/20167258) both intentionally and unintentionally (for examples, see the papers in today's MyAberdeen workshop folder - just give them very quick skims so you get the point). Importantly, you are not obliged to use P-values when you do statistics. It is entirely fair to simply not rely on them to tell you if a parameter is different to zero.
+
+# An (Akaike's) Information Criterion
+
+Not much changes when we switch over to using AIC, in terms of the workflow - we just change the technique. Keep in mind that AIC's objective is to remove "unnecessary" explanatory variables from the model without impacting how well the data fits (or predicts) the raw data.
+
+We can even just pick up where we left off, using the butterfly model that we just ran, and applying AIC to this model to see if we can trim any explanatory variables.
+
+To do so, we have two options (that we'll cover in this workshop). The first is that we can fit models with each variable removed in turn, or else we can use a function called `drop1()` which will do this automatically for us. The downside of the `drop`()` function is that it can be pretty counter-intuitive to use - I personally have to stop and think carefully whenever I use it because it just doesn't work the way my brain thinks it does. The downside of fitting the models ourselves is that this can take a fair amount of time to do. I actually don't mind that though, as fitting the models yourself means your less likely to fit something you don't care about (or go "fishing" for interesting results).
+
+Here's what the "manual" option looks like, where we start off by just asking `R` to tell us what the AIC was for our current version of the butterfly model:
+
+```{r}
+AIC(butter_mod)
+```
+
+And we get an AIC value of `r AIC(butter_mod)`. In and of itself, that tells us nothing. Remember that AIC is used to compare between two or more models, so just having the AIC for a single model means nothing.
+
+So let's run another model where we exclude `body_length` to see if we really need it or not to make accurate predictions of butterfly wing length:
+
+```{r}
+butter_mod_no_body <- lm(wing_length ~ glyphosphate + habitat, data = butterfly)
+```
+
+And then check the AIC of this new model without body length:
+
+```{r}
+AIC(butter_mod_no_body)
+```
+
+Our AIC is now `r AIC(butter_mod_no_body)`, and increase of `r AIC(butter_mod_no_body) - AIC(butter_mod)` (or if we want to be fancy, we could write $\Delta AIC =$ `r AIC(butter_mod_no_body) - AIC(butter_mod)`). Remember that we want AIC to be as low as possible, so of the two models we've now run, the first model is a substantially "better" fit to the data, meaning that body length seems to be a useful explanatory variable to accurately predict wing length. Let's try removing the other variables, one at a time, until we're left with the "Null Model" (i.e. a model with no explanatory variables - just an average wing length), and then compare them. 
+
+Run the all versions of the model with different combinations of the explanatory variables:
+
+```{r, eval = F}
+# Model without glyphosphate
+butter_mod_no_glyph <- lm(wing_length ~ , data = butterfly)
+# Model without habitat
+butter_mod_no_hab <- lm(wing_length ~ , data = butterfly)
+# Model with with only body
+butter_mod_body <- lm(wing_length ~ , data = butterfly)
+# Model with only glyphosphate
+butter_mod_glyph <- lm(wing_length ~ , data = butterfly)
+# Model with only habitat
+butter_mod_hab <- lm(wing_length ~ , data = butterfly)
+# Model with no explanatory variables (average only)
+# If you're unsure how to run this model, try looking online first before asking a member of staff
+butter_mod_null <- lm(wing_length ~ , data = butterfly)
+```
+
+```{r, include=answer_sheet, class.source="bg-success", eval = T}
+# Model without glyphosphate
+butter_mod_no_glyph <- lm(wing_length ~ body_length + habitat, data = butterfly)
+# Model without habitat
+butter_mod_no_hab <- lm(wing_length ~ body_length + glyphosphate, data = butterfly)
+# Model with with only body
+butter_mod_body <- lm(wing_length ~ body_length, data = butterfly)
+# Model with only glyphosphate
+butter_mod_glyph <- lm(wing_length ~ glyphosphate, data = butterfly)
+# Model with only habitat
+butter_mod_hab <- lm(wing_length ~ habitat, data = butterfly)
+# Model with no explanatory variables (average only)
+butter_mod_null <- lm(wing_length ~ 1, data = butterfly)
+```
+
+We could now extract the AIC for each of these models in turn, or we can just use the AIC function on all of the models to get it done in one line of code:
+
+```{r}
+AIC(butter_mod,
+    butter_mod_no_body,
+    butter_mod_no_glyph,
+    butter_mod_no_hab,
+    butter_mod_body,
+    butter_mod_glyph,
+    butter_mod_hab,
+    butter_mod_null)
+```
+
+Now we just need to find the models where the AIC is within 2 units of the absolute lowest AIC value. Our lowest AIC is `r round(min(AIC(butter_mod,  butter_mod_no_body, butter_mod_no_glyph, butter_mod_no_hab, butter_mod_body, butter_mod_glyph, butter_mod_hab, butter_mod_null)$AIC), digits = 1)` for the model that included body length and habitat.
+
+In cases where we have two or more models which we would deem to be broadly equivalent judging by AIC (i.e. where the difference (or $\Delta$ is less than or equal to 2), there are a number of options as to how to choose which model should be interpreted and reported. These include:
+
+1. Select the model with the absolute lowest AIC and report on this model only.
+2. Of the models within 2 AIC units, select and report on the one which best answers your research question.
+3. Carry out model averaging (which we don't cover on this course)
+
+There is no clear answer for which option is to be preferred, so the choice is yours to make. Whichever model you choose though, you would complete the final steps; diagnose, summarise and interpret.
+
+## Automate AIC
+
+While we can go through this process of running each model "by hand", it's a bit of a pain, especially if we have lots of explanatory variables in our model. An alternative is to use an automated process (it's not complicated after all, just time consuming). There are a few options to do this, but the one we'll show here involves using a package that comes pre-installed whenever you download `R` called `MASS`. Within `MASS`, the function we want to use is called  `stepAIC()`. The way `stepAIC()` works is that we supply our most complex model (the model with all of the explanatory variables we can include) and let the machinery take care of the rest. 
+
+An important note is that `stepAIC()` uses a slightly different way to calculate AIC compared to the `AIC()` function. It's largely just pedantic and technical differences, but the important thing is that it doesn't really matter how we calculate AIC. The end result will, in 99% of cases, be the same end result (i.e. the final model we choose).
+
+Here's what that would look like:
+
+```{r}
+library(MASS) # load the MASS package
+stepAIC(butter_mod)
+```
+
+The output can look a bit intimidating at first, but it's basically doing the same thing we did before (just slightly smarter). The first part of the output tells us the AIC of our starting model (`Start:  AIC=265.31`). Then `stepAIC()` attempts to remove each explanatory variable in turn (e.g. `- glyphosphate` is where glyphosphate is removed, hence the minus) but also considers when it doesn't remove any (i.e. `<none>` where no variables are removed). At this point, `stepAIC()` looks for the lowest AIC of the models it has run, in this case, that's when glyphosphate is removed. Remember, AIC "improves" when it is lowered, so if we remove glyphosphate and AIC drops, then that implies an "improvement".
+
+Having then removed any variables that result in improved AIC, it repeats this process, attempting to remove any explanatory variables that lower AIC. In this example, however, removing either `habitat` or `body_length` result in increased AIC values, so we shouldn't remove these, and we're left with our final model, which is `wing_length ~ body_length + habitat`.
+
+# The difference between NHST and AIC
+
+Although the two approaches use different statistical backgrounds, they are both largely trying to resolve the same problem. In reality, they share a lot of fundamental theory (AIC is the equivalent to using something called likelihood ratio testing, which uses P-values to select between models, just where the threshold is not 0.05 but 0.18). So there is an argument to be made that they are pretty much doing the same thing. As a general rule, AIC tends to be retain explanatory variables more so than NHST, though they will often get you to the same model and inference.
+
+A broader question, though, is if we really need either. Consider when we plotted the model results earlier. Did you really need additional statistics to tell you that body length and habitat were important, while glyphosphate didn't seem to be? I'd argue; no we don't. We can get there by just thinking about the results for ourselves, rather than relying on tools that can sometimes lead us astray and to make silly inference.
+
+At this point in the workshop, I'll come clean. The butterfly data is fake. It's simulated. The reason for that is that I wanted a dataset where I knew *exactly* what the model should tell us, so I can then point to it and show you where it got it right and were it got it wrong. Well, the truth is that all three explanatory variables influenced butterfly wing length, including glyphosphate. It's just that the glyphosphate effect was very small and hard for the model to detect. The important thing though, is that neither NHST nor AIC picked out that there was a glyphosphate effect, despite there being one. Now, that's fair enough given the model couldn't detect it, but I hope this is a good example of where these techniques (including models in general) can go wrong. Just because there is an effect, doesn't mean the model will detect it, nor will it get picked out as "significant" or retained by AIC.
+
+# The Next Challenger
+
+If you've managed to get to the end, then feel free to take a well earned break. If you feel up to it, go back to the flat price dataset and the model where we were trying to predict rent price and use NHST and AIC to see 1) which explanatory variables are significant and 2) which variables can be removed to make the predictive model more efficient.
+
+# Assumption table 
+
+| **Assumption**                   | **Description**                                                                                             | **Example of Violation**                                                                                                                                       |
+|---------------------------------|-------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1. **Validity**                     | The data is able to answer the research question effectively.                      | Using IQ to measure overall intelligence (what does IQ even measure?).                      |
+| 2. **Representativeness**           | The data reflects the population or group being studied.                              | Using survey data from a rural area to draw conclusions about an urban population. |
+| 3. **Additivity**                   | Effects of predictors are additive and there are no interactions between them.         | Assuming that study hours and sleep hours independently affect exam scores without considering their combined effect (imagine a Venn diagram with study and sleep overlapping). |
+| 4. **Linearity**                   | The relationship between predictors and the outcome is linear.                                   | Assuming plant growth will continue to increase indefinitely without ever levelling out.          |
+| 5. **Independence of Errors**       | Observations are independent of each other. (Related to residual errors.)                                                       | If modelling height, the data come from the same group of children over time.               |
+| 6. **Equal Variance of Errors**     | Residuals have constant variance across all levels of predictors ("homoscedasticity"). (Related to residual errors.)  | If modelling income, variability in salaries is not the same across all levels of a company’s hierarchy.              |
+| 7. **Normality of Errors**          | Residuals should be normally distributed.  (Related to residual errors.)                         | If modelling income, the presence of any extremely wealthy individuals will be hard for the model to understand and explain.     

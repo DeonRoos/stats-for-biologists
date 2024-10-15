@@ -1,0 +1,34 @@
+---
+title: "Equations"
+author: "Deon Roos"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+Question:
+
+For a linear model with a categorical variable which includes the category group, with levels "A1", "A2", "A3" and "A4", which of the following corresponds to the equivalent equation for the code lm(y ~ group, data = my_data)?
+
+Answer 1 (Correct):
+
+$y_i \sim Normal(\mu_i, \sigma)$
+
+$\mu_i = \beta_0 + \beta_1 \times A2_i + \beta_2 \times A3_i + \beta_4 \times A4_i$
+
+Answer 2:
+
+$y_i \sim Normal(\mu_i, \sigma)$
+
+$\mu_i = \beta_0 + \beta_1 \times A1_i + \beta_2 \times A2_i + \beta_4 \times A3_i$
+
+Answer 3:
+
+$y_i \sim Normal(\mu_i, \sigma)$
+
+$\mu_i = \beta_0 + \beta_1 \times A1_i + \beta_2 \times A2_i + \beta_4 \times A3_i + \beta_5 \times A4_i$
+
+Answer 4:
+
+$y_i \sim Normal(\mu_i, \sigma)$
+
+$\mu_i = \beta_0 \times A1_i + \beta_1 \times A2_i + \beta_2 \times A3_i + \beta_4 \times A4_i$

@@ -219,34 +219,37 @@ $weight_i \sim Normal(\mu_i, \sigma)$
 $\mu_i = \underline{\phantom{\beta_0}} + \underline{\phantom{\beta_0}} \times Present_i$
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# The first blank should be 272.447 and the second blank should be -5.335
-# Or mu = 272.5 + -5.3 * Present
+# The first blank should be 269.566 and the second blank should be -2.866. or mu = 269.566 - 2.866 * Present
 ```
 
 2. Using your completed equation from 1., what value of $\mu$ (or Amami rabbit weight) would you predict if there are mongoose present?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# We can just replace the drought from the above equation with zero:
-# 272.5 + -5.3 * 1 = 267.2
+# We can replace Present from the above equation with a one:  269.6 - 2.9 * 1 = 266.7  Note that I am using only one decimal place in my estimation.  I made this decision based on two observations.  The first was that rabbit weight was given as whole numbers in grams in the dataset.  The second was that my estimate of the coefficient for mongoosePresent was relatively small (-2.866).  Including one decimal place to my coefficients seems appropriate given these two observations.  I don't want to suggest I have more precision in my estimations than I actually do.
 ```
 
 3. Using your completed equation from 1., what value of $\mu$ would you predict if mongoose were absent?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# We can just replace the drought from the above equation with eight:
-# 272.5 + -5.3 * 0 = 272.5
+# We replace Present with a zero, 269.9 - 2.9 * 0 = 269.9
 ```
 
 4. Is the presence mongoose associated with a decline in weight as the Japanese researchers hypothesised?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# Based on the model, yes, mongoose appear to reduce the average weight of rabbits by about 5 grams.
+# Based on the model, mongoose appear to reduce the average weight of rabbits by about 3 grams, however, there are other bits of information that we need to notice here.  For example, the standard error of the estimate associated with the presence of mongoose is relatively large.  Remembering what we learned in the lecture about 95% Confidence Intervals, if we were calculate the 95% confidence interval around the estimate we would see that the confidence interval includes zero.  That suggests
+
+# 95% confidence interval = mean value +/SE * 1.96:
+# Upper limit =  (-2.866) + (5.422 * 1.96) = 7.761  
+# Lower limit = (-2.866) - (5.422 * 1.96) = -13.493
+
+# So a very small difference in average weight between the two islands and a lot of uncertainty in the two averages. Statistically, it seems unlikely that there's a big difference in weight.
 ```
 
 5. Is the association sufficient to be of biological concern?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# Five grams is pretty small, given the rabbits weight on average 2.7 kg. Combined with the uncertainty of whether or not mongoose are actually absent from Tokunoshima, we're not really sure what we've learned here.
+# 3 grams is pretty small, given the rabbits weight on average 2.7 kg. Combined with the uncertainty of whether or not mongoose are actually absent from Tokunoshima, we're not really sure what we've learned here.
 
 # I.e. we identified before running the model that the mongoose variable might not be reliable, and we now find a tiny effect of mongoose on rabbit weight. So what should we take away from this? I'm not sure myself.
 ```

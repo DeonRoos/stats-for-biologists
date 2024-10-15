@@ -1,4 +1,4 @@
-"body_length" "habitat" "glyphosate" "wing_length"
+"body_length" "habitat" "glyphosphate" "wing_length"
 34.91 "Meadow" 1.5 18.85
 32.34 "Forest" 1.2 15.44
 29.46 "Wetland" 0 13.91

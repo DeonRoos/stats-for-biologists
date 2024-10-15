@@ -1,0 +1,313 @@
+---
+title: "Computer Workshop 10: Poisson GLMs"
+author: "Roos & Pinard"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+    reference_docx: "../sbstemplate.docx"
+---
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, results = "show", fig.show="show")
+answer_sheet <- TRUE
+library(ggplot2)
+library(here)
+species <- read.table(here("Workshops/Workshop 10 - GLMs/Data", "species.txt"), header= TRUE)
+```
+
+# Workshop Structure
+
+As always, we are using the workflow below to structure the workshops:
+
+1. Formulate a research question.
+2. Perform exploratory data analysis.
+3. Identify any hidden assumptions.
+4. Fit an appropriate model [Focus of today].
+5. Diagnose the model and check assumptions [Focus of today].
+6. Summarise the results [Focus of today].
+7. Interpret and provide inferences.
+
+# 1. Formulate a research question.
+
+The researchers who collected this data wanted to describe the relationships between the number of species (`Species`) present in a plot of land, and how this number was associated with the overall plant biomass (`Biomass`, i.e. what was the overall weight of plants in the plot of land), and the pH of the soil (`pH`, categorised into "High", "Medium" and "Low"). The researchers were interested in describing the associations between species and the two explanatory variables. In total, the researchers collected data from 90 plots of land ($n = 90$), where each observation is from a single plot.
+
+# 2. Perform exploratory data analysis.
+
+Even though we're going to be running a $Poisson$ GLM, we can do the same kind of EDA that we've done so far in this course. Carry out an EDA and try to spot anything that seems weird.
+
+# 3. Identify any hidden assumptions.
+
+And just like EDA, we still want to think about what assumptions we are making before we see any shiny results that may tempt us to ignore any problems in the data.
+
+# 4. Fit an appropriate model.
+
+From the information provided in the brief above, we are already able to determine a suitable distribution to use when fitting the model (the fact that this workshop is called Poisson GLMs may also offer a rather cryptic hint...). The relevant information comes from the description of `Species` indicating that this variable is a count, which implies 1) the minimum value is 0 [we cannot have -1 species], and 2) the response variable will be measured in integers [we cannot count 3.14 plants]. With this information alone, we can already deduce the that our data was likely generated according to a $Poisson$ distribution.
+
+Therefore, the first part of our model (the stochastic, or "random" element) will be:
+
+$Species_i \sim Poisson(\lambda_i)$
+
+Where $y$ is the count of species in a plot $i$, generated according to a $Poisson$ distribution with rate $\lambda$.
+
+Because we're going to assume a $Poisson$ distribution when fitting the model, we already know (or at least can find out with a quick Google) what the default (or "canonical") link function is. For a $Poisson$ GLM, the default link function is $log$, which we'll use to adapt our linear predictor ($\lambda$) such that we can more easily fit a straight line to the data. 
+
+> Keep in mind(!), the link function does not transform the species count, that never changes, we're only change the *linear predictor* (this is a super common misunderstanding with GLMs and link functions).
+
+## Which explanatory variables to include?
+
+Spare a moment's thought to how complex the process behind the number of plant species present in a plot of land will be. How much sunlight does each plot get? How much rainfall? What seeds were already present in the soil before data collection started? Why were *those* seeds present and not others? Why did some of them germinate in time for us to count them? 
+
+We don't have any data to try and explain this variation, yet it will still be there (this is what we are tasking the stochastic part of the model to deal with).
+
+For our purposes, the deterministic part we're interested in is what role plant biomass and soil pH plays in determining species richness. With this in mind, the model we will eventually want to run is:
+
+$log(\lambda_i) = \beta_0 + \beta_1 \times Biomass_i + \beta_2 \times midpH_i + \beta_3 \times highpH_i$
+
+Where $\lambda$ is our linear predictor regressed on the $log$ link scale, where $\beta_0$ is the intercept (which defaults to low pH), $\beta_1$ is the slope for biomass, $\beta_2$ is the difference from low pH ($\beta_0$) to mid pH, and $\beta_3$ is the difference from low pH to high pH.
+
+But before we jump straight into this model, we'll take things slow. To begin with, let's just run a model where we try and find the relationship between species and biomass. As always, fitting the model is the easiest part!, let's do it now:
+
+```{r}
+species_mod <- glm(Species ~ Biomass, 
+                   family = poisson(link = "log"),
+                   data = species)
+```
+
+# 5. Diagnose the model and check assumptions.
+
+Having run the model, we now need to check how well this model meets the assumptions. Keep in mind that some GLMs have additional assumptions. For $Poisson$ GLMs we have an extra assumption related to "dispersion" (as a quick reminder, this is where the amount of variation is smaller or larger than we'd expect), so we'll need to check for that as well. Do so now.
+
+```{r}
+par(mfrow = c(2,2)) # Show figures in 2 rows and 2 columns
+plot(species_mod)   # Plot the model diagnostics
+par(mfrow = c(1,1)) # Reset so only 1 figure is shown
+```
+
+## Question Set One
+
+1. Do you see any thing to be concerned with from the `Residuals vs Fitted` plot?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# We see a fairly clear "funnel" pattern. We go from having relatively "little" variation when our predicted values (on the link scale) are small, to "lots" of variation when our predicted values are large, and most of this is happening between predicted values of 2.5 to 3.5 (so over a fairly small range of predicted values). This would suggest we're not meeting the assumptions particularly well and is a good indication that we have overdispersion.
+```
+
+2. Do you see any thing to be concerned with from the `Q-Q Residuals` plot?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# We completely ignore the Q-Q plot for GLMs - remember, we're not assuming our residuals are Normally distributed anymore.
+```
+
+3. Do you see any thing to be concerned with from the `Scale-Location` plot?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# We see the same rapid increase in variation once predicted values are above 2.5
+```
+
+4. Do you see any thing to be concerned with from the `Residuals vs Leverage` plot?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# While we don't have any observations that are greater than 1, we have a handful that are getting uncomfortably close. While these values are fine, we're not exactly jumping for joy with these Cook's distances.
+```
+
+5. How can we check for overdispersion?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = T}
+# The Residuals vs Fitted can help us spot it, but we can also check the summary() of the model and do our calculation that we discussed in the lecture:
+summary(species_mod)
+  # We take residual deviance and divide by the degrees of freedom, so for this model:
+  # 433.62/88 = 4.9!
+  # We have a whopping 4.9 overdispersion! My general rule of thumb is that I start getting
+  # concerned when dispersion is somewhere in the 1.5 to 1.8 region. 4.9 is doomsday!
+  # As a result, our standard error for our parameter estimates are going to be artificially
+  # small. This in turn leads to both 1) risks of our p value being smaller than it should be
+  # for Biomass, and 2) any predictions that include uncertainty being too confident.
+```
+
+# 6. Summarise the results.
+
+Hopefully you identified issues that mean we should be very cautious with interpreting this model. For now, we'll put these concerns to rest (we will come back to them), and use this model as an opportunity to practice making predictions (and therefore answering our research question).
+
+As a reminder, the statistical notation for the deterministic element of the model with just `Biomass` is:
+
+$log(\lambda_i) = \beta_0 + \beta_1 \times Biomass_i$
+
+where $\beta_0$ was the intercept and $\beta_1$ was the slope for biomass.
+
+Replace $\beta_0$ and $\beta_1$ now, using your parameter estimates from `summary()`, and use this updated equation to make the following predictions:
+
+## Question Set Two
+
+1. On the link scale, how many species would you predict if a plot had 0 kg of biomass?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+3.55455 + -0.19534 * 0 # = 3.55455
+```
+
+2. On the link scale, how many species would you predict if a plot had 2.5 kg of biomass?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+3.55455 + -0.19534 * 2.5 # = 3.0662
+```
+
+3. On the link scale, how many species would you predict if a plot had 5 kg of biomass?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+3.55455 + -0.19534 * 5 # = 2.57785
+```
+
+To make interpreting these predictions easier and more intuitive, let's make the predictions on the response scale. To go from the $log$ link scale, to the response scale, we take our predictions and apply the inverse link function to them. The inverse link function of $log$ is $e$ (or exponential, or `exp()`). Predict, on the response scale, how many plant species we would expect if:
+
+4. On the response scale, how many plants would you predict if a plot had 0 kg of biomass?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+exp(3.5545494 + -0.1953352 * 0) # = 35.0
+```
+
+5. On the response scale, how many plants would you predict if a plot had 5 kg of biomass?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+exp(3.5545494 + -0.1953352 * 5) # = 13.2
+```
+
+6. On the response scale, how many plants would you predict if a plot had 10 kg of biomass?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+exp(3.5545494 + -0.1953352 * 10) # = 5.0
+```
+
+Using this approach, we get a series of snapshot predictions over different values of Biomass. That's useful in and of itself, but we can make this a bit easier for readers to interpret by showing this in a figure. 
+
+To do so, rather copy-and-pasting our equation and substituting in different value of biomass, why not use `R` to make this a bit easier for us? 
+
+Just like we did for linear models, we'll start by creating an entirely new `fake` dataset that contains a column called `Biomass`.
+
+```{r}
+fake <- data.frame(Biomass = seq(from = min(species$Biomass), 
+                                 to = max(species$Biomass), 
+                                 length.out = 20))
+```
+
+Where our approach is going to change, compared to how it worked with linear models, is that we need to backtransform our predicted number of species out of the $log$ link, back into average number of species that we would expect to count, given the biomass. Remember that to backtransform out of $log$, we exponentiate (using `exp()` in `R`).
+
+```{r}
+fake$fit <- exp(predict(species_mod, newdata = fake))
+fake
+```
+
+But what about our 95% confidence intervals? Well, it works pretty much the same as it did for linear models (where we would include `se.fit = TRUE`), but just as for `fit` above, we need to backtransform them. We'll redo the above, just now with 95% CI:
+
+```{r}
+preds <- predict(species_mod, newdata = fake, se.fit = TRUE)
+fake$fit <- exp(preds$fit)
+fake$low <- exp(preds$fit - 1.96 * preds$se.fit)
+fake$upp <- exp(preds$fit + 1.96 * preds$se.fit)
+```
+
+## Question Set Three
+
+1. Using the above dataset, create a sensible figure to convey your results using `ggplot2`.
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+ggplot(fake) +
+  geom_ribbon(aes(x = Biomass, ymin = low, ymax = upp), fill = "grey80") +
+  geom_line(aes(x = Biomass, y =  fit)) +
+  labs(x = "Biomass (kg)",
+       y = "Expected species count") +
+  theme_light()
+```
+
+And with that, we have a prediction (from our model which we know has issues). If we stopped here, we'd conclude that biomass has a negative association with the number of plant species, while also reporting that this model has a variety of issues.
+
+# Solving the violated assumptions
+
+We've run a Poisson GLM where `Species` is explained by `Biomass`, but there are two problems. The first is that our model diagnostics suggested we are not meeting our assumptions well. The second is that our initial research question sought to describe the relationships between `Species` with both `Biomass` *and* `pH`. We might be able to address both issues with the appropriate model.
+
+Run a $Poisson$ GLM where `Species` is a function of `Biomass` and `pH`.
+
+```{r, include=answer_sheet, class.source="bg-success", eval = T}
+species_mod2 <- glm(Species ~ Biomass + pH, 
+                    family = poisson(link = "log"), 
+                    data = species)
+```
+
+## Re-diagnose
+
+With every new model we run, we need to diagnose that model. We've already done that once, so let's quickly do it again.
+
+## Question Set Four
+
+1. Have we resolved the issues from the model with just Biomass included?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# Model diagnostic plots:
+# Residuals versus Fitted
+  # While we do still see a little bit of a funnel, it's a big improvement compared to previous model. This plot for the new model, while not perfect, is pretty good
+# Q-Q Residuals
+  # We completely ignore this figure (despite it looking nice in this model)
+# Scale-Location
+  # We also don't want to see any patterns. There's maybe a touch of increasing error as our predictor gets larger, but not enough to concern me
+# Residuals vs Leverage
+  # We're really only using this to check for values close to a Cook's distance of 1. We can't even see the dashed lines showing a Cook's distance of 0.5, so we're golden here too
+# Overall, the diagnostic plots look great
+
+# To do a quick and crude check for dispersion, we can use the information from summary()
+  # We take residual deviance and divide by the degrees of freedom, so for this model:
+  # 77.128/86 = 0.9
+  # Not exactly the ideal value of 1 but 0.9 is nothing to get concerned about
+  # Also, *underdispersion* is generally not much of an issue, relative to overdispersion
+  # Compared to the first model, this is a fantastic improvement
+par(mfrow = c(2,2))
+plot(species_mod2)
+par(mfrow = c(1,1))
+summary(species_mod2)
+```
+
+## Model interpretation
+
+Now that we've fit a model that answers our question and checked that we are meeting the assumptions reasonably well, let's begin the process of interpreting what the results mean. 
+
+Using `summary()`, identify and write down what each parameter means, both statistically but also biologically.
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# "(Intercept)" is the predicted value on the link (log) scale when
+# pH is "high". A hint is that there is no labelled coefficient called "pHhigh".
+
+# "Biomass" is the slope of Biomass. It is negative, so assumes a linear decrease (on the log scale). For every extra 1 unit (here kg) of biomass "added" to a plot the number of species (on the log scale) decreases by -0.16
+
+# "pHlow" is the estimated difference (on the log scale) between the "pHlow" and the reference level, "pHhigh". A value of -1.13 means plots with "low" pH have -1.13 (on link scale) fewer species than "high" (our intercept).
+
+# "pHmid" is the estimated difference (on the log scale) between the "pHmid" and the reference level, "pHhigh". A value of -0.47 means plots with "mid" pH have -0.47 (on link scale) fewer species than "high" (our intercept).
+
+# A mathematical description of the model (and how I would present it in the methods section of a paper):
+# Species_i ~ Poisson(lambda_i)
+# log(lambda_i) = 3.89 + -0.16 * Biomass_i + -1.13 * pHlow_i + -0.47 * pHmid_i
+summary(species_mod2)
+```
+
+## Summarise the new model
+
+Having gone through the process of checking the model and confirming there is no evidence that we have violated any assumptions that we can check, as well as ensuring we understand what the results mean (and doing a "sanity check" to make sure we aren't finding anything blatantly silly), we can now plot the model fit.
+
+If we wanted to, we could do this by hand, just like we did above. However, in the interesting in ending the workshops on an "easy, stress-free" note, let's use `ggeffects` and have it do all the annoying coding for us:
+
+```{r}
+library(ggeffects)
+bio_pred <- ggpredict(species_mod2, terms = "Biomass")
+plot(bio_pred)
+ph_pred <- ggpredict(species_mod2, terms = "pH")
+plot(ph_pred)
+```
+
+And just like that, we have figures that can show our predicted relationships from our model.
+
+# Fin
+
+That's a wrap. This is the last workshop of the course, so you're free to go now.
+
+A few final requests from me (Deon):
+
+* I don't care if you forget the details and technical side of this course. I do, however, want you to try to remember that data and models are not magic boxes that unravel the Truth or the "secrets of the universe". A model is just a bunch of code and equations. Don't be fooled by people shoving data and results down your throat, be that on the internet or in peer-reviewed papers.
+
+* If you found any typos, sections of the workshop materials, parts of lectures, or anything in general that felt confusing (given it's a stats course...), then let me (Deon) know. Please. I genuinely think the material on this course is important to know, and if I'm not doing a good job of that, please tell me. Feel free to message via email or however you prefer. I'd really appreciate any comments or critques (just please don't be cruel).

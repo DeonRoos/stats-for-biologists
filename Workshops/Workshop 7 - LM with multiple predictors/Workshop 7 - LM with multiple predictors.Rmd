@@ -43,7 +43,7 @@ This exercise will show that the same statistical tools can be used for differen
 Predictive models are a great starting point when considering models with multiple explanatory variables because they’re usually more straightforward — no need to worry about tricky causal assumptions here (don’t tell the Machine Learning folks I said that!).
 
 ```{r, echo = FALSE}
-abdn <- read.table(here("Workshops/Workshop 2 - Data vis/Data", "abdn_flats.txt"), header = TRUE)
+abdn <- read.table(here("Workshops/Workshop 2 - Data vis/Data", "abdn_flats_old.txt"), header = TRUE)
 ```
 
 ## 1. Formulate a Research Question
@@ -145,7 +145,7 @@ par(mfrow = c(1,1))
 2. If so, what is the consequence of violating this assumptions?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# Our confidence intervals will be artificially inflated, making our predictions look more uncertain than they should be.
+# Our confidence intervals will either be artificially inflated or deflated (i.e. either too small or too big), making our predictions look more or less uncertain than they should be.
 ```
 
 3. Do you see any assumptions that are likely broken in the Q-Q Residuals plot?
@@ -251,8 +251,7 @@ ggplot(fake) +
   theme_minimal()
 ```
 
-
-### Question Set Five
+### Question Set Two
 
 1. Can we identify any causal relationships from this model (e.g. "If you increase the square meters of a property by 10 meters squared, it will *cause* the rent to increase by X")?
 
@@ -297,7 +296,7 @@ Having run a model that aims to predict rent price, we're now going to switch ov
 To be responsible, be sure to re-load the data again, so that any changes we made to it specifically for the predictive modelling are not carried into our new analysis. However, if there were any issues that you previously resolved, do so again now.
 
 ```{r, echo = FALSE}
-abdn <- read.table(here("Workshops/Workshop 2 - Data vis/Data", "abdn_flats.txt"), header = TRUE)
+abdn <- read.table(here("Workshops/Workshop 2 - Data vis/Data", "abdn_flats_old.txt"), header = TRUE)
 ```
 
 ## 1. Formulate a Research Question
@@ -445,7 +444,7 @@ Repeat the above process, but where our research question is focused on understa
 Because we're doing a new analysis, be sure to re-load the data before proceeding.
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# This is the same DAG as above. Nothing actually changes in the DAG even though our reseasrch question has.
+# This is the same DAG as above. Nothing actually changes in the DAG even though our research question has.
 rent_dag <- check_dag(
   price ~ rooms + sqmt + tax + epc,
   rooms ~ sqmt,

@@ -1,0 +1,36 @@
+---
+title: "poisson equation"
+author: "Deon Roos"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+A. 
+
+$Y_i \sim Poisson(\lambda_i)$ 
+
+$log(\lambda_i) = log(\beta_0 + \beta_1 \times X_i)$
+
+<hr>
+
+B. 
+
+$Y_i \sim Poisson(\lambda_i)$
+
+$log(\lambda_i) = \beta_0 + \beta_1 \times X_i$
+
+<hr>
+
+C. 
+
+$log(Y_i) \sim Poisson(\lambda_i)$
+
+$\lambda_i = \beta_0 + \beta_1 \times X_i$
+
+<hr>
+
+D. 
+
+$log(Y_i) \sim Normal(\mu_i, \sigma^2)$
+
+$\mu_i = \beta_0 + \beta_1 \times X_i$

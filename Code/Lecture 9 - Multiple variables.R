@@ -433,3 +433,12 @@ p2 <- ggplot(nu_data) +
   sbs_theme()
 p2
 ggsave(here("Lecture 9 - Multivariate LM/Figures", file = "beaver_no_wolf.png"), plot = p2, width = 650/72, height = 775/72, dpi = 72)
+
+
+
+# Export ------------------------------------------------------------------
+
+yst_dat <- yst_dat |> 
+  select(beaver, wolf, reproduction, survival, park, site, year)
+
+write.table(yst_dat, "Workshops/Workshop 7 - LM with multiple predictors/yellowstone.txt", row.names = FALSE)

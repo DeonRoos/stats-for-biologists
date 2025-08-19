@@ -29,12 +29,12 @@ library(here)
 
 ### A Slight Tweak to Our Workflow
 
-Today, we’re going to explore two different approaches to modelling using the same dataset with both models being fit using a linear model. You might recognize this dataset from the first week of the course — it contains information about rental prices in Aberdeen.
+Today, we’re going to explore two different approaches to modelling using the same dataset with both models being fit using a linear model. You might recognize this dataset from the first week of the course — it contains information about rental Prices in Aberdeen.
 
 The two models we’re focusing on are:
 
-1. **A predictive model** aimed at predicting rent prices as accurately as possible.
-2. **A causal model** designed to understand the effect of square meters on rent price.
+1. **A predictive model** aimed at predicting rent Prices as accurately as possible.
+2. **A causal model** designed to understand the effect of square meters on rent Price.
 
 This exercise will show that the same statistical tools can be used for different goals — whether you want to build a simple predictive "AI" model or explore causal relationships.
 
@@ -43,73 +43,73 @@ This exercise will show that the same statistical tools can be used for differen
 Predictive models are a great starting point when considering models with multiple explanatory variables because they’re usually more straightforward — no need to worry about tricky causal assumptions here (don’t tell the Machine Learning folks I said that!).
 
 ```{r, echo = FALSE}
-abdn <- read.table(here("Workshops/Workshop 2 - Data vis/Data", "abdn_flats_old.txt"), header = TRUE)
+abdn <- read.table(here("Workshops/Workshop 2 - Data vis/Data", "abdn_flats.txt"), header = TRUE)
 ```
 
 ## 1. Formulate a Research Question
 
-This one’s simple: We just want to predict rent price. We’re not interested in why a rented property (either a flat or house) is more or less expensive; we just want to predict the listed price as accurately as possible.
+This one’s simple: We just want to predict rent Price. We’re not interested in why a rented property (either a flat or house) is more or less expensive; we just want to predict the listed Price as accurately as possible.
 
 ## 2. Perform Exploratory Data Analysis (EDA)
 
 As usual, spend a few minutes exploring the dataset. Check for any obvious errors or odd values. Since you have a link to each property, you can even verify unusual entries yourself; a rare luxury in science!
 
-As a warning, there are properties that when listed were given a specific price but by the time you look at a particular link, it may have had it's priced reduced. For example, there is one property that when I first added it to the dataset was listed at a whopping £3,200 a month but at the time of writing this, that price had dropped to £2,900 (because no one was willing to pay £3.2k in rent). In these cases, you'll need to decide for yourself how you want to deal with these. Your options are; 1) retain the original price if you think it wasn't a data entry mistake, 2) update the price with the newly lowered rent, or 3) create an entirely new observation for this "new" listing. Note that option 3) will lead to an assumption being violated. Do you know which assumption would be broken if creating a new observation for any properties that had their price lowered?
+As a warning, there are properties that when listed were given a specific Price but by the time you look at a particular link, it may have had it's Priced reduced. For example, there is one property that when I first added it to the dataset was listed at a whopping £3,200 a month but at the time of writing this, that Price had dropped to £2,900 (because no one was willing to pay £3.2k in rent). In these cases, you'll need to decide for yourself how you want to deal with these. Your options are; 1) retain the original Price if you think it wasn't a data entry mistake, 2) update the Price with the newly lowered rent, or 3) create an entirely new observation for this "new" listing. Note that option 3) will lead to an assumption being violated. Do you know which assumption would be broken if creating a new observation for any properties that had their Price lowered?
 
 ## 3. Identify Any Hidden Assumptions
 
-Even in a predictive model, we need to think about potential hidden assumptions. If our data is flawed or not representative, our predictions will be flawed too. Take a moment to consider limitations. For example, can we use this model to predict rent prices in London?
+Even in a predictive model, we need to think about potential hidden assumptions. If our data is flawed or not representative, our predictions will be flawed too. Take a moment to consider limitations. For example, can we use this model to predict rent Prices in London?
 
-Another hidden aspect of the data that you may want to consider (and potentially resolve if you are unhappy with it), is that the data contains both rental prices for both houses and flats, with no distinction made between them. Unless you decide to go through all `nrow(abdn)` properties and classify them as house or flat, I'd suggest you leave this distinction out of the data. But if we do so, what do you think this lack of distinction will do in our predictive model?
+Another hidden aspect of the data that you may want to consider (and potentially resolve if you are unhappy with it), is that the data contains both rental Prices for both houses and flats, with no distinction made between them. Unless you decide to go through all `nrow(abdn)` properties and classify them as house or flat, I'd suggest you leave this distinction out of the data. But if we do so, what do you think this lack of distinction will do in our predictive model?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # A property being either an entire house or just a flat will almost certainly have a big impact on how much the landlord asks for in rent. By not including this, we're leaving an "important" variable out of the model, so our predictions are likely going to be less accurate. Maybe by a lot, maybe by a little, but definitely by "some" amount.
 
-# The other issue is that this will likely create some unequal variance of errors, with predictions being worse (i.e. less accurate, i.e. more residual error) at higher predicted rent prices (as most houses cost more to rent, the model will likely struggle to understand *why* they are so expensive [or cheap], leading to more error).
+# The other issue is that this will likely create some unequal variance of errors, with predictions being worse (i.e. less accurate, i.e. more residual error) at higher predicted rent Prices (as most houses cost more to rent, the model will likely struggle to understand *why* they are so expensive [or cheap], leading to more error).
 ```
 
 ## 4. Fit an Appropriate Model
 
 One reason predictive modelling is so accessible is that we can throw all of our (sensible) explanatory variables into the model without worrying too much about the underlying relationships (obviously, we wouldn't include the hyperlink as an explanatory variable in the model). But let’s keep it simple today. We’ll include the following predictors:
 
-- **`sqmt`**: Property size in square meters.
+- **`FloorArea`**: Property size in square meters.
 - **`rooms`**: Total number of rooms (the sum of bedrooms and living rooms).
-- **`epc`**: The property’s energy performance rating (categorical with levels A to G, A being the most energy efficient).
-- **`tax`**: The council tax band based on the assumed property value in 1991 (categorical with levels A to G, G being the most expensive).
+- **`EPC`**: The property’s energy performance rating (categorical with levels A to G, A being the most energy efficient).
+- **`Tax`**: The council Tax band based on the assumed property value in 1991 (categorical with levels A to G, G being the most expensive).
 
 Notice that we’re using `rooms` in the model, but this variable isn’t in the dataset. You’ll need to create it by adding `beds` and `living` together (i.e., bedrooms and living rooms).
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = T}
-abdn$rooms <- abdn$beds + abdn$living
+abdn$rooms <- abdn$Bedrooms + abdn$PublicRooms
 ```
 
-Another thing to note in this dataset are the `epc` and `tax` variables. In both of these variables, the underlying "values" are continuous (e.g. the property was worth £100,000 in 1991) but these have been discretised, or converted into groups (e.g. instead of £100,000 it's recorded as `tax` equal to `a`). 
+Another thing to note in this dataset are the `EPC` and `Tax` variables. In both of these variables, the underlying "values" are continuous (e.g. the property was worth £100,000 in 1991) but these have been discretised, or converted into groups (e.g. instead of £100,000 it's recorded as `Tax` equal to `a`). 
 
 Whenever this discretisation is done, when it comes to the actual model, it can make our life pretty horrible, which you can see when we write out the full notation. In our case, here’s what our model looks like:
 
-$price_i \sim Normal(\mu_i, \sigma)$
+$Price_i \sim Normal(\mu_i, \sigma)$
 
-$\mu_i = \beta_0 + \beta_1 \times sqmt_i + \beta_2 \times rooms_i + \beta_3 \times epcC_i +$
-$\beta_4 \times epcD_i + \beta_5 \times epcE_i + \beta_6 \times epcF_i + \beta_7 \times epcG_i +$
-$\beta_8 \times taxB_i + \beta_9 \times taxC_i + \beta_{10} \times taxD_i +$
-$\beta_{11} \times taxE_i + \beta_{12} \times taxF_i + \beta_{13} \times taxG_i$
+$\mu_i = \beta_0 + \beta_1 \times FloorArea_i + \beta_2 \times rooms_i + \beta_3 \times EPCC_i +$
+$\beta_4 \times EPCD_i + \beta_5 \times EPCE_i + \beta_6 \times EPCF_i + \beta_7 \times EPCG_i +$
+$\beta_8 \times TaxB_i + \beta_9 \times TaxC_i + \beta_{10} \times TaxD_i +$
+$\beta_{11} \times TaxE_i + \beta_{12} \times TaxF_i + \beta_{13} \times TaxG_i$
 
 Where:
 
-- $\beta_0$ is the intercept, representing a property with zero square meters, zero rooms, an EPC of B, and a tax band of A.
+- $\beta_0$ is the intercept, representing a property with zero square meters, zero rooms, an EPC of B, and a Tax band of A.
 - $\beta_1$ is the slope for each additional square meter.
 - $\beta_2$ is the slope for each additional room.
 - $\beta_{3,...,7}$ are the effects of each EPC rating compared to B.
-- $\beta_{8,...,13}$ are the effects of each tax band compared to A.
+- $\beta_{8,...,13}$ are the effects of each Tax band compared to A.
 
-As you can see, `epc` and `tax` being recorded as categories has made our model stupidly and crazily more complicated than it would otherwise be. If EPC and tax were continuous variables, we’d need to estimate just *four* parameters instead of 14! 
+As you can see, `EPC` and `Tax` being recorded as categories has made our model stupidly and crazily more complicated than it would otherwise be. If EPC and Tax were continuous variables, we’d need to estimate just *four* parameters instead of 14! 
 
 A general tip: avoid creating categorical variables out of continuous ones when possible — it’ll save you headaches down the road (and often makes your analyses more reliable).
 
 Despite the complexity, running this model in R is straightforward:
 
 ```{r}
-rent_mod <- lm(price ~ sqmt + rooms + epc + tax, data = abdn)
+rent_mod <- lm(Price ~ FloorArea + rooms + EPC + Tax, data = abdn)
 ```
 
 Now let’s take a look at the estimated parameters using `summary()`:
@@ -157,7 +157,7 @@ par(mfrow = c(1,1))
 4. Are there any observations that are having a disproportionate affect on the model?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# Yes, a few. We can see these in the Residuals vs. Leverage plot, particularly the rental properties on rows 112 and 88 of our dataset (note that 88 doesn’t appear on the plot but is highlighted by the text output).
+# Yes, a few. We can see these in the Residuals vs. Leverage plot, particularly the rental properties on rows 324 and 329 of our dataset (note that these don’t appear on the plot but are highlighted by the text output).
 ```
 
 5. If there are any such observations, what should we do about them (if in doubt, ask a member of staff)?
@@ -172,14 +172,14 @@ par(mfrow = c(1,1))
 # 3. Rerun the model without these problematic observations and compare the parameter estimates of the two models. If removing them doesn’t drastically change the estimates, you might as well stick with the original model (telling your reader that you've checked both models and showing them both). If it does make a difference, things get more complicated. In that case, you should still report both models but focus on the one you feel is “better.” What “better” means here is up to you; there’s no definitively "right" answer (but not having high leverage might be a sensible measure).
 
 # Here’s how you’d do option 3:
-abdn_trimmed <- abdn[-c(112, 88),]
-trimmed_rent_mod <- lm(price ~ sqmt + rooms + epc + tax, data = abdn_trimmed)
+abdn_trimmed <- abdn[-c(324, 329),]
+trimmed_rent_mod <- lm(Price ~ FloorArea + rooms + EPC + Tax, data = abdn_trimmed)
 coef(trimmed_rent_mod) # coef() gives just the "coefficients" or parameter estimates
 coef(rent_mod)
-# By comparing the two models, you can see the effect these observations had. For example, removing them means that the effect of sqmt changes from about 10p per extra square meter to £2.34 per extra square meter.
+# By comparing the two models, you can see the effect these observations had. For example, removing them means that the effect of FloorArea changes from about 10p per extra square meter to £2.34 per extra square meter.
 ```
 
-Given your dataset may be slightly different to the one I used above (given how you dealt with any changes in listed price, houses versus flats, etc.), you may have seen some issues in the Residuals verses Leverage plot (though you may not, which would be fine). If you did see any problematic observations, before moving ahead, remove any observations from your dataset where the associated Cook's distance was $\geq 1$ and rerun your model. As a hint, if I believed the flats on rows 1 and 2 of the dataset were causing issues in the model, I could remove them by doing (observations 1 and 2 chosen here at random just to demonstrate how to remove them):
+Given your dataset may be slightly different to the one I used above (given how you dealt with any changes in listed Price, houses versus flats, etc.), you may have seen some issues in the Residuals verses Leverage plot (though you may not, which would be fine). If you did see any problematic observations, before moving ahead, remove any observations from your dataset where the associated Cook's distance was $\geq 1$ and rerun your model. As a hint, if I believed the flats on rows 1 and 2 of the dataset were causing issues in the model, I could remove them by doing (observations 1 and 2 chosen here at random just to demonstrate how to remove them):
 
 ```{r, eval = F}
 abdn <- abdn[-c(1, 2),]
@@ -190,8 +190,8 @@ The `-` before `c()` basically means "remove", so here we're removing rows 1 and
 Having removed these and rerun the model (unless your previous checks suggested no issues and you did not need to remove any observations). Do a quick check of the diagnostic plots to see if this has resolved the issue.
 
 ```{r, echo = FALSE}
-abdn_trimmed <- abdn[-c(112, 88),]
-rent_mod <- lm(price ~ sqmt + rooms + epc + tax, data = abdn_trimmed)
+abdn_trimmed <- abdn[-c(324, 329),]
+rent_mod <- lm(Price ~ FloorArea + rooms + EPC + Tax, data = abdn_trimmed)
 plot(rent_mod)
 ```
 
@@ -205,7 +205,7 @@ As usual, pull up the summary table:
 summary(rent_mod)
 ```
 
-Pay attention to the `Estimate` for `sqmt`; the model seems to be predicting that adding an extra 1 square meter to a property only increases the rent by about £2.34. Seems a bit low, right? Do we really think that the difference in price between a 50 m$^2$ flat and a 100 m$^2$ flat will be just £117 extra per month? We'll come back to this after we run the causal version of this model.
+Pay attention to the `Estimate` for `FloorArea`; the model seems to be predicting that adding an extra 1 square meter to a property only increases the rent by about £0.51. Seems a bit low, right? Do we really think that the difference in Price between a 50 m$^2$ flat and a 100 m$^2$ flat will be just £25.50 extra per month? We'll come back to this after we run the causal version of this model.
 
 Given the number of explanatory variables we have in our predictive model, we'll use `ggeffects` to do the plotting, though you can definitely do this manually if you prefer more control (see the instructions with answers to see how to do that).
 
@@ -213,7 +213,7 @@ Given the number of explanatory variables we have in our predictive model, we'll
 library(ggeffects)
 ```
 
-Then ask `ggeffects` to show the predicted relationship (or association) between rent price and each of our explanatory variables:
+Then ask `ggeffects` to show the predicted relationship (or association) between rent Price and each of our explanatory variables:
 
 ```{r}
 preds <- ggpredict(rent_mod)
@@ -231,10 +231,10 @@ We get the same message that we saw previously, where `ggeffects` isn't terribly
 # To make these predictions manually we still do things the same way as before. The only extra complication is that we do this for each explanatory variable in turn. Additionally, we need to specify values for all explanatory variables, even those we aren't making predictions for:
 
 fake <- data.frame(
-  sqmt = seq(from = min(abdn$sqmt), to = max(abdn$sqmt), by = 5),
+  FloorArea = seq(from = min(abdn$FloorArea), to = max(abdn$FloorArea), by = 5),
   rooms = median(abdn$rooms),
-  tax = "d",
-  epc = "d"
+  Tax = "D",
+  EPC = "D"
 )
 
 preds <- predict(rent_mod, newdata = fake, se.fit = TRUE)
@@ -244,10 +244,10 @@ fake$upp <- preds$fit + preds$se.fit * 1.96
 
 # Plot
 ggplot(fake) +
-  geom_ribbon(aes(x = sqmt, ymin = low, ymax = upp), fill = "lightgrey", alpha = 0.8) +
-  geom_line(aes(x = sqmt, y = fit)) +
+  geom_ribbon(aes(x = FloorArea, ymin = low, ymax = upp), fill = "lightgrey", alpha = 0.8) +
+  geom_line(aes(x = FloorArea, y = fit)) +
   labs(x = "Square meters",
-       y = "Predicted rental price") +
+       y = "Predicted rental Price") +
   theme_minimal()
 ```
 
@@ -256,16 +256,16 @@ ggplot(fake) +
 1. Can we identify any causal relationships from this model (e.g. "If you increase the square meters of a property by 10 meters squared, it will *cause* the rent to increase by X")?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# No, we can't identify causal relationships with this model. This model is designed to predict rent prices and not to understand the cause-and-effect relationship between variables.
+# No, we can't identify causal relationships with this model. This model is designed to predict rent Prices and not to understand the cause-and-effect relationship between variables.
 ```
 
-2. Why might the relationship between `price` and `sqmt` be smaller than we'd expect?
+2. Why might the relationship between `Price` and `FloorArea` be smaller than we'd expect?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# Probably because the size of the property *causes* the number of rooms you have. So if we provide the model with both explanatory variables sqmt and rooms, it only needs rooms to make an accurate prediction. Having both sqmt and rooms is redundant (for predictive modelling), because sqmt → rooms → price (or size causes rooms causes price). Basically, the model can "ignore" sqmt once we've told it about rooms.
+# Probably because the size of the property *causes* the number of rooms you have. So if we provide the model with both explanatory variables FloorArea and rooms, it only needs rooms to make an accurate prediction. Having both FloorArea and rooms is redundant (for predictive modelling), because FloorArea → rooms → Price (or size causes rooms causes Price). Basically, the model can "ignore" FloorArea once we've told it about rooms.
 ```
 
-3. Go to the letting agency website, [ASPC](https://www.aspc.co.uk/), and find a recently listed rental property which has all of the explanatory variables you need. Using your selected property, see how well your model predicts the rent. You're also welcome to use your own flat if you know (or can guess) how many square meters it has, what the EPC rating is, and which tax band it falls in.
+3. Go to the letting agency website, [ASPC](https://www.aspc.co.uk/), and find a recently listed rental property which has all of the explanatory variables you need. Using your selected property, see how well your model predicts the rent. You're also welcome to use your own flat if you know (or can guess) how many square meters it has, what the EPC rating is, and which Tax band it falls in.
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 #E.g. I'll use this property: https://www.aspc.co.uk/search/property/427426/6-Joss-Court/Aberdeen/
@@ -273,14 +273,14 @@ ggplot(fake) +
 # I need to create a dataframe to contain the relevant information:
 joss_court <- data.frame(
   rooms = 3,
-  sqmt = 61,
-  epc = "c",
-  tax = "c"
+  FloorArea = 61,
+  EPC = "C",
+  Tax = "C"
 )
 
 predict(rent_mod, newdata = joss_court)
 
-# The model predicts this property should be £785, and is actually listed at £800 - £25 off is not bad for predicting the rent of a flat the model has never seen before! (That £25 is also the residual error!)
+# The model predicts this property should be £740, and is actually listed at £800; £60 off is not bad for predicting the rent of a flat the model has never seen before! (That £60 is also the residual error!)
 
 # We could always include 95% CI to see if the true rent is within our intervals (using a shortcut to getting 95% CI):
 predict(rent_mod, newdata = joss_court, interval = "confidence")
@@ -291,17 +291,17 @@ If you want to see how this kind of model could be translated into something you
 
 # Causal Modelling
 
-Having run a model that aims to predict rent price, we're now going to switch over to causal modelling using the same dataset. Hopefully the differences and similarities between the two approaches will become clear.
+Having run a model that aims to predict rent Price, we're now going to switch over to causal modelling using the same dataset. Hopefully the differences and similarities between the two approaches will become clear.
 
 To be responsible, be sure to re-load the data again, so that any changes we made to it specifically for the predictive modelling are not carried into our new analysis. However, if there were any issues that you previously resolved, do so again now.
 
 ```{r, echo = FALSE}
-abdn <- read.table(here("Workshops/Workshop 2 - Data vis/Data", "abdn_flats_old.txt"), header = TRUE)
+abdn <- read.table(here("Workshops/Workshop 2 - Data vis/Data", "abdn_flats.txt"), header = TRUE)
 ```
 
 ## 1. Formulate a Research Question
 
-Our research question is going to be to understand the causal effect of square meters on rent price, or "How much would rent be if a property were larger or smaller?". The important thing here is that we're going to try and and ask a *causal* question and not simply exploit associations (i.e. correlations) to make accurate predictions.
+Our research question is going to be to understand the causal effect of square meters on rent Price, or "How much would rent be if a property were larger or smaller?". The important thing here is that we're going to try and and ask a *causal* question and not simply exploit associations (i.e. correlations) to make accurate predictions.
 
 Because we've already carried out an EDA and thought about hidden assumptions with regards to this data, we can skip these steps but before we get to fitting the model, we have an extra step when we want a model to potentially understand causation.
 
@@ -320,13 +320,13 @@ install.packages(c("performance", "see"), repos = "https://easystats.r-universe.
 In R, the function `check_dag()` from the `performance` and `see` packages helps us create and evaluate a DAG. Here’s how it works:
 
 1. Specify the Causal Relationships for the Response Variable:
-- You need to outline what you believe the causal relationships are. For example, if you think rent is influenced by the number of rooms, square meters, tax band, and EPC, you would "translate" this to `Rent ~ Rooms + Sqmt + Tax + EPC`. Note that the variable names in the model don't have to match those in your dataset; just avoid using spaces in variable names, e.g., use `Aberdeen_Rent` instead of `Aberdeen Rent`.
+- You need to outline what you believe the causal relationships are. For example, if you think rent is influenced by the number of rooms, square meters, Tax band, and EPC, you would "translate" this to `Rent ~ Rooms + FloorArea + Tax + EPC`. Note that the variable names in the model don't have to match those in your dataset; just avoid using spaces in variable names, e.g., use `Aberdeen_Rent` instead of `Aberdeen Rent`.
 
 2. Define the Relationships Between Variables:
-- Having done that, we now just go through what might cause our *explanatory* variables, for example the number of rooms you can have in a flat is must surely be caused by how many square meters there are, so we include this as: `Rooms ~ Sqmt`, and so on for the other explanatory variables.
+- Having done that, we now just go through what might cause our *explanatory* variables, for example the number of rooms you can have in a flat is must surely be caused by how many square meters there are, so we include this as: `Rooms ~ FloorArea`, and so on for the other explanatory variables.
 
 3. Set Up the Response and Explanatory Variables:
-- The final part we need to complete is to define what our response variable is (called "`outcome`" by performance) and what our explanatory variable is (called "`exposure`"). This defines our initial and simple model, which in this case would be: `Rent ~ Sqmt`.
+- The final part we need to complete is to define what our response variable is (called "`outcome`" by performance) and what our explanatory variable is (called "`exposure`"). This defines our initial and simple model, which in this case would be: `Rent ~ FloorArea`.
 
 Here's what your code might look like (but note that your DAG might look different from mine, e.g. maybe you don't agree with me that EPC is caused by the size of a property):
 
@@ -334,12 +334,12 @@ Here's what your code might look like (but note that your DAG might look differe
 library(performance)
 library(see)
 rent_dag <- check_dag(
-  price ~ rooms + sqmt + tax + epc,
-  rooms ~ sqmt,
-  epc ~ sqmt,
-  tax ~ sqmt,
-  exposure = "sqmt",
-  outcome = "price"
+  Price ~ rooms + FloorArea + Tax + EPC,
+  rooms ~ FloorArea,
+  EPC ~ FloorArea,
+  Tax ~ FloorArea,
+  exposure = "FloorArea",
+  outcome = "Price"
 )
 ```
 
@@ -349,23 +349,23 @@ Once we're happy that we have a DAG that seems sensible, we can then plot it:
 plot(rent_dag)
 ```
 
-> Note that the exact positions of the variables in the figure  are semi-random, so your figure might not look exactly the same as mine, e.g. `sqmt` might be on the right instead of the left of `tax` but the arrow should still go from `sqmt` to `tax`.
+> Note that the exact positions of the variables in the figure  are semi-random, so your figure might not look exactly the same as mine, e.g. `FloorArea` might be on the right instead of the left of `Tax` but the arrow should still go from `FloorArea` to `Tax`.
 
 The left hand figure shows the version of the DAG if we ran the model:
 
 ```{r, eval = F}
-lm(price ~ sqmt, data = abdn)
+lm(Price ~ FloorArea, data = abdn)
 ```
 
-while the figure on the right shows the version of the DAG that would required if we wanted to understand the *total causal effect* that changing `sqmt` would have on the `price`. In this case, they look identical? Why is that? Well, note that `sqmt` drives a lot of causal relationships in our DAG: `sqmt` → `rooms` → `price`, and `sqmt` → `tax` → `price`, etc. So according to this DAG, if a landlord increased the square meters of their property it will have lots of "knock on" effects, e.g. increasing `sqmt` will increase how many rooms you have, resulting in a higher listing price. These are all "piped confounds" (sometimes called "mediators"). Remember the example of what to do with pipes? We normally want information to "flow", so we don't "block" them. Here we keep them "unblocked" by not including the respective explanatory variable.
+while the figure on the right shows the version of the DAG that would required if we wanted to understand the *total causal effect* that changing `FloorArea` would have on the `Price`. In this case, they look identical? Why is that? Well, note that `FloorArea` drives a lot of causal relationships in our DAG: `FloorArea` → `rooms` → `Price`, and `FloorArea` → `Tax` → `Price`, etc. So according to this DAG, if a landlord increased the square meters of their property it will have lots of "knock on" effects, e.g. increasing `FloorArea` will increase how many rooms you have, resulting in a higher listing Price. These are all "piped confounds" (sometimes called "mediators"). Remember the example of what to do with pipes? We normally want information to "flow", so we don't "block" them. Here we keep them "unblocked" by not including the respective explanatory variable.
 
-The reason for doing so here is that all of these ways in which changing `sqmt` will *cause* a change in `price` are relevant to understanding the *total causal effects* of changing `sqmt`. If we've increased the square meters of a property, and that results in an extra room, isn't that part of how `sqmt` causes a `price` change? So in this case, the model we want to run, to identify the *total causal effect* that changing `sqmt` would have on the `price` is:
+The reason for doing so here is that all of these ways in which changing `FloorArea` will *cause* a change in `Price` are relevant to understanding the *total causal effects* of changing `FloorArea`. If we've increased the square meters of a property, and that results in an extra room, isn't that part of how `FloorArea` causes a `Price` change? So in this case, the model we want to run, to identify the *total causal effect* that changing `FloorArea` would have on the `Price` is:
 
 ```{r, eval = F}
-lm(price ~ sqmt, data = abdn)
+lm(Price ~ FloorArea, data = abdn)
 ```
 
-> Note that it won't always work out that to understand the causal effect of X on Y requires the model Y ~ X. In fact, most of the time it doesn't. It's just that according to this particular DAG, to understand sqmt on price we would run the model price ~ sqmt.
+> Note that it won't always work out that to understand the causal effect of X on Y requires the model Y ~ X. In fact, most of the time it doesn't. It's just that according to this particular DAG, to understand FloorArea on Price we would run the model Price ~ FloorArea.
 
 For a slightly more detailed summary of the DAG, we can simply pull up the DAG object in `R` to use it to identify which model we should run to answer our research question:
 
@@ -375,14 +375,14 @@ rent_dag
 
 We get two pieces of information here
 
-This tells us that to estimate for the *direct* effect of `sqmt` on `price`, we would also need to include EPC and Rooms, but we aren't interested in just the direct effect. For clarity, the *direct* effect would be the effect of adding extra square meters to a property not including the fact that this will likely influence the number of rooms, the EPC, the tax band, etc. Instead, based on our research question we want to understand what would happen to `price` if we increased a property by, say, 10 square meters, and all the different ways those extra 10 m result in a change in price. So we want the *total* effects. For that, `check_dag()` has suggested that the initial model is correctly specified, where our initial model was `price ~ sqmt`.
+This tells us that to estimate for the *direct* effect of `FloorArea` on `Price`, we would also need to include EPC and Rooms, but we aren't interested in just the direct effect. For clarity, the *direct* effect would be the effect of adding extra square meters to a property not including the fact that this will likely influence the number of rooms, the EPC, the Tax band, etc. Instead, based on our research question we want to understand what would happen to `Price` if we increased a property by, say, 10 square meters, and all the different ways those extra 10 m result in a change in Price. So we want the *total* effects. For that, `check_dag()` has suggested that the initial model is correctly specified, where our initial model was `Price ~ FloorArea`.
 
 ## 4. Fit an appropriate model.
 
 Let's run that model:
 
 ```{r}
-rent_causal_mod <- lm(price ~ sqmt, data = abdn)
+rent_causal_mod <- lm(Price ~ FloorArea, data = abdn)
 ```
 
 ## 5. Diagnose the model and check assumptions.
@@ -397,13 +397,12 @@ par(mfrow = c(1,1))
 
 Most of the diagnostics look ok. Not great, but maybe just about good enough to work with, with the exception of the Residuals vs Leverage plot.
 
-
 As for the predictive model, decide how you want to deal with the Residuals vs Leverage plot and rerun your analysis if necessary.
 
 ```{r, include = F}
 # If your row numbers are different to mine, make sure you re-loaded the data in before starting with the causal model
-abdn_trimmed <- abdn[-c(55, 79, 112),]
-rent_causal_mod <- lm(price ~ sqmt, data = abdn_trimmed)
+abdn_trimmed <- abdn[-c(73),]
+rent_causal_mod <- lm(Price ~ FloorArea, data = abdn_trimmed)
 # Diagnostics now look good.
 ```
 
@@ -419,60 +418,60 @@ And plot:
 
 ```{r}
 fake <- data.frame(
-  sqmt = seq(from = min(abdn$sqmt), to = max(abdn$sqmt), length.out = 10)
+  FloorArea = seq(from = min(abdn$FloorArea), to = max(abdn$FloorArea), length.out = 10)
 )
 preds <- predict(rent_causal_mod, newdata = fake, se.fit = TRUE)
 fake$fit <- preds$fit
 fake$low <- preds$fit - preds$se.fit * 1.96
 fake$upp <- preds$fit + preds$se.fit * 1.96
 ggplot(fake) +
-  geom_ribbon(aes(x = sqmt, ymin = low, ymax = upp), fill = "lightgrey", alpha = 0.7) +
-  geom_line(aes(x = sqmt, y = fit)) +
+  geom_ribbon(aes(x = FloorArea, ymin = low, ymax = upp), fill = "lightgrey", alpha = 0.7) +
+  geom_line(aes(x = FloorArea, y = fit)) +
   labs(x = "Square meters of property",
        y = "Predicted rent") +
   theme_bw()
 ```
 
-So what we learn is that for every additional meter square "added" the rent increases by roughly £8.50. So long as we assume that our DAG is accurate (a potentially big assumption), this £8.50 increase is the *causal* effect of square meters on rent.
+So what we learn is that for every additional meter square "added" the rent increases by roughly £7.90. So long as we assume that our DAG is accurate (a potentially big assumption), this £7.90 increase is the *causal* effect of square meters on rent.
 
-Compare that with our predictive model that found "adding" an extra square meter to a property would increase the price by £2.30. At the time, we noted that £2.30 seemed on the "cheap" side and the reason for the predictive modelling estimating it as being "cheap" was because, according to out DAG, m$^2$ was confounded by the number of rooms in a flat. To be clear, that confounding didn't matter for the first model because our aim was to make predictions, not to understand the causal effect.
+Compare that with our predictive model that found "adding" an extra square meter to a property would increase the Price by £0.51. At the time, we noted that £0.51 seemed on the "cheap" side and the reason for the predictive modelling estimating it as being "cheap" was because, according to out DAG, m$^2$ was confounded by the number of rooms in a flat. To be clear, that confounding didn't matter for the first model because our aim was to make predictions, not to understand the causal effect.
 
-# What is the causal effect of EPC on price?
+# What is the causal effect of EPC on Price?
 
-Repeat the above process, but where our research question is focused on understanding the causal effect of EPC on price.
+Repeat the above process, but where our research question is focused on understanding the causal effect of EPC on Price.
 
 Because we're doing a new analysis, be sure to re-load the data before proceeding.
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # This is the same DAG as above. Nothing actually changes in the DAG even though our research question has.
 rent_dag <- check_dag(
-  price ~ rooms + sqmt + tax + epc,
-  rooms ~ sqmt,
-  epc ~ sqmt,
-  tax ~ sqmt,
-  exposure = "epc",
-  outcome = "price"
+  Price ~ rooms + FloorArea + Tax + EPC,
+  rooms ~ FloorArea,
+  EPC ~ FloorArea,
+  Tax ~ FloorArea,
+  exposure = "EPC",
+  outcome = "Price"
 )
 
 rent_dag
-# To estimate the causal effect of EPC, we need to include sqmt in the model:
-epc_mod <- lm(price ~ epc + sqmt, data = abdn)
+# To estimate the causal effect of EPC, we need to include FloorArea in the model:
+EPC_mod <- lm(Price ~ EPC + FloorArea, data = abdn)
 # Check diagnostics:
-plot(epc_mod) # No issues with this model
-summary(epc_mod)
-plot(ggpredict(epc_mod, terms = "epc"))
+plot(EPC_mod) # No issues with this model
+summary(EPC_mod)
+plot(ggpredict(EPC_mod, terms = "EPC"))
 # The causal effects seem to be all over the place. This either suggests that the DAG may be more complex than I've assumed, or we need more data to estimate this relationship properly.
 
-# Note that we do not interpret sqmt in this model. sqmt is included simply to deal with confounded relationships, so under this version of the model is it now confounded. If we did interpret sqmt from this model we would be falling into the "Table 2 Fallacy".
+# Note that we do not interpret FloorArea in this model. FloorArea is included simply to deal with confounded relationships, so under this version of the model is it now confounded. If we did interpret FloorArea from this model we would be falling into the "Table 2 Fallacy".
 
 # As an example of how drawing a DAG can be challenging, below is a more fleshed out version of the DAG that has had more thought given to it:
 better_dag <- check_dag(
-  Price ~ Rooms + Sqmt + Tax + EPC + PropertyType,
-  Rooms ~ Sqmt + PropertyAge,
-  EPC ~ Sqmt + PropertyAge,
+  Price ~ Rooms + FloorArea + Tax + EPC + PropertyType,
+  Rooms ~ FloorArea + PropertyAge,
+  EPC ~ FloorArea + PropertyAge,
   Tax ~ HistoricPrice,
-  HistoricPrice ~ PropertyAge + PropertyType + Rooms + Sqmt,
-  Sqmt ~ PropertyAge + PropertyType,
+  HistoricPrice ~ PropertyAge + PropertyType + Rooms + FloorArea,
+  FloorArea ~ PropertyAge + PropertyType,
   exposure = "EPC",
   outcome = "Price"
 )
@@ -480,11 +479,11 @@ better_dag <- check_dag(
 plot(better_dag)
 better_dag
 # Which tells us that we'd one of the following models:
-# Rent ~ EPC + PropertyType + Rooms + Sqmt + Tax
-# Rent ~ EPC + HistoricPrice + PropertyType + Rooms + Sqmt
-# Rent ~ EPC + PropertyAge + Sqmt
+# Rent ~ EPC + PropertyType + Rooms + FloorArea + Tax
+# Rent ~ EPC + HistoricPrice + PropertyType + Rooms + FloorArea
+# Rent ~ EPC + PropertyAge + FloorArea
 
-# The easiest of which would be the first, given PropertyType is the easiest variable to collect (property age is difficult, and historic price may well beimpossible to get). The means that unless we get PropertyType, we can't currently understand the causal effect of EPC with the data as is. This is a nice example of where doing the DAG *before* data collection helps to prevent headaches later on by identifying which variables to collect!
+# The easiest of which would be the first, given PropertyType is the easiest variable to collect (property age is difficult, and historic Price may well beimpossible to get). The means that unless we get PropertyType, we can't currently understand the causal effect of EPC with the data as is. This is a nice example of where doing the DAG *before* data collection helps to prevent headaches later on by identifying which variables to collect!
 ```
 
 # Assumption table

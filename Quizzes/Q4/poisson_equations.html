@@ -11,9 +11,9 @@
 
 <meta name="author" content="Deon Roos" />
 
-<meta name="date" content="2024-10-11" />
+<meta name="date" content="2024-10-27" />
 
-<title>Equations</title>
+<title>poisson equation</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -350,39 +350,42 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Equations</h1>
+<h1 class="title toc-ignore">poisson equation</h1>
 <h4 class="author">Deon Roos</h4>
-<h4 class="date">2024-10-11</h4>
+<h4 class="date">2024-10-27</h4>
 
 </div>
 
 
-<p>Question:</p>
-<p>For a linear model with a categorical variable which includes the
-category group, with levels “A1”, “A2”, “A3” and “A4”, which of the
-following corresponds to the equivalent equation for the code lm(y ~
-group, data = my_data)?</p>
-<p>Answer 1 (Correct):</p>
-<p><span class="math inline">\(y_i \sim Normal(\mu_i,
-\sigma)\)</span></p>
-<p><span class="math inline">\(\mu_i = \beta_0 + \beta_1 \times A2_i +
-\beta_2 \times A3_i + \beta_4 \times A4_i\)</span></p>
-<p>Answer 2:</p>
-<p><span class="math inline">\(y_i \sim Normal(\mu_i,
-\sigma)\)</span></p>
-<p><span class="math inline">\(\mu_i = \beta_0 + \beta_1 \times A1_i +
-\beta_2 \times A2_i + \beta_4 \times A3_i\)</span></p>
-<p>Answer 3:</p>
-<p><span class="math inline">\(y_i \sim Normal(\mu_i,
-\sigma)\)</span></p>
-<p><span class="math inline">\(\mu_i = \beta_0 + \beta_1 \times A1_i +
-\beta_2 \times A2_i + \beta_4 \times A3_i + \beta_5 \times
-A4_i\)</span></p>
-<p>Answer 4:</p>
-<p><span class="math inline">\(y_i \sim Normal(\mu_i,
-\sigma)\)</span></p>
-<p><span class="math inline">\(\mu_i = \beta_0 \times A1_i + \beta_1
-\times A2_i + \beta_2 \times A3_i + \beta_4 \times A4_i\)</span></p>
+<ol style="list-style-type: upper-alpha">
+<li></li>
+</ol>
+<p><span class="math inline">\(Y_i \sim Poisson(\lambda_i)\)</span></p>
+<p><span class="math inline">\(log(\lambda_i) = log(\beta_0 + \beta_1
+\times X_i)\)</span></p>
+<hr>
+<ol start="2" style="list-style-type: upper-alpha">
+<li></li>
+</ol>
+<p><span class="math inline">\(Y_i \sim Poisson(\lambda_i)\)</span></p>
+<p><span class="math inline">\(log(\lambda_i) = \beta_0 + \beta_1 \times
+X_i\)</span></p>
+<hr>
+<ol start="3" style="list-style-type: upper-alpha">
+<li></li>
+</ol>
+<p><span class="math inline">\(log(Y_i) \sim
+Poisson(\lambda_i)\)</span></p>
+<p><span class="math inline">\(\lambda_i = \beta_0 + \beta_1 \times
+X_i\)</span></p>
+<hr>
+<ol start="4" style="list-style-type: upper-alpha">
+<li></li>
+</ol>
+<p><span class="math inline">\(log(Y_i) \sim Normal(\mu_i,
+\sigma^2)\)</span></p>
+<p><span class="math inline">\(\mu_i = \beta_0 + \beta_1 \times
+X_i\)</span></p>
 
 
 

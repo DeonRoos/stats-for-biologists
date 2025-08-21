@@ -479,7 +479,7 @@ Once we've identified the rows we're interested in (the simplest but least elega
 
 
 ```{r}
-ali[20,]
+ali[30,]
 ```
 
 To make life a bit easier for ourselves, we can use these square brackets in combination with the conditional statement to extract the entire row for the alligator that's `r max(ali$length)` cm long. In this case, the `TRUE` and `FALSE` values act as indicators for which rows we want to display. If a value is `TRUE`, it means we want to see that row; if it's `FALSE`, we don't. We can achieve this by writing:
@@ -605,7 +605,7 @@ ali$bite[20] <- ali$bite[20] / 100
 
 ## Question Set Five
 
-1. Resolve the data entry mistake for `ali$length`. Be sure to add a clear comment indicating that you have made this change, so that if anyone reviews your code, they understand the reason for the modification and don't suspect any foul play.
+Question 1. Resolve the data entry mistake for `ali$length`. Be sure to add a clear comment indicating that you have made this change, so that if anyone reviews your code, they understand the reason for the modification and don't suspect any foul play.
 
 ```{r, include=answer_sheet, class.source="bg-success"}
 # Correcting missing decimal point
@@ -613,13 +613,13 @@ ali$bite[20] <- ali$bite[20] / 100
 ali$length[20] <- ali$length[20] / 10
 ```
 
-2. Having made any changes to your data, it's always worthwhile checking it again to make sure you did not create a new mistake. Do so now using any techniques you feel are appropriate.
+Question 2. Having made any changes to your data, it's always worthwhile checking it again to make sure you did not create a new mistake. Do so now using any techniques you feel are appropriate.
 
 ```{r, include=answer_sheet, class.source="bg-success"}
 summary(ali)
 ```
 
-# Do it for real
+# Do it for Real
 
 Within MyAberdeen, there is an additional dataset called `animal_speed.txt`. Your objective here is to try and find all the data entry mistakes. This dataset is more challenging than the alligator one, with some issues being harder to detect. Additionally, the dataset is fairly large, making it impractical to manually search for errors. To help you out, here are some hints:
 
@@ -735,13 +735,14 @@ str(fast)
 unique(fast$species)
 fast$weight[fast$weight < quantile(fast$weight, probs = 0.01)]
 
-# Problems identified from initial exploration: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Problems identified from initial exploration: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 1. One weight observation is 0 g
 # 2. One weight observation is 3 g
 # 3. Species named "Peregrin Took" instead of "Peregrine Falcon"
-# 4. There is an extremely high speed value (33346.0 km/h) for a Peregrine Falcon
+# 4. There is an extremely high speed value (33346.0 km/h) for a 
+# Peregrine Falcon
 # 5. There is a missing value (NA) in the speed column
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Problem 1: Investigate the weight observation that is 0 g
 # Identify rows where weight is 0
@@ -770,8 +771,9 @@ fast$species[fast$species == "Peregrin Took"] <- "Peregrine Falcon"
 # Characters can be converted into factors. In many cases it doesn't make a
 # difference, but it can be harder to correct factors compared to characters.
 # A general rule, leave strings as characters until you're confident they are
-# "correct", and then convert to factors if you really want "factors" but 
-# in general there's rarely any downsides to leaving them as characters.
+# "correct" (a "string" is a sequence of characters, e.g. "hello" or "A24"), 
+# and then convert to factors if you really want "factors" but in general 
+# there's rarely any downsides to leaving them as characters.
 fast$species <- factor(fast$species)
 
 # Problem 4: Investigate the extremely high speed value (35711 km/h)
@@ -797,22 +799,25 @@ summary(fast)
 
 If you haven't done so already, have a look at the instructions with the answers which contains what the actual values should be for four of the five data issues that you identified. Correct those values now (either using the code provided in the answer or create your own solution - there are multiple ways to correct the data here) then answer the following questions:
 
-1. What is the median weight in this dataset?
+Question 1. What is the median weight in this dataset?
 
 ```{r, include=answer_sheet, eval = answer_sheet, class.source="bg-success"}
 median(fast$weight)
+# The median weight is 46441 grams, or 46.4 kg
 ```
 
-2. What is the median speed in this dataset?
+Question 2. What is the median speed in this dataset?
 
 ```{r, include=answer_sheet,eval = answer_sheet, class.source="bg-success"}
 median(fast$speed, na.rm = TRUE)
+# The median speed is 102 km/h
 ```
 
-3. Which species is most common in this dataset?
+Question 3. Which species is most common in this dataset?
 
 ```{r, include=answer_sheet,eval = answer_sheet, class.source="bg-success"}
 # We can use the table() function to answer this but lots of different ways
 table(fast$species)
+# Most observations are of Saiga Antelope
 ```
 

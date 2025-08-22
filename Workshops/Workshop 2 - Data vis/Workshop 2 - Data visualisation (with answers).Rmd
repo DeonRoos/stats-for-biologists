@@ -377,15 +377,6 @@ Frequency histograms are useful for visualising the distribution of data. The hi
 
 Create a histogram using the boto length data (you did this in Question Set Two, Question 4). We can improve the appearance of the graph by adding outlines to the bars, adding labels for the axes.
 
-```{r}
-mboto <- boto[boto$sex == "Male",]
-fboto <- boto[boto$sex == "Female",]
-
-boto |> 
-  group_by(sex) |> 
-  summary(boto)
-```
-
 <!-- Initially, do not separate the male and female dolphins. -->
 
 ```{r}
@@ -436,7 +427,7 @@ ggplot(boto) +
        y = "Frequency")
 ```
 
-Remember those violin plots from earlier, they're basically just density plots.
+Remember those violin plots from earlier? They're basically just density plots rotated onto their side and split by whichever factor you add to the x-axis.
 
 # The Good and The Bad
 
@@ -597,38 +588,68 @@ ggplot(abdn) +
 
 Below are a series of figures seen "out in the wild". Have a look through them and consider what works, what doesn't work, and why they have made the decisions they have when producing that figure. Also give some thought to how you might create these figures in `ggplot2`.
 
-## Doubling time
+## THe Y-AxIs!1!
 
 ![](Figures/LondonBus.jpg){width="400px"}
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # This figure made a lot of people really angry online, mostly due to the y-axis. Note how the y-axis ranges from -50% to +100%? That's because the values have been logged transformed, which people argued made it exaggerate the differences.
 
-# In truth, it's actually a pretty clever y-axis. 100% represents a doubling in the number of buses; Increasing the number of buses from 5 to 10 is a 100% increase - the number has doubled. Going from 10 to 5, however, is a -50% decrease - the number has halved.
+# In truth, it's actually a pretty clever y-axis. 100% represents a doubling in the number of buses; Increasing the number of buses from 5 to 10 is a 100% increase - the number has doubled. Going from 10 to 5, however, is a -50% decrease - the number has halved. Doing it this way makes your natural interpretation of the lines appropriate. Had they not made this change the figure *would have exaggerated* the apparent (lack of) difference.
 
-# People get super agitated by y-axes, especially when the bottom is not set to zero. Honestly? I don't care. There are times when it's entirely appropriate to do that, other times when it's not. But I really dislike when people seem to treat it as the *rule* is that there is only ever a singularly correct way to set up a figure. There's not. Use your brain. Think what the best way is to visualise your data and do that.
+# People get super annoyed by y-axes, especially when the bottom is not set to zero. Honestly? I don't care. There are times when it's entirely appropriate to do that, other times when it's not. But I dislike it when people treat it as though there is some *rule* that there is only a singularly correct way to set up a figures axes. There's not. Use your brain. Think what the best way is to visualise your data and do that.
 
-# As a small side note, the Financial Times uses ggplot2 to produce their figures and have their own theme (ftplottools).
+# As a small side note, the Financial Times (the newspaper that made this figure) uses ggplot2 to produce their figures and even have their own ggplot theme (ftplottools).
 ```
 
-## Are you happy?
+## Are you even happy?
 
 ![](Figures/Happy.jpg){width="400px"}
 
-```{r}
-# A clearly silly figure. The bars here are just the order. So Finland is the "happiest" country in the world, while New Zealand is the 10th happiest. At this point, you've made a glorified list.
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# Ok, so an obviously dumb figure. The bars here are just the order. So Finland is the "happiest" country in the world, ranked at 1, while New Zealand is the 10th happiest. At this point, the figure is an overly complicated and glorified list.
 
-# More subtly, I'm always super skeptical of these kinds of "happiness" ratings. I have no idea how happy I am; am I a 10 out of 10 today or a 9 out of 10? Have I ever truly had a 0 out of 10? Would me and you give the same score if we had the same "happiness"? Maybe your 10/10 is my 5/10. What if I'm just having an off day and I'm pissed off? How many people do you ask to figure out happiness?
+# More subtly, I'm always super sceptical of these kinds of "happiness" ratings and similar measurements. I have no idea how happy I am; am I a "10 happiness out of 10 potential happiness" today or am I feeling more like a 9.2 out of 10? Have I ever truly had a 0 out of 10? Would you and I give the same "happiness score" if we had the same "happiness"? Maybe I'm a nihilist and your 5/10 is my 10/10. What if I'm just having an off day and I'm pissed off but I'm normally super chirpy? How many people do you ask to figure out happiness? Five? A million?
 
-# Point is that the data underlying this figure is most likely nonsense. At least, it doesn't pass *my* assumption of validity check.
+# The point I'm making here is that the *data* underlying this figure is most likely nonsense. At least, it doesn't pass *my* assumption of validity check.
 ```
 
-## Vaccines for me but not for thee
+## Birds and light
 
-![](Figures/Vaccine.jpg)
+![](Figures/Birds.png)
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# This comes from a paper published in Science (one of the most prestigious journals you can publish in) and it has some pretty poor choices from a data visualisation perspective.
 
-```{r}
-# So I don't know what point the creator of this figure was trying to make, but if we ignore that and just consider the way the information is visualised, then there are some issues we might want to correct.
+# 1. Remember from the lecture that people really struggle to accurately interpret stacked bars. In this figure, can you tell if there is a difference in "Unfiltered detections" (the darker orange bars) in Aug 2023 and Sep 2023? I have no idea. I genuinely can't tell. Maybe? 
 
-# First the y-axis are 
+# What about the bars labelled "Response variable"? I wouldn't blame you if you didn't even see notice this in the bars. 
+
+# Overall, the only thing I can really say about the data from this figure is that there was some sort of "trend" over time in observations. What's the point then? Why bother with the colours?
+
+# 2. The colours probably aren't colour blind friendly. It costs nothing to make them friendly and takes seconds to change, so why risk it?
+
+# 3. The x-axis is overly annotated. Why not just have the start, middle and end date shown? It's so cluttered right now that it's actually pretty hard to say which month each bin represents. I'm pretty sure I know the answer, and I think it's because the author had date as a factor in R, which means each month is printed out. (You can have "date" as a data type in R that would have fixed this).
+
+# How I'd make this figure:
+# I'd use points showing the number of observations, with each "group" (i.e. "Response variable") connected by a line. I'd then split the figure into three smaller ones, one for each group. And in each of these smaller figures, the y-axis would have a different scale so that you could see the trend for Response variable.
 ```
+
+## Marmosets and ketamine (?!)
+
+![](Figures/Ketamine.png)
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# This is another figure from Science from a study that was apparently looking at giving ketamine to marmosets (I have no idea why...) and it's vile.
+
+# 1. The hell is with the weird 1990's colour/pattern theme?? Who was like - "Yeaaaaaah bruh, this looks siiiiiiick dude".
+
+# 2. Abbreviations in figures are rarely a good idea. Great figures don't need a legend or a paper to make sense of. You can see them in complete isolation and they make total sense. Do you know what the "change in total response" is? What about "Sal/Veh"? Make it make sense...
+
+# 3. All the randomly shaped points. What do they mean? Why are some filled and others empty? Are those all the observations they had, cause if so... what's that? Like 10 observations? Get outta here with that.
+
+# 4. The bars are completely unnecessary here and probably misleading. What the authors are trying to show are specific values (called "point estimates"). For example, the category "Sal/DCZ" is estimated at roughly -50 on the y-axis. That's the value that's important. By using a bar you're implying there was also a -49, and -48, and -47, all the way to 0. That's not the case. It's -50. Just -50.
+
+# How I'd make this figure
+# I'd use points for the estimated values instead of bars. I probably wouldn't add points to show the data, but if I did, I'd make those points much smaller (and be consistent). I'd write the full category name and rotate them 90 degrees so it would fit in. (I'd also get rid of the P-value "bars" and asterisk's (the *) at the top of the figure but I'll explain why later in the course).
+```
+

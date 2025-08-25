@@ -72,9 +72,9 @@ write.table(reef, here("Workshops/Workshop 8 - LM with interactions/Data", "reef
 
 For this last workshop on incorporating explanatory variables in linear models, we're going to be using a dataset from a study set in the coral reef ecosystems of the "Coral Triangle", a biodiversity hotspot located in the Indo-Pacific region (called `reef.txt` on MyAberdeen). The data includes:
 
-- Shark Density: Tiger shark (*Galeocerdo cuvier*) density, estimated using underwater visual surveys conducted by divers along transects at each site. Densities were recorded as the number of sharks observed per square kilometer.
-- Reef Complexity: Reef complexity was assessed using a "standardized structural complexity index", which incorporates how much area is covered by coral, "rugosity" (i.e. surface roughness), and habitat diversity. Higher scores represent more structurally complex reefs.
-- Fish Biomass Change: Fish biomass change was measured as the net difference in biomass (kg/m$^2$) over a six-month period using underwater cameras. Changes could be positive (population growth) or negative (population decline).
+-   Shark Density: Tiger shark (*Galeocerdo cuvier*) density, estimated using underwater visual surveys conducted by divers along transects at each site. Densities were recorded as the number of sharks observed per square kilometer.
+-   Reef Complexity: Reef complexity was assessed using a "standardized structural complexity index", which incorporates how much area is covered by coral, "rugosity" (i.e. surface roughness), and habitat diversity. Higher scores represent more structurally complex reefs.
+-   Fish Biomass Change: Fish biomass change was measured as the net difference in biomass (kg/m$^2$) over a six-month period using underwater cameras. Changes could be positive (population growth) or negative (population decline).
 
 Our research objective (or question) is to *predict* fish biomass change as shark density and reef complexity change.
 
@@ -96,9 +96,9 @@ $\mu_i = \beta_0 + \beta_1 \times shark_i + \beta_2 \times reef_i$
 
 Where:
 
-- $\beta_0$ is the intercept, representing the change in biomass when there are no sharks and reef complexity is zero.
-- $\beta_1$ is the slope for each additional tiger shark density.
-- $\beta_2$ is the slope for each additional reef complexity measure.
+-   $\beta_0$ is the intercept, representing the change in biomass when there are no sharks and reef complexity is zero.
+-   $\beta_1$ is the slope for each additional tiger shark density.
+-   $\beta_2$ is the slope for each additional reef complexity measure.
 
 Let's run the model:
 
@@ -118,10 +118,10 @@ par(mfrow = c(1,1))
 
 ## Question Set One
 
-1. Do any assumptions cause concern?
+1.  Do any assumptions cause concern?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# Yes, the residuals vs fitted plot seems to have a slightly weird pattern. Here, it's indicating that either the assumption of validity or additivity are possibly violated.
+# Yes, the residuals vs fitted plot seems to have a slightly weird pattern. Here, it's indicating that either the assumption of linearity or additivity are possibly violated.
 # The other plots look ok.
 ```
 
@@ -135,19 +135,19 @@ summary(bio_mod)
 
 ## Question Set Two
 
-1. How much does predicted biomass change for each additional shark density?
+1.  How much does predicted biomass change for each additional shark density?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# By 3.2 kg for each additional density
+# By 3.2 kg for each additional increase in shark density (individuals per transect)
 ```
 
-2. How much does predicted biomass change for each additional reef complexity measure?
+2.  How much does predicted biomass change for each additional reef complexity measure?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# By 7.1 kg for each additional reef complexity
+# By 7.1 kg for each additional increase in reef complexity
 ```
 
-3. How much do you predict biomass would change, if shark density was 5 and reef complexity was 0.1? What about if there were 10 sharks and reef complexity was 0.1?
+3.  How much do you predict biomass would change, if shark density was 5 and reef complexity was 0.1? What about if there were 10 sharks and reef complexity was 0.1?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # We can either do this by hand, or use R. Using R, we'd do this using:
@@ -162,7 +162,7 @@ new_reef <- 0.1
 # We'd predict biomass would change by: 5.67519 kg under these conditions
 ```
 
-4. From your answer to Q3, what does going from five to ten sharks do for predicted biomass?
+4.  From your answer to Q3, what does going from five to ten sharks do for predicted biomass?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # Having an extra five sharks (from five to ten) apparently increases biomass by roughly 16 kg
@@ -180,7 +180,7 @@ plot(preds)
 
 ## Question Set Three
 
-1. How would you explain the apparent result where sharks cause biomass to *increase*?
+1.  How would you explain the apparent result where sharks cause biomass to *increase*?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # It's kind of hard to think why adding predators would increase the number of prey. But not impossible. Maybe it's because adding more predators cause some kind of trophic cascade, or some kind of "landscape of fear" effect, shifts in species compositions, compensatory breeding by prey, etc, etc,.
@@ -202,13 +202,13 @@ where we have the same "main effects" of shark and reef, but now include the mul
 
 `biomass_change ~ shark_density * reef_complexity`
 
-which is exactly the same as above, except that we have a more condensced version of the code.
+which is exactly the same as above, except that we have a more condensed undefined ndefinedndef
 
 No matter how we specify the interaction, the resulting statistical notation for this model takes the same form.
 
 ## Question Set Four
 
-1. Complete the following equation to include the statistical notation:
+1.  Complete the following equation to include the statistical notation:
 
 $biomass_i \sim Normal(\mu_i, \sigma)$
 
@@ -216,10 +216,10 @@ $\mu_i = \beta_0 + \beta_1 \times shark_i + \beta_2 \times reef_i + (\underline{
 
 Where:
 
-- $\beta_0$ is the intercept, representing the change in biomass when there are no sharks and reef complexity is zero.
-- $\beta_1$ is the slope for each additional tiger shark density.
-- $\beta_2$ is the slope for each additional reef complexity measure.
-- $\beta_3$ is combined (or interacting) slope for both sharks and reef complexity.
+-   $\beta_0$ is the intercept, representing the change in biomass when there are no sharks ($shark = 0$) and reef complexity is zero ($reef = 0$).
+-   $\beta_1$ is the "partial" slope for each additional tiger shark density (partial because this applies when reef complexity is held constant).
+-   $\beta_2$ is the "partial" slope for each additional reef complexity measure (partial because this applies when reef complexity is held constant).
+-   $\beta_3$ is the interaction, in this case the change in the shark slope per one-unit increase in reef complexity (and symmetrically, the change in the reef slope per one-unit increase in shark density).
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # The completed equation is:
@@ -248,13 +248,13 @@ par(mfrow = c(1,1))
 
 ## Question Set Five
 
-1. Does the model with the interaction resolve the concerns we had from the model with only main effects?
+1.  Does the model with the interaction resolve the concerns we had from the model with only main effects?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # Yes - the diagnostics look excellent now. This would give some evidence that the first model was violating the assumption of additivity.
 ```
 
-2. Does meeting these assumptions make a model inherently trustworthy?
+2.  Does meeting these assumptions make a model inherently trustworthy?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # No, it just means we've not been able to find any issues related to residual errors, plus we can't check for hidden assumptions with these plots.
@@ -268,25 +268,25 @@ summary(bio_mod)
 
 ## Question Set Six
 
-1. What does the intercept (`(Intercept)`, or $\beta_0$) represent now?
+1.  What does the intercept (`(Intercept)`, or $\beta_0$) represent now?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # Our intercept still represents the predicted biomass change when there are zero sharks and reef complexity is zero.
 ```
 
-2. What does the interaction (`shark_density:reef_complexity`, or $\beta_3$) represent?
+2.  What does the interaction (`shark_density:reef_complexity`, or $\beta_3$) represent?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # This is our interaction, which is the combined effect of both shark density and reef complexity changing, beyond the simple "main effects". This tells you how much you would predict biomass will change as *both* shark density and reef complexity change.
 ```
 
-3. Do we still find that increasing shark density has a positive effect on biomass?
+3.  Do we still find that increasing shark density has a positive effect on biomass?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # No, we get something that seems far more intuitive and requires fewer mental gymnastics to explain. Predators eat prey. The more predators the less prey. Just that simple.
 ```
 
-4. What does the interaction being positive tell you about the system?
+4.  What does the interaction being positive tell you about the system?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # It suggests that the negative impact of sharks on prey biomass is reduced in more complex reefs, which we might interpret as meaning the more places there are for prey to hide, the less "effective" sharks are at catching prey.
@@ -300,25 +300,25 @@ When visualising how different combinations of explanatory variable values affec
 
 The `expand.grid()` function in `R` is used to generate a data frame from all possible combinations of the supplied variables. It's particularly useful when you want to create a grid of predictor values to simulate and visualize interactions. How does it work? Well, imagine you have two variables:
 
-* Shark Density (e.g., `shark_density`)
-* Reef Complexity (e.g., `reef_complexity`)
+-   Shark Density (e.g., `shark_density`)
+-   Reef Complexity (e.g., `reef_complexity`)
 
 We want to visualise how the interaction between these two variables affects a response, such as biomass change. To do this, you need to create a dataset with all combinations of values for these predictors.
 
 Here’s how `expand.grid()` helps:
 
-1. *Create Sequences of Values*: First, define the range of values for each predictor. For example, a sensible range for shark density would be from the minimum shark density to the maximum. And the same for reef complexities. You can use the `seq()` function to generate these sequences.
+1.  *Create Sequences of Values*: First, define the range of values for each predictor. For example, a sensible range for shark density would be from the minimum shark density to the maximum. And the same for reef complexities. You can use the `seq()` function to generate these sequences. By using `length.out =` we can say how many values we want the sequence to produce.
 
 ```{r}
 shark_density_seq <- seq(from = min(reef$shark_density), 
                          to = max(reef$shark_density), 
-                         by = 1)
+                         length.out = 20)
 reef_complexity_seq <- seq(from = min(reef$reef_complexity), 
                          to = max(reef$reef_complexity), 
-                         by = 1)
+                         length.out = 20)
 ```
 
-2. *Generate Combinations*: Use `expand.grid()` to create a data frame that contains every possible combination of these sequences. Note that it's important that your variables are named the same as in the original dataset.
+2.  *Generate Combinations*: Use `expand.grid()` to create a data frame that contains every possible combination of these sequences. Note that it's important that your variables are named the same as in the original dataset.
 
 ```{r}
 fake <- expand.grid(
@@ -329,9 +329,9 @@ fake <- expand.grid(
 
 In this example:
 
-* `shark_density` takes on each value from `shark_density_seq`.
-* `reef_complexity` takes on each value from `reef_complexity_seq`.
-* `expand.grid()` produces a data frame where each row represents a unique combination of both of these variables.
+-   `shark_density` takes on each value from `shark_density_seq`.
+-   `reef_complexity` takes on each value from `reef_complexity_seq`.
+-   `expand.grid()` produces a data frame where each row represents a unique combination of both of these variables.
 
 If you want to see what this `fake` dataset looks like run `head(fake)`.
 
@@ -350,6 +350,8 @@ ggplot(fake) +
 ```
 
 Plotting it now allows us to see the interaction. We can see that the greatest biomass occurs at high reef complexity and also high shark density, which we will now need to try and rationalise (without "HARKing", or pretending that we always thought this result was going to be the case) which this might be the case.
+
+> If you do find a result that you did not expect, then any post-hoc explanations should be presented as exploratory (e.g. "we expected X but found Z. Z might make sense if we interpret it like this."), rather than presenting them as if you were always expecting them (e.g. "just as we expected, we find strong evidence of Z").
 
 There are two problems with our figure above. The first is that the blue gradient can be hard to distinguish, so we might want to change to another colour palette.
 
@@ -375,11 +377,11 @@ Having gone through this process, if there's time, analyse the following dataset
 
 The dataset includes:
 
-* Vegetation Cover (continuous, 0-100%): Represents the density of vegetation at different sites.
+-   Vegetation Cover (continuous, 0-100%): Represents the density of vegetation at different sites.
 
-* Proximity to Human Settlements (categorical, 3 levels: "Far", "Near", "Very Near"): Indicates how close each site is to human activity.
+-   Proximity to Human Settlements (categorical, 3 levels: "Far", "Near", "Very Near"): Indicates how close each site is to human activity.
 
-* Activity Index (response variable): Reflects differences from an assumed "baseline activity level" observed in elephants present in an undisturbed, dense vegetation area. Negative values suggest reduced activity relative the this undisturbed locations, while positive values indicate an increase in activity.
+-   Activity Index (response variable): Reflects differences from an assumed "baseline activity level" observed in elephants present in an undisturbed, dense vegetation area. Negative values suggest reduced activity relative to the undisturbed locations, while positive values indicate an increase in activity.
 
 ```{r, echo = FALSE}
 set.seed(2024)
@@ -511,16 +513,14 @@ plot(preds)
 # This may indicate that elephants attempt to avoid conflict with humans.
 ```
 
-
 # Assumption table
 
-
-| **Assumption**                   | **Description**                                                                                             | **Example of Violation**                                                                                                                                       |
-|---------------------------------|-------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1. **Validity**                     | The data is able to answer the research question effectively.                      | Using IQ to measure overall intelligence (what does IQ even measure?).                      |
-| 2. **Representativeness**           | The data reflects the population or group being studied.                              | Using survey data from a rural area to draw conclusions about an urban population. |
-| 3. **Additivity**                   | Effects of predictors are additive and there are no interactions between them.         | Assuming that study hours and sleep hours independently affect exam scores without considering their combined effect (imagine a Venn diagram with study and sleep overlapping). |
-| 4. **Linearity**                   | The relationship between predictors and the outcome is linear.                                   | Assuming plant growth will continue to increase indefinitely without ever levelling out.          |
-| 5. **Independence of Errors**       | Observations are independent of each other. (Related to residual errors.)                                                       | If modelling height, the data come from the same group of children over time.               |
-| 6. **Equal Variance of Errors**     | Residuals have constant variance across all levels of predictors ("homoscedasticity"). (Related to residual errors.)  | If modelling income, variability in salaries is not the same across all levels of a company’s hierarchy.              |
-| 7. **Normality of Errors**          | Residuals should be normally distributed.  (Related to residual errors.)                         | If modelling income, the presence of any extremely wealthy individuals will be hard for the model to understand and explain.     
+| **Assumption** | **Description** | **Example of Violation** |
+|---------------|-----------------------|-----------------------------------|
+| 1\. **Validity** | The data is able to answer the research question effectively. | Using IQ to measure overall intelligence (what does IQ even measure?). |
+| 2\. **Representativeness** | The data reflects the population or group being studied. | Using survey data from a rural area to draw conclusions about an urban population. |
+| 3\. **Additivity** | Effects of predictors are additive and there are no interactions between them. | Assuming that study hours and sleep hours independently affect exam scores without considering their combined effect (imagine a Venn diagram with study and sleep overlapping). |
+| 4\. **Linearity** | The relationship between predictors and the outcome is linear. | Assuming plant growth will continue to increase indefinitely without ever levelling out. |
+| 5\. **Independence of Errors** | Observations are independent of each other. (Related to residual errors.) | If modelling height, the data come from the same group of children over time. |
+| 6\. **Equal Variance of Errors** | Residuals have constant variance across all levels of predictors ("homoscedasticity"). (Related to residual errors.) | If modelling income, variability in salaries is not the same across all levels of a company’s hierarchy. |
+| 7\. **Normality of Errors** | Residuals should be normally distributed. (Related to residual errors.) | If modelling income, the presence of any extremely wealthy individuals will be hard for the model to understand and explain. |

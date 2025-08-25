@@ -73,43 +73,44 @@ Another hidden aspect of the data that you may want to consider (and potentially
 One reason predictive modelling is so accessible is that we can throw all of our (sensible) explanatory variables into the model without worrying too much about the underlying relationships (obviously, we wouldn't include the hyperlink as an explanatory variable in the model). But let’s keep it simple today. We’ll include the following predictors:
 
 - **`FloorArea`**: Property size in square meters.
-- **`rooms`**: Total number of rooms (the sum of bedrooms and living rooms).
+- **`Rooms`**: Total number of rooms (the sum of bedrooms and living rooms).
 - **`EPC`**: The property’s energy performance rating (categorical with levels A to G, A being the most energy efficient).
 - **`Tax`**: The council Tax band based on the assumed property value in 1991 (categorical with levels A to G, G being the most expensive).
 
-Notice that we’re using `rooms` in the model, but this variable isn’t in the dataset. You’ll need to create it by adding `beds` and `living` together (i.e., bedrooms and living rooms).
+Notice that we’re using `Rooms` in the model, but this variable isn’t in the dataset. You’ll need to create it by adding `Bedrooms` and `PublicRooms` together (i.e., bedrooms and living rooms).
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = T}
 abdn$rooms <- abdn$Bedrooms + abdn$PublicRooms
 ```
 
-Another thing to note in this dataset are the `EPC` and `Tax` variables. In both of these variables, the underlying "values" are continuous (e.g. the property was worth £100,000 in 1991) but these have been discretised, or converted into groups (e.g. instead of £100,000 it's recorded as `Tax` equal to `a`). 
+Another thing to note in this dataset are the `EPC` and `Tax` variables. In both of these variables, the underlying "values" are continuous (e.g. the property was worth £100,000 in 1991) but these have been discretised, or converted into groups (e.g. instead of being valued at £100,000 in 1991, it's recorded as `Tax` equal to `A`). 
 
 Whenever this discretisation is done, when it comes to the actual model, it can make our life pretty horrible, which you can see when we write out the full notation. In our case, here’s what our model looks like:
 
 $Price_i \sim Normal(\mu_i, \sigma)$
 
-$\mu_i = \beta_0 + \beta_1 \times FloorArea_i + \beta_2 \times rooms_i + \beta_3 \times EPCC_i +$
-$\beta_4 \times EPCD_i + \beta_5 \times EPCE_i + \beta_6 \times EPCF_i + \beta_7 \times EPCG_i +$
-$\beta_8 \times TaxB_i + \beta_9 \times TaxC_i + \beta_{10} \times TaxD_i +$
-$\beta_{11} \times TaxE_i + \beta_{12} \times TaxF_i + \beta_{13} \times TaxG_i$
+$\mu_i = \beta_0 + \beta_1 \times FloorArea_i + \beta_2 \times rooms_i + $
+$\beta_3 \times EPCB_i +\beta_4 \times EPCC_i + \beta_5 \times EPCD_i + $
+$\beta_6 \times EPCE_i + \beta_7 \times EPCF_i + \beta_8 \times EPCG_i +$
+$\beta_9 \times TaxB_i + \beta_10 \times TaxC_i + \beta_{11} \times TaxD_i +$
+$\beta_{12} \times TaxE_i + \beta_{13} \times TaxF_i + \beta_{14} \times TaxG_i$
 
 Where:
 
-- $\beta_0$ is the intercept, representing a property with zero square meters, zero rooms, an EPC of B, and a Tax band of A.
-- $\beta_1$ is the slope for each additional square meter.
+- $\beta_0$ is the intercept, representing a property with zero square meters, zero rooms, an EPC of A, and a Tax band of A.
+- $\beta_1$ is the slope for each additional square meter in floor area.
 - $\beta_2$ is the slope for each additional room.
-- $\beta_{3,...,7}$ are the effects of each EPC rating compared to B.
-- $\beta_{8,...,13}$ are the effects of each Tax band compared to A.
+- $\beta_{3,...,8}$ are the effects of each EPC rating compared to A.
+- $\beta_{9,...,14}$ are the effects of each Tax band compared to A.
 
-As you can see, `EPC` and `Tax` being recorded as categories has made our model stupidly and crazily more complicated than it would otherwise be. If EPC and Tax were continuous variables, we’d need to estimate just *four* parameters instead of 14! 
+As you can see, `EPC` and `Tax` being recorded as categories has made our model stupidly and crazily more complicated than it would otherwise be. If EPC and Tax were continuous variables, we’d need to estimate just *four* parameters instead of 14! In this case, we can't go backwards. The data we have is categorical and we have to respect that.
 
 A general tip: avoid creating categorical variables out of continuous ones when possible — it’ll save you headaches down the road (and often makes your analyses more reliable).
 
 Despite the complexity, running this model in R is straightforward:
 
 ```{r}
-rent_mod <- lm(Price ~ FloorArea + rooms + EPC + Tax, data = abdn)
+rent_mod <- lm(Price ~ FloorArea + Rooms + EPC + Tax, data = abdn)
 ```
 
 Now let’s take a look at the estimated parameters using `summary()`:
@@ -157,7 +158,7 @@ par(mfrow = c(1,1))
 4. Are there any observations that are having a disproportionate affect on the model?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# Yes, a few. We can see these in the Residuals vs. Leverage plot, particularly the rental properties on rows 324 and 329 of our dataset (note that these don’t appear on the plot but are highlighted by the text output).
+# Yes, a few. We can see these in the Residuals vs. Leverage plot, with a few points highlighted by the text output (note that these don’t appear on the plot but are highlighted by the text output).
 ```
 
 5. If there are any such observations, what should we do about them (if in doubt, ask a member of staff)?
@@ -172,7 +173,7 @@ par(mfrow = c(1,1))
 # 3. Rerun the model without these problematic observations and compare the parameter estimates of the two models. If removing them doesn’t drastically change the estimates, you might as well stick with the original model (telling your reader that you've checked both models and showing them both). If it does make a difference, things get more complicated. In that case, you should still report both models but focus on the one you feel is “better.” What “better” means here is up to you; there’s no definitively "right" answer (but not having high leverage might be a sensible measure).
 
 # Here’s how you’d do option 3:
-abdn_trimmed <- abdn[-c(324, 329),]
+abdn_trimmed <- abdn[-c(324, 534),]
 trimmed_rent_mod <- lm(Price ~ FloorArea + rooms + EPC + Tax, data = abdn_trimmed)
 coef(trimmed_rent_mod) # coef() gives just the "coefficients" or parameter estimates
 coef(rent_mod)
@@ -191,7 +192,7 @@ Having removed these and rerun the model (unless your previous checks suggested 
 
 ```{r, echo = FALSE}
 abdn_trimmed <- abdn[-c(324, 329),]
-rent_mod <- lm(Price ~ FloorArea + rooms + EPC + Tax, data = abdn_trimmed)
+rent_mod <- lm(Price ~ FloorArea + Rooms + EPC + Tax, data = abdn_trimmed)
 plot(rent_mod)
 ```
 
@@ -205,7 +206,7 @@ As usual, pull up the summary table:
 summary(rent_mod)
 ```
 
-Pay attention to the `Estimate` for `FloorArea`; the model seems to be predicting that adding an extra 1 square meter to a property only increases the rent by about £0.51. Seems a bit low, right? Do we really think that the difference in Price between a 50 m$^2$ flat and a 100 m$^2$ flat will be just £25.50 extra per month? We'll come back to this after we run the causal version of this model.
+Pay attention to the `Estimate` for `FloorArea`; the model seems to be predicting that adding an extra 1 square meter to a property only increases the rent by about £0.80. Seems a bit low, right? Do we really think that the difference in Price between a 50 m$^2$ flat and a 100 m$^2$ flat will be just £40 extra per month? We'll come back to this after we run the causal version of this model.
 
 Given the number of explanatory variables we have in our predictive model, we'll use `ggeffects` to do the plotting, though you can definitely do this manually if you prefer more control (see the instructions with answers to see how to do that).
 
@@ -232,7 +233,7 @@ We get the same message that we saw previously, where `ggeffects` isn't terribly
 
 fake <- data.frame(
   FloorArea = seq(from = min(abdn$FloorArea), to = max(abdn$FloorArea), by = 5),
-  rooms = median(abdn$rooms),
+  Rooms = median(abdn$Rooms),
   Tax = "D",
   EPC = "D"
 )
@@ -272,7 +273,7 @@ ggplot(fake) +
 
 # I need to create a dataframe to contain the relevant information:
 joss_court <- data.frame(
-  rooms = 3,
+  Rooms = 3,
   FloorArea = 61,
   EPC = "C",
   Tax = "C"
@@ -334,8 +335,8 @@ Here's what your code might look like (but note that your DAG might look differe
 library(performance)
 library(see)
 rent_dag <- check_dag(
-  Price ~ rooms + FloorArea + Tax + EPC,
-  rooms ~ FloorArea,
+  Price ~ Rooms + FloorArea + Tax + EPC,
+  Rooms ~ FloorArea,
   EPC ~ FloorArea,
   Tax ~ FloorArea,
   exposure = "FloorArea",
@@ -400,7 +401,7 @@ Most of the diagnostics look ok. Not great, but maybe just about good enough to 
 As for the predictive model, decide how you want to deal with the Residuals vs Leverage plot and rerun your analysis if necessary.
 
 ```{r, include = F}
-# If your row numbers are different to mine, make sure you re-loaded the data in before starting with the causal model
+# If your row numbers are different to mine, make sure you re-loaded the data in before starting with the causal model and note that by the time of this workshop (and with more data) observation 73 may not be a problem anymore, or it may have changed to a different observation.
 abdn_trimmed <- abdn[-c(73),]
 rent_causal_mod <- lm(Price ~ FloorArea, data = abdn_trimmed)
 # Diagnostics now look good.
@@ -432,9 +433,9 @@ ggplot(fake) +
   theme_bw()
 ```
 
-So what we learn is that for every additional meter square "added" the rent increases by roughly £7.90. So long as we assume that our DAG is accurate (a potentially big assumption), this £7.90 increase is the *causal* effect of square meters on rent.
+So what we learn is that for every additional meter square "added" the rent increases by roughly £7.65. So long as we assume that our DAG is accurate (a potentially big assumption), this £7.65 increase is the *causal* effect of square meters on rent.
 
-Compare that with our predictive model that found "adding" an extra square meter to a property would increase the Price by £0.51. At the time, we noted that £0.51 seemed on the "cheap" side and the reason for the predictive modelling estimating it as being "cheap" was because, according to out DAG, m$^2$ was confounded by the number of rooms in a flat. To be clear, that confounding didn't matter for the first model because our aim was to make predictions, not to understand the causal effect.
+Compare that with our predictive model that found "adding" an extra square meter to a property would increase the Price by £0.80. At the time, we noted that £0.80 seemed on the "cheap" side and the reason for the predictive modelling estimating it as being "cheap" was because, according to out DAG, m$^2$ was confounded by the number of rooms in a flat. To be clear, that confounding didn't matter for the first model because our aim was to make predictions, not to understand the causal effect.
 
 # What is the causal effect of EPC on Price?
 
@@ -445,7 +446,7 @@ Because we're doing a new analysis, be sure to re-load the data before proceedin
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # This is the same DAG as above. Nothing actually changes in the DAG even though our research question has.
 rent_dag <- check_dag(
-  Price ~ rooms + FloorArea + Tax + EPC,
+  Price ~ Rooms + FloorArea + Tax + EPC,
   rooms ~ FloorArea,
   EPC ~ FloorArea,
   Tax ~ FloorArea,

@@ -91,7 +91,7 @@ The x-axis represents the `Fitted values`, which is just a different way of sayi
 
 ### Linearity
 
-One of the main differences from last week is that our model doesn't have a linear trend - there's no line that we can draw between mongoose being present and mongoose being absent. So we're actually not assuming linearity here. One less thing to check for :).
+One of the main differences from last week is that our model doesn't have a linear trend - there's no line that we can draw between mongoose being present and mongoose being absent. So there is no linear trend to meet the assumption of linearity. One less thing to check for :).
 
 ### Equal Variance of Errors
 
@@ -149,9 +149,9 @@ ggplot() +
   theme_minimal()
 ```
 
-We can see that the amount of uncertainty (the 95% CI) is equal in both groups, but in reality, the confidence intervals for Group A should probably be much smaller. Keep in mind that inflated standard errors (which we use to calculate 95% CI) are a consequence of violating the assumption of equal variance of errors. However, the point estimate (the mean of groups A and B) are estimated accurately (which I only know for sure in this case because I simulated the data). So if we only cared about estimating the means of the groups accurately (and are not too concerned about uncertainty), then we wouldn't be too worried about having unequal variance of errors. 
+We can see that the amount of uncertainty (the 95% CI) is equal in both groups, but in reality, the confidence intervals for Group A should probably be much smaller. Keep in mind that inflated standard errors (which we use to calculate 95% CI) are a consequence of violating the assumption of equal variance of errors but it can just as easily lead to too small confidence intervals. However, the point estimate (the mean of groups A and B) are estimated accurately. So if we only cared about estimating the means of the groups accurately (and are not too concerned about uncertainty), then we wouldn't be too worried about having unequal variance of errors. 
 
-It's worth saying that we generally do care about estimating uncertainty accurately. Keep in mind, we never really know if the means are "True" (as in they accurately reflect reality), so having some measure of uncertainty is generally the responsible approach to science. If you need a reminder of why it's important, have a look at the lecture where we spoke about being given the option of two drugs with different probabilities of unintended mortality, and how our decision would change depending on if we showed uncertainty or not.
+It's worth saying that we generally do care about estimating uncertainty accurately. Keep in mind, we never really know if the means are "True" (as in, they accurately reflect reality), so having some measure of uncertainty is generally the responsible approach to science. If you need a reminder of why it's important, have a look at the lecture where we spoke about being given the option of two drugs with different probabilities of unintended mortality, and how our decision would change depending on if we showed uncertainty or not.
 
 ## `Scale-Location`
 
@@ -161,7 +161,7 @@ Remember that the Scale-Location plot offers us another chance to evaluate the e
 plot(rabbit_mod, which = 3)
 ```
 
-From the plot above, it seems like the assumption is very slightly less well met than the Residuals vs Fitted plot would suggest, simply because predictions at about 270 g seem to have residuals that are the tiniest bit larger than when the rabbits are predicted to weigh roughly 265 g (representing the mean predicted weights for our two mongoose categories, `Present` and `Absent` respectively). Importantly though, this is no where near "substantial" enough for me to be worried about.
+From the plot above, it seems like the assumption is very slightly less well met than the Residuals vs Fitted plot would suggest, simply because predictions at about 270 g seem to have residuals that are the tiniest bit larger than when the rabbits are predicted to weigh roughly 265 g (representing the mean predicted weights for our two mongoose categories, `Present` and `Absent` respectively). Importantly though, this is nowhere near "substantial" enough for me to be worried about.
 
 For example, compare it to the data I simulated above that includes unequal variance of errors by design. Here's what the Scale-Location plot looks like in that case:
 
@@ -177,7 +177,7 @@ Next to the Q-Q plot for the rabbit model.
 plot(rabbit_mod, which = 2)
 ```
 
-Keep in mind that we're assuming that the residuals of our model take on a $Normal$ distribution, so that's what this plot is looking for. What having $Normally$ distributed residuals actually means, though, is whether or not our model is predicting the individual rabbits of our dataset accurately, which 99% of the time, we're not too bothered about.
+Keep in mind that we're assuming that the residuals of our model take on a $Normal$ distribution, so that's what this plot is looking for. What having $Normally$ distributed residuals actually means, though, (aside from the residuals being approximately $Normal$) is whether or not our model is predicting the individual rabbits of our dataset accurately, which 99% of the time, we're not too bothered about.
 
 Never-the-less, we still want the points to broadly lie on the dashed line, but we don't stress out too much if it's not exactly perfect. If we ever did see utterly bizarre patterns in the points, that implies one of two things. Either you need to choose a different distribution for your data generating process and fit a "Generalised Linear Model" (GLM), or your model is missing some important predictor variables (more on both of these options later in the course).
 
@@ -189,7 +189,7 @@ The last plot doesn’t assess the assumptions we’ve discussed but provides a 
 plot(rabbit_mod, which = 5)
 ```
 
-Just like last week, we're looking to see if we can spot the contour lines indicating a Cook's distance of 1. In the plot above, these contour lines are no-where in sight, so we don't have any issues here either.
+Just like last week, we're looking to see if we can spot the contour lines indicating a Cook's distance of 1. In the plot above, these contour lines are nowhere in sight, so we don't have any issues here either.
 
 If you want an alternative way to check Cook's distance, without showing Leverage, then you can do:
 
@@ -207,7 +207,7 @@ None of our points are close to 1, so we don't have any observations that are pu
 # Equal Variance of Errors. We have no linear trend, so there's no assumption of linearity.
 ```
 
-2. Which assumption(s) can be check for using the Scale-Location plot when fitting a linear model with only a categorical predictor variable?
+2. Which assumption(s) can be checked for using the Scale-Location plot when fitting a linear model with only a categorical predictor variable?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # Equal Variance of Errors

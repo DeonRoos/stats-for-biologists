@@ -77,12 +77,12 @@ They ask you to resolve these issues but also to check for any other possible mi
 1. What `mongoose` value should the first mistake have?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = T}
-# We've been told this is the 7th row, so we can use square brackets to check this row. Here, I'll also ask for all columns of the 7th row (by not speciying anything after the ,):
+# We've been told this is the 7th row, so we can use square brackets to check this row. Here, I'll also ask for all columns of the 7th row (by not specifying anything after the ,):
 rabbit[7,]
 ```
 
 
-1.5  Correct the above data entry mistake and confirm that you're correction has worked
+1.5  Correct the above data entry mistake and confirm that your correction has worked
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = T}
 # The rabbit was from Oshima, not Tokunoshima, so mongoose should be Present not Absent
@@ -102,7 +102,7 @@ rabbit[7,]
 # If we do a plot of the data:
 ggplot(rabbit) +
   geom_histogram(aes(x = weight))
-# We can clearly see there's one rabbit that's much larger than the others. From the figure, we can also see that it's the only rabbit that's larger than 350 g, so we can use that as our condition and subtract 100 g. We also learn that this is on row 41 (the number oto the left of the output).
+# We can clearly see there's one rabbit that's much larger than the others. From the figure, we can also see that it's the only rabbit that's larger than 350 g, so we can use that as our condition and subtract 100 g. We also learn that this is on row 41 (the number to the left of the output).
 rabbit[rabbit$weight > 350,]
 ```
 
@@ -155,6 +155,8 @@ Having resolved any data issues, it's time to think more carefully about that da
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # If there are mongoose on both islands, then assuming mongoose *do* decrease weight, then we'll either find no difference in weight, or a very small difference in weight - i.e. if there are mongoose on both islands, and mongoose decrease weight, then rabbit weight will be more-or-less identical on both islands.
+
+# Mongoose presence or absence likely breaks the assumption of validity.
 
 # The annoying thing is that it could also be that mongoose don't impact rabbit weight. So finding no difference or small differences in weights can mean multiple things. Either there are mongoose on both islands, or mongoose don't affect rabbit weight.
 ```
@@ -342,6 +344,7 @@ The important technical thing to remember is that 95% CI take the standard error
 ```{r}
 fake$low95 <- preds$fit - 1.96 * preds$se.fit
 fake$upp95 <- preds$fit + 1.96 * preds$se.fit
+# Note that you can use confint(rabbit_mod) to do the above calculations
 ```
 
 Now our `fake` dataset has all the values we need to do plot our results, using `geom_errorbar()` to add in the error bars to show our 95% CI:
@@ -411,7 +414,7 @@ ggplot(fake) +
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # As said above, personally I have no idea what to make of this model given that the assumption of validity seems questionable (related to our uncertainty of mongoose being present or not in Tokunoshima). 
 
-# Making it even harder, the apparent effect of mongoose is tiny, just two gramms! - small enough that it could be something as silly as using two different sets of scales on both islands.
+# Making it even harder, the apparent effect of mongoose is tiny, just two grams! - small enough that it could be something as silly as using two different sets of scales on both islands.
 
 # The thing that would keep me up at night would be if anyone were to use our model to make any decisions that could have real world consequences, such as showing these results to the local government. Are we really confident enough in our model to have that rest on our conscious? I don't think I am.
 

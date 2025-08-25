@@ -1,0 +1,83 @@
+---
+title: "Workshop 5 - Study Notes"
+author: "Michelle Pinard & Deon Roos"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+    reference_docx: "../sbstemplate.docx"
+---
+
+# Purpose
+
+Use a linear model when you want to see how your response varies across different groups. The model estimates one of the group's mean and the difference from this for all other groups, not a slope through categories.
+
+Data must be in tabular form (rows are observations, columns are variables).
+
+# Model and interpretation
+
+When using groups with contrast treatments, the model is $\mu_i = \beta_0 + \beta_1G2 + ...$. $\beta_0$ is the mean of your reference group; each subsequent $\beta$ (e.g. $\beta_1$) is the mean difference between the respective group e.g. ($G2$) and your reference group.
+
+# R workflow
+
+```{r, eval = F}
+setwd("C:/BI3010")
+dat <- read.table("data/my_data.txt", header = TRUE)
+# If you want you can convert the categorical variable to a factor
+# But this is often not needed
+dat$group <- factor(dat$group)
+
+m <- lm(weight ~ group, data = dat)
+summary(m)
+```
+
+# Predicted means and 95% CIs
+
+To get confidence intervals, add or subtract $1.96 \times SE$ from the predicted value. This works the same for models with continuous explanatory variables.
+
+```{r, eval = F}
+fake <- data.frame(group = levels(dat$group))
+pred <- predict(m, newdata = fake, se.fit = TRUE)
+
+fake$fit <- pred$fit
+fake$upp <- pred$fit + 1.96 * pred$se.fit
+fake$lwr <- pred$fit - 1.96 * pred$se.fit
+
+ggplot(data = fake, aes(group, fit)) +
+  geom_errorbar(aes(ymin = lwr, ymax = upr), width = 0.15) +
+  geom_point(size = 2) +
+  labs(x = "Group", y = "Predicted y")
+```
+
+# Reading `summary(model)`
+
+`(Intercept)` is the reference-group mean. For a model that with a categorical variable called "group" with the levels "A" and "B", the intercept will be the mean for group A, and the estimate for "B" is the mean difference $B − A$ (so long as A is the reference). For more than two groups, there are $k − 1$ differences versus the reference.
+
+Unless otherwise specified, `R` will take the first alphanumerical value as the reference point; A rather than B; A1 rather than A2.
+
+# Confidence intervals, briefly
+
+A 95% CI is a procedure that, in repeated sampling, covers the true parameter 95% of the time. After seeing one interval, it either covers or it does not. In practice we read it as the range of parameter values most compatible with the data and model. Consider both the point estimate and its CI when answering the scientific question.
+
+# Diagnostics you still need
+
+Linearity can be ignored and additivity can be very difficult to diagnose, but equal variance of errors, normality of errors, and influence still matter. Use the standard diagnostic plots from `lm` to check variance patterns and tail behaviour; interpret flagged points in context rather than by fixed cutoffs.
+
+# Design cautions
+
+If your group is a proxy for an unmeasured driver (e.g., region is a proxy for hunting pressure), be explicit about the extra assumption that groups differ only in that variable.
+
+# When to prefer continuous predictors
+
+Avoid turning a measured continuum into categories unless justified. Continuous variables are usually more efficient and faithful to biology; categorisation can be useful for nonlinearity or logistics, but it costs information.
+
+# Small variations you may need
+
+Change the reference group level with `relevel`; interpret accordingly.
+
+```{r, eval = F}
+dat$group <- relevel(dat$group, ref = "B")
+summary(lm(y ~ group, data = dat))
+```
+
+This flips the intercept to the "B" group.

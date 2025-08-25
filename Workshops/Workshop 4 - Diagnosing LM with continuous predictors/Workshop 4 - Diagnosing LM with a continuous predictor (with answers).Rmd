@@ -75,9 +75,9 @@ As an additional step, which we'll explain in more detail soon, we'll also use t
 boto$predicted <- predict(boto_model)
 ```
 
-# Diagnosing the four horseman
+# Diagnosing the four horsemen
 
-We're now ready to perform some diagnostics using those "four horseman" (of the apocalypse) plots. The code to fo this is relatively straightforward: you just need to `plot()` the model. Pay close attention to your R console when you do this. You'll see a prompt that says `Hit <Return> to see next plot:`. If you press Return (or Enter) on your keyboard four times, you'll see a total of four plots. Alternatively, you can "partition" you figure into two rows and two columns by doing:
+We're now ready to perform some diagnostics using those "four horsemen" (of the apocalypse) plots. The code to for this is relatively straightforward: you just need to `plot()` the model. Pay close attention to your R console when you do this. You'll see a prompt that says `Hit <Return> to see next plot:`. If you press Return (or Enter) on your keyboard four times, you'll see a total of four plots. Alternatively, you can "partition" you figure into two rows and two columns by doing:
 
 ```{r}
 par(mfrow = c(2,2)) # split figure into a 2 x 2
@@ -107,6 +107,7 @@ Dolphin "6" is a male that had experienced two droughts and was 236 cm long but 
 
 ```{r}
 boto$residual <- boto$length - boto$predicted
+# Or we could use residuals(boto_model)
 ```
 
 Now when we pull up dolphin "6", we see:
@@ -191,7 +192,7 @@ For the most part, the Scale-Location plot is similar to the Residuals vs Fitted
 plot(boto_model, which = 3)
 ```
 
-This means that the Scale-Location plot provides another opportunity to check the same assumptions that the Residuals vs Fitted plot did but in a different way. The reason for having both plots is that sometimes one plot may make diagnosing issues easier than the other. For example, the Residuals vs Fitted can may spotting non-linearity a bit easier, while the Scale-Location can make checking for equal variance a bit easier. It's often worth checking both.
+This means that the Scale-Location plot provides another opportunity to check the same assumptions that the Residuals vs Fitted plot did but in a different way. The reason for having both plots is that sometimes one plot may make diagnosing issues easier than the other. For example, the Residuals vs Fitted can make spotting non-linearity a bit easier, while the Scale-Location can make checking for equal variance a bit easier. It's often worth checking both.
 
 ## `Q-Q Residuals`
 
@@ -205,7 +206,7 @@ The normality of residuals is an assumption we check to ensure that the errors o
 
 Here's the crux. If you want to understand how drought impacts botos, then do you really care about how accurately you can predict each dolphin? Not really. Of course you're not going to explain it perfectly. Would we really expect the only thing that impacts a dolphins length is how many years of drought it had experienced?
 
-Regardless, the Q-Q plot helps us assess this assumption by comparing the distribution of the residuals to am "idealised" normal distribution. If the residuals follow a straight line in the Q-Q plot, this suggests they are approximately normally distributed.
+Regardless, the Q-Q plot helps us assess this assumption by comparing the distribution of the residuals to an "idealised" normal distribution. If the residuals follow a straight line in the Q-Q plot, this suggests they are approximately normally distributed.
 
 ```{r, echo = F}
 plot(boto_model, which = 2)
@@ -423,7 +424,7 @@ plot(preds, add.data = TRUE)
 # Interpret -----------------------------------
 # This model, as is, should not be used to make any kind of inference
 # (In reality, we'd need to change the model to allow temperature to have a non-linear effect)
-# (But given you don't know how to do that, we should stop here and advice/insist the results are not interpreted)
+# (But given you don't know how to do that, we should stop here and advise/insist the results are not interpreted)
 ```
 
 

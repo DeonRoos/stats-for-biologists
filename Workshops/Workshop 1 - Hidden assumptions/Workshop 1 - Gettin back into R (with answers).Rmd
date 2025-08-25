@@ -33,15 +33,14 @@ library(here)
 
 # Learning Objectives
 
-1. (Re)familiarise yourself with the basics of `R`;
-2. Use `R` to perform simple descriptive summaries of data and data processing;
-3. Use the results of the EDA (Exploratory Data Analysis) to identify any issues in the data;
-4. Begin thinking about the assumptions we make with a specific dataset even before we begin using statistics
+1.  (Re)familiarise yourself with the basics of `R`;
+2.  Use `R` to perform simple descriptive summaries of data and data processing;
+3.  Use the results of the EDA (Exploratory Data Analysis) to identify any issues in the data;
+4.  Begin thinking about the assumptions we make with a specific dataset even before we begin using statistics
 
 All of these objectives link to useful skills for **initial, quick explorations** and screening of datasets. Because it's so important to ensure that the data we subsequently use in analysis is suitable for answering our question, the importance of such EDA cannot be overstated.
 
 These skills will be used throughout the course.
-
 
 ```{r datasets, echo = FALSE, message = FALSE}
 # For coordinators -
@@ -97,23 +96,23 @@ my_result <- a_function(argument1 = "character1",
                         argument5 = my_data)
 ```
 
-* The light purple text preceded by "#" indicates comments. These will not be treated by `R` as code, so we are free to write whatever we want. See below for guidance on comment writing.
+-   The light purple text preceded by "\#" indicates comments. These will not be treated by `R` as code, so we are free to write whatever we want. See below for guidance on comment writing.
 
-* The orange code (e.g. `a_function()`) denotes a function. Functions are blocks of reusable code, often written by someone else, to perform a specific task, for example, `mean()`. Underlying each function is a collection of "source" code to perform the specific task (if you want to see the source code for `mean()`, write `getAnywhere(mean.default())` in your console). Functions are always followed by an open parenthesis "(" and end with a closed parenthesis ")".
+-   The orange code (e.g. `a_function()`) denotes a function. Functions are blocks of reusable code, often written by someone else, to perform a specific task, for example, `mean()`. Underlying each function is a collection of "source" code to perform the specific task (if you want to see the source code for `mean()`, write `getAnywhere(mean.default())` in your console). Functions are always followed by an open parenthesis "(" and end with a closed parenthesis ")".
 
-* The pale blue code (e.g. `argument1 =`) indicates arguments - data, parameters, or choices that the function requires, or allows, to perform its purpose. You can think of arguments as the information required, or permitted, for the function to do its task. Multiple arguments are separated using commas.
+-   The pale blue code (e.g. `argument1 =`) indicates arguments - data, parameters, or choices that the function requires, or allows, to perform its purpose. You can think of arguments as the information required, or permitted, for the function to do its task. Multiple arguments are separated using commas.
 
-* Green code, wrapped in quotation marks (e.g. `"character1"`), indicates strings or characters, which are types of data used to represent text.
+-   Green code, wrapped in quotation marks (e.g. `"character1"`), indicates strings or characters, which are types of data used to represent text.
 
-* Black code (e.g. `variableA`, `my_result`, and `my_data`) indicates objects in the R environment. Generally, these are single values, columns of data, or even entire datasets.
+-   Black code (e.g. `variableA`, `my_result`, and `my_data`) indicates objects in the R environment. Generally, these are single values, columns of data, or even entire datasets.
 
-* Finally, the maroon code (e.g. `TRUE` and `FALSE`) represents "Boolean" values. These are some of the simplest forms of data and are used to indicate, unsurprisingly, whether something is true or false (commonly used in functions to allow the user to say "Yes" or "No").
+-   Finally, the maroon code (e.g. `TRUE` and `FALSE`) represents "Boolean" values. These are some of the simplest forms of data and are used to indicate, unsurprisingly, whether something is true or false (commonly used in functions to allow the user to say "Yes" or "No").
 
 If you're not sure what a string is, or a function, don't worry; there's a short explainer further below.
 
-> Note that the colours used within the instructions use a custom colour which will not match the colours used by default in RStudio. This is perfectly fine. If you want to change the "theme" of RStudio, go to Tools > Global Options... > Appearance and play around with the different options.
+> Note that the colours used within the instructions use a custom colour which will not match the colours used by default in RStudio. This is perfectly fine. If you want to change the "theme" of RStudio, go to Tools \> Global Options... \> Appearance and play around with the different options.
 
-## Commenting guide 
+## Commenting guide
 
 It's good practice to make comments to yourself (and others) while writing code. Comments generally act as notes that help explain your general intent for a section of code, which in three weeks' time can be an absolute lifesaver. They're also super useful for anyone else reading your code (and your commenting may be evaluated for some jobs).
 
@@ -171,26 +170,26 @@ Before we begin the workshop, let's make sure that you are set up to work with `
 
 Once you have `R` and RStudio set up, open RStudio. You should see a window with four main panes:
 
-* Source: This is where you write your scripts.
+-   Source: This is where you write your scripts.
 
-* Console: This is where you can type and execute R code directly.
+-   Console: This is where you can type and execute R code directly.
 
-* Environment/History: This pane shows you the objects that are currently stored in R's memory.
+-   Environment/History: This pane shows you the objects that are currently stored in R's memory.
 
-* Files/Plots/Packages/Help/Viewer: This is a multi-tabbed pane that allows you to navigate files, view plots, manage packages, and access documentation.
+-   Files/Plots/Packages/Help/Viewer: This is a multi-tabbed pane that allows you to navigate files, view plots, manage packages, and access documentation.
 
 ## Running Code
 
 There are a few ways to run `R` code:
 
-- **Directly in the console**: You can type `R` commands directly into the Console pane and press Enter to run them. This is useful for very quick tests and calculations but avoid using this for project work (none of it is saved).
+-   **Directly in the console**: You can type `R` commands directly into the Console pane and press Enter to run them. This is useful for very quick tests and calculations but avoid using this for project work (none of it is saved).
 
-- **From a script**: Scripts are simple text files that contain `R` code. You can write multiple lines of code in a script and run them together or one by one. This is particularly useful for more complex analyses where you want to keep a record of your code.
+-   **From a script**: Scripts are simple text files that contain `R` code. You can write multiple lines of code in a script and run them together or one by one. This is particularly useful for more complex analyses where you want to keep a record of your code.
 
 To run code from a script, you can:
 
-- Click the "Run" button at the top of the Source pane to run the selected line or code chunk.
-- Press `Ctrl + Enter` (or `Cmd + Enter` on a Mac) to run the current line or selected code.
+-   Click the "Run" button at the top of the Source pane to run the selected line or code chunk.
+-   Press `Ctrl + Enter` (or `Cmd + Enter` on a Mac) to run the current line or selected code.
 
 # Workshop Instructions
 
@@ -204,13 +203,13 @@ We would like you to use RStudio, an Integrated Development Environment. Essenti
 
 If you haven’t already created a folder for the course on your computer or your university drive, do so now. For example, you might create a folder in your `H` drive for the course, with subfolders for each of the workshops (e.g., `workshop1`), such that the file path to your working directory would be: `H:\BI3010\workshop1`.
 
-Open RStudio and create a new R script (`File` > `New File` > `R Script`, or use the hotkeys `Ctrl + Shift + N`). Once open, you can now write code in the script. When you want to run that code, either press the "Run" button (top right of the main panel) or click anywhere in a line of code and use the hotkeys `Ctrl + Enter`.
+Open RStudio and create a new R script (`File` \> `New File` \> `R Script`, or use the hotkeys `Ctrl + Shift + N`). Once open, you can now write code in the script. When you want to run that code, either press the "Run" button (top right of the main panel) or click anywhere in a line of code and use the hotkeys `Ctrl + Enter`.
 
 With your script now open, to set the working directory to the folder you want to use for saving your work, you have two options:
 
 **Option 1:**
 
-Find the file path for your newly created folder (e.g. `H:` > `BI3010` > `workshop1`). If you're not sure, an easy way to get this is by using File Explorer in Windows, go to your `workshop1` folder, then select the address (or file path) from the navigation bar at the top (the equivalent of the URL bar in web browsers). It will probably look something like:
+Find the file path for your newly created folder (e.g. `H:` \> `BI3010` \> `workshop1`). If you're not sure, an easy way to get this is by using File Explorer in Windows, go to your `workshop1` folder, then select the address (or file path) from the navigation bar at the top (the equivalent of the URL bar in web browsers). It will probably look something like:
 
 `H:\BI3010\workshop1`
 
@@ -232,14 +231,13 @@ The benefit of doing it this way is that because we can include this code in our
 
 **Option 2:**
 
-An easy option is to use the drop-down menu in RStudio: `Session` > `Set Working Directory` > `Choose Directory...`
+An easy option is to use the drop-down menu in RStudio: `Session` \> `Set Working Directory` \> `Choose Directory...`
 
 Option 2 is easier if you're just doing a very quick project (i.e., an hour or two), but becomes a pain when you come back to the project, as you'll need to keep setting the working directory each time (and maybe make a mistake, causing more pain and frustration).
 
 We'd advise using Option 1. It's a little more of a fuss the first time, but then you don't need to think about it again.
 
 We can check if the working directory has been set correctly by asking `R` what the current directory is:
-
 
 ```{r, eval = F}
 getwd() #to check which directory RStudio is using
@@ -278,18 +276,17 @@ There are a few things to make sure of when loading your data into `R`, but just
 
 When loading your data, if you encounter an error, some common problems include:
 
-* You may have set the wrong working directory.
+-   You may have set the wrong working directory.
 
-* You may have misspelled one of the words (including using a capital letter instead of lower case).
+-   You may have misspelled one of the words (including using a capital letter instead of lower case).
 
-* Your file may be missing a column heading.
+-   Your file may be missing a column heading.
 
-* The file is not in the correct format (e.g., the file saved as a `.csv` instead of a `.txt`).
+-   The file is not in the correct format (e.g., the file saved as a `.csv` instead of a `.txt`).
 
-* The quotation marks are in the wrong location.
+-   The quotation marks are in the wrong location.
 
-* You may have missed the final bracket `)` in the `read.table()` function.
-
+-   You may have missed the final bracket `)` in the `read.table()` function.
 
 To confirm that the file has been read properly, click the blue button next to the name in the Environment panel (normally in the upper right of RStudio).
 
@@ -337,7 +334,7 @@ Question 2: What are the variable names?
 # Above functions will give you this except for ncol()
 ```
 
-Question 3: Are the names captilised?
+Question 3: Are the names capitalised?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # bite and length are both lower case
@@ -366,6 +363,7 @@ To do this quickly, we can use the `str()` function (short for "structure"):
 ```{r}
 str(ali)
 ```
+
 We see that `ali` is a `data.frame` (great - it should be!), with 78 observations (or samples) and two variables. The `$` operator is used to extract specific variables from a dataframe, so `ali$bite` will give you just the `bite` variable from the `ali` dataset. This is why the second and third lines are preceded by `$`. From this, we can see that both the `length` and `bite` variables are being treated as numbers (indicated by `num`), and we get a handful of example values for both `length` and `bite`.
 
 So far, we're not seeing anything unusual, which is great - it means we haven't identified any problems that we need to fix.
@@ -423,7 +421,7 @@ summary(ali$length) # will give you summary of just length
 Question 2. What are the minimum and maximum values for bite strength?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# 832.9 PSI to 123632.0 PSI
+# 832.9 PSI to 123632.0 PSI (pounds per square inch)
 range(ali$bite)
 ```
 
@@ -448,22 +446,21 @@ This is where square brackets `[]` come into play. In `R`, square brackets are u
 
 To use them effectively, first consider how you would find the information manually (e.g. in Excel):
 
-1. We'd start by looking at the `ali` dataset.
-2. We'd then skim through the `ali` dataset, looking for any rows where alligators are `r max(ali$length)` cm long.
-3. Once we've found these rows, examine all the information related to those alligators.
+1.  We'd start by looking at the `ali` dataset.
+2.  We'd then skim through the `ali` dataset, looking for any rows where alligators are `r max(ali$length)` cm long.
+3.  Once we've found these rows, examine all the information related to those alligators.
 
 How does that translate into `R`? Almost exactly—we just need to write those three steps using code.
 
-1. We'd start by looking at the `ali` dataset.
+1.  We'd start by looking at the `ali` dataset.
 
 ```{r, eval = F}
 ali
 ```
 
+2.  We'd then skim through the `ali` dataset, looking for any rows where alligators are `r max(ali$length)` cm long.
 
-2. We'd then skim through the `ali` dataset, looking for any rows where alligators are `r max(ali$length)` cm long.
-
-This is where we can use square brackets `[]` in conjunction with conditional statements. Conditional statements allow us to specify criteria like "when this condition is met, do *something*". 
+This is where we can use square brackets `[]` in conjunction with conditional statements. Conditional statements allow us to specify criteria like "when this condition is met, do *something*".
 
 In our case, the condition is finding alligators that are `r max(ali$length)` cm long. In `R`, we write this condition using double equal signs (`==`) to denote "equal to". This is basically the same as your eyes going down the Excel column looking for `r max(ali$length)`, noting any instances where it was true or not. For example:
 
@@ -473,10 +470,9 @@ ali$length == 2293.0
 
 The output will be a list of `r nrow(ali)` values, each being either `TRUE` or `FALSE`, corresponding to each row in the `ali` dataset. `TRUE` values indicate rows where the alligator is `r max(ali$length)` cm long, and `FALSE` values indicate rows where the alligator is not `r max(ali$length)` cm long (in `R`, "not equal to" is denoted as `!=`).
 
-3. Once we've found these rows, examine all the information related to those alligators.
+3.  Once we've found these rows, examine all the information related to those alligators.
 
-Once we've identified the rows we're interested in (the simplest but least elegant way is to just count what row the `TRUE` is from in the above list), we can use square brackets to extract the relevant information. Square brackets in `R` let us select specific rows, columns, or individual values from datasets. When using square brackets, remember that the row number comes before the comma, and the column number comes after (e.g., `ali[row, column]`). If we omit either the row or column number, `R` will return all rows or all columns respectively. For instance, to view all the information (i.e., all columns) for the 20th row, you would use:
-
+Once we've identified the rows we're interested in (the simplest but least elegant way is to just count what row the `TRUE` is from in the above list), we can use square brackets to extract the relevant information. Square brackets in `R` let us select specific rows, columns, or individual values from datasets. When using square brackets, remember that the row number comes before the comma, and the column number comes after (e.g., `ali[row, column]`). If we omit either the row or column number, `R` will return all rows or all columns respectively. For instance, to view all the information (i.e., all columns) for the 30th row, you would use:
 
 ```{r}
 ali[30,]
@@ -490,7 +486,7 @@ ali[ali$length == 2293,]
 
 What do you make of this observation? We're expecting `length` to be about 200 to 400 centimeters (2 to 4 m), but this alligator is apparently 10 times bigger than that. And `bite` is about 100 times bigger. Neither of the two values seem to have a decimal point (or at least `R` has given them values of zero after the decimal point).
 
-Why might that be the case? Let's see if we can find a "normal" observation to compare this giant alligator to. 
+Why might that be the case? Let's see if we can find a "normal" observation to compare this giant alligator to.
 
 Assuming the first observation is a normal one, use the square brackets to extract the first row of data from the `ali` dataset:
 
@@ -623,29 +619,29 @@ summary(ali)
 
 Within MyAberdeen, there is an additional dataset called `animal_speed.txt`. Your objective here is to try and find all the data entry mistakes. This dataset is more challenging than the alligator one, with some issues being harder to detect. Additionally, the dataset is fairly large, making it impractical to manually search for errors. To help you out, here are some hints:
 
-1. Use `unique()` to find and report unique entries in a column, which is useful for strings/characters/factors.
+1.  Use `unique()` to find and report unique entries in a column, which is useful for strings/characters/factors.
 
-2. If there are `NA` values in a column, functions like `mean()` will return `NA`. To override this, you can specify `mean(variable, na.rm = TRUE)`, which will temporarily remove `NA`s from the `variable` before executing the function.
+2.  If there are `NA` values in a column, functions like `mean()` will return `NA`. To override this, you can specify `mean(variable, na.rm = TRUE)`, which will temporarily remove `NA`s from the `variable` before executing the function.
 
-3. There are a total of five mistakes in the dataset.
+3.  There are a total of five mistakes in the dataset.
 
-As before, start by getting a feel for the data. What data do you have? What kind of values seem sensible, or what kind of values might seem *weird*? 
+As before, start by getting a feel for the data. What data do you have? What kind of values seem sensible, or what kind of values might seem *weird*?
 
 Can you find them all? Once you have, take a look at the instructions with answers to see what the values should be and attempt to resolve them.
 
 ## Information about the dataset:
 
-* The weight of three species was measured (in grams).
+-   The weight of three species was measured (in grams).
 
-* The species included Peregrine falcons, Saiga antelopes, and cheetahs.
+-   The species included Peregrine falcons, Saiga antelopes, and cheetahs.
 
-* The speed of each individual was measured over a 50 m distance (in km per hour).
+-   The speed of each individual was measured over a 50 m distance (in km per hour).
 
-* A total of 500 individuals were measured, but these were not equally divided between the three species.
+-   A total of 500 individuals were measured, but these were not equally divided between the three species.
 
-* Multiple people participated in data entry, and it is believed that not all were confident in how to do this.
+-   Multiple people participated in data entry, and it is believed that not all were confident in how to do this.
 
-* Physical copies of the data are available should any data need to be verified (contact one of the teaching staff if you need a data entry confirmed).
+-   Physical copies of the data are available should any data need to be verified (contact one of the teaching staff if you need a data entry confirmed).
 
 ```{r extra dataset, echo = FALSE, message = FALSE, eval = T}
 # For coordinators -
@@ -739,7 +735,7 @@ fast$weight[fast$weight < quantile(fast$weight, probs = 0.01)]
 # 1. One weight observation is 0 g
 # 2. One weight observation is 3 g
 # 3. Species named "Peregrin Took" instead of "Peregrine Falcon"
-# 4. There is an extremely high speed value (33346.0 km/h) for a 
+# 4. There is an extremely high speed value (35711 km/h) for a 
 # Peregrine Falcon
 # 5. There is a missing value (NA) in the speed column
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -803,14 +799,12 @@ Question 1. What is the median weight in this dataset?
 
 ```{r, include=answer_sheet, eval = answer_sheet, class.source="bg-success"}
 median(fast$weight)
-# The median weight is 46441 grams, or 46.4 kg
 ```
 
 Question 2. What is the median speed in this dataset?
 
 ```{r, include=answer_sheet,eval = answer_sheet, class.source="bg-success"}
 median(fast$speed, na.rm = TRUE)
-# The median speed is 102 km/h
 ```
 
 Question 3. Which species is most common in this dataset?
@@ -818,6 +812,102 @@ Question 3. Which species is most common in this dataset?
 ```{r, include=answer_sheet,eval = answer_sheet, class.source="bg-success"}
 # We can use the table() function to answer this but lots of different ways
 table(fast$species)
-# Most observations are of Saiga Antelope
+```
+
+# Chupacabras, Aliens and Beer
+
+The final dataset you will be working with is called `chupa.txt`. We will work on this together in the final 30 minutes of the session but if you are finished early and want to get started, please feel free to do so. This dataset contains the following variables:
+
+-   `year`: The year in which data was collected
+
+-   `city`: The city where the data was collected
+
+-   `alc`: The average alcohol consumption in that city, in that year
+
+-   `ufo`: The number of [unidentified flying objects](https://en.wikipedia.org/wiki/Unidentified_flying_object) (i.e. aliens) reported in that city, in that year
+
+-   `belief`: The most common response from a selection of members of the public when asked if they believe in the supernatural, in that city, in that year
+
+-   `chupa`: The growth rate of [chupacabra](https://en.wikipedia.org/wiki/Chupacabra) sightings from the previous year to the current year, in that city (where a value of zero means the number of sightings is constant, -0.5 means the number of sightings has declined by 50%, and 0.5 means they have increased by 50%).
+
+There are a number of data entry issues in the dataset. Carry out an EDA and try to find them all.
+
+As a group, we will look at lines of code and try to spot the error(s) and figure out what these codes are doing when we run them.
+
+```{r, include = FALSE, eval = TRUE}
+chupa <- read.table(here("Workshops/Workshop 1 - Hidden assumptions/Data", "chupa.txt"), header = TRUE)
+```
+
+
+```{r, eval = F, include=answer_sheet, class.source="bg-success"}
+chupa<-read.table("chupa.txt", header=TRUE)
+```
+
+```{r, include=answer_sheet, class.source="bg-success"}
+head(chupa)
+str(chupa)
+unique(chupa$city)
+summary(chupa)
+unique(chupa$belief)
+```
+
+```{r, include=FALSE, class.source="bg-success"}
+# Errors to fix
+# city has two spellings of Amarillo (upper and lower case A)
+# unusual values in alc and ufo
+```
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Find the rows with the lower case "amarillo"
+chupa$city=="amarillo"         # Gives us TRUE or FALSE for each observation
+chupa[198,]                    # Gives us information for row number 198
+chupa[chupa$city=="amarillo",] # Shows all columns for any rows with this name spelling
+```
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# To correct the spelling
+chupa$city[chupa$city == "amarillo"] <- "Amarillo"
+unique(chupa$city)      # Check to see if corrected
+chupa[198,]             # Checks row 198 to see if corrected
+```
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Unusual values in ufo
+hist(chupa$ufo)         # Looks like we need to change 9999 to NA
+chupa[chupa$ufo == 9999,]
+#change to NA
+chupa$ufo[chupa$ufo == 9999] <- NA
+summary(chupa$ufo)
+
+# Unusual value in alc
+hist(chupa$alc)         # Looks like we have one negative value, let's make it positive
+chupa[chupa$alc == -5,]
+#change to 5
+chupa$alc[chupa$alc == -5] <- 5
+summary(chupa$alc)
+
+hist(chupa$chupa) #Some negative values but these are okay as it is a growth rate
+```
+
+# Coding Puzzles
+
+In the following snippets of code, can you identify the error? If you're not sure, try running them and see what the error says.
+
+```{r, eval = F}
+summary(alc)
+chupa[chupa$ufo==9999]
+chupa[chupa$ufo = 9999, ]
+chupa[chupa$city = Houston,]
+ali[ali$Length > 200, ]
+ali[ali$bite > mean(ali$bite), ]
+```
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+summary(alc) # We have not specified that this is in the chupa dataset
+chupa[chupa$ufo==9999] # We're missing the comma to specify which columns to show
+chupa[chupa$ufo == 9999, ] # = assigns a value, use == for a conditional test
+chupa[chupa$city = Houston,] # Houston needs to be in quatation makes
+ali[ali$Length > 200, ] # Names are case sensitive. Should be `length`
+ali[ali$bite > mean(ali$bite), ] # If there are NAs in bite this will fail, include `na.rm = TRUE`
 ```
 

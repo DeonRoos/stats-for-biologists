@@ -48,7 +48,7 @@ These skills will be used throughout the course.
 
 # Task 1
 
-In this workshop, you will come up with some examples of various datasets that are likely to violate a hidden assumption. Some of these are related to residual error, which we will cover in more detail next week. For now, understand residual error as the difference between what a model predicts and the actual observation. For example, if a model predicts a flat costs £850 to rent each month, but the actual rent was £800, then the residual error is observed minus predicted (or $Residual = y - \hat{y}$). For the flat example, the residual error would be $800 - 850 = -50$, or £-50 difference.
+In this workshop, you will come up with some examples of various datasets that are likely to violate a hidden assumption. Some of these are related to residual error, which we will cover in more detail next week. For now, understand residual error as the difference between what a model predicts and the actual observation. For example, if a model predicts a flat costs £850 to rent each month, but the actual rent was £800, then the residual error is observed minus predicted (or $\text{Residual} = y - \hat{y}$). For the flat example, the residual error would be $800 - 850 = -50$, or £-50 difference.
 
 These assumptions (with some simple examples) are:
 
@@ -64,7 +64,7 @@ These assumptions (with some simple examples) are:
 
 For this exercise, form groups of two to four at your table. Your task is to come up with seven datasets that you believe are likely to violate assumptions one to seven in the above table. Once you have come up with an example for a given assumption, choose one of your group to upload your example the MyAberdeen discussion board, such that we build up a "portfolio" of lousy datasets.
 
-If it helps, you can think of this exercise as essentially asking you to be a terrible scientist. For each assumption, think of an experiment or how you might collect data in such a way as to violate one of these assumptions. You might decide to focus on trying to come up with a lousy experiment to understand, which you do in the qorst possible way:
+If it helps, you can think of this exercise as essentially asking you to be a terrible scientist. For each assumption, think of an experiment or how you might collect data in such a way as to violate one of these assumptions. You might decide to focus on trying to come up with a lousy experiment to understand, which you do in the worst possible way:
 
 * Ostrich wing length (e.g. "we measured wing length by looking at the wing through binocs and guessing to the nearest mm" - **Validity**)
 
@@ -84,8 +84,7 @@ To ensure that we have examples for each assumption, within your group, have one
 # The code below is essentially a lottery machine
 # x = are the options you want to be selected from (here "1 to 7" or 1:7)
 # size = the number of draws you want made
-# replace = FALSE determines if, once one of x has been selected, 
-# if it can still be selected in subsequent draws
+# replace = FALSE says that once a number has been selected, it cannot be selected again
 sample(x = 1:7, size = 7, replace = FALSE)
 ```
 
@@ -154,7 +153,7 @@ Return to the `alligator_bite.txt` dataset from the first workshop. We did not g
 ```{r, include=answer_sheet, class.source="bg-success", eval = FALSE}
 # The issues that jump out are:
 
-# 1. It seems likely that they could sample the same alligators, given they return them to the pond before retrieving the next, even with assurances that they believe this is not the case. If this has occurred, then they have have extreme Lack of independence, as they will have repeated measures of the same alligator for some observations.
+# 1. It seems likely that they could sample the same alligators, given they return them to the pond before retrieving the next, even with assurances that they believe this is not the case. If this has occurred, then they have have extreme lack of independence, as they will have repeated measures of the same alligator for some observations.
 
 # 2. It sounds like actually getting alligators to bite the device might have been a bit hard. Raises the question if we can be sure that each alligator bit the device as hard as possible, or just hard enough for the staff to feel like they had a measurement. We could formalise this as the assumption of Validity.
 

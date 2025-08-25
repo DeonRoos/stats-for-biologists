@@ -1,0 +1,66 @@
+---
+title: "Workshop 3 - Study Notes"
+author: "Michelle Pinard & Deon Roos"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+    reference_docx: "../sbstemplate.docx"
+---
+
+# Why and when to use an LM with a continuous predictor
+
+-   We want a simple, interpretable summary of how a response changes with a continuous explanatory variable.
+
+-   Start from a clear question, and carry out an EDA.
+
+-   Residuals quantify vertical deviations from a predicted line and allow automated fitting via likelihood.
+
+# From idea to model
+
+Specify a linear model for a continuous response with constant variance: $y_i \sim Normal(\mu_i, \sigma), \mu_i = \beta_0 + \beta_1 \times x_i$. Where $\beta_0$ is the mean at $x = 0$ (i.e. the intercept) and $\beta_1$ is the change in the mean per one-unit increase in $x$.
+
+The slope's sign answers direction (positive means positive relationship, negative means negative relationship).
+
+# Implementing the model in R
+
+Data must be tabular (rows = observations, columns = variables). Use the formula interface (e.g. `y ~ x`) and store the model object:\
+
+```{r, eval = F}
+fit <- lm(response ~ explanatory, data = my_data)
+```
+
+Read `summary(fit)` provides the parameter estimates and their standard error in the coefficients table (estimates, standard errors) as well as t tests, p values, residual standard error (σ estimate), degrees of freedom, and R².
+
+Report estimates with units and tie them back to $\mu_i = \beta_0 + \beta_1 \times x_i$.
+
+# Interpreting output
+
+-   Intercept ($\beta_0$): expected response when $x = 0$ (interpret only if 0 is in-range or scientifically meaningful).
+
+-   Slope ($\beta_1$): expected change in response per unit $x$.
+
+-   Summarise parameter estimates to an appropriate level of precision (e.g. to three decimal places). A general heuristic is to summarise to the same level as your data. For example, if your data has one decimal place, then summarise your parameters to one decimal place.
+
+-   Caution advised when rounding parameter estimates prior to generating predictions (generally avoid unless you have good reason to)
+
+# Showing the fit
+
+Manual: create a grid of x values, compute $\mu = \beta_0 + \beta_1 \times x$, then plot as a line.
+
+```{r, eval = F}
+new <- data.frame(x = seq(min(d$x), max(d$x), length.out = 50))
+pred <- predict(m, newdata = new)
+new$fit <- pred
+
+ggplot(data = new) +
+  geom_line(aes(x = x, y = fit))
+```
+
+Convenience: use the `ggeffects` package and the `ggpredict()` and `plot()` functions for quick defaults, noting the trade-off in flexibility.
+
+```{r, eval = F}
+library(ggeffects)
+ggpred <- ggpredict(fit)
+plot(ggpred)
+```

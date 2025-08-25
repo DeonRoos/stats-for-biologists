@@ -1,0 +1,226 @@
+"year" "city" "alc" "ufo" "belief" "chupa"
+1981 "Houston" 7.8 0 "medium" 0.14
+1982 "Houston" 10.5 3 "low" 0.52
+1983 "Houston" 4.9 0 "high" -0.54
+1984 "Houston" 7.1 0 "low" -0.54
+1985 "Houston" 5.8 0 "low" -0.77
+1986 "Houston" 7 0 "high" -0.1
+1987 "Houston" 7.6 0 "low" -0.44
+1988 "Houston" 5.3 0 "medium" -0.52
+1989 "Houston" 6.9 0 "medium" -0.07
+1990 "Houston" 4.4 0 "high" -0.6
+1991 "Houston" 10.4 4 "medium" 0.93
+1992 "Houston" 6.4 0 "medium" -0.35
+1993 "Houston" 9.7 0 "high" 0.67
+1994 "Houston" 6.8 0 "medium" -0.2
+1995 "Houston" 7.6 0 "high" 0.06
+1981 "Dallas" 9.7 0 "medium" 0.5
+1982 "Dallas" 7.8 1 "low" -0.19
+1983 "Dallas" 6.5 1 "high" 0.06
+1984 "Dallas" 7.2 0 "low" -0.46
+1985 "Dallas" 4.3 0 "low" -0.94
+1986 "Dallas" 6.2 5 "high" 0.36
+1987 "Dallas" 4.9 7 "low" -0.07
+1988 "Dallas" 9.3 0 "medium" 0.2
+1989 "Dallas" 5.8 0 "medium" -0.17
+1990 "Dallas" 3.6 0 "high" -0.75
+1991 "Dallas" 6.2 38 "medium" 3.56
+1992 "Dallas" 1 0 "medium" -1.49
+1993 "Dallas" 6.5 0 "high" -0.17
+1994 "Dallas" 7.3 10 "medium" 0.77
+1995 "Dallas" 10.5 0 "high" 0.75
+1981 "Austin" 8.7 0 "medium" 5
+1982 "Austin" 11.9 0 "low" 0.62
+1983 "Austin" 7.3 0 "high" 0.12
+1984 "Austin" 6.4 0 "low" -0.72
+1985 "Austin" 0 0 "low" -2.03
+1986 "Austin" 8.6 3 "high" 0.65
+1987 "Austin" 7.8 8 "low" 0.42
+1988 "Austin" 8.1 0 "medium" -0.04
+1989 "Austin" 0 0 "medium" -1.71
+1990 "Austin" 7.1 0 "high" -0.04
+1991 "Austin" 11.9 3 "medium" 1.09
+1992 "Austin" 3.5 0 "medium" -0.76
+1993 "Austin" 5.9 0 "high" -0.15
+1994 "Austin" 7.2 1 "medium" -0.11
+1995 "Austin" 7.8 0 "high" 0.29
+1981 "San Antonio" 6.8 0 "medium" -0.17
+1982 "San Antonio" 7.8 0 "low" -0.17
+1983 "San Antonio" 8.4 1 "high" 0.49
+1984 "San Antonio" 12.9 1 "low" 0.68
+1985 "San Antonio" 4.7 9999 "low" -1.16
+1986 "San Antonio" 8.6 0 "high" 0.31
+1987 "San Antonio" 4.4 24 "low" 1.43
+1988 "San Antonio" 8.9 0 "medium" 0.11
+1989 "San Antonio" 3.5 1 "medium" -0.66
+1990 "San Antonio" 7.4 0 "high" 0.06
+1991 "San Antonio" 10.5 5 "medium" 1.18
+1992 "San Antonio" 8 0 "medium" -0.05
+1993 "San Antonio" 7.7 1 "high" 0.38
+1994 "San Antonio" 5.1 0 "medium" -0.57
+1995 "San Antonio" 7.5 0 "high" 0.08
+1981 "Fort Worth" 9.5 0 "medium" 0.16
+1982 "Fort Worth" 9.5 0 "low" 0.06
+1983 "Fort Worth" 7.9 0 "high" 0.17
+1984 "Fort Worth" 10.4 0 "low" 0.11
+1985 "Fort Worth" 4.8 0 "low" -1.03
+1986 "Fort Worth" 5.9 1 "high" -0.08
+1987 "Fort Worth" 5.1 15 "low" 0.79
+1988 "Fort Worth" 6.4 0 "medium" -0.34
+1989 "Fort Worth" 8.2 0 "medium" 0.02
+1990 "Fort Worth" 3.9 0 "high" -0.58
+1991 "Fort Worth" 7.8 14 "medium" 1.31
+1992 "Fort Worth" 6.7 0 "medium" -0.08
+1993 "Fort Worth" 9.3 1 "high" 0.53
+1994 "Fort Worth" 4.7 0 "medium" -0.62
+1995 "Fort Worth" 7.3 0 "high" 0.27
+1981 "El Paso" 6.6 0 "medium" -0.35
+1982 "El Paso" 9.6 0 "low" 0.22
+1983 "El Paso" 7.5 1 "high" 0.29
+1984 "El Paso" 8.2 0 "low" -0.25
+1985 "El Paso" 8.9 0 "low" 0.03
+1986 "El Paso" 8.7 1 "high" 0.44
+1987 "El Paso" 4.6 25 "low" 1.48
+1988 "El Paso" 9.1 0 "medium" 0.15
+1989 "El Paso" 11.3 0 "medium" 0.6
+1990 "El Paso" 8.4 0 "high" 0.19
+1991 "El Paso" 8.5 3 "medium" 0.45
+1992 "El Paso" 8.6 0 "medium" 0.11
+1993 "El Paso" 12.1 16 "high" 2.66
+1994 "El Paso" 7.7 1 "medium" 0.1
+1995 "El Paso" 8 0 "high" 0.18
+1981 "Arlington" 5.6 0 "medium" -0.43
+1982 "Arlington" 9.9 0 "low" 0.27
+1983 "Arlington" 9.5 0 "high" 0.5
+1984 "Arlington" 9.4 0 "low" 0.02
+1985 "Arlington" 7.7 0 "low" -0.24
+1986 "Arlington" 9.6 0 "high" 0.58
+1987 "Arlington" 6.1 3 "low" -0.29
+1988 "Arlington" 7.3 0 "medium" -0.08
+1989 "Arlington" 3.7 0 "medium" -0.79
+1990 "Arlington" 9.3 0 "high" 0.45
+1991 "Arlington" 8.8 8 "medium" 0.92
+1992 "Arlington" 5.9 0 "medium" -0.42
+1993 "Arlington" 10.6 1 "high" 0.92
+1994 "Arlington" 5.7 0 "medium" -0.48
+1995 "Arlington" 7 0 "high" 0.08
+1981 "Corpus Christi" 10.5 0 "medium" 0.49
+1982 "Corpus Christi" 6.1 0 "low" -0.74
+1983 "Corpus Christi" 5.7 0 "high" -0.37
+1984 "Corpus Christi" 9.9 0 "low" 0.16
+1985 "Corpus Christi" 5.3 0 "low" -0.75
+1986 "Corpus Christi" 6.9 1 "high" 0.09
+1987 "Corpus Christi" 8.9 1 "low" -0.28
+1988 "Corpus Christi" 5.8 0 "medium" -0.46
+1989 "Corpus Christi" 7.4 0 "medium" 0
+1990 "Corpus Christi" 10.3 0 "high" 0.63
+1991 "Corpus Christi" 11.8 1 "medium" 0.66
+1992 "Corpus Christi" 6.8 0 "medium" -0.28
+1993 "Corpus Christi" 7.5 1 "high" 0.1
+1994 "Corpus Christi" 7.7 0 "medium" -0.14
+1995 "Corpus Christi" -5 0 "high" 0.28
+1981 "Plano" 7.3 0 "medium" -0.25
+1982 "Plano" 9.4 1 "low" 0
+1983 "Plano" 5.9 0 "high" -0.16
+1984 "Plano" 12.3 0 "low" 0.6
+1985 "Plano" 3.4 0 "low" -1.36
+1986 "Plano" 8.3 1 "high" 0.26
+1987 "Plano" 3.8 0 "low" -0.83
+1988 "Plano" 7.6 0 "medium" -0.04
+1989 "Plano" 9.1 0 "medium" 0.42
+1990 "Plano" 8.8 0 "high" 0.25
+1991 "Plano" 8.7 0 "medium" 0.27
+1992 "Plano" 7.7 0 "medium" -0.01
+1993 "Plano" 10.7 33 "high" 4.04
+1994 "Plano" 4.9 0 "medium" -0.59
+1995 "Plano" 9.2 0 "high" 0.33
+1981 "Laredo" 8 0 "medium" -0.08
+1982 "Laredo" 13.2 0 "low" 0.81
+1983 "Laredo" 6.1 0 "high" -0.22
+1984 "Laredo" 8.9 0 "low" 0.13
+1985 "Laredo" 5.9 0 "low" -0.74
+1986 "Laredo" 8.1 0 "high" 0.04
+1987 "Laredo" 5.9 5 "low" -0.17
+1988 "Laredo" 4.5 0 "medium" -0.77
+1989 "Laredo" 7.4 0 "medium" -0.12
+1990 "Laredo" 5.4 0 "high" -0.35
+1991 "Laredo" 8.4 1 "medium" 0.16
+1992 "Laredo" 5.2 0 "medium" -0.49
+1993 "Laredo" 9.2 6 "high" 1.11
+1994 "Laredo" 4.9 0 "medium" -0.66
+1995 "Laredo" 8.4 0 "high" 0.11
+1981 "Lubbock" 5 0 "medium" -0.76
+1982 "Lubbock" 10.5 0 "low" 0.23
+1983 "Lubbock" 5.5 0 "high" -0.42
+1984 "Lubbock" 8.4 0 "low" -0.06
+1985 "Lubbock" 7.9 0 "low" -0.36
+1986 "Lubbock" 6.1 0 "high" -0.38
+1987 "Lubbock" 8.6 0 "low" -0.26
+1988 "Lubbock" 8.2 0 "medium" -0.04
+1989 "Lubbock" 4.2 1 "medium" -0.63
+1990 "Lubbock" 7 0 "high" -0.11
+1991 "Lubbock" 7.8 0 "medium" 0.07
+1992 "Lubbock" 8.1 0 "medium" 0.15
+1993 "Lubbock" 7.9 3 "high" 0.48
+1994 "Lubbock" 3.7 5 "medium" -0.32
+1995 "Lubbock" 7.8 0 "high" 0.02
+1981 "Garland" 5.7 0 "medium" -0.45
+1982 "Garland" 8.1 0 "low" -0.28
+1983 "Garland" 6.7 0 "high" -0.14
+1984 "Garland" 8.8 0 "low" 0.07
+1985 "Garland" 6.7 0 "low" -0.62
+1986 "Garland" 4.3 0 "high" -0.54
+1987 "Garland" 3.1 0 "low" -1.34
+1988 "Garland" 8.4 0 "medium" 0.09
+1989 "Garland" 7.5 0 "medium" 0.11
+1990 "Garland" 9.8 0 "high" 0.53
+1991 "Garland" 8.4 1 "medium" 0.19
+1992 "Garland" 1.8 0 "medium" -1.13
+1993 "Garland" 12 1 "high" 1.06
+1994 "Garland" 6.7 0 "medium" -0.18
+1995 "Garland" 4.3 0 "high" -0.54
+1981 "Irving" 4.4 0 "medium" -0.83
+1982 "Irving" 8.1 0 "low" -0.07
+1983 "Irving" 5.6 0 "high" -0.29
+1984 "Irving" 10.5 0 "low" 0.36
+1985 "Irving" 8.8 1 "low" -0.06
+1986 "Irving" 11.9 0 "high" 1.15
+1987 "Irving" 5.6 14 "low" 0.47
+1988 "Irving" 5.8 0 "medium" -0.45
+1989 "Irving" 9.2 1 "medium" 0.29
+1990 "Irving" 6.4 0 "high" -0.06
+1991 "Irving" 3.6 4 "medium" -0.37
+1992 "Irving" 2.3 0 "medium" -1.22
+1993 "Irving" 11 17 "high" 2.37
+1994 "Irving" 8.3 0 "medium" 0.07
+1995 "Irving" 7.7 0 "high" 0.24
+1981 "Amarillo" 5.8 0 "medium" -0.46
+1982 "Amarillo" 12.7 0 "low" 0.65
+1983 "amarillo" 8.6 0 "high" 0.5
+1984 "Amarillo" 9.4 0 "low" 0.03
+1985 "Amarillo" 6.2 0 "low" -0.65
+1986 "Amarillo" 9.6 0 "high" 0.66
+1987 "Amarillo" 6 0 "low" -0.63
+1988 "Amarillo" 4.6 0 "medium" -0.65
+1989 "Amarillo" 6.4 0 "medium" -0.37
+1990 "Amarillo" 11.7 0 "high" 0.78
+1991 "Amarillo" 12.2 0 "medium" 0.6
+1992 "Amarillo" 7.8 0 "medium" 0.02
+1993 "Amarillo" 10.5 15 "high" 2.32
+1994 "Amarillo" 3.2 0 "medium" -0.84
+1995 "Amarillo" 5.2 0 "high" -0.14
+1981 "Grand Prairie" 5.3 0 "medium" -0.71
+1982 "Grand Prairie" 10.1 0 "low" -0.12
+1983 "Grand Prairie" 9.7 0 "high" 0.61
+1984 "Grand Prairie" 6.6 0 "low" -0.65
+1985 "Grand Prairie" 3.2 0 "low" -1.33
+1986 "Grand Prairie" 6 0 "high" -0.14
+1987 "Grand Prairie" 2.4 0 "low" -1.4
+1988 "Grand Prairie" 5.8 4 "medium" -0.05
+1989 "Grand Prairie" 6.5 0 "medium" -0.23
+1990 "Grand Prairie" 4.9 0 "high" -0.32
+1991 "Grand Prairie" 9.6 0 "medium" 0.31
+1992 "Grand Prairie" 8.1 0 "medium" -0.02
+1993 "Grand Prairie" 8.5 6 "high" 0.84
+1994 "Grand Prairie" 8.3 2 "medium" 0.21
+1995 "Grand Prairie" 6 0 "high" -0.14

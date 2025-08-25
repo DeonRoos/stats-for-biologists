@@ -816,7 +816,7 @@ table(fast$species)
 
 # Chupacabras, Aliens and Beer
 
-The final dataset you will be working with is called `chupa.txt`. This dataset contains the following variables:
+The final dataset you will be working with is called `chupa.txt`. We will work on this together in the final 30 minutes of the session but if you are finished early and want to get started, please feel free to do so. This dataset contains the following variables:
 
 -   `year`: The year in which data was collected
 
@@ -831,3 +831,82 @@ The final dataset you will be working with is called `chupa.txt`. This dataset c
 -   `chupa`: The growth rate of [chupacabra](https://en.wikipedia.org/wiki/Chupacabra) sightings from the previous year to the current year, in that city (where a value of zero means the number of sightings is constant, -0.5 means the number of sightings has declined by 50%, and 0.5 means they have increased by 50%).
 
 There are a number of data entry issues in the dataset. Carry out an EDA and try to find them all.
+
+As a group, we will look at lines of code and try to spot the error(s) and figure out what these codes are doing when we run them.
+
+```{r, include = FALSE, eval = TRUE}
+chupa <- read.table(here("Workshops/Workshop 1 - Hidden assumptions/Data", "chupa.txt"), header = TRUE)
+```
+
+
+```{r, eval = F, include=answer_sheet, class.source="bg-success"}
+chupa<-read.table("chupa.txt", header=TRUE)
+```
+
+```{r, include=answer_sheet, class.source="bg-success"}
+head(chupa)
+str(chupa)
+unique(chupa$city)
+summary(chupa)
+unique(chupa$belief)
+```
+
+```{r, include=FALSE, class.source="bg-success"}
+# Errors to fix
+# city has two spellings of Amarillo (upper and lower case A)
+# unusual values in alc and ufo
+```
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Find the rows with the lower case "amarillo"
+chupa$city=="amarillo"         # Gives us TRUE or FASLE for each observation
+chupa[198,]                    # Gives us information for row number 198
+chupa[chupa$city=="amarillo",] # Shows all columns for any rows with this name spelling
+```
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# To correct the spelling
+chupa$city[chupa$city == "amarillo"] <- "Amarillo"
+unique(chupa$city)      # Check to see if corrected
+chupa[198,]             # Checks row 198 to see if corrected
+```
+
+```{r, include=answer_sheet, class.source="bg-success"}
+# Unusual values in ufo
+hist(chupa$ufo)         # Looks like we need to change 9999 to NA
+chupa[chupa$ufo == 9999,]
+#change to NA
+chupa$ufo[chupa$ufo == 9999] <- NA
+summary(chupa$ufo)
+
+# Unusual value in alc
+hist(chupa$alc)         # Looks like we have one negative value, let's make it positive
+chupa[chupa$alc == -5,]
+#change to 5
+chupa$alc[chupa$alc == -5] <- 5
+summary(chupa$alc)
+
+hist(chupa$chupa) #Some negative values but these are okay as it is a growth rate
+```
+
+# Coding Puzzles
+
+In the following snippets of code, can you identify the error? If you're not sure, try running them and see what the error says.
+
+```{r, eval = F}
+summary(alc)
+chupa[chupa$ufo==9999]
+chupa[chupa$ufo = 9999, ]
+chupa[chupa$city = Houston,]
+ali[ali$Length > 200, ]
+ali[ali$bite > mean(ali$bite), ]
+```
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+summary(alc) # We have not specified that this is in the chupa dataset
+chupa[chupa$ufo==9999] # We're missing the comma to specify which columns to show
+chupa[chupa$ufo == 9999, ] # = assigns a value, use == for a conditional test
+chupa[chupa$city = Houston,] # Houston needs to be in quatation makes
+ali[ali$Length > 200, ] # Names are case sensitive. Should be `length`
+ali[ali$bite > mean(ali$bite), ] # If there are NAs in bite this will fail, include `na.rm = TRUE`
+```

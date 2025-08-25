@@ -64,7 +64,7 @@ After running the code, you'll notice that the simulated values look pretty simi
 
 Next, we should ask if there are any natural bounds on the data and whether our model might predict values near these bounds. For boto length, the natural lower bound is zero — i.e. no adult animal can be 0 cm long. Although this suggests that a $Normal$ distribution could theoretically predict impossible (negative or zero) lengths, the minimum observed length in our data is well above zero. Therefore, the risk of the model predicting such extreme values is minimal.
 
-In practice, this makes a $Normal$ distribution a reasonably safe choice here. However, we should still check the model’s predictions later to ensure it isn’t producing values that are physically implausible. If we the model was predicting the impossible, then we'd switch to another distribution using a "Generalised" Linear Model (or GLM). We'll cover GLMs at the end of the course.
+In practice, this makes a $Normal$ distribution a reasonably safe choice here. However, we should still check the model’s predictions later to ensure it isn’t producing values that are physically implausible. If the model predicts the impossible, then we'd switch to another distribution using a "Generalised" Linear Model (or GLM). We'll cover GLMs at the end of the course.
 
 ## Important Clarification
 
@@ -134,13 +134,13 @@ Consider whether we are likely to break any of these assumptions based on your u
 1. Which assumptions do you believe are very likely to be violated?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# One potential issue could be the assumption of additivity. Last week, we saw that different sexes might be affected differently by drought, suggesting an it is the overlap between sex and drought. In instances where you have "overlap" between two or more variables, the assumption of addivity is likely to be broken.
+# One potential issue could be the assumption of additivity. Last week, we saw that different sexes might be affected differently by drought, suggesting overlap between sex and drought. In instances where you have "overlap" between two or more variables, the assumption of additivity is likely to be broken.
 ```
 
 2. Which assumptions could we check *after* fitting the model?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# All of the assumptions related to model residuals. Remember - residuals are the difference between what the model predict
+# All of the assumptions related to model residuals. Remember - residuals are the difference between what the model predicts
 # and what we observed. We can't check that until we've run the model. We can also check linearity after (but also with EDA) but there is no way to check the others
 
 # Another concern could be the independence of errors. It’s possible that dolphins measured in the same region are related (e.g., larger dolphins might produce larger offspring), which could lead to correlated errors. For instance, if a parent is smaller than predicted by the model, and we don’t fully understand why, their offspring may also be smaller than expected for the same unknown reasons. This shared unexplained variation would violate the assumption of independence in our model (i.e. misunderstanding one dolphin should not make us more likely to misunderstand another dolphin).
@@ -392,7 +392,7 @@ As a tip, don't confuse the length of a script with complexity or the intelligen
 
 # A new challenger
 
-Using the skills you've just developed, you're now going to analyse an entirely new dataset, the `beetles.txt` dataset on MyAberdeen. This data comes from a lab experiment from researchers who were interested in understanding how temperature impacts fecundity in burying beetles beetles (*Nicrophorus vespilloides*), ultimately attempting to understanding how short term (i.e. 6 hours) exposures to temperature changes may affect how the species may respond to climate change.
+Using the skills you've just developed, you're now going to analyse an entirely new dataset, the `beetles.txt` dataset on MyAberdeen. This data comes from a lab experiment from researchers who were interested in understanding how temperature impacts fecundity in burying beetles (*Nicrophorus vespilloides*), ultimately attempting to understanding how short term (i.e. 6 hours) exposures to temperature changes may affect how the species may respond to climate change.
 
 The data contains:
 
@@ -504,7 +504,7 @@ plot(preds, add.data = TRUE)
 # Interpret -----------------------------------
 # This model, as is, should not be used to make any kind of inference
 # (In reality, we'd need to change the model to allow temperature to have a non-linear effect)
-# (But given you don't know how to do that, we should stop here and advice/insist the results are not interpreted)
+# (But given you don't know how to do that, we should stop here and advise/insist the results are not interpreted)
 ```
 
 

@@ -1,0 +1,44 @@
+---
+title: "Workshop 7 - Study Notes"
+author: "Michelle Pinard & Deon Roos"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+    reference_docx: "../sbstemplate.docx"
+---
+
+# Purpose
+
+Running linear models with multiple explanatory variables. We also introduced the idea that you can use the same linear-model machinery for two goals: predicting, and estimating a causal effect when justified by a defensible causal story.
+
+# Core ideas
+
+A linear model with multiple explanatory variables estimates a mean response as a sum of terms, one per predictor, plus contrasts for categorical levels. When a continuous variable is recorded categorically (e.g., EPC or Tax bands), the model gains many parameters and loses efficiency; avoid unnecessary discretisation when you can. Parameter estimates from a multi-variable model are associations conditional on the other explanatory variables and are not automatically causal.
+
+# Predictive modelling track
+
+Goal: have a model that can accurately predict new data. You do not need to adjust for confounding (indeed, confounding actually helps predictions). Interpret parameter estimates as conditional associations useful for prediction, not causes. Diagnose residual patterns as usual; unequal variance mainly harms standard errors and intervals.
+
+# Causal modelling track
+
+Goal: estimate the effect of changing one variable while respecting the data-generating process. Draw a DAG, identify open “backdoor” paths, and find the variables to include that blocks the open paths. Interpret as causal only if the DAG is credible.
+
+# Confounding: what it is and why it matters
+
+Models estimate _associations_. Those can be causal, spurious, or confounded by not including forks or by including colliders (inclusion of forks depends on modelling aim). Lectures 7 and 7.5 classify common structures (forks, pipes, and colliders) and show how misleading narratives arise when we skip causal reasoning. Use DAGs and the backdoor criterion to plan adjustment; experiments achieve the same aim by design.
+
+# Diagnostics and influence
+
+Use the standard four plots. Residuals vs fitted and scale–location target mean structure and variance; QQ targets tail behaviour; residuals vs leverage plus Cook’s distance flags influential cases. Compare estimates with and without flagged cases rather than silently deleting them.
+
+# Interpreting parameters from predictive versus causal
+
+Predictive model: the FloorArea parameter is a conditional association after accounting for Rooms, EPC, and Tax.
+Causal model: the FloorArea parameter estimates the total effect under the stated DAG, which leaves mediating paths open. 
+
+Keep your interpretation aligned with the model’s purpose; predictive = "associations", causal = "causal".
+
+# Checklist
+
+Frame your question and choose the track (predictive or causal). For causal, this requires an extra step of sketching a DAG and applying the backdoor criterion before fitting.

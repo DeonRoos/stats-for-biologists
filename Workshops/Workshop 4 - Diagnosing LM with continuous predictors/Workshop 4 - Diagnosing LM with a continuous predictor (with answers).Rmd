@@ -336,6 +336,11 @@ An added benefit is that these plots come with guidance on what to look for in e
 
 Having diagnosed the boto model, let's move on to the beetle model from the last workshop. If you haven't run that model yet, do so now. Once you have, go through the process of checking the model diagnostics to determine if you’re willing to place your trust in the model.
 
+The dataset contains:
+
+- `temperature`: The average temperature at which beetles were kept.
+- `offspring`: The total number of offspring produced by the beetles.
+
 ## Question Set Two
 
 1. Do any of the diagnostic plots for the beetle model suggest a reason to not trust the results?
@@ -417,8 +422,8 @@ summary(beet_mod)
 # BUT(!) this model is biased, and so these parameters are unreliable, so we should not use this model
 
 preds <- ggpredict(beet_mod)
-plot(preds, add.data = TRUE)
-# The plot above includes the raw data (via add.data = TRUE)
+plot(preds, show_data = TRUE)
+# The plot above includes the raw data (via show_data = TRUE)
 # The linear fit to the non-linear relationship is pretty clear
 
 # Interpret -----------------------------------
@@ -427,6 +432,88 @@ plot(preds, add.data = TRUE)
 # (But given you don't know how to do that, we should stop here and advise/insist the results are not interpreted)
 ```
 
+# A Disturbance in the Force
+
+To finish off this workshop, there is a final dataset that you will need to 1) carry out an EDA, 2) build and fit a model to answer a research question, 3) diagnose the model fit, and 4) create a figure to show your predicted relationship. You will have no
+
+This data comes from the Cairngorms National Park, where researchers wanted to quantify how much dogs (that were being walked without a leash, i.e. able to go anywhere) disturbed mammalian species in the park (including fox, badgers, red and roe deer, marten, stoat, weasles and red squirrels). To do so, they placed cameras adjacent to trail paths to record how long mammalian species remained on camera. Observers would then stay on the path and note how many dogs without a leash passed in a six hour window.
+
+```{r, echo = FALSE}
+set.seed(1234)
+n <- 241
+dogs <- rpois(n = n, lambda = 3)
+total <- 60*60*6 # total seconds in 6 hours
+b0 <- total * 0.2 # 20% of time animals present
+b1 <- -432
+mu <- b0 + b1 * dogs
+seconds <- rnorm(n = n, mean = mu, sd = 1000)
+df <- data.frame(seconds, dogs)
+df[132,] <- c(0, 6120.112)
+write.table(df, here("Workshops/Workshop 4 - Diagnosing LM with continuous predictors/Data", "dog_disturbance.txt"), row.names = FALSE)
+```
+
+The dataset contains:
+
+- `seconds`: The total time (in seconds) that UK mammals spent in view of a camera trap in a six hour period
+- `dogs`: The number of dogs that were observed walking without a leash in a six hour period
+
+## Question Set Three
+
+1. Carry out an EDA. Do you notice any potential issues?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# There is an observation where there were 6120.112 dogs and zero seconds of mammal activity. This is clearly a mistake, given the maximum of dogs, excluding this observation, is nine. It seems likely that the values are correct, just entered into the wrong row; it's probably 6120.112 seconds with 0 dogs.
+```
+
+2. What is the range in numbers dogs that were walked off the leash?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# We can use range(cairmgorms$dogs) which will return 0.000 and 6120.112 dogs. Alternatively, we could use min(), max(), summary() or a huge variety of other functions to achieve the same goal.
+```
+
+3. If you have found any issues (hint, there is one issue), how should it be corrected? **Do not make any changes to the data yet.**
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# Given it seems that this row should be zero dogs and 6120.112 seconds of activity, we can swap this ourselves in a number of ways. Personally, I'd use:
+cairmgorms[cairmgorms$dogs > 6000, ] <- c(6120.112, 0)
+# But there will, as always, be lots of ways you could solve this issue.
+```
+
+3. If the researchers want to understand the impact that dogs have on mammals, would `dogs` the explanatory variable or the response variable in the model?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# Dogs is the explanatory variable. We want to understand how seconds of activity changes in relation to dogs. If dogs were the response, our question would be: "Does mammal activity impact how many dogs are not on a leash".
+```
+
+4. Fit a model capable of answering the researchers question, then check the diagnostic plots. Which plot suggests an issue?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# Although all plots look "weird", the only one that shows a problem is the Residuals vs. Leverage plot. One observation has a very large Cook's distance value.
+```
+
+5. Is the observation you noted in 1. the same observation highlighted by the diagnostic plots?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# The Residuals vs. Leverage plot shows one observation with with a huge Cook's distance value. The number shown next to it is the row number, so the weird observation is on row 132.
+```
+
+6. Correct any observations that require it. Rerun the model with the corrected data. Do the diagnostic plots look sufficient now?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+cairmgorms[cairmgorms$dogs > 6000, ] <- c(6120.112, 0)
+```
+
+7. If you are happy that the model has sufficiently met it's assumptions, for each additional dog that is not on a leash, what is the change in seconds of mammal activity in a six hour period?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# The slope per six hours is -381.88 seconds, meaning that for every dog that is walked without a leash, mammal activity (on camera) decreases by ca. 381.88 seconds, or about 6 minutes.
+```
+
+8. Are there any remaining assumptions that should cause us to pause?
+
+```{r, include=answer_sheet, class.source="bg-success", eval = F}
+# We need to keep in mind that this data is activity of mammals *on camera*. This is at risk of violating the assumption of representativeness. Is the behaviour of animals on camera the same as animals not on camera? What about a camera placed in a tree? Will that capture badger activity?
+```
 
 
 # Assumption table

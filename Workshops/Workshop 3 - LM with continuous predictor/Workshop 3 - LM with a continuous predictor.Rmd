@@ -269,6 +269,78 @@ $\mu_i = \underline{\phantom{\beta_0}} + \underline{\phantom{\beta_0}} \times dr
 
 We'll cover this on Friday.
 
+# Extra: How many decimal points?
+
+Generally, when we work with summaries of data and estimates, these won't be integers (i.e. whole numbers, 1, 2, 3) but will be _floating_ numbers (i.e. numbers with decimal points, 1.1, 2.032, 3.14). A common question is, "How many decimal points should I use and report?" There is no singularly correct answer. It depends on context. For example, in the next step of this workshop you'll be using parameter estimates to create figures showing your predicted relationship. If you were to do this by hand, should you use zero decimal points or one hundred? Let's see what difference it makes with a hypothetical model.
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+library(ggplot2)
+library(dplyr)
+
+pred_fun <- \(b, x) b["(Intercept)"] + b["x"] * x
+
+set.seed(1)
+n <- 200
+x <- seq(0, 100, length.out = n)
+y <- -1.23456789 + 3.45567891 * x + rnorm(n, sd = 0.75)
+
+fit <- lm(y ~ x)
+b_hat <- coef(fit)
+
+new_x <- seq(min(x), max(x), length.out = 301)
+digits <- c(0, 2)
+
+curves <- digits |>
+  lapply(\(d) {
+    b <- round(b_hat, d)
+    data.frame(x = new_x, y = pred_fun(b, new_x), decimals = d)
+  }) |>
+  bind_rows() |>
+  mutate(decimals = factor(decimals, levels = digits))
+
+ggplot(curves, aes(x, y, color = decimals, group = decimals)) +
+  geom_line(linewidth = 0.9) +
+  scale_colour_brewer(palette = "Dark2") +
+  labs(x = "Explanatory variable", y = "Predicted response", color = "Parameter Estimates\nRounded to (dp)") +
+  theme_minimal(base_size = 12)
+```
+
+In the figure above, the parameter estimates from the model ($\beta_0 (\text{Intercept}) = -1.23456789$ and $\beta_1 (\text{Slope}) = 3.45567891$) have been rounded to zero or two decimal places. For zero decimal places, this becomes ($\beta_0 (\text{Intercept}) = -1$ and $\beta_1 (\text{Slope}) = 3$) and for twop decimal places ($\beta_0 (\text{Intercept}) = -1.23$ and $\beta_1 (\text{Slope}) = 3.46$), resulting in fairly different lines being drawn here. This isn't great, because an arbitrary decision is having an impact in how we understand the system. We can see a more extreme (but not uncommon) example below.
+
+```{r, echo = FALSE}
+pred_fun <- \(b, x) b["(Intercept)"] + b["x"] * x
+
+set.seed(1)
+n <- 200
+x <- seq(50000, 1050000, length.out = n)
+y <- 0.0000000652 + 0.0005161519 * x + rnorm(n, sd = 0.75)
+
+fit <- lm(y ~ x)
+b_hat <- coef(fit)
+
+new_x <- seq(min(x), max(x), length.out = 301)
+digits <- c(2, 10)
+
+curves <- digits |>
+  lapply(\(d) {
+    b <- round(b_hat, d)
+    data.frame(x = new_x, y = pred_fun(b, new_x), decimals = d)
+  }) |>
+  bind_rows() |>
+  mutate(decimals = factor(decimals, levels = digits))
+
+ggplot(curves, aes(x, y, color = decimals, group = decimals)) +
+  geom_line(linewidth = 0.9) +
+  scale_colour_brewer(palette = "Dark2") +
+  labs(x = "Explanatory variable", y = "Predicted response", color = "Parameter Estimates\nRounded to (dp)") +
+  theme_minimal(base_size = 12)
+```
+Note that in the above figure the explanatory variable values are much larger than the first example. Here we're going up one million "explanatory variable units" (whatever this might be, e.g. CO2 emmissions), which means that our parameter estimates are, in this case, tiny; $\beta_0 (\text{Intercept}) = 0.0000000652$ and $\beta_1 (\text{Slope}) = 0.0005161519$. Meaning that when we round these two two decimal places, we get $\beta_0 (\text{Intercept}) = 0.00$ and $\beta_1 (\text{Slope}) = 0.00$.
+
+So in the first example, rounding to two decimal points is perfect. In the second, it's terrible. The point here is that when you round numbers for a something like a report or thesis, then you need to think about it. How much does the number change if I round to zero decimal points? What about to five decimal points? What is the range of the explanatory variable? Does it go to billions, or just a handful? All of these are important features to consider, particularly when working with parameter estimates.
+
+> In the tests for BI3010 we will always state how many decimal points you should report values to.
+
 # 6. Summarise the results.
 
 We'll come back to "5. Diagnose the model and check assumptions." on Friday. For today we'll go through how to take these results and convert them into a figure.

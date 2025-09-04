@@ -1,0 +1,63 @@
+---
+title: "Linear models with a single continuous predictor - Study Notes"
+author: "Michelle Pinard & Deon Roos"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+    reference_docx: "../sbstemplate.docx"
+---
+
+# Purpose
+
+Model how a continuous response variable changes with a single continuous explanatory variable. The question is framed as a straight-line trend and the goal is to obtain interpretable parameters and a clear figure showing the fitted relationship.
+
+# How to read the model
+
+A linear model with one continuous predictor estimates an intercept and a slope. The intercept ($\beta_0$) is the expected outcome when the explanatory variable equals zero. The slope ($\beta_1$) is the expected change in the response for a one-unit increase in the explanatory variable. These parameters define the "line of best fit," which balances positive and negative residuals
+
+# How the code is written and relates to the model
+
+If the `R` code is `lm(y ~ x, data = my_data)`, this maps to:
+
+$y_i \sim Normal(\mu_i, \sigma)$
+
+$\mu_i = \beta_0 + \beta_1 \times x_i$
+
+# Interpreting output
+
+-   Intercept ($\beta_0$): expected response when $x = 0$ (pay attention to if $x = 0$ is biologically meaningful in your context, e.g. can a minke whale weigh 0 kg?)
+
+-   Slope ($\beta_1$): expected change in response per unit $x$.
+
+-   Summarise parameter estimates to an appropriate level of precision (e.g. to three decimal places or whatever makes sense in the given context).
+
+# Workflow carried across
+
+Use the same sequence as always: formulate the question, do quick EDA, note hidden assumptions, fit the model, summarise, and produce a clear plot of the fitted relationship. Diagnostic checking is in the next Study Note.
+
+# Useful code examples
+
+```{r, eval = F}
+# Fit model
+m <- lm(y ~ x, data = d)
+
+# Summary of model
+summary(m)
+
+# Create a simple prediction to show relationship
+fake <- data.frame(x = seq(min(d$x), max(d$x), length.out = 25))
+pr   <- predict(m, newdata = fake, se.fit = TRUE)
+
+fake$fit = pr$fit
+
+# Plot the relationship
+ggplot(fake, aes(x, fit)) +
+  geom_line() +
+  labs(x = "Explanatory", y = "Predicted mean")
+
+# Quick way to plot
+library(ggeffects)
+plot(ggpredict(m))
+```
+

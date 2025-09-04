@@ -96,7 +96,7 @@ par(mfrow = c(1,1)) # Reset so only 1 figure is shown
 2. Do you see any thing to be concerned with from the `Q-Q Residuals` plot?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# We completely ignore the Q-Q plot for GLMs - remember, we're not assuming our residuals are Normally distributed anymore.
+# We almost completely ignore the Q-Q plot for GLMs - remember, we're not assuming our residuals are Normally distributed anymore. Focus on the other diagnostics.
 ```
 
 3. Do you see any thing to be concerned with from the `Scale-Location` plot?
@@ -310,4 +310,4 @@ A few final requests from me (Deon):
 
 * I don't care if you forget the details and technical side of this course. I do, however, want you to try to remember that data and models are not magic boxes that unravel the Truth or the "secrets of the universe". A model is just a bunch of code and equations. Don't be fooled by people shoving data and results down your throat, be that on the internet or in peer-reviewed papers.
 
-* If you found any typos, sections of the workshop materials, parts of lectures, or anything in general that felt confusing (given it's a stats course...), then let me (Deon) know. Please. I genuinely think the material on this course is important to know, and if I'm not doing a good job of that, please tell me. Feel free to message via email or however you prefer. I'd really appreciate any comments or critques (just please don't be cruel).
+* If you found any typos, sections of the workshop materials, parts of lectures, or anything in general that felt confusing (given it's a stats course...), then let me (Deon) know. Please. I genuinely think the material on this course is important to know, and if I'm not doing a good job of that, please tell me. Feel free to message via email or however you prefer. I'd really appreciate any comments or critiques (just please don't be needlessly cruel).

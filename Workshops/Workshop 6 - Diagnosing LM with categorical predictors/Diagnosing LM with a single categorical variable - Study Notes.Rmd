@@ -1,0 +1,61 @@
+---
+title: "Diagnosing linear models with a single categorical variable - Study Notes"
+author: "Michelle Pinard & Deon Roos"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+    reference_docx: "../sbstemplate.docx"
+---
+
+# Purpose
+
+Model-checking step of the workflow for linear models where the explanatory variable is categorical. The focus is on reading the standard diagnostic plots and deciding whether model assumptions look adequate for interpretation.
+
+# Model structure
+
+With a categorical predictor the model structure is a set of group averages (and differences in averages). There is no linear trend to check, so the “linearity” assumption is not applicable in this setting.
+
+# The four diagnostic plots and what they address
+
+* Residuals vs Fitted. Assess equal variance of errors by comparing residual spread across fitted values (i.e. across groups). Look for bands of similar spread around zero.
+
+* Scale–Location. A second view on equal variance using the square root of absolute standardised residuals. A roughly flat and equal profile supports the assumption.
+
+* Normal Q–Q. Check whether residuals are approximately normal; slight departures are common and usually not a major concern.
+
+* Residuals vs Leverage (with Cook’s distance contours). Identify disproportionately influential observations; values near the Cook’s distance contour of 1 warrant inspection but values it can often be worth checking values getting close to 0.5.
+
+# Interpreting unequal variance
+
+Unequal residual variance affects uncertainty. Confidence intervals created under violated equal-variance assumptions can be too narrow or too wide even when group means themselves are estimated accurately. Decisions on whether to address this or not depends on how much you rely on uncertainty for that analysis.
+
+# Limits of these checks
+
+Passing the residual checks does not validate data assumptions such as validity or representativeness; those require separate consideration.
+
+# Optional alternative display
+
+`check_model` from the `performance` package provides a compact diagnostic panel. For very simple two-group models its smoothing line can appear wiggly without implying a problem.
+
+# Useful code examples
+
+```{r, eval = F}
+mod <- lm(y ~ group, data = d) # Fit a model with a categorical variable
+
+plot(mod)  # To plot all diagnostic figures
+plot(mod, which = 4)  # To plot only Cook's distances
+
+# To create predictions with 95% CI
+fake <- data.frame(group = unique(d$group))
+pr   <- predict(mod, newdata = fake, se.fit = TRUE)
+fake$fit <- pr$fit
+fake$low <- pr$fit - 1.96 * pr$se.fit
+fake$upp <- pr$fit + 1.96 * pr$se.fit
+
+# To plot predicted relationships
+ggplot(fake, aes(group, fit)) +
+  geom_errorbar(aes(ymin = low, ymax = upp), width = 0.15) +
+  geom_point()
+```
+

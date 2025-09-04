@@ -1,0 +1,63 @@
+---
+title: "GLMs - Study Notes"
+author: "Michelle Pinard & Deon Roos"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+  toc: yes
+reference_docx: "../sbstemplate.docx"
+---
+  
+# Purpose
+  
+GLMs extend linear models to responses that are not well described by $Normal$ distributions. For counts, we can use a Poisson generalised linear model (GLM) with a log link.
+
+# Model essentials for counts
+
+Counts are nonnegative integers. The Poisson GLM assumes $y_i$ follows a $Poisson$ distribution with rate $\lambda_i$, and uses a log link for the linear predictor. The link transforms the linear predictor, not the observed counts ($y$); predictions are made on the link scale and then back-transformed with the exponential for plotting and interpretation.
+
+A $Poisson$ GLM will generally have a form similar to:
+
+$y_i \sim Poisson(\lambda_i)$
+
+$log(\lambda_i) = \beta_0 + \beta_1 \times x_i$
+
+though $log(\lambda_i) = \cdots$ can be adapted just as with linear models (e.g. including categories and/or continuous explanatory variables).
+
+# Diagnosing Poisson GLMs 
+
+Use the standard 2×2 diagnostic plots after fitting.
+
+- Residuals vs Fitted and Scale Location plots can be use to check for non-linearity, equal variance of errors _and dispersion_. Dispersion is relevant to some, but not all, GLMs.
+
+- The Q-Q has very limited use, so can be largely ignored.
+
+- Dispersion can sometimes be resolved by including variables that were originally omitted from the model.
+
+# Interpreting and presenting results
+
+On the link scale, the intercept and slopes can be read directly from summary output. For communication, predictions are shown on the response scale by exponentiating fitted values. In the seabird lecture example, adding species as a fixed effect alongside distance produces a clearer summary and improved diagnostics; full predictions are then shown to answer the original question.
+
+# Key takeaways
+
+Pick a distribution that matches the response, use the appropriate link, diagnose after every refit, and present fitted relationships in the scale that answers the question (here, expected counts for $Poisson$).
+
+# Useful code
+
+```{r, eval = F}
+# Fit a Poisson GLM
+species_mod  <- glm(Species ~ Biomass,
+                    family = poisson(link = "log"),
+                    data = species)
+
+# Backtransform out of log link function by exponentiating predictions
+fake <- data.frame(Biomass = seq(min(species$Biomass),
+                                 max(species$Biomass),
+                                 length.out = 20))
+
+preds <- predict(species_mod, newdata = fake, se.fit = TRUE)
+fake$fit <- exp(preds$fit)
+fake$low <- exp(preds$fit - 1.96 * preds$se.fit)
+fake$upp <- exp(preds$fit + 1.96 * preds$se.fit)
+```
+

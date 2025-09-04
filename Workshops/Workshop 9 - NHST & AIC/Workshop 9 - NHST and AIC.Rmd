@@ -33,7 +33,7 @@ Today we'll have two parts to the workshop. In the first part, you'll use Null H
 
 # 1. Formulate a Research Question
 
-For this workshop you will be using a new dataset on Monarch butterfly wing length. This data is collected by researchers who are concerned by potential impacts of habitat degradation and pesticide use (specifically, glyphosphate) on the migration/flight ability of the butterflies, with fears that their wingspan may be decreasing, ultimately impacting whether the butterflies are able to complete their migration from central America to north America.
+For this workshop you will be using a new dataset on Monarch butterfly wing length. This data is collected by researchers who are concerned by potential impacts of habitat degradation and pesticide use (specifically, glyphosate) on the migration/flight ability of the butterflies, with fears that their wingspan may be decreasing, ultimately impacting whether the butterflies are able to complete their migration from central America to north America.
 
 The researchers want to identify if either of the two explanatory variables are statistically significant, with fears that the increasing amount of meadows/farmland may be detrimental for the species.
 
@@ -46,23 +46,23 @@ body_length <- rnorm(n, mean = 30, sd = 5)
 habitat_type <- sample(c("Forest", "Meadow", "Wetland"), size = n, replace = TRUE)
 habitat_effect <- ifelse(habitat_type == "Forest", 1,
                          ifelse(habitat_type == "Meadow", -0.5, 0))
-glyphosphate <- rgamma(n, rate = 1, shape = 0.5)
+glyphosate <- rgamma(n, rate = 1, shape = 0.5)
 wing_length <- 0.5 * body_length + 
   habitat_effect + 
-  -0.05 * glyphosphate +
+  -0.05 * glyphosate +
   rnorm(n, mean = 0, sd = 2)
 
 butterfly <- data.frame(body_length = round(body_length, digits = 2),
                         habitat = habitat_type,
-                        glyphosphate = round(glyphosphate, digits = 1),
+                        glyphosate = round(glyphosate, digits = 1),
                         wing_length = round(wing_length, digits = 2))
 # head(butterfly)
 # hist(butterfly$wing_length)
 # hist(butterfly$body_length)
 # boxplot(butterfly$wing_length ~ butterfly$habitat)
 # plot(butterfly$wing_length ~ butterfly$body_length)
-# plot(butterfly$wing_length ~ butterfly$glyphosphate)
-# summary(lm(wing_length ~ body_length + glyphosphate + habitat, data = butterfly))
+# plot(butterfly$wing_length ~ butterfly$glyphosate)
+# summary(lm(wing_length ~ body_length + glyphosate + habitat, data = butterfly))
 butterfly$habitat[46] <- "forest"
 write.table(butterfly, here("Workshops/Workshop 9 - NHST & AIC/Data", "butterfly.txt"), row.names = FALSE)
 ```
@@ -100,19 +100,19 @@ $\mu_i = \beta_0 + \beta_1 \times body_i + \beta_2 \times glyph_i + \underline{\
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # The full model will be:
 # wing_i ~ Normal(mu_i, sigma)
-# mu_i = beta_0 + beta_1 * body + beta_2 * glyphosphate + \beta_3 * meadow_i + beta_4 * wetland_i
+# mu_i = beta_0 + beta_1 * body + beta_2 * glyphosate + \beta_3 * meadow_i + beta_4 * wetland_i
 ```
 
 2. What does the parameter $\beta_0$ represent?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# This is the wing length of our butterflies when body length is zero, glyphosphate is zero and the butterflies are in forests.
+# This is the wing length of our butterflies when body length is zero, glyphosate is zero and the butterflies are in forests.
 ```
 
 Let's run our linear model:
 
 ```{r}
-butter_mod <- lm(wing_length ~ body_length + glyphosphate + habitat, data = butterfly)
+butter_mod <- lm(wing_length ~ body_length + glyphosate + habitat, data = butterfly)
 ```
 
 Having run the model, let's see what the parameters $\beta_0$ and $\beta_1$ have been estimated as, using `summary()`:
@@ -161,7 +161,9 @@ summary(butter_mod)
 4. What does statistical significance (or the lack thereof) mean for an intercept?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# P-values in models always asks the same thing: "is this number (i.e. parameter estimate) different to zero?". Statistical significance just adds: "is the probability that the parameter is different to zero less than a 5% chance?".
+# P-values in models always asks the same thing: "is this number (i.e. parameter estimate) different to zero?" (or more technically, "what is the probability, assuming the null hypothesis (true parameter = 0) and model assumptions hold, of obtaining a result at least as extreme as the one observed." 
+
+# Statistical significance just adds: "is the probability that the parameter is different to zero less than a 5% chance?".
 ```
 
 5. What does statistical significance (or the lack thereof) mean for *our* intercept?
@@ -195,7 +197,7 @@ Everything should look good but if you find any issues, investigate and see if y
 
 # 6. Summarise the results.
 
-Before we begin interpreting, let's quickly make the plots to see what's going on in the model. To do so, we'll need three `fake` datasets; one to show the relationship with body length, one to show the relationship with glyphosphate and another to show habitat. Just like when we did the linear models with multiple explanatory variables, we need to keep all other explanatory variables constant when we're trying to show the relationship for our chosen variable.
+Before we begin interpreting, let's quickly make the plots to see what's going on in the model. To do so, we'll need three `fake` datasets; one to show the relationship with body length, one to show the relationship with glyphosate and another to show habitat. Just like when we did the linear models with multiple explanatory variables, we need to keep all other explanatory variables constant when we're trying to show the relationship for our chosen variable.
 
 Meaning:
 
@@ -203,9 +205,9 @@ For the `body_length` figure:
 
 - set `habitat` to `Forest` (Forest chosen arbitrarily)
 
-- set `glyphosphate` to the median `glyphosphate` value
+- set `glyphosate` to the median `glyphosate` value
 
-For the `glyphosphate` figure:
+For the `glyphosate` figure:
 
 - set `habitat` to `Forest` (Forest chosen arbitrarily)
 
@@ -213,7 +215,7 @@ For the `glyphosphate` figure:
 
 For the `habitat` figure:
 
-- set `glyphosphate` to the median `glyphosphate` value
+- set `glyphosate` to the median `glyphosate` value
 
 - set `body_length` to the median `body_length` value
 
@@ -224,7 +226,7 @@ fake_1 <- data.frame(
   body_length = seq(from = min(butterfly$body_length),
                     to = max(butterfly$body_length),
                     by = 0.1),
-  glyphosphate = median(butterfly$glyphosphate),
+  glyphosate = median(butterfly$glyphosate),
   habitat = "Forest"
 )
 
@@ -248,8 +250,8 @@ ggplot(fake_1) +
 
 fake_2 <- data.frame(
   body_length = median(butterfly$body_length),
-  glyphosphate = seq(from = min(butterfly$glyphosphate),
-                    to = max(butterfly$glyphosphate),
+  glyphosate = seq(from = min(butterfly$glyphosate),
+                    to = max(butterfly$glyphosate),
                     by = 0.1),
   habitat = "Forest"
 )
@@ -260,21 +262,21 @@ fake_2$low <- preds$fit - preds$se.fit * 1.96
 fake_2$upp <- preds$fit + preds$se.fit * 1.96
 
 ggplot(fake_2) +
-  geom_ribbon(aes(x = glyphosphate, 
+  geom_ribbon(aes(x = glyphosate, 
                   ymin = low, 
                   ymax = upp),
               fill = "lightgrey",
               alpha = 0.8) +
-  geom_line(aes(x = glyphosphate,
+  geom_line(aes(x = glyphosate,
                 y = fit),
             colour = "black") +
-  labs(x = "glyphosphate (ml)",
+  labs(x = "glyphosate (ml)",
        y = "Predicted wing length (mm)") +
   theme_minimal()
 
 fake_3 <- data.frame(
   body_length = median(butterfly$body_length),
-  glyphosphate = median(butterfly$glyphosphate),
+  glyphosate = median(butterfly$glyphosate),
   habitat = unique(butterfly$habitat)
 )
 
@@ -320,10 +322,10 @@ In terms of the scientific question, what have we learnt?
 # This is where we need some biological knowledge of the system. Monarch butterflies are reliant on milkweed plants, which are killed off by herbicides. Milkweeds are going to be more common in meadows (and farmlands), so that could be a reason, but we're speculating with this result.
 ```
 
-4. Does glyphosphate effect wing length?
+4. Does glyphosate effect wing length?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# We might be tempted to say no, but we actually don't know. All we know is that we don't have any evidence to support the hypothesis that glyphosphate effects wing length. So it seems unlikely, but not definitive.
+# We might be tempted to say no, but we actually don't know. All we know is that we don't have any evidence to support the hypothesis that glyphosate effects wing length. So it seems unlikely, but not definitive.
 
 # There are many ways an effect can be obscured one of which includes possible confounding. Another common reason is if an effect is weak, then you need a lot of data to be able to detect it. Here we don't have a massive dataset, so it's not impossible that there is an effect, it's just too weak for us to detect in our data and model.
 ```
@@ -363,7 +365,7 @@ And we get an AIC value of `r AIC(butter_mod)`. In and of itself, that tells us 
 So let's run another model where we exclude `body_length` to see if we really need it or not to make accurate predictions of butterfly wing length:
 
 ```{r}
-butter_mod_no_body <- lm(wing_length ~ glyphosphate + habitat, data = butterfly)
+butter_mod_no_body <- lm(wing_length ~ glyphosate + habitat, data = butterfly)
 ```
 
 And then check the AIC of this new model without body length:
@@ -377,13 +379,13 @@ Our AIC is now `r AIC(butter_mod_no_body)`, and increase of `r AIC(butter_mod_no
 Run the all versions of the model with different combinations of the explanatory variables:
 
 ```{r, eval = F}
-# Model without glyphosphate
+# Model without glyphosate
 butter_mod_no_glyph <- lm(wing_length ~ , data = butterfly)
 # Model without habitat
 butter_mod_no_hab <- lm(wing_length ~ , data = butterfly)
 # Model with with only body
 butter_mod_body <- lm(wing_length ~ , data = butterfly)
-# Model with only glyphosphate
+# Model with only glyphosate
 butter_mod_glyph <- lm(wing_length ~ , data = butterfly)
 # Model with only habitat
 butter_mod_hab <- lm(wing_length ~ , data = butterfly)
@@ -393,14 +395,14 @@ butter_mod_null <- lm(wing_length ~ , data = butterfly)
 ```
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = T}
-# Model without glyphosphate
+# Model without glyphosate
 butter_mod_no_glyph <- lm(wing_length ~ body_length + habitat, data = butterfly)
 # Model without habitat
-butter_mod_no_hab <- lm(wing_length ~ body_length + glyphosphate, data = butterfly)
+butter_mod_no_hab <- lm(wing_length ~ body_length + glyphosate, data = butterfly)
 # Model with with only body
 butter_mod_body <- lm(wing_length ~ body_length, data = butterfly)
-# Model with only glyphosphate
-butter_mod_glyph <- lm(wing_length ~ glyphosphate, data = butterfly)
+# Model with only glyphosate
+butter_mod_glyph <- lm(wing_length ~ glyphosate, data = butterfly)
 # Model with only habitat
 butter_mod_hab <- lm(wing_length ~ habitat, data = butterfly)
 # Model with no explanatory variables (average only)
@@ -443,7 +445,7 @@ library(MASS) # load the MASS package
 stepAIC(butter_mod)
 ```
 
-The output can look a bit intimidating at first, but it's basically doing the same thing we did before (just slightly smarter). The first part of the output tells us the AIC of our starting model (`Start:  AIC=265.31`). Then `stepAIC()` attempts to remove each explanatory variable in turn (e.g. `- glyphosphate` is where glyphosphate is removed, hence the minus) but also considers when it doesn't remove any (i.e. `<none>` where no variables are removed). At this point, `stepAIC()` looks for the lowest AIC of the models it has run, in this case, that's when glyphosphate is removed. Remember, AIC "improves" when it is lowered, so if we remove glyphosphate and AIC drops, then that implies an "improvement".
+The output can look a bit intimidating at first, but it's basically doing the same thing we did before (just slightly smarter). The first part of the output tells us the AIC of our starting model (`Start:  AIC=265.31`). Then `stepAIC()` attempts to remove each explanatory variable in turn (e.g. `- glyphosate` is where glyphosate is removed, hence the minus) but also considers when it doesn't remove any (i.e. `<none>` where no variables are removed). At this point, `stepAIC()` looks for the lowest AIC of the models it has run, in this case, that's when glyphosate is removed. Remember, AIC "improves" when it is lowered, so if we remove glyphosate and AIC drops, then that implies an "improvement".
 
 Having then removed any variables that result in improved AIC, it repeats this process, attempting to remove any explanatory variables that lower AIC. In this example, however, removing either `habitat` or `body_length` result in increased AIC values, so we shouldn't remove these, and we're left with our final model, which is `wing_length ~ body_length + habitat`.
 
@@ -451,9 +453,9 @@ Having then removed any variables that result in improved AIC, it repeats this p
 
 Although the two approaches use different statistical backgrounds, they are both largely trying to resolve the same problem. In reality, they share a lot of fundamental theory (AIC is the equivalent to using something called likelihood ratio testing, which uses P-values to select between models, just where the threshold is not 0.05 but 0.18). So there is an argument to be made that they are pretty much doing the same thing. As a general rule, AIC tends to be retain explanatory variables more so than NHST, though they will often get you to the same model and inference.
 
-A broader question, though, is if we really need either. Consider when we plotted the model results earlier. Did you really need additional statistics to tell you that body length and habitat were important, while glyphosphate didn't seem to be? I'd argue; no we don't. We can get there by just thinking about the results for ourselves, rather than relying on tools that can sometimes lead us astray and to make silly inference.
+A broader question, though, is if we really need either. Consider when we plotted the model results earlier. Did you really need additional statistics to tell you that body length and habitat were important, while glyphosate didn't seem to be? I'd argue; no we don't. We can get there by just thinking about the results for ourselves, rather than relying on tools that can sometimes lead us astray and to make silly inference.
 
-At this point in the workshop, I'll come clean. The butterfly data is fake. It's simulated. The reason for that is that I wanted a dataset where I knew *exactly* what the model should tell us, so I can then point to it and show you where it got it right and were it got it wrong. Well, the truth is that all three explanatory variables influenced butterfly wing length, including glyphosphate. It's just that the glyphosphate effect was very small and hard for the model to detect. The important thing though, is that neither NHST nor AIC picked out that there was a glyphosphate effect, despite there being one. Now, that's fair enough given the model couldn't detect it, but I hope this is a good example of where these techniques (including models in general) can go wrong. Just because there is an effect, doesn't mean the model will detect it, nor will it get picked out as "significant" or retained by AIC.
+At this point in the workshop, I'll come clean. The butterfly data is fake. It's simulated. The reason for that is that I wanted a dataset where I knew *exactly* what the model should tell us, so I can then point to it and show you where it got it right and were it got it wrong. Well, the truth is that all three explanatory variables influenced butterfly wing length, including glyphosate. It's just that the glyphosate effect was very small and hard for the model to detect. The important thing though, is that neither NHST nor AIC picked out that there was a glyphosate effect, despite there being one. Now, that's fair enough given the model couldn't detect it, but I hope this is a good example of where these techniques (including models in general) can go wrong. Just because there is an effect, doesn't mean the model will detect it, nor will it get picked out as "significant" or retained by AIC.
 
 # The Next Challenger
 

@@ -138,13 +138,13 @@ summary(bio_mod)
 1.  How much does predicted biomass change for each additional shark density?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# By 3.2 kg for each additional increase in shark density (individuals per transect)
+# Increases by 3.2 kg per meter squared for each additional increase in shark density (individuals per transect)
 ```
 
 2.  How much does predicted biomass change for each additional reef complexity measure?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# By 7.1 kg for each additional increase in reef complexity
+# Increases by 7.1 kg per meter squared for each additional increase in reef complexity
 ```
 
 3.  How much do you predict biomass would change, if shark density was 5 and reef complexity was 0.1? What about if there were 10 sharks and reef complexity was 0.1?
@@ -154,18 +154,18 @@ summary(bio_mod)
 new_shark <- 5
 new_reef <- 0.1
 -27.2075 + 3.2171 * new_shark + 7.1169 * new_reef
-# We'd predict biomass would change by: -10.41031 kg under these conditions
+# We'd predict biomass would change by: -10.41031 kg per meter squared under these conditions
 
 new_shark <- 10
 new_reef <- 0.1
 -27.2075 + 3.2171 * new_shark + 7.1169 * new_reef
-# We'd predict biomass would change by: 5.67519 kg under these conditions
+# We'd predict biomass would change by: 5.67519 kg per meter squared under these conditions
 ```
 
 4.  From your answer to Q3, what does going from five to ten sharks do for predicted biomass?
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
-# Having an extra five sharks (from five to ten) apparently increases biomass by roughly 16 kg
+# Having an extra five sharks (from five to ten) apparently increases biomass by roughly 16 kg per meter squared
 ```
 
 Let's use `ggeffects` to quick make a plot:
@@ -185,7 +185,7 @@ plot(preds)
 ```{r, include=answer_sheet, class.source="bg-success", eval = F}
 # It's kind of hard to think why adding predators would increase the number of prey. But not impossible. Maybe it's because adding more predators cause some kind of trophic cascade, or some kind of "landscape of fear" effect, shifts in species compositions, compensatory breeding by prey, etc, etc,.
 
-# The point is that you can always come up with some hypothesis to explain your results. It's something called "HARKing" (or Hypothesising After Results Known), and is a serious problem in science. To be very clear, HARKing is a *highly* questionable research practice (i.e. essentially fraud) where researchers try to explain their results, after their model tells them the answer, while pretending that they were always testing this hypothesis. You'll see later why this is very dangerous and should never be done.
+# The point is that you can always come up with some hypothesis to explain your results. It's something called "HARKing" (or Hypothesising After Results Known), and is a serious problem in science. To be very clear, HARKing is a *highly* questionable research practice (i.e. uncomfortably close to fraud) where researchers try to explain their results, after their model tells them the answer, while pretending that they were always testing this hypothesis. You'll see later why this is very dangerous and should never be done.
 ```
 
 # Including an Interaction
@@ -202,7 +202,7 @@ where we have the same "main effects" of shark and reef, but now include the mul
 
 `biomass_change ~ shark_density * reef_complexity`
 
-which is exactly the same as above, except that we have a more condensed undefined ndefinedndef
+which is exactly the same as above, except that we have a more condensed formula.
 
 No matter how we specify the interaction, the resulting statistical notation for this model takes the same form.
 

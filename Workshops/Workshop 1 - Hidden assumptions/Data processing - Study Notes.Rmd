@@ -1,0 +1,122 @@
+---
+title: "Data processing - Study Notes"
+author: "Michelle Pinard & Deon Roos"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+    reference_docx: "../sbstemplate.docx"
+---
+
+# Purpose
+
+Carry out simple exploratory data analysis to check datasets before modelling. The emphasis is on seeing structure, spotting obvious errors, and making transparent, code-based fixes when confirmed.
+
+# Workflow for the course
+
+The same workflow underlies later weeks: formulate a question, do EDA, identify hidden assumptions, fit a model, diagnose, summarise, and interpret. This session focuses on EDA and basic data quality assurance.
+
+# Orientation to R/RStudio and running code
+
+Use RStudio’s panes (Source, Console, Environment/History, Files/Plots/Packages/Help/Viewer). Write code in scripts and run with Run or Ctrl/Cmd+Enter; **avoid doing project work only in the Console.**
+
+# Working directories and loading data
+
+Set a working directory once in your script so R knows where to locate your data. Load data stored in .txt files using `read.table(..., header = TRUE)`. Check that it worked with `head`, `View`, `str`, and/or `summary.` Be sure to use forward slashes when specifying your directory.
+
+# EDA goals and simple summaries
+
+Start by understanding variables and ranges. Ask whether names are consistent, types are correct, and values plausible. Use summaries (`mean`, `min`, `max`, `quantiles`) to find any data issues.
+
+# Indexing and conditional selection
+
+Use square brackets for row/column selection and logical conditions to locate specific records, for example values equal to a threshold (`my_data$y == 15`), above a quantile (`my_data$y > quantile(my_data$x, prob = 0.9)`), or matching a label (`my_data$group == "Aberdeen"`). This allows you to isolate and inspect potential issues before deciding how to act.
+
+# Transparent corrections
+
+If a verifiable data-entry error is confirmed (e.g., missing decimal points), correct it in code using square brackets to specify the row and column and documenting the change with a clear comment. Prefer code-based edits over manual spreadsheet edits so changes are auditable. Re-check summaries after any edit.
+
+# Handling missing values and strings vs factors
+
+Functions like `mean` and `median` return `NA` if missing values are present; add `na.rm = TRUE` when appropriate. For text variables, keep as character while cleaning; convert to a factor later if needed. Use `unique` to find inconsistent labels.
+
+# Useful code examples
+
+```{r, eval = F}
+# Set and find current working directory
+setwd("H:/BI3010/workshop1")   # or setwd("~/Documents/BI3010/workshop1") on macOS
+getwd()
+
+# Load data
+ali <- read.table("alligator_bite.txt", header = TRUE)
+
+# Check first couple of rows
+head(ali)
+
+# Open a new window that shows all data (like Excel)
+View(ali)
+
+# Report the structure of the data and variables in the dataset
+str(ali)
+
+# Report summary statistics for all variables
+summary(ali)
+
+# Number of columns and rows in dataset
+ncol(ali)
+nrow(ali)
+
+# Names of the columns in a dataset
+colnames(ali)
+
+# Range (min to max) of a variable
+range(ali$length)
+
+# Minimum and maximum individually
+min(ali$length)
+max(ali$length)
+
+# Mean and median
+mean(ali$length)
+median(ali$length)
+
+# Quantiles
+quantile(ali$bite, 0.75) # Gives the 75th quantile
+
+# Conditional indexing to locate rows
+ali[10, 5]                                   # the value in row 10, column 5
+ali[1, ]                                     # all column values in row 1
+ali[, 1]                                     # all row values in column 1
+ali$bite[1]                                  # bite value for row 1
+ali[ali$length == 2293, ]                    # all rows with exact match for length
+ali[ali$length > mean(ali$length), ]         # all rows where length is greater than average length
+ali[ali$bite <= quantile(ali$bite, 0.75), ]  # all rows where bite is less than or equal to upper quartile
+
+# Correcting data entry mistakes
+ali$bite[20]   <- ali$bite[20]   / 100       # divide bite on row 20 by 100 and store in bite on row 20
+ali$length[50] <- ali$length[50] / 3         # divide length on row 50 by 3 and store in length on row 3
+summary(ali)                                 # always confirm correction has worked
+
+# Fix characters
+unique(chupa$city)                                 # list all unique city characters
+chupa$city[chupa$city == "amarillo"] <- "Amarillo" # In city column, change any rows where city is amarillo and replace with Amarillo
+
+# Set values to NA
+chupa$ufo[chupa$ufo == 9999] <- NA  # If ufo has a value of 9999, change it to NA
+
+# Summaries with missing values
+median(fast$speed, na.rm = TRUE) # Include na.rm = TRUE if there are NAs (missing values) in the data
+
+# Convert to factor and create a table of counts
+fast$species <- factor(fast$species)
+table(fast$species)
+
+# Common mistakes
+summary(alc)                      # need to specify dataset - chupa$alc
+chupa[chupa$ufo == 9999 ]         # include the comma (after 9999,) to keep all columns
+chupa[chupa$ufo = 9999, ]         # use == for tests, not =
+chupa[chupa$city == "Houston", ]  # quotes required for strings
+ali[ali$Length > 200, ]           # names are case sensitive; length not Length
+ali[ali$bite > mean(ali$bite, na.rm = TRUE), ]   # guard against NA
+```
+

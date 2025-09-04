@@ -1,0 +1,67 @@
+---
+title: "Diagnosing linear models with a single continuous predictor - Study Notes"
+author: "Michelle Pinard & Deon Roos"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+    reference_docx: "../sbstemplate.docx"
+---
+
+# Purpose
+
+Model-checking for linear models where the explanatory variable is continuous. The aim is to read the standard diagnostic plots and decide whether assumptions look adequate before interpreting results.
+
+# Model structure
+
+With a continuous predictor the model structure is a straight-line trend in the explanatory variable. Linearity (i.e. a straight-line fit) is therefore a direct assumption to examine, alongside the others.
+
+# The four diagnostic plots and what they address
+
+* Residuals vs Fitted. Targets two issues at once: linearity of the fit and equal variance of errors. Look for no waves or other patterns and a roughly constant spread around zero across the fitted range.
+
+* Scale–Location. Shows standardised residuals against fitted values; another chance to check linearity and variance patterns that can make patterns more visible.
+
+Normal Q–Q. Compares residuals to an idealised normal distribution. Often the least decisive plot here; mild tail departures are common and usually not central for this task.
+
+Residuals vs Leverage (with Cook’s distance). Flags disproportionately influential observations; cases approaching a Cook’s distance near 1 need inspection but even when observations start getting close to 0.5 it can be worth double checking.
+
+# Interpreting non-linearity
+
+Non-linear results generally results in misleading estimated relationships, though the severity of this can vary from benign to consequential. If severe, then you would change to models that allow for non-linear relationships (which we do not cover on the course).
+
+# Interpreting unequal variance
+
+Unequal residual variance mainly affects uncertainty. Standard errors and intervals can be distorted even when the linear mean trend is reasonable. In these materials it is treated as less critical than clear failures of linearity, which can bias trend estimates. Decide how much this matters for your question.
+
+# Limits of these checks
+
+Passing residual checks does not validate data assumptions such as validity or representativeness; those require separate reasoning about how the data were obtained.
+
+# Useful code examples
+
+```{r, eval = F}
+# Fit model
+m <- lm(y ~ x, data = df)
+
+# Extract residuals
+d$predicted <- predict(m)
+d$residual  <- d$y - d$predicted
+# or
+d$residual  <- residuals(m)
+
+# Diagnostic plots
+par(mfrow = c(2, 2))
+plot(m)
+par(mfrow = c(1, 1))
+
+# Generate predictions to show relationship
+fake <- data.frame(x = seq(min(d$x), max(d$x), length.out = 25))
+fake$fit <- predict(m, newdata = fake)
+
+# Plot relationship
+ggplot(fake) +
+  geom_line(aes(x, fit)) +
+  geom_point(data = d, aes(x, y))
+```
+

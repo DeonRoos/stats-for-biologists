@@ -1,0 +1,90 @@
+---
+title: "Data visulation - Study Notes"
+author: "Michelle Pinard & Deon Roos"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+    reference_docx: "../sbstemplate.docx"
+---
+
+# Purpose
+
+Use graphics to reveal structure that summaries can hide, support exploratory data analysis (EDA), and communicate results clearly. Visualisations help decide whether a relationship is likely present (but note relationships may be hidden with simple figures) and whether formal modelling is worth pursuing.
+
+# Principles for effective figures
+
+Keep cognitive load low. Prefer simple designs that focus on the scientific message. Avoid designs where human perception struggles: stacked bars with comparisons by length, angle judgements, or overlapping intensity layers. Use colour-blind–safe palettes when colour encodes information. Treat guidance as context dependent rather than as rigid rules.
+
+# `ggplot2` in brief
+
+`ggplot2` implements the “grammar of graphics”: start a plot, map data to aesthetics via `aes()`, add one or more geoms, then refine scales, labels, themes, and facets to your preferences. Layer order matters because later layers can cover earlier ones. Base `R` can make similar plots, but this course uses `ggplot2` for clarity and flexibility.
+
+# Which plot?
+
+Begin with simple figures to show variables and ranges, then choose geoms that make patterns legible. For continuous–continuous pairs, use scatterplots; for continuous by group, use boxplots or violins, optionally with jittered points to show spread. For distributions, use histograms or density plots, adjusting binwidth or reading density as proportion as needed. Titles, axis labels, and modest theming can improve readability without adding noise. Facetting can split a plot by a factor to simplify comparisons.
+
+# Interpreting common plots
+
+Boxplots show medians and interquartile ranges; violin plots show a smoothed distribution. 
+
+Histograms count observations in bins; density plots show smoothed proportions. Both display where values concentrate, but the y-axes differ (counts vs proportion). Adjusting histogram binwidth trades granularity against smoothness.
+
+# Common pitfalls
+
+Placing aesthetics inside `aes()` that are not data driven (e.g., `size`) creates warnings or unwanted legends. Mapping two variables to the same aesthetic argument causes errors. Overly ornate or complicated themes, cluttered axes, or ambiguous encodings (e.g., stacked bars for many groups) hinder interpretation. Favour clear labels, sensible scales, and restrained styling.
+
+# Useful code examples
+
+```{r, eval = F}
+install.packages("ggplot2") # Only need to run once to install
+library(ggplot2)
+
+# Clear your environment of anything left from previous session
+rm(list = ls())
+
+# Load data
+boto <- read.table("boto.txt", header = TRUE)
+
+# Summarise data
+summary(boto)
+str(boto)
+
+# Scatterplot with length as response, and drought as explanatory variable
+ggplot(boto) +
+  geom_point(aes(y = length, x = drought))
+
+# Plots for categorical data
+ggplot(boto) +
+  geom_boxplot(aes(y = length, x = sex))
+
+ggplot(boto) +
+  geom_violin(aes(y = length, x = sex)) +
+  geom_jitter(aes(y = length, x = sex), height = 0, width = 0.1)
+
+# Histogram
+ggplot(boto) +
+  geom_histogram(aes(x = length))
+
+# Change binwidth and add white outline to bars
+ggplot(boto) +
+  geom_histogram(aes(x = length), binwidth = 5, colour = "white")
+
+# Density plot
+ggplot(boto) +
+  geom_density(aes(x = length)) +
+  labs(y = "Proportion")
+
+# Add colour based on category
+ggplot(boto) +
+  geom_point(aes(y = length, x = drought, colour = sex), size = 2)
+
+# Facets and themes
+ggplot(boto) +
+  geom_point(aes(y = length, x = drought, colour = sex), size = 2) +
+  labs(y = "Boto length (cm)",
+       x = "Number of droughts in past 20 years",
+       colour = "Boto sex") +
+  facet_wrap(~ sex) +
+  theme_bw()
+```

@@ -1,0 +1,67 @@
+---
+title: "NHST & AIC - Study Notes"
+author: "Michelle Pinard & Deon Roos"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+  toc: yes
+reference_docx: "../sbstemplate.docx"
+---
+  
+# Purpose
+  
+This block introduces two additions to linear models: null hypothesis significance testing (NHST) and an information criterion (AIC). 
+
+- NHST is used to test whether parameter estimates differ from zero for a stated null hypothesis. 
+- AIC is used to compare candidate models fitted to the same data and select the most parsimonious model.
+
+# NHST: core ideas
+
+NHST reframes a scientific question as a null hypothesis to try to reject, following a Popper-style "attempt to prove ourselves wrong" stance. Example framing: "There is no difference in Adélie penguin weight among islands." P values are presented as the probability of obtaining results as extreme as observed under the null. A threshold, such as 0.05, is then used to decide "statistical significance."
+
+Interpreting model output: 
+
+- In all linear models, there will be an intercept. What the inference may differ between models, but in all cases "significant" answers "is the intercept different from 0?".
+
+- In a linear model with a continuous predictor, the "significance" for the slope answers "is the slope different from 0?"
+
+- In a linear model with a categorical predictor, the "significance" for the category (i.e. difference from the reference level) answers "is the difference between the current category and the reference different from 0?" 
+
+Remember that statistical significance is not always biologically important and saying "the treatment had a significant effect" without direction or size is ambiguous and does not help anyone to understand the biology. Larger samples tend to make significance more likely; multiple testing and confounding can result in misleading P-values.
+
+# AIC: core ideas
+
+AIC provides a single-number criterion to compare models that represent different processes but are fit to the same data. It balances fit and complexity to prefer parsimony (explain the most, using the least). Model selection proceeds by choosing the model with the lowest AIC; models within about 2 AIC units of the minimum are treated as similarly supported, after which a choice can be made based on the question. Treat AIC as a tool for efficient predictive modelling, not for establishing causation. 
+
+You applied AIC using two approaches: manually fitting a set of models and comparing AIC values, and using `stepAIC` from `MASS` to automate backward selection from the full model. Absolute AIC values are not interpreted in isolation; only differences across models are useful.
+
+# Useful code
+
+```{r, eval = F}
+# To get P-values of parameter estimates use summary
+fit <- lm(y ~ x, data = my_data)
+summary(fit)
+
+# Manual AIC comparisons
+butter_mod_no_body  <- lm(wing_length ~ glyphosate + habitat, data = butterfly)
+butter_mod_no_glyph <- lm(wing_length ~ body_length + habitat, data = butterfly)
+butter_mod_no_hab   <- lm(wing_length ~ body_length + glyphosate, data = butterfly)
+butter_mod_body     <- lm(wing_length ~ body_length, data = butterfly)
+butter_mod_glyph    <- lm(wing_length ~ glyphosate, data = butterfly)
+butter_mod_hab      <- lm(wing_length ~ habitat, data = butterfly)
+butter_mod_null     <- lm(wing_length ~ 1, data = butterfly) # ~ 1 is an intercept only model (i.e. no explanatory variables are included, just estimate the average)
+
+AIC(butter_mod,
+    butter_mod_no_body,
+    butter_mod_no_glyph,
+    butter_mod_no_hab,
+    butter_mod_body,
+    butter_mod_glyph,
+    butter_mod_hab,
+    butter_mod_null)
+
+# Automated AIC comparisons
+library(MASS)
+stepAIC(butter_mod)
+```
+

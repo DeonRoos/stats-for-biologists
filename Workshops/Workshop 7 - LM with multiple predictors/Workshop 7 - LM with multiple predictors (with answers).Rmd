@@ -428,10 +428,6 @@ Let's run that model:
 rent_causal_mod <- lm(Price ~ FloorArea, data = abdn)
 ```
 
-```{r, echo = F}
-beta_dag <- unname(coef(rent_causal_mod)["FloorArea"])
-```
-
 ## 5. Diagnose the model and check assumptions.
 
 And we can do a quick check of the assumptions related to the model residuals:
@@ -442,15 +438,29 @@ plot(rent_causal_mod)
 par(mfrow = c(1,1))
 ```
 
-Most of the diagnostics look ok. Not great, but maybe just about good enough to work with, with the exception of the Residuals vs Leverage plot.
+There are likely some issues that show up in the diagnostics.
 
-As for the predictive model, decide how you want to deal with the Residuals vs Leverage plot and rerun your analysis if necessary.
++ The first is unequal variance of errors. If you think about it, it's maybe not too surprising for two reasons.
 
-```{r}
+  - In your EDA, if you did a histogram of `Price`, then you may have noticed that rent tends to be rounded to £25-£50 increments when the rent is less than £1000, but when the property is more than £1000, this rounding increases to £50-£100. This creates "error" in the price measurement at higher prices, so our model uncertainty performs "worse".
+  
+  - Keep in mind that unequal variance of errors impacts our estimated standard error, which in turn impacts our 95% confidence intervals. It does not affect our actual prediction.
+  
+  - The other reason is that estate agents have a easier time guessing the rent for "cheap" properties. For cheap flats, it’s easier to pin down the right rent because £250 is a big chunk of the total (e.g. going from £500 to £750 is a big jump). For a luxury mansion, £250 hardly moves the needle (e.g. going from £3,500 to £3,750), so estimates naturally spread out more as price increases.
+  
++ The second issue you might see is that you may have one or multiple overly influential observations. This has fluctuated over time as I've added more and more data (sometimes these disappear, other times more appear) but generally there are one or two expensive properties that cause issues and need to be addressed.
+
+  - Influential observations do impact the parameter estimates, so you would first want to confirm if the entered `Price` is correct (which you can check given you have `PropertyURL` - but note that ASPC sometimes removes properties)
+  
+  - If you confirm the `Price` has been recorded properly, then you will need to decide how to resolve. Generally, you have two options, either ignore the problem (but acknowledge it when talking about your results) or remove the observation from your dataset. There are some other options, but we won't go into them here.
+  
+Fix any issues with influential properties, and rerun your analysis.
+
+```{r, include=answer_sheet, class.source="bg-success", eval = T}
 # If your row numbers are different to mine, make sure you re-loaded the data in before starting with the causal model and note that by the time of this workshop (and with more data) observation 73 may not be a problem anymore, or it may have changed to a different observation.
 abdn_trimmed <- abdn[-c(73),]
 rent_causal_mod <- lm(Price ~ FloorArea, data = abdn_trimmed)
-# Diagnostics now look good.
+# Diagnostics now look good except for unequal variance of errors.
 ```
 
 ## 6. Summarise the results.
@@ -459,6 +469,10 @@ The technical steps are exactly the same as for the predictive model. Get the mo
 
 ```{r}
 summary(rent_causal_mod)
+```
+
+```{r, echo = F}
+beta_dag <- unname(coef(rent_causal_mod)["FloorArea"])
 ```
 
 And plot:

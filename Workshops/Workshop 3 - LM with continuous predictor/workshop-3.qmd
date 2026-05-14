@@ -1,0 +1,1160 @@
+---
+title: "Workshop 3: Linear models with a continuous predictor"
+subtitle: "BI3010 Statistics for Biologists"
+author: "Roos & Pinard"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    theme: [cosmo, ../custom.scss]
+    highlight-style: github
+    embed-resources: true
+    code-copy: true
+    code-tools: false
+    html-math-method: mathjax
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show = "show")
+library(ggplot2)
+library(dplyr)
+boto <- read.table("../Workshop 2 - Data vis/Data/boto.txt", header = TRUE)
+boto_model <- lm(length ~ drought, data = boto)
+```
+
+```{=html}
+<script>
+/* --- answer lock --- */
+var WS_PASS_SHA256 = 'caaed8c4eb8dfedde10e80b06341a9bdbae13582a49164bf00fb75a703df17c8';
+var WS_PASS_DJB2   = '2785fcc2';
+var _wsUnlocked = false;
+
+function _wsDjb2(s) {
+  var h = 5381;
+  for (var i = 0; i < s.length; i++) { h = ((h << 5) + h + s.charCodeAt(i)) | 0; }
+  return (h >>> 0).toString(16).padStart(8, '0');
+}
+function wsVerifyPass() {
+  var inp = document.getElementById('ws-pass-input'); if (!inp) return;
+  var msg = document.getElementById('ws-pass-msg');
+  function finish(ok) {
+    if (ok) {
+      _wsUnlocked = true; sessionStorage.setItem('ws-unlocked', WS_PASS_SHA256);
+      document.body.classList.remove('ws-locked');
+      var b = document.getElementById('ws-lock-banner');
+      if (b) { b.style.transition = 'opacity 0.4s'; b.style.opacity = '0'; setTimeout(function () { b.remove(); }, 450); }
+    } else {
+      inp.classList.add('ws-wrong'); if (msg) msg.textContent = 'Incorrect password.';
+      setTimeout(function () { inp.classList.remove('ws-wrong'); if (msg) msg.textContent = ''; }, 2000);
+    }
+  }
+  if (window.crypto && crypto.subtle) {
+    crypto.subtle.digest('SHA-256', new TextEncoder().encode(inp.value))
+      .then(function (buf) { var hex = Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join(''); finish(hex === WS_PASS_SHA256); })
+      .catch(function () { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); });
+  } else { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); }
+}
+function wsFlashBanner() {
+  var b = document.getElementById('ws-lock-banner'); if (!b) return;
+  b.classList.remove('ws-flash'); void b.offsetWidth; b.classList.add('ws-flash');
+}
+function wsInitLock() {
+  if (sessionStorage.getItem('ws-unlocked') === WS_PASS_SHA256) { _wsUnlocked = true; return; }
+  document.body.classList.add('ws-locked');
+  var b = document.createElement('div'); b.id = 'ws-lock-banner';
+  b.innerHTML = '<span style="font-size:1.15rem;line-height:1;">🔒</span>' +
+    '<span>Answers are locked. Enter the workshop password to reveal them.</span>' +
+    '<span class="ws-unlock-form">' +
+      '<input type="password" id="ws-pass-input" placeholder="Password"' +
+      ' onkeydown="if(event.key===\'Enter\')wsVerifyPass();">' +
+      '<button id="ws-unlock-btn" onclick="wsVerifyPass()">Unlock</button>' +
+    '</span><span id="ws-pass-msg"></span>';
+  var t = document.getElementById('title-block-header');
+  if (t) t.insertAdjacentElement('afterend', b); else document.body.prepend(b);
+}
+document.addEventListener('DOMContentLoaded', wsInitLock);
+/* --- end lock --- */
+
+function revealAnswer(btn) {
+  if (!_wsUnlocked) { wsFlashBanner(); return; }
+  var block = btn.closest('.question-block, .puzzle-block');
+  var answerClass = block.classList.contains('puzzle-block') ? '.puzzle-answer' : '.instructor-answer';
+
+  var textarea = block.querySelector('.student-answer');
+  if (textarea) {
+    if (textarea.value.trim() === '') {
+      textarea.classList.add('missing');
+      textarea.placeholder = 'Please write your answer before revealing...';
+      textarea.focus();
+      return;
+    }
+    textarea.classList.remove('missing');
+  }
+
+  var mcOptions = block.querySelector('.mc-options');
+  if (mcOptions) {
+    var radios = mcOptions.querySelectorAll('input[type=radio]');
+    var anyChecked = Array.from(radios).some(function(r) { return r.checked; });
+    if (!anyChecked) {
+      mcOptions.classList.add('unanswered');
+      return;
+    }
+    mcOptions.classList.remove('unanswered');
+    radios.forEach(function(r) {
+      r.disabled = true;
+      var label = r.closest('label');
+      if (r.dataset.correct === 'true') {
+        label.classList.add('mc-correct');
+      } else if (r.checked) {
+        label.classList.add('mc-incorrect');
+      }
+    });
+  }
+
+  var answer = block.querySelector(answerClass);
+  if (answer) answer.style.display = 'block';
+  btn.textContent = 'Answer shown';
+  btn.disabled = true;
+}
+
+function toggleGlossary() {
+  document.getElementById('glossary-panel').classList.toggle('open');
+}
+</script>
+```
+
+```{=html}
+<style>
+#glossary-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: #00b494;
+  color: #fff;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  transition: background 0.15s;
+  font-family: inherit;
+}
+#glossary-btn:hover { background: #009478; }
+
+#glossary-panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 380px;
+  height: 100vh;
+  background: #fff;
+  border-left: 3px solid #00b494;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+  z-index: 1001;
+  transition: right 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+#glossary-panel.open { right: 0; }
+
+#glossary-header {
+  background: #0d1e2c;
+  color: #fff;
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+#glossary-header span {
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
+}
+#glossary-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.7;
+}
+#glossary-close:hover { opacity: 1; }
+
+#glossary-body {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.glossary-entry {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #e8f5f0;
+}
+.glossary-entry:last-child { border-bottom: none; }
+
+.glossary-terms {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.3rem;
+}
+.glossary-en-term {
+  font-weight: 600;
+  color: #0d1e2c;
+  font-size: 0.92rem;
+}
+.glossary-zh-term {
+  color: #00b494;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+.glossary-en-def {
+  font-size: 0.845rem;
+  color: #444;
+  line-height: 1.5;
+  margin-bottom: 0.25rem;
+}
+.glossary-zh-def {
+  font-size: 0.845rem;
+  color: #1c3a50;
+  line-height: 1.65;
+}
+</style>
+```
+
+::: {.callout-note}
+## Workshop structure
+
+Starting this week, we apply the full analytical workflow to a single dataset before working through an independent one. Today's focus is step 4.
+
+1. Formulate a research question.
+2. Perform exploratory data analysis.
+3. Identify any hidden assumptions.
+4. Fit an appropriate model **[Focus of today]**.
+5. Diagnose the model and check assumptions.
+6. Summarise the results.
+7. Interpret and provide inferences.
+:::
+
+::: {.callout-tip}
+## Learning objectives
+
+1. Decide whether a Normal distribution is a reasonable assumption for a response variable.
+2. Fit a linear model in R using `lm()`.
+3. Interpret the intercept and slope from model output.
+4. Produce a figure of the fitted relationship using `ggeffects` or manual predictions.
+:::
+
+# Formulate a research question
+
+For this first workshop on linear models, we return to a familiar dataset: `boto.txt` from Workshop 2. As a reminder, it contains:
+
+- `sex`: sex of the boto dolphin
+- `drought`: number of years in the past 20 where drought was recorded in the dolphin's region
+- `length`: length of the boto dolphin (cm)
+
+The research question is whether the number of droughts in the past 20 years affects boto length. The broader motivation is climate change and dam construction in the Amazon basin: if droughts become more frequent, could dolphins become smaller and be in poorer condition?
+
+From the question we can identify:
+
+- **Response variable:** `length`
+- **Predictor variable:** `drought`
+
+Before fitting any model, we need to decide whether a Normal distribution is a reasonable description of the data-generating process for boto length. Formally, we are asking whether the following is plausible:
+
+$$length_i \sim \text{Normal}(\mu_i, \sigma)$$
+
+Here, $length_i$ is the length of dolphin $i$, assumed to follow a Normal distribution with mean $\mu_i$ (the model's predicted length for that dolphin) and standard deviation $\sigma$.
+
+## Is a Normal distribution appropriate?
+
+The first question is whether `length` is continuous or discrete. A discrete variable can only take integer values (1 cm, 2 cm, etc.). A continuous variable can in principle take any value within a range. Although the researchers rounded lengths to the nearest centimetre, actual dolphin length is not constrained to whole-centimetre increments. `length` is inherently continuous, and the Normal distribution generates continuous values. To see this, run:
+
+```{r, eval=FALSE}
+rnorm(n = 10, mean = 200, sd = 10)
+```
+
+The generated values look much like the lengths in the boto dataset, which is reassuring. The only visible difference is that the researchers rounded their measurements.
+
+The next question is whether there are natural bounds that might cause problems. Boto length cannot be zero or negative, and the Normal distribution can technically produce such values. However, the minimum observed length is well above zero, so the risk of the model predicting physically impossible values is low. A Normal distribution is a reasonable choice here, though we should verify this after fitting by checking that the model does not produce implausible predictions. If it did, we would switch to a different distribution using a Generalised Linear Model (GLM), which we cover later in the course.
+
+::: {.callout-warning}
+## An important distinction
+
+Choosing a distribution for the response variable is separate from the assumption of "normally distributed errors" (or "normally distributed residuals"). The choice of distribution is based on the nature of the response variable and can be made before even looking at the data. The residuals assumption can only be checked after the model has been fitted.
+:::
+
+## The Normal distribution in practice
+
+<div class="question-block">
+<p><strong>Question 1.</strong> Does a Normal distribution generate discrete or continuous values?</p>
+<textarea class="student-answer" rows="2" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Continuous. Although values in a dataset may subsequently be rounded (e.g. to the nearest cm), the underlying process generates continuous values.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 2.</strong> Run <code>rnorm(n = 100, mean = 50, sd = 20)</code>. What is the smallest value you get? Try increasing the standard deviation and observe what happens.</p>
+<textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Because these are random numbers, results vary each run. With a mean of 50 and a standard deviation of 20, values below zero are quite plausible, especially if you increase the SD. You can find the minimum quickly with:</p>
+<pre><code class="language-r">min(rnorm(n = 100, mean = 50, sd = 20))</code></pre>
+<p>This illustrates that a Normal distribution can produce values below zero, which matters when the response variable has a natural lower bound.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 3.</strong> If the values from <code>rnorm(n = 100, mean = 50, sd = 20)</code> were your response variable, would it be reasonable to assume a Normal distribution in your model?</p>
+<textarea class="student-answer" rows="2" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Yes. The data were generated by a Normal distribution, so a model assuming Normal errors is entirely appropriate. The subtlety is that in the boto case we're balancing biology with statistics: dolphins cannot be zero or negative centimetres long, but we can reasonably proceed because no observed values are anywhere near that boundary.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 4.</strong> If your data were generated by a Normal distribution, does that automatically satisfy the assumption of normality?</p>
+<textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>No. The assumption of normality refers to the distribution of the <em>residuals</em> (differences between observed and predicted values), not the raw data, and not the distribution we assumed generated the data. Even if the underlying data are normally distributed, the residuals from a poorly specified model may not be. This can only be checked after fitting the model.</p>
+</div>
+</div>
+
+# Exploratory data analysis
+
+You worked with this dataset in Workshop 2, so EDA is already done. If you want a refresher, copy the relevant code from your Workshop 2 script.
+
+# Identifying hidden assumptions
+
+Before fitting the model, consider which assumptions are most likely to be violated. The full assumption list is included at the end of this document.
+
+## Assumptions for the boto model
+
+<div class="question-block">
+<p><strong>Question 1.</strong> Which assumptions do you think are most likely to be violated?</p>
+<textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p><strong>Additivity</strong> is a likely concern. In Workshop 2 we saw that drought appears to affect male and female dolphins differently (different slopes on the faceted plot). Where predictors overlap in their effects, additivity is probably broken.</p>
+<p><strong>Independence of errors</strong> is also plausible. Dolphins from the same region may be related: if a parent is shorter than predicted (for unknown reasons), its offspring may also be shorter for the same reasons. This shared unexplained variation would violate independence: misunderstanding one observation should not make us more likely to misunderstand another.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 2.</strong> Which assumptions can only be checked <em>after</em> fitting the model?</p>
+<textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>All of the residual-based assumptions: independence of errors, equal variance of errors, and normality of errors. Residuals are the difference between what the model predicts and what was observed, so they can only exist after the model has been fitted. Linearity can also be assessed from a plot of residuals versus fitted values, though it can also be explored during EDA.</p>
+</div>
+</div>
+
+# Fit an appropriate model
+
+The model we will fit is:
+
+$$length_i \sim \text{Normal}(\mu_i, \sigma)$$
+$$\mu_i = \beta_0 + \beta_1 \times drought_i$$
+
+Where:
+
+- $length_i$ is the length of dolphin $i$, assumed to follow a Normal distribution with mean $\mu_i$ and standard deviation $\sigma$.
+- $\beta_0$ is the **intercept**: the predicted length when `drought = 0`.
+- $\beta_1$ is the **slope**: the change in predicted length for each additional year of drought.
+
+Fitting this in R takes one line:
+
+```{r, eval=FALSE}
+boto_model <- lm(length ~ drought, data = boto)
+```
+
+## Translating the equation to code
+
+- `lm()` fits a linear model, which by default assumes the response follows a Normal distribution.
+- The formula `length ~ drought` specifies the relationship. `length` is the response variable; `drought` is the predictor. This corresponds directly to $\mu_i = \beta_0 + \beta_1 \times drought_i$. R adds the intercept automatically.
+- We store the result in `boto_model` so we can use it later without re-running.
+
+Now look at the results:
+
+```{r, eval=FALSE}
+summary(boto_model)
+```
+
+The `Estimates` column gives us $\beta_0$ and $\beta_1$: **213.3** and **−5.3**, respectively.
+
+## What the parameters mean
+
+To understand what these numbers represent, substitute into the equation. Start with the intercept. If there has never been a drought, then `drought = 0`:
+
+$$\mu_i = \beta_0 + \beta_1 \times 0 = \beta_0$$
+
+Any number multiplied by zero is zero, so only $\beta_0$ remains. The intercept is the predicted length when the predictor equals zero: when `drought = 0`, the model predicts dolphins are approximately **213.3 cm** long. The intercept is always "the expected value of Y when X equals zero."
+
+The slope, $\beta_1 = -5.3$, tells us how much the predicted length changes per additional year of drought. For every extra year of drought, the model expects dolphins to be **5.3 cm shorter** on average. Starting from `drought = 0` at a length of 213 cm, each step to the right along the x-axis drops the prediction by 5.3 cm.
+
+The figure below illustrates this:
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+fake_diag <- data.frame(drought = 0:8)
+fake_diag$fit <- predict(boto_model, newdata = fake_diag)
+ggplot(fake_diag) +
+  annotate("text", x = 0.1, y = 195,
+           label = expression(beta[0] == 213.3), vjust = -1.5, hjust = -0.1) +
+  annotate("segment", x = 0.5, xend = 0, y = 200, yend = 212,
+           arrow = arrow(length = unit(0.2, "cm")), colour = "red") +
+  annotate("text", x = 5.5, y = (213.3 - 5.3 * 4.5) + 1,
+           label = expression(beta[1] == -5.3), vjust = -1) +
+  annotate("polygon",
+           x = c(4, 5, 5),
+           y = c(213.3 - 5.3 * 4, 213.3 - 5.3 * 4, 213.3 - 5.3 * 5),
+           fill = "transparent", colour = "red") +
+  geom_line(aes(x = drought, y = fit), linewidth = 1) +
+  theme_minimal() +
+  labs(x = "Number of drought years",
+       y = "Predicted length of boto (cm)")
+```
+
+## Predictions from the equation
+
+<div class="question-block">
+<p><strong>Question 1.</strong> The model estimated &beta;<sub>0</sub> = 213.3 and &beta;<sub>1</sub> = &minus;5.3. Write out the completed equation:</p>
+<p style="font-family: monospace; font-size: 1rem;">&mu;<sub>i</sub> = <span style="border-bottom: 1px solid #333; display: inline-block; width: 3em;">&nbsp;</span> + <span style="border-bottom: 1px solid #333; display: inline-block; width: 3em;">&nbsp;</span> &times; drought<sub>i</sub></p>
+<textarea class="student-answer" rows="2" placeholder="Fill in the blanks..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>&mu;<sub>i</sub> = 213.3 + (&minus;5.3) &times; drought<sub>i</sub></p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 2.</strong> Using your completed equation, what length would you predict for a dolphin in a region with zero years of drought?</p>
+<textarea class="student-answer" rows="2" placeholder="Show your working..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p><code>213.3 + (−5.3) × 0 = 213.3 cm</code></p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 3.</strong> What length would you predict if there had been eight years of drought?</p>
+<textarea class="student-answer" rows="2" placeholder="Show your working..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p><code>213.3 + (−5.3) × 8 = 170.9 cm</code></p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 4.</strong> What is the predicted difference in length between a dolphin that experienced two years of drought and one that experienced seven?</p>
+<textarea class="student-answer" rows="4" placeholder="Show your working..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Two years of drought: <code>213.3 + (−5.3) × 2 = 202.7 cm</code></p>
+<p>Seven years of drought: <code>213.3 + (−5.3) × 7 = 176.2 cm</code></p>
+<p>Difference: <code>202.7 − 176.2 = 26.5 cm</code></p>
+<p>According to the model, the dolphin with seven years of drought would be 26.5 cm shorter.</p>
+</div>
+</div>
+
+# Diagnose the model and check assumptions
+
+We'll cover this on Friday.
+
+# A note on decimal places
+
+When reporting parameter estimates, how many decimal places should you use? There is no universal answer; it depends on context. The figures below show what happens when you round estimates to different levels of precision.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+pred_fun <- function(b, x) b["(Intercept)"] + b["x"] * x
+
+set.seed(1)
+n <- 200
+x1 <- seq(0, 100, length.out = n)
+y1 <- -1.23456789 + 3.45567891 * x1 + rnorm(n, sd = 0.75)
+fit1 <- lm(y1 ~ x1)
+colnames(fit1$model)[2] <- "x"
+b_hat1 <- setNames(coef(fit1), c("(Intercept)", "x"))
+
+new_x1 <- seq(0, 100, length.out = 301)
+digits1 <- c(0, 2)
+
+curves1 <- lapply(digits1, function(d) {
+  b <- round(b_hat1, d)
+  data.frame(x = new_x1, y = pred_fun(b, new_x1), decimals = as.character(d))
+}) |> bind_rows() |>
+  mutate(decimals = factor(decimals, levels = as.character(digits1)))
+
+ggplot(curves1, aes(x, y, colour = decimals, group = decimals)) +
+  geom_line(linewidth = 0.9) +
+  scale_colour_brewer(palette = "Dark2") +
+  labs(x = "Explanatory variable", y = "Predicted response",
+       colour = "Rounded to (dp)") +
+  theme_minimal(base_size = 12)
+```
+
+Here $\beta_0 = -1.235$ and $\beta_1 = 3.456$. Rounding to zero decimal places gives $\beta_0 = -1$ and $\beta_1 = 3$, producing a noticeably different line than rounding to two decimal places.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+set.seed(1)
+n <- 200
+x2 <- seq(50000, 1050000, length.out = n)
+y2 <- 0.0000000652 + 0.0005161519 * x2 + rnorm(n, sd = 0.75)
+fit2 <- lm(y2 ~ x2)
+b_hat2 <- setNames(coef(fit2), c("(Intercept)", "x"))
+
+new_x2 <- seq(50000, 1050000, length.out = 301)
+digits2 <- c(2, 10)
+
+curves2 <- lapply(digits2, function(d) {
+  b <- round(b_hat2, d)
+  data.frame(x = new_x2, y = pred_fun(b, new_x2), decimals = as.character(d))
+}) |> bind_rows() |>
+  mutate(decimals = factor(decimals, levels = as.character(digits2)))
+
+ggplot(curves2, aes(x, y, colour = decimals, group = decimals)) +
+  geom_line(linewidth = 0.9) +
+  scale_colour_brewer(palette = "Dark2") +
+  labs(x = "Explanatory variable", y = "Predicted response",
+       colour = "Rounded to (dp)") +
+  theme_minimal(base_size = 12)
+```
+
+In this second example the explanatory variable runs up to one million and the true parameters are extremely small ($\beta_0 = 0.0000000652$, $\beta_1 = 0.0005161519$). Rounding to two decimal places gives $\beta_0 = 0.00$ and $\beta_1 = 0.00$, which is useless.
+
+The lesson: before rounding, ask how much the number changes and what the scale of your predictor is. An arbitrary rounding decision can meaningfully alter your results. In BI3010 assessments, the number of decimal places to report will always be specified.
+
+# Summarise the results
+
+We'll return to model diagnosis on Friday. For now, let's turn the results into a figure. There are two ways to do this.
+
+## Option 1: ggeffects
+
+The `ggeffects` package does the work for you:
+
+```{r, eval=FALSE}
+install.packages("ggeffects")  # Run once
+library(ggeffects)
+
+preds <- ggpredict(boto_model)
+plot(preds)
+```
+
+This produces the fitted line with a 95% confidence interval (we'll cover confidence intervals next week). It is quick but gives you limited control over the appearance.
+
+## Option 2: manual predictions
+
+Making the figure yourself is not much harder and is more transparent. The idea is to create a small dataset of drought values and use `predict()` to calculate the model's prediction for each one, exactly what you did by hand in the questions above.
+
+First, create a dataset with the drought values you want to predict at:
+
+```{r, eval=FALSE}
+fake <- data.frame(drought = 0:8)
+```
+
+Then generate the predictions and add them to the dataset:
+
+```{r, eval=FALSE}
+fake$fit <- predict(boto_model, newdata = fake)
+```
+
+**Try it yourself.** Enter any drought values in the table below. The fit column fills in using `213.3 + (−5.3) × drought`, and each point appears on the plot connected to the previous one. This is exactly what `predict()` does in R, repeated for each row.
+
+```{=html}
+<style>
+.pw-widget {
+  border: 1px solid #cddde4;
+  border-radius: 6px;
+  padding: 1.1rem 1.25rem 1.25rem;
+  margin: 1rem 0 1.5rem;
+  background: #f8fdfc;
+}
+.pw-body {
+  display: flex;
+  gap: 1.75rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.pw-table-wrap { flex: 0 0 auto; }
+.pw-table {
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.pw-table th {
+  background: #0d1e2c;
+  color: #fff;
+  padding: 0.35rem 0.85rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+.pw-table td {
+  padding: 0.2rem 0.5rem;
+  text-align: center;
+  border-bottom: 1px solid #e8f5f0;
+}
+.pw-table tr:last-child td { border-bottom: none; }
+.pw-row-num { color: #9ab; font-size: 0.78rem; width: 1.6rem; }
+.pw-input {
+  width: 5rem;
+  padding: 0.2rem 0.35rem;
+  border: 1px solid #cddde4;
+  border-radius: 3px;
+  text-align: center;
+  font-size: 0.875rem;
+  font-family: inherit;
+  -moz-appearance: textfield;
+}
+.pw-input::-webkit-inner-spin-button,
+.pw-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.pw-input:focus { outline: none; border-color: #00b494; box-shadow: 0 0 0 2px rgba(0,180,148,0.15); }
+.pw-fit-cell {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 0.85rem;
+  color: #1c3a50;
+  min-width: 5rem;
+}
+.pw-clear-btn {
+  margin-top: 0.55rem;
+  background: none;
+  border: 1px solid #cddde4;
+  border-radius: 4px;
+  padding: 0.22rem 0.75rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: #666;
+  font-family: inherit;
+  transition: border-color 0.12s, color 0.12s;
+}
+.pw-clear-btn:hover { border-color: #00b494; color: #00b494; }
+.pw-plot-wrap { flex: 1 1 300px; }
+#pw-svg { width: 100%; max-width: 400px; display: block; }
+</style>
+
+<div class="pw-widget">
+  <div class="pw-body">
+    <div class="pw-table-wrap">
+      <table class="pw-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>drought</th>
+            <th>fit (cm)</th>
+          </tr>
+        </thead>
+        <tbody id="pw-tbody"></tbody>
+      </table>
+      <button class="pw-clear-btn" onclick="pwClear()">Clear all</button>
+    </div>
+    <div class="pw-plot-wrap">
+      <svg id="pw-svg" viewBox="0 0 390 310" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var N = 6, B0 = 213.3, B1 = -5.3;
+  var SVG_W = 390, SVG_H = 310;
+  var ML = 58, MR = 16, MT = 16, MB = 52;
+  var PW = SVG_W - ML - MR, PH = SVG_H - MT - MB;
+  var X0 = -0.4, X1 = 8.4, Y0 = 161, Y1 = 219;
+  var TEAL = '#00b494', NAVY = '#0d1e2c', GRID = '#ddeee8';
+  var droughts = [];
+  for (var k = 0; k < N; k++) droughts.push(null);
+
+  function sx(x) { return ML + (x - X0) / (X1 - X0) * PW; }
+  function sy(y) { return MT + PH - (y - Y0) / (Y1 - Y0) * PH; }
+
+  function svgEl(tag, attrs) {
+    var e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+  function svgTxt(s, attrs) {
+    var e = svgEl('text', attrs);
+    e.textContent = s;
+    return e;
+  }
+
+  function buildSvg() {
+    var svg = document.getElementById('pw-svg');
+    svg.innerHTML = '';
+
+    // Plot area background
+    svg.appendChild(svgEl('rect', { x: ML, y: MT, width: PW, height: PH,
+      fill: '#fff', stroke: GRID, 'stroke-width': 1 }));
+
+    // Grid and x-axis ticks
+    var xTicks = [0,1,2,3,4,5,6,7,8];
+    xTicks.forEach(function(v) {
+      var x = sx(v);
+      svg.appendChild(svgEl('line', { x1:x, y1:MT, x2:x, y2:MT+PH,
+        stroke: GRID, 'stroke-width': 1 }));
+      svg.appendChild(svgTxt(v, { x:x, y:MT+PH+16,
+        'text-anchor':'middle', 'font-size':11, fill:'#555', 'font-family':'inherit' }));
+    });
+
+    // Grid and y-axis ticks
+    var yTicks = [165,170,175,180,185,190,195,200,205,210,215];
+    yTicks.forEach(function(v) {
+      var y = sy(v);
+      if (y < MT || y > MT+PH) return;
+      svg.appendChild(svgEl('line', { x1:ML, y1:y, x2:ML+PW, y2:y,
+        stroke: GRID, 'stroke-width': 1 }));
+      svg.appendChild(svgTxt(v, { x:ML-6, y:y+4,
+        'text-anchor':'end', 'font-size':11, fill:'#555', 'font-family':'inherit' }));
+    });
+
+    // Axes
+    svg.appendChild(svgEl('line', { x1:ML, y1:MT, x2:ML, y2:MT+PH,
+      stroke:NAVY, 'stroke-width':1.5 }));
+    svg.appendChild(svgEl('line', { x1:ML, y1:MT+PH, x2:ML+PW, y2:MT+PH,
+      stroke:NAVY, 'stroke-width':1.5 }));
+
+    // X label
+    svg.appendChild(svgTxt('Drought (years)', {
+      x: ML + PW/2, y: SVG_H - 6,
+      'text-anchor':'middle', 'font-size':12, fill:NAVY,
+      'font-family':'inherit', 'font-weight':600
+    }));
+
+    // Y label (rotated)
+    var yl = svgTxt('Predicted length (cm)', {
+      x: 12, y: MT + PH/2,
+      'text-anchor':'middle', 'font-size':12, fill:NAVY,
+      'font-family':'inherit', 'font-weight':600,
+      transform: 'rotate(-90 12 ' + (MT + PH/2) + ')'
+    });
+    svg.appendChild(yl);
+
+    // Dynamic group
+    svg.appendChild(svgEl('g', { id:'pw-data' }));
+    renderData();
+  }
+
+  function renderData() {
+    var g = document.getElementById('pw-data');
+    if (!g) return;
+    g.innerHTML = '';
+
+    // Collect valid points in table order
+    var pts = [];
+    for (var i = 0; i < N; i++) {
+      if (droughts[i] !== null) {
+        var fit = B0 + B1 * droughts[i];
+        pts.push({ i: i, px: sx(droughts[i]), py: sy(fit) });
+      }
+    }
+
+    // Lines between consecutive valid points
+    for (var j = 1; j < pts.length; j++) {
+      g.appendChild(svgEl('line', {
+        x1: pts[j-1].px, y1: pts[j-1].py,
+        x2: pts[j].px,   y2: pts[j].py,
+        stroke: TEAL, 'stroke-width': 2.2, 'stroke-linecap': 'round',
+        opacity: 0.75
+      }));
+    }
+
+    // Dots and row-number labels
+    pts.forEach(function(p) {
+      g.appendChild(svgEl('circle', {
+        cx: p.px, cy: p.py, r: 5.5,
+        fill: TEAL, stroke: '#fff', 'stroke-width': 1.8
+      }));
+      var lx = p.px + 9, ly = p.py - 7;
+      g.appendChild(svgTxt(p.i + 1, {
+        x: lx, y: ly,
+        'font-size': 9.5, fill: '#1c3a50', 'font-family': 'inherit'
+      }));
+    });
+  }
+
+  // Build table rows
+  var tbody = document.getElementById('pw-tbody');
+  for (var i = 0; i < N; i++) {
+    (function(idx) {
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td class="pw-row-num">' + (idx+1) + '</td>' +
+        '<td><input class="pw-input" type="number" id="pw-d-' + idx + '" ' +
+          'step="any" placeholder="" ' +
+          'oninput="pwUpdate(' + idx + ', this.value)"></td>' +
+        '<td class="pw-fit-cell" id="pw-f-' + idx + '">&mdash;</td>';
+      tbody.appendChild(tr);
+    })(i);
+  }
+
+  window.pwUpdate = function(i, val) {
+    var fitCell = document.getElementById('pw-f-' + i);
+    var parsed = parseFloat(val);
+    if (val === '' || val === null || isNaN(parsed)) {
+      droughts[i] = null;
+      fitCell.textContent = '—';
+    } else {
+      droughts[i] = parsed;
+      fitCell.textContent = (B0 + B1 * parsed).toFixed(1);
+    }
+    renderData();
+  };
+
+  window.pwClear = function() {
+    for (var i = 0; i < N; i++) {
+      droughts[i] = null;
+      var inp = document.getElementById('pw-d-' + i);
+      var fit = document.getElementById('pw-f-' + i);
+      if (inp) inp.value = '';
+      if (fit) fit.textContent = '—';
+    }
+    renderData();
+  };
+
+  buildSvg();
+})();
+</script>
+```
+
+Now plot:
+
+```{r, eval=FALSE}
+ggplot(fake) +
+  geom_line(aes(x = drought, y = fit)) +
+  labs(x = "Number of drought years",
+       y = "Predicted length of boto (cm)") +
+  theme_minimal()
+```
+
+Here is the full workflow from loading the data to the final figure, as you might write it in a script:
+
+```{r, eval=FALSE}
+# Deon Roos
+# Analysis of boto length in relation to droughts
+
+library(ggplot2)
+
+setwd("H:/BI3010/workshop3")
+boto <- read.table("boto.txt", header = TRUE)
+
+# EDA
+summary(boto)
+str(boto)
+ggplot(boto) + geom_point(aes(x = drought, y = length))
+ggplot(boto) + geom_point(aes(x = drought, y = length, colour = sex))
+ggplot(boto) + geom_point(aes(x = drought, y = length, colour = sex)) + facet_wrap(~sex)
+# No unusual observations detected in EDA
+
+# Concerns prior to modelling:
+# Measurement precision is high (unclear how lengths were measured at this accuracy)
+# Validity: depends on measurement method
+# Independence: related dolphins (families) may have been measured
+# Additivity: drought may affect the sexes differently
+
+# Fit model
+boto_model <- lm(length ~ drought, data = boto)
+
+# Diagnostics: covered in the next workshop
+
+# Inference
+summary(boto_model)
+
+fake <- data.frame(drought = 0:8)
+fake$fit <- predict(boto_model, newdata = fake)
+
+ggplot(fake) +
+  geom_line(aes(x = drought, y = fit)) +
+  labs(x = "Number of drought years",
+       y = "Predicted length of boto (cm)") +
+  theme_minimal()
+```
+
+The entire analysis is about 40 lines including comments. It is reproducible and shareable. As a tip: don't confuse script length with complexity. A long script is often a sign of uncertainty, not sophistication. Less is usually more.
+
+# Burying beetles: independent analysis
+
+Using everything you have just learned, work through a new dataset: `beetles.txt` on MyAberdeen. This data comes from a lab experiment investigating how short-term temperature exposure (6 hours per day) affects fecundity in burying beetles (*Nicrophorus vespilloides*), with the aim of understanding how the species might respond to climate change.
+
+Variables:
+
+- `offspring`: number of offspring produced
+- `temperature`: temperature (°C) to which beetles were exposed for 6 hours per day
+
+Carry out an EDA, consider which assumptions are likely violated, fit an appropriate model, and plot the results. Make sure you are comfortable with the full workflow, as an equivalent analysis may appear in a quiz.
+
+<div class="question-block">
+<p><strong>Worked answer.</strong> Once you have completed your own analysis, reveal the instructor's version to compare approaches.</p>
+<textarea class="student-answer" rows="4" placeholder="Describe your approach, any assumptions you think are violated, and your main findings..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<pre><code class="language-r">library(ggplot2)
+library(ggeffects)
+
+setwd("H:/BI3010/workshop3")
+beetles <- read.table("beetles.txt", header = TRUE)
+
+# EDA
+str(beetles)      # n = 234
+summary(beetles)  # minimum of 1 offspring, plausible if low
+
+ggplot(beetles) +
+  geom_histogram(aes(x = offspring), colour = "white", binwidth = 1) +
+  theme_minimal()
+# 1 offspring seems reasonable, just on the low end
+
+ggplot(beetles) +
+  geom_histogram(aes(x = temperature), colour = "white", binwidth = 1) +
+  theme_minimal()
+# Fairly even spread of temperatures between −10 and 35°C
+
+ggplot(beetles) +
+  geom_point(aes(x = temperature, y = offspring)) +
+  theme_minimal()
+# Clear non-linear trend: offspring increases then decreases as temperature rises
+
+# Hidden assumption concerns:
+# Linearity is almost certainly broken (the relationship curves)
+# Equal variance of errors: possibly OK (the plot looks roughly homogeneous)
+# Representativeness: this is a lab population; extrapolate to wild populations with caution
+
+# Fit model
+beet_mod <- lm(offspring ~ temperature, data = beetles)
+
+summary(beet_mod)
+# Intercept: 25.3, predicted offspring at 0°C
+# Slope: 0.5, each 1°C increase adds roughly 0.5 offspring
+# BUT: the model is biased (linearity is broken), so these estimates are unreliable.
+# Do not use this model for inference.
+
+preds <- ggpredict(beet_mod)
+plot(preds, add.data = TRUE)
+# The linear fit to a non-linear relationship is obvious in this plot.
+# In reality, we would need to allow temperature to have a non-linear effect in the model.</code></pre>
+</div>
+</div>
+
+# Assumption reference
+
+| Assumption | Description | Example of violation |
+|---|---|---|
+| 1. Validity | The data can answer the research question. | Using IQ to measure overall intelligence. |
+| 2. Representativeness | The data reflects the population being studied. | Using survey data from a rural area to draw conclusions about an urban population. |
+| 3. Additivity | Effects of predictors are additive with no interactions. | Assuming study hours and sleep hours independently affect exam scores without considering their combined effect. |
+| 4. Linearity | The relationship between predictors and the outcome is linear. | Assuming plant growth continues to increase indefinitely without ever levelling off. |
+| 5. Independence of errors | Observations are independent of each other. | Modelling height using repeated measurements of the same children over time. |
+| 6. Equal variance of errors | Residuals have constant variance across all predictor levels (homoscedasticity). | Modelling income, where salary variability differs across levels of a company hierarchy. |
+| 7. Normality of errors | Residuals are approximately normally distributed. | Modelling income, where a small number of extremely wealthy individuals create a heavily skewed residual distribution. |
+
+```{=html}
+<button id="glossary-btn" onclick="toggleGlossary()">词典 / Glossary</button>
+
+<div id="glossary-panel">
+  <div id="glossary-header">
+    <span>Glossary / 词典</span>
+    <button id="glossary-close" onclick="toggleGlossary()">&#x2715;</button>
+  </div>
+  <div id="glossary-body">
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Linear model</span>
+        <span class="glossary-zh-term">线性模型</span>
+      </div>
+      <div class="glossary-en-def">A statistical model that describes the relationship between a response variable and one or more predictors using a straight line. Fitted in R with lm().</div>
+      <div class="glossary-zh-def">用直线描述响应变量与一个或多个预测变量之间关系的统计模型，在 R 中使用 lm() 拟合。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Normal distribution</span>
+        <span class="glossary-zh-term">正态分布</span>
+      </div>
+      <div class="glossary-en-def">A symmetric, bell-shaped probability distribution defined by its mean (μ) and standard deviation (σ). The default assumption for the response variable in a linear model.</div>
+      <div class="glossary-zh-def">由均值（μ）和标准差（σ）定义的对称钟形概率分布，是线性模型中响应变量的默认假设。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Response variable</span>
+        <span class="glossary-zh-term">响应变量</span>
+      </div>
+      <div class="glossary-en-def">The outcome being modelled (the "Y" variable). In the boto example, this is length. Also called the dependent variable.</div>
+      <div class="glossary-zh-def">被建模的结果变量（即"Y"变量）。在亚马逊河豚示例中为体长，也称因变量。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Predictor variable</span>
+        <span class="glossary-zh-term">预测变量</span>
+      </div>
+      <div class="glossary-en-def">The variable used to explain or predict the response (the "X" variable). Also called the explanatory variable, independent variable, or covariate.</div>
+      <div class="glossary-zh-def">用于解释或预测响应变量的变量（即"X"变量），也称解释变量、自变量或协变量。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Intercept (β₀)</span>
+        <span class="glossary-zh-term">截距</span>
+      </div>
+      <div class="glossary-en-def">The predicted value of the response variable when all predictors equal zero. In the boto model: the predicted length when drought = 0.</div>
+      <div class="glossary-zh-def">当所有预测变量等于零时，响应变量的预测值。在亚马逊河豚模型中，即干旱年数为零时的预测体长。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Slope (β₁)</span>
+        <span class="glossary-zh-term">斜率</span>
+      </div>
+      <div class="glossary-en-def">The change in the predicted response for a one-unit increase in the predictor. In the boto model: the change in predicted length for each additional year of drought.</div>
+      <div class="glossary-zh-def">预测变量每增加一个单位时，预测响应变量的变化量。在亚马逊河豚模型中，即每增加一年干旱，预测体长的变化量。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Fitted value (μ)</span>
+        <span class="glossary-zh-term">拟合值</span>
+      </div>
+      <div class="glossary-en-def">The model's predicted value for a given set of predictor values. Written μ_i for observation i. Calculated as β₀ + β₁ × predictor.</div>
+      <div class="glossary-zh-def">对于给定预测变量值，模型所预测的值，第 i 个观测的拟合值记为 μ_i，计算公式为 β₀ + β₁ × 预测变量。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Residual</span>
+        <span class="glossary-zh-term">残差</span>
+      </div>
+      <div class="glossary-en-def">The difference between an observed value and its fitted value: residual = observed − predicted. Residuals are used to diagnose whether model assumptions are met.</div>
+      <div class="glossary-zh-def">观测值与拟合值之差：残差 = 观测值 − 预测值。残差用于诊断模型假设是否满足。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Standard deviation (σ)</span>
+        <span class="glossary-zh-term">标准差</span>
+      </div>
+      <div class="glossary-en-def">A measure of spread around the mean. In a linear model, σ describes how much individual observations vary around the fitted line.</div>
+      <div class="glossary-zh-def">均值周围数据分散程度的度量。在线性模型中，σ 描述各观测值围绕拟合线的变异程度。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Continuous variable</span>
+        <span class="glossary-zh-term">连续变量</span>
+      </div>
+      <div class="glossary-en-def">A variable that can take any value within a range, including non-integer values. Length, weight, and temperature are continuous. Compatible with a Normal distribution.</div>
+      <div class="glossary-zh-def">可取某范围内任意值（包括非整数值）的变量。体长、体重和温度均为连续变量，与正态分布兼容。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Discrete variable</span>
+        <span class="glossary-zh-term">离散变量</span>
+      </div>
+      <div class="glossary-en-def">A variable that can only take specific values, usually integers (e.g. count of offspring). A Normal distribution is generally not appropriate for discrete variables.</div>
+      <div class="glossary-zh-def">只能取特定值（通常为整数）的变量，例如后代数量。正态分布通常不适用于离散变量。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">lm()</span>
+        <span class="glossary-zh-term">lm()</span>
+      </div>
+      <div class="glossary-en-def">The R function for fitting a linear model. Takes a formula (response ~ predictor) and a data frame. Returns a model object that can be passed to summary(), predict(), and other functions.</div>
+      <div class="glossary-zh-def">R 中用于拟合线性模型的函数。接受公式（响应变量 ~ 预测变量）和数据框，返回可传递给 summary()、predict() 等函数的模型对象。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">summary() for lm</span>
+        <span class="glossary-zh-term">summary() 用于线性模型</span>
+      </div>
+      <div class="glossary-en-def">Prints the key results from a fitted lm object, including the estimated intercept and slope, standard errors, and model fit statistics.</div>
+      <div class="glossary-zh-def">打印拟合线性模型的关键结果，包括截距和斜率的估计值、标准误差及模型拟合统计量。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">predict()</span>
+        <span class="glossary-zh-term">predict()</span>
+      </div>
+      <div class="glossary-en-def">Calculates fitted values from a model for a given set of predictor values. Use predict(model, newdata = ...) to generate predictions for new data.</div>
+      <div class="glossary-zh-def">根据给定的预测变量值，从模型计算拟合值。使用 predict(模型, newdata = ...) 为新数据生成预测值。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">ggeffects</span>
+        <span class="glossary-zh-term">ggeffects</span>
+      </div>
+      <div class="glossary-en-def">An R package that automatically generates model predictions and confidence intervals, and plots them with ggplot2. Useful for quick visualisation of model fits.</div>
+      <div class="glossary-zh-def">自动生成模型预测值和置信区间，并用 ggplot2 绘图的 R 包，适用于快速可视化模型拟合结果。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Coefficient</span>
+        <span class="glossary-zh-term">系数</span>
+      </div>
+      <div class="glossary-en-def">An estimated parameter from the model (e.g. the intercept or slope). Reported in the Estimate column of summary() output.</div>
+      <div class="glossary-zh-def">模型估计的参数（如截距或斜率），显示在 summary() 输出的 Estimate 列中。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Confidence interval</span>
+        <span class="glossary-zh-term">置信区间</span>
+      </div>
+      <div class="glossary-en-def">A range of values within which the true parameter is likely to fall, with a specified level of confidence (usually 95%). Covered in detail next week.</div>
+      <div class="glossary-zh-def">在指定置信水平（通常为95%）下，真实参数值可能落入的值域范围，将在下周详细介绍。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Fecundity</span>
+        <span class="glossary-zh-term">繁殖力</span>
+      </div>
+      <div class="glossary-en-def">The reproductive output of an organism, typically measured as the number of offspring produced. The response variable in the burying beetle dataset.</div>
+      <div class="glossary-zh-def">生物体的生殖产出，通常以产生的后代数量衡量，是埋葬甲虫数据集中的响应变量。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Linearity (assumption)</span>
+        <span class="glossary-zh-term">线性性（假设）</span>
+      </div>
+      <div class="glossary-en-def">The assumption that the relationship between the predictor and the response follows a straight line. Violated when the true relationship curves, as in the beetle temperature data.</div>
+      <div class="glossary-zh-def">预测变量与响应变量之间关系呈直线的假设。当真实关系为曲线时（如甲虫温度数据），该假设被违反。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Biased estimate</span>
+        <span class="glossary-zh-term">有偏估计</span>
+      </div>
+      <div class="glossary-en-def">An estimate that is systematically too high or too low because the model is misspecified (e.g. fitting a straight line to curved data). Biased estimates should not be used for inference.</div>
+      <div class="glossary-zh-def">由于模型设定错误（如对曲线数据拟合直线）而系统性偏高或偏低的估计值，有偏估计不应用于推断。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Covariate</span>
+        <span class="glossary-zh-term">协变量</span>
+      </div>
+      <div class="glossary-en-def">Another term for a predictor variable. Often used when the predictor is continuous and included to control for its effect alongside the main variable of interest.</div>
+      <div class="glossary-zh-def">预测变量的另一种说法，通常指连续型预测变量，用于在研究主要变量的同时控制其影响。</div>
+    </div>
+
+  </div>
+</div>
+```

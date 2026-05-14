@@ -1,0 +1,985 @@
+---
+title: "Workshop 4: Diagnosing linear models with a continuous predictor"
+subtitle: "BI3010 Statistics for Biologists"
+author: "Roos & Pinard"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    theme: [cosmo, ../custom.scss]
+    highlight-style: github
+    embed-resources: true
+    code-copy: true
+    code-tools: false
+    html-math-method: mathjax
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, results = "hide", fig.show = "show",
+                      message = FALSE, warning = FALSE)
+library(ggplot2)
+
+boto  <- read.table("../Workshop 2 - Data vis/Data/boto.txt", header = TRUE)
+boto_model <- lm(length ~ drought, data = boto)
+boto$predicted <- predict(boto_model)
+boto$residual  <- boto$length - boto$predicted
+
+beetles  <- read.table("../Workshop 3 - LM with continuous predictor/Data/beetles.txt",
+                       header = TRUE)
+beet_mod <- lm(offspring ~ temperature, data = beetles)
+
+dogs <- read.table("Data/dog_disturbance.txt", header = TRUE)
+```
+
+```{=html}
+<script>
+/* --- answer lock --- */
+var WS_PASS_SHA256 = '864ab12b1858361a2dd80e99b61740bb6e01c8abb3eae721754a8ec1a6463bcc';
+var WS_PASS_DJB2   = '23a4301e';
+var _wsUnlocked = false;
+
+function _wsDjb2(s) {
+  var h = 5381;
+  for (var i = 0; i < s.length; i++) { h = ((h << 5) + h + s.charCodeAt(i)) | 0; }
+  return (h >>> 0).toString(16).padStart(8, '0');
+}
+function wsVerifyPass() {
+  var inp = document.getElementById('ws-pass-input'); if (!inp) return;
+  var msg = document.getElementById('ws-pass-msg');
+  function finish(ok) {
+    if (ok) {
+      _wsUnlocked = true; sessionStorage.setItem('ws-unlocked', WS_PASS_SHA256);
+      document.body.classList.remove('ws-locked');
+      var b = document.getElementById('ws-lock-banner');
+      if (b) { b.style.transition = 'opacity 0.4s'; b.style.opacity = '0'; setTimeout(function () { b.remove(); }, 450); }
+    } else {
+      inp.classList.add('ws-wrong'); if (msg) msg.textContent = 'Incorrect password.';
+      setTimeout(function () { inp.classList.remove('ws-wrong'); if (msg) msg.textContent = ''; }, 2000);
+    }
+  }
+  if (window.crypto && crypto.subtle) {
+    crypto.subtle.digest('SHA-256', new TextEncoder().encode(inp.value))
+      .then(function (buf) { var hex = Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join(''); finish(hex === WS_PASS_SHA256); })
+      .catch(function () { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); });
+  } else { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); }
+}
+function wsFlashBanner() {
+  var b = document.getElementById('ws-lock-banner'); if (!b) return;
+  b.classList.remove('ws-flash'); void b.offsetWidth; b.classList.add('ws-flash');
+}
+function wsInitLock() {
+  if (sessionStorage.getItem('ws-unlocked') === WS_PASS_SHA256) { _wsUnlocked = true; return; }
+  document.body.classList.add('ws-locked');
+  var b = document.createElement('div'); b.id = 'ws-lock-banner';
+  b.innerHTML = '<span style="font-size:1.15rem;line-height:1;">🔒</span>' +
+    '<span>Answers are locked. Enter the workshop password to reveal them.</span>' +
+    '<span class="ws-unlock-form">' +
+      '<input type="password" id="ws-pass-input" placeholder="Password"' +
+      ' onkeydown="if(event.key===\'Enter\')wsVerifyPass();">' +
+      '<button id="ws-unlock-btn" onclick="wsVerifyPass()">Unlock</button>' +
+    '</span><span id="ws-pass-msg"></span>';
+  var t = document.getElementById('title-block-header');
+  if (t) t.insertAdjacentElement('afterend', b); else document.body.prepend(b);
+}
+document.addEventListener('DOMContentLoaded', wsInitLock);
+/* --- end lock --- */
+
+function revealAnswer(btn) {
+  if (!_wsUnlocked) { wsFlashBanner(); return; }
+  var block = btn.closest('.question-block, .puzzle-block');
+  var answerClass = block.classList.contains('puzzle-block') ? '.puzzle-answer' : '.instructor-answer';
+
+  var textarea = block.querySelector('.student-answer');
+  if (textarea) {
+    if (textarea.value.trim() === '') {
+      textarea.classList.add('missing');
+      textarea.placeholder = 'Please write your answer before revealing...';
+      textarea.focus();
+      return;
+    }
+    textarea.classList.remove('missing');
+  }
+
+  var mcOptions = block.querySelector('.mc-options');
+  if (mcOptions) {
+    var radios = mcOptions.querySelectorAll('input[type=radio]');
+    var anyChecked = Array.from(radios).some(function(r) { return r.checked; });
+    if (!anyChecked) {
+      mcOptions.classList.add('unanswered');
+      return;
+    }
+    mcOptions.classList.remove('unanswered');
+    radios.forEach(function(r) {
+      r.disabled = true;
+      var label = r.closest('label');
+      if (r.dataset.correct === 'true') {
+        label.classList.add('mc-correct');
+      } else if (r.checked) {
+        label.classList.add('mc-incorrect');
+      }
+    });
+  }
+
+  var answer = block.querySelector(answerClass);
+  if (answer) answer.style.display = 'block';
+  btn.textContent = 'Answer shown';
+  btn.disabled = true;
+}
+
+function toggleGlossary() {
+  document.getElementById('glossary-panel').classList.toggle('open');
+}
+</script>
+```
+
+```{=html}
+<style>
+#glossary-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: #00b494;
+  color: #fff;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  transition: background 0.15s;
+  font-family: inherit;
+}
+#glossary-btn:hover { background: #009478; }
+
+#glossary-panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 380px;
+  height: 100vh;
+  background: #fff;
+  border-left: 3px solid #00b494;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+  z-index: 1001;
+  transition: right 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+#glossary-panel.open { right: 0; }
+
+#glossary-header {
+  background: #0d1e2c;
+  color: #fff;
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+#glossary-header span { font-weight: 600; font-size: 0.95rem; letter-spacing: 0.03em; }
+#glossary-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.7;
+}
+#glossary-close:hover { opacity: 1; }
+#glossary-body { overflow-y: auto; flex: 1; }
+
+.glossary-entry {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #e8f5f0;
+}
+.glossary-entry:last-child { border-bottom: none; }
+.glossary-terms {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.3rem;
+}
+.glossary-en-term { font-weight: 600; color: #0d1e2c; font-size: 0.92rem; }
+.glossary-zh-term { color: #00b494; font-weight: 600; font-size: 0.92rem; }
+.glossary-en-def  { font-size: 0.845rem; color: #444; line-height: 1.5; margin-bottom: 0.25rem; }
+.glossary-zh-def  { font-size: 0.845rem; color: #1c3a50; line-height: 1.65; }
+</style>
+```
+
+::: {.callout-note}
+## Workshop structure
+
+Today we work with the models from Workshop 3 and apply the full diagnostic workflow. The focus is step 5.
+
+1. Formulate a research question.
+2. Perform exploratory data analysis.
+3. Identify any hidden assumptions.
+4. Fit an appropriate model.
+5. Diagnose the model and check assumptions **[Focus of today]**.
+6. Summarise the results.
+7. Interpret and provide inferences.
+
+To keep the workload manageable, start by copying your workflow from Workshop 3 into a new script, or continue in the same script. If you did not finish Workshop 3, complete it now before continuing here.
+:::
+
+::: {.callout-tip}
+## Learning objectives
+
+1. Understand what residuals are and how they are used in model diagnosis.
+2. Interpret the four standard diagnostic plots produced by `plot(model)`.
+3. Identify which assumptions each plot is designed to check.
+4. Recognise when a diagnostic plot signals a genuine problem and when it does not.
+:::
+
+# Why diagnostics matter
+
+Starting with the boto dolphin model from Workshop 3, we have the equation with estimated parameters:
+
+$$length_i \sim \text{Normal}(\mu_i, \sigma)$$
+
+$$\mu_i = 213.2 + (-5.3) \times drought_i$$
+
+We used this to generate a figure, but how do we know if we can trust the result? The uncomfortable answer is that we can't confirm it with absolute certainty. The results might be completely unreliable, either because the data violated a hidden assumption or because the model is not well suited to the data. The particularly bad news is that we almost always get *some* answer from a model, even when the data or model are badly flawed.
+
+This means it falls to us to actively look for signs that the model results should not be interpreted. This is especially important when a model could influence real-world decisions. We don't want to conclude a drug is safe only to discover later it has serious [side effects](https://pubmed.ncbi.nlm.nih.gov/21507989/).
+
+One more uncomfortable truth: the assumptions we care about *most* (validity and representativeness) are the hardest to test formally. They require domain knowledge, careful EDA, and clear thinking about the data-generating process. That is why you should spend the majority of your time on EDA and thinking about the context before fitting any model.
+
+The assumptions that *can* be checked formally after fitting are the residual-based ones: linearity, equal variance, normality, and independence of errors. That is where today's workshop focuses.
+
+To start, ensure you have the boto model from the last workshop loaded. Add one extra line to store the model's predictions for the original dataset:
+
+```{r, echo=TRUE, eval=FALSE}
+boto$predicted <- predict(boto_model)
+```
+
+Unlike the `fake` dataset approach from Workshop 3, here we pass the original data through the model so we can compute residuals: the difference between each observed length and what the model predicted for that dolphin.
+
+# Diagnosing the four horsemen
+
+The four standard diagnostic plots are produced in one call:
+
+```{r, echo=TRUE, eval=FALSE}
+par(mfrow = c(2, 2))  # arrange as 2x2 grid
+plot(boto_model)
+par(mfrow = c(1, 1))  # reset
+```
+
+Alternatively, press Return in the console after `plot(boto_model)` to step through them one at a time. Let's go through each plot and what it tells us.
+
+## Residuals vs Fitted
+
+```{r fig.height=4.5}
+plot(boto_model, which = 1)
+```
+
+The y-axis shows residual errors: the difference between each dolphin's actual measured length and what the model predicted. A perfect prediction gives a residual of zero, shown as the dashed horizontal line.
+
+The x-axis shows the fitted (predicted) values. Points at the far left are dolphins the model predicts to be short; points at the right are those the model predicts to be longer. Points labelled with numbers are the row indices of notable observations. For example, the point labelled 6 corresponds to:
+
+```{r, echo=TRUE, eval=FALSE}
+boto[6, ]
+```
+
+Dolphin 6 is a male that experienced two droughts and was 236 cm long. The model predicted 203 cm, so its residual is approximately +33 cm. We can add a residual column directly:
+
+```{r, echo=TRUE, eval=FALSE}
+boto$residual <- boto$length - boto$predicted
+# Equivalently: residuals(boto_model)
+boto[6, ]
+```
+
+This plot is used to check two assumptions.
+
+### Linearity
+
+If the residuals display a "wavy" pattern across the fitted values, drawing a straight line through the data is not capturing the relationship well. Here is a simulated example that clearly violates linearity:
+
+```{r fig.height=4}
+set.seed(1)
+df_lin <- data.frame(x = 0:100)
+df_lin$y <- rnorm(n = nrow(df_lin),
+                  mean = 0 + 2.5 * df_lin$x + 0.05 * df_lin$x^2 - 0.003 * df_lin$x^3,
+                  sd = 100)
+ggplot(df_lin, aes(x = x, y = y)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE, colour = "#1c3a50") +
+  labs(x = "Explanatory variable", y = "Response variable") +
+  theme_minimal()
+```
+
+The straight line fitted to this curved relationship produces a systematic pattern in the residuals: the model overpredicts at low and high x values and underpredicts in the middle. The diagnostic plot makes this visible:
+
+```{r fig.height=4.5}
+m_lin <- lm(y ~ x, data = df_lin)
+plot(m_lin, which = 1)
+```
+
+The red smoothed line through the residuals curves clearly away from zero rather than sitting flat. Compare this to the boto model plot above, where the smoothed line stays close to the dashed zero line across the range of fitted values.
+
+Violating linearity can seriously mislead inference. In the simulated example above, the true relationship peaks in the middle and declines, but a straight line would suggest a flat or slightly positive trend across the whole range. The severity depends on context: sometimes a mild deviation is acceptable; a strong curve is not.
+
+### Equal variance of errors
+
+We also use this plot to check whether residuals are equally spread across the range of fitted values. Here is a simulated example of heteroscedasticity (unequal variance):
+
+```{r fig.height=4}
+set.seed(2)
+df_var <- data.frame(x = 0:100)
+df_var$y <- rnorm(n = nrow(df_var), mean = 0 + 2.5 * df_var$x, sd = 1 + 1.5 * df_var$x)
+ggplot(df_var, aes(x = x, y = y)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE, colour = "#1c3a50") +
+  labs(x = "Explanatory variable", y = "Response variable") +
+  theme_minimal()
+```
+
+```{r fig.height=4.5}
+m_var <- lm(y ~ x, data = df_var)
+plot(m_var, which = 1)
+```
+
+The residuals fan outward from left to right: predictions are accurate at low x values and increasingly inaccurate at high x values. This violates the assumption that residual variance is constant across all fitted values.
+
+Heteroscedasticity is generally less damaging than nonlinearity. Parameter estimates remain unbiased, but standard errors become inflated. This matters most when you need to quantify uncertainty (next week) or when using p-values (later in the course).
+
+## Scale-Location
+
+```{r fig.height=4.5}
+plot(boto_model, which = 3)
+```
+
+This plot checks the same two assumptions as Residuals vs Fitted, but transforms the residuals by taking the square root of their absolute values. This makes it easier to spot trends in the *spread* of residuals rather than their sign. A flat smoothed line indicates equal variance. The two plots are complementary: if one is ambiguous, the other may be clearer.
+
+## Q-Q Residuals
+
+```{r fig.height=4.5}
+plot(boto_model, which = 2)
+```
+
+### Normality of errors
+
+The Q-Q plot compares the distribution of the model's residuals to a theoretical Normal distribution. If the residuals are approximately Normal, the points fall close to the diagonal line. Systematic departures at the tails (points curving away from the line) indicate the residual distribution has heavier or lighter tails than Normal.
+
+The following figure shows the same information in a different form, using a histogram of residuals overlaid with the theoretical Normal distribution. You are not expected to reproduce this, but the code is shown for reference:
+
+```{r echo=TRUE, results="show", fig.height=4}
+resids  <- residuals(boto_model)
+resid_df <- data.frame(residuals = resids)
+theory_df <- data.frame(x = seq(min(resids), max(resids), length.out = 200))
+theory_df$y <- dnorm(theory_df$x, mean = mean(resids), sd = sd(resids))
+
+ggplot() +
+  geom_histogram(data = resid_df,
+                 aes(x = residuals, y = after_stat(density)),
+                 binwidth = 3, fill = "lightgrey", colour = "grey60") +
+  geom_area(data = theory_df, aes(x = x, y = y),
+            colour = "black", fill = "#4AB54A", alpha = 0.3) +
+  labs(x = "Residuals", y = "Density") +
+  theme_minimal()
+```
+
+The grey bars are the actual residuals; the green shaded area is the ideal Normal. Ideally the bars and the shading would align. Here, the bars extend slightly further in both tails than the Normal would predict, matching what the Q-Q plot shows.
+
+Does this matter for the boto model? Not really. Minor tail deviations are common and usually acceptable. Normality of errors is the least critical of the residual assumptions, because it only governs how well the model predicts *individual* observations. If the goal is to understand the relationship between drought and length rather than to predict individual dolphins precisely, moderate non-normality is not a serious problem.
+
+## Residuals vs Leverage
+
+```{r fig.height=4.5}
+plot(boto_model, which = 5)
+```
+
+This plot does not check the distributional assumptions. Instead it identifies observations that have a disproportionate influence on where the fitted line sits. **Leverage** measures how far an observation is from the centre of the predictor space. **Cook's distance** combines leverage and residual size to measure overall influence.
+
+Look for observations close to or beyond a Cook's distance of 1 (shown as dashed contour lines). An observation with high Cook's distance is pulling the fitted line substantially toward itself. The boto model shows no observations near that threshold, so no single dolphin is unduly distorting the results.
+
+For Cook's distance alone, without the leverage axis:
+
+```{r echo=TRUE, eval=FALSE}
+plot(boto_model, which = 4)
+```
+
+```{=html}
+<div style="border:1px solid #d0ecea;border-radius:6px;padding:1.25rem;margin:1.5rem 0;background:#fafefe;">
+<p style="font-weight:600;margin:0 0 0.3rem;color:#0d1e2c;font-size:0.95rem;">Cook's distance and leverage: interactive explorer</p>
+<p style="font-size:0.84rem;color:#555;margin:0 0 0.75rem;">Select a scenario to add a single special point to the dataset. The grey dashed line shows the baseline fit; the coloured line shows how the fit changes once the special point is included. Stats refer to the special point within the full model.</p>
+<svg id="cooks-svg" width="480" height="300" style="display:block;max-width:100%;"></svg>
+<div id="cooks-buttons" style="display:flex;flex-wrap:wrap;gap:0.45rem;margin:0.7rem 0 0.45rem;">
+  <button onclick="cookScenario(0)" style="padding:0.3rem 0.7rem;border:1px solid #00b494;border-radius:4px;cursor:pointer;font-size:0.81rem;font-family:inherit;transition:background 0.12s;">Baseline</button>
+  <button onclick="cookScenario(1)" style="padding:0.3rem 0.7rem;border:1px solid #00b494;border-radius:4px;cursor:pointer;font-size:0.81rem;font-family:inherit;transition:background 0.12s;">High leverage + high Cook's D</button>
+  <button onclick="cookScenario(2)" style="padding:0.3rem 0.7rem;border:1px solid #00b494;border-radius:4px;cursor:pointer;font-size:0.81rem;font-family:inherit;transition:background 0.12s;">High leverage + low Cook's D</button>
+  <button onclick="cookScenario(3)" style="padding:0.3rem 0.7rem;border:1px solid #00b494;border-radius:4px;cursor:pointer;font-size:0.81rem;font-family:inherit;transition:background 0.12s;">Low leverage + large residual</button>
+</div>
+<div id="cooks-stats" style="min-height:3.5rem;"></div>
+</div>
+<script>
+(function(){
+  var SVG_W=480,SVG_H=300,ML=52,MR=20,MT=16,MB=44;
+  var PW=SVG_W-ML-MR,PH=SVG_H-MT-MB;
+  var XMIN=0,XMAX=16,YMIN=0,YMAX=34;
+
+  /* Base dataset: 13 points, clear positive trend y ~ 2x + 1 */
+  var bx=[1,2,2.5,3,4,4.5,5.5,6,7,7.5,8,9,10];
+  var by=[3.2,5.1,5.8,7.3,9.0,9.8,11.7,12.4,14.6,15.0,17.2,18.9,20.8];
+
+  var SC=[
+    {px:null,py:null,col:null,
+     desc:"Baseline: 13 observations with a clear positive trend, no special point added."},
+    {px:14,py:5,col:"#c0392b",
+     desc:"Special point at x = 14, y = 5. Far to the right of the data (high leverage) and far below the trend (large residual). Both combine to give a high Cook’s D — the fitted line rotates substantially toward this single observation."},
+    {px:14,py:29,col:"#d07000",
+     desc:"Special point at x = 14, y = 29. Same high leverage as the previous scenario, but y is right on the trend, so the residual is tiny. Cook’s D is low and the line barely shifts. Leverage alone does not make a point influential."},
+    {px:5.5,py:24,col:"#7b2f9e",
+     desc:"Special point at x = 5.5, y = 24. Near the centre of x (low leverage) but far above the trend (large residual). The line shifts upward but less dramatically than scenario 2, because low leverage limits overall influence."}
+  ];
+
+  function mean(a){return a.reduce(function(s,v){return s+v;},0)/a.length;}
+
+  function ols(xs,ys){
+    var n=xs.length,xb=mean(xs),yb=mean(ys),Sxx=0,Sxy=0,i;
+    for(i=0;i<n;i++){Sxx+=(xs[i]-xb)*(xs[i]-xb);Sxy+=(xs[i]-xb)*(ys[i]-yb);}
+    var b1=Sxy/Sxx,b0=yb-b1*xb,SSE=0;
+    for(i=0;i<n;i++){var r=ys[i]-(b0+b1*xs[i]);SSE+=r*r;}
+    return {b0:b0,b1:b1,MSE:SSE/(n-2),Sxx:Sxx,xb:xb,n:n};
+  }
+
+  function cookStat(xp,yp,fit){
+    var h=1/fit.n+Math.pow(xp-fit.xb,2)/fit.Sxx;
+    var e=yp-(fit.b0+fit.b1*xp);
+    var D=(e*e*h)/(2*fit.MSE*Math.pow(1-h,2));
+    return {h:h,e:e,D:D};
+  }
+
+  function px(x){return ML+(x-XMIN)/(XMAX-XMIN)*PW;}
+  function py(y){return MT+PH-(y-YMIN)/(YMAX-YMIN)*PH;}
+
+  function ln(x1,y1,x2,y2,stroke,sw,dash){
+    return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+
+      '" stroke="'+stroke+'" stroke-width="'+sw+'"'+
+      (dash?' stroke-dasharray="'+dash+'"':'')+'/>';
+  }
+  function ci(cx,cy,r,fill,stroke,sw){
+    return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+
+      '" fill="'+fill+'" stroke="'+(stroke||'none')+'" stroke-width="'+(sw||0)+'"/>';
+  }
+  function tx(x,y,anchor,size,col,s){
+    return '<text x="'+x+'" y="'+y+'" text-anchor="'+anchor+
+      '" font-size="'+size+'" fill="'+col+'">'+s+'</text>';
+  }
+
+  function render(si){
+    var sc=SC[si];
+    var base=ols(bx,by);
+    var full=(sc.px!==null)?ols(bx.concat([sc.px]),by.concat([sc.py])):null;
+    var h='';
+
+    /* axes */
+    h+=ln(ML,MT+PH,ML+PW,MT+PH,'#888',1,'');
+    h+=ln(ML,MT,ML,MT+PH,'#888',1,'');
+
+    /* x ticks */
+    for(var x=0;x<=XMAX;x+=2){
+      var pxi=px(x);
+      h+=ln(pxi,MT+PH,pxi,MT+PH+4,'#888',1,'');
+      h+=tx(pxi,MT+PH+15,'middle',10,'#555',x);
+    }
+    /* y ticks */
+    for(var y=0;y<=YMAX;y+=8){
+      var pyi=py(y);
+      h+=ln(ML-4,pyi,ML,pyi,'#888',1,'');
+      h+=tx(ML-6,pyi+4,'end',10,'#555',y);
+    }
+
+    /* axis labels */
+    h+=tx(ML+PW/2,SVG_H-4,'middle',11,'#444','Predictor (x)');
+    h+='<text transform="rotate(-90,'+(ML-36)+','+(MT+PH/2)+')" x="'+(ML-36)+
+       '" y="'+(MT+PH/2+4)+'" text-anchor="middle" font-size="11" fill="#444">Response (y)</text>';
+
+    /* baseline regression line */
+    var bly0=py(base.b0+base.b1*XMIN),blyN=py(base.b0+base.b1*XMAX);
+    if(full!==null){
+      h+=ln(px(XMIN),bly0,px(XMAX),blyN,'#bbb',1.5,'5,3');
+      h+=tx(px(XMAX)-4,bly0-6,'end',9,'#999','baseline');
+    } else {
+      h+=ln(px(XMIN),bly0,px(XMAX),blyN,'#00b494',2,'');
+    }
+
+    /* influenced regression line */
+    if(full!==null){
+      var fly0=py(full.b0+full.b1*XMIN),flyN=py(full.b0+full.b1*XMAX);
+      h+=ln(px(XMIN),fly0,px(XMAX),flyN,sc.col,2,'');
+    }
+
+    /* base data points */
+    for(var i=0;i<bx.length;i++){
+      h+=ci(px(bx[i]),py(by[i]),5,'#1c5f90','#fff',1);
+    }
+
+    /* special point */
+    if(sc.px!==null){
+      h+=ci(px(sc.px),py(sc.py),8,sc.col,'#fff',1.5);
+    }
+
+    document.getElementById('cooks-svg').innerHTML=h;
+
+    /* stats panel */
+    var sd=document.getElementById('cooks-stats');
+    if(full!==null){
+      var st=cookStat(sc.px,sc.py,full);
+      var dcol=st.D>0.5?'#c00':st.D>0.15?'#b06000':'#2a7a2a';
+      var dFlag=st.D>1?' &#9888;':'';
+      sd.innerHTML=
+        '<div style="display:flex;gap:1.5rem;flex-wrap:wrap;margin:0.2rem 0 0.45rem;font-size:0.85rem;">'+
+        '<span><strong>Leverage (h):</strong> '+st.h.toFixed(3)+'</span>'+
+        '<span><strong>Residual:</strong> '+st.e.toFixed(2)+'</span>'+
+        '<span style="color:'+dcol+'"><strong>Cook\'s D:</strong> '+st.D.toFixed(3)+dFlag+'</span>'+
+        '</div>'+
+        '<p style="font-size:0.83rem;color:#444;margin:0 0 0.15rem;">'+sc.desc+'</p>'+
+        '<p style="font-size:0.79rem;color:#777;margin:0;">Cook\'s D &gt; 1 is a common threshold for flagging potentially influential observations.</p>';
+    } else {
+      sd.innerHTML='<p style="font-size:0.83rem;color:#444;margin:0;">'+sc.desc+'</p>';
+    }
+
+    /* button styling */
+    document.querySelectorAll('#cooks-buttons button').forEach(function(b,i){
+      b.style.background=(i===si)?'#00b494':'#e8f5f0';
+      b.style.color=(i===si)?'#fff':'#0d1e2c';
+    });
+  }
+
+  window.cookScenario=function(i){render(i);};
+  render(0);
+})();
+</script>
+```
+
+## Diagnosing the boto model
+
+<div class="question-block">
+<p><strong>Question 1.</strong> Which assumptions can be assessed using the Residuals vs Fitted plot?</p>
+<div class="mc-options">
+  <label><input type="radio" name="boto-q1" data-correct="false"> Normality of errors</label>
+  <label><input type="radio" name="boto-q1" data-correct="true"> Linearity and equal variance of errors</label>
+  <label><input type="radio" name="boto-q1" data-correct="false"> Independence of errors</label>
+  <label><input type="radio" name="boto-q1" data-correct="false"> Validity and representativeness</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Linearity and equal variance of errors. A curved pattern in the residuals suggests non-linearity; a fan or funnel shape suggests heteroscedasticity (unequal variance).</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 2.</strong> Which assumptions can be assessed using the Scale-Location plot?</p>
+<div class="mc-options">
+  <label><input type="radio" name="boto-q2" data-correct="false"> Normality of errors</label>
+  <label><input type="radio" name="boto-q2" data-correct="false"> Independence of errors</label>
+  <label><input type="radio" name="boto-q2" data-correct="true"> Linearity and equal variance of errors</label>
+  <label><input type="radio" name="boto-q2" data-correct="false"> Cook's distance and leverage</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Linearity and equal variance of errors, the same pair as the Residuals vs Fitted plot, viewed from a different angle. Checking both is worthwhile since one can sometimes reveal a pattern that the other obscures.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 3.</strong> Which assumption does the Q-Q Residuals plot assess?</p>
+<div class="mc-options">
+  <label><input type="radio" name="boto-q3" data-correct="false"> Linearity</label>
+  <label><input type="radio" name="boto-q3" data-correct="true"> Normality of errors</label>
+  <label><input type="radio" name="boto-q3" data-correct="false"> Equal variance of errors</label>
+  <label><input type="radio" name="boto-q3" data-correct="false"> Independence of errors</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Normality of errors. The Q-Q plot compares the distribution of residuals to what a normal distribution would predict. Points that follow the diagonal line closely indicate the normality assumption is well met.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 4.</strong> How important is it to meet the linearity assumption?</p>
+<div class="mc-options">
+  <label><input type="radio" name="boto-q4" data-correct="false"> Not very important; linear models are robust to non-linearity</label>
+  <label><input type="radio" name="boto-q4" data-correct="true"> It depends on the degree of departure; mild curvature may still allow useful inference, but a reversal or peak can bias results substantially</label>
+  <label><input type="radio" name="boto-q4" data-correct="false"> Important only for small sample sizes</label>
+  <label><input type="radio" name="boto-q4" data-correct="false"> Important only for prediction, not for inference</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Linearity is generally important, but how much it matters depends on the degree of departure. If the underlying trend is still broadly directional, a linear model may give useful inference. If the relationship has a peak or reversal (as with the beetles), fitting a straight line gives misleading results for at least part of the predictor range and should not be used for inference.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 5.</strong> How important is it to meet the equal variance of errors assumption?</p>
+<div class="mc-options">
+  <label><input type="radio" name="boto-q5" data-correct="false"> More critical than linearity; violation biases parameter estimates directly</label>
+  <label><input type="radio" name="boto-q5" data-correct="false"> Equally critical as linearity</label>
+  <label><input type="radio" name="boto-q5" data-correct="true"> Less critical than linearity; heteroscedasticity inflates standard errors but does not bias the parameter estimates themselves</label>
+  <label><input type="radio" name="boto-q5" data-correct="false"> Not important unless Cook's distance is high</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Less critical than linearity. Heteroscedasticity inflates standard errors without biasing the parameter estimates themselves. The main consequence is that confidence intervals become wider than they should be, making it harder to detect genuine effects.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 6.</strong> Looking at the boto diagnostic plots above, do any of them suggest a problem with the model?</p>
+<div class="mc-options">
+  <label><input type="radio" name="boto-q6" data-correct="false"> Yes: the Q-Q plot shows a serious normality violation</label>
+  <label><input type="radio" name="boto-q6" data-correct="true"> No: the assumptions are reasonably well met, with only minor deviations typical of real data</label>
+  <label><input type="radio" name="boto-q6" data-correct="false"> Yes: the Residuals vs Fitted plot shows strong non-linearity</label>
+  <label><input type="radio" name="boto-q6" data-correct="false"> Yes: at least one observation has Cook's distance above 1</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>No. There is a slight suggestion of increasing residual spread in the Residuals vs Fitted plot, and minor tail deviations in the Q-Q plot, but neither is cause for serious concern. No observation approaches Cook's distance of 1. Overall, the boto model assumptions are reasonably well met.</p>
+</div>
+</div>
+
+# Prettier diagnostics with `performance`
+
+The standard `plot()` diagnostic output is useful but visually plain. The `performance` package produces the same diagnostics in a more informative layout, including an additional panel called the "Posterior Predictive Check." This check uses the fitted model to simulate a range of datasets and overlays them on the observed distribution. If the model is reasonable, the simulated datasets should look similar to the real data.
+
+```{r, echo=TRUE, eval=FALSE}
+install.packages("performance")  # Run once
+library(performance)
+check_model(boto_model)
+```
+
+Each panel also includes guidance text describing what a passing plot looks like. Remember, though, that not all assumptions are equally important; read the guidance in context rather than treating every deviation as a failure.
+
+# Revisiting the beetles
+
+Bring across the beetle model from Workshop 3 (`beet_mod <- lm(offspring ~ temperature, data = beetles)`) and run the same diagnostics.
+
+<div class="question-block">
+<p><strong>Question 1.</strong> Do any of the diagnostic plots for the beetle model suggest a reason not to trust the results?</p>
+<div class="mc-options">
+  <label><input type="radio" name="beetles-q1" data-correct="false"> No: all four plots look acceptable</label>
+  <label><input type="radio" name="beetles-q1" data-correct="false"> Yes: the Residuals vs Leverage plot shows a problematic observation with high Cook's distance</label>
+  <label><input type="radio" name="beetles-q1" data-correct="true"> Yes: the Residuals vs Fitted plot shows clear non-linearity, indicating the straight-line model is a poor fit</label>
+  <label><input type="radio" name="beetles-q1" data-correct="false"> Yes: the Q-Q plot shows a serious normality violation</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Yes. The Residuals vs Fitted plot shows clear non-linearity: residuals follow a wave pattern, positive at low and high temperatures, negative in the middle. This reflects the beetles' thermal optimum around 20°C; they produce the most offspring near that temperature and fewer at both extremes. Fitting a straight line through a hump-shaped relationship produces biased estimates and should not be used for inference.</p>
+<p>The Scale-Location also shows a wave, though it is less obvious. The Q-Q and Residuals vs Leverage plots look relatively acceptable, but those cannot override the clear linearity violation.</p>
+<pre><code class="language-r">par(mfrow = c(2, 2))
+plot(beet_mod)
+par(mfrow = c(1, 1))
+# The Residuals vs Fitted pattern is the critical signal here.</code></pre>
+</div>
+</div>
+
+# Dog disturbance in the Cairngorms
+
+To finish this workshop, work through a new dataset independently. The data come from Cairngorms National Park, where researchers wanted to quantify how much off-leash dogs disturb mammals (foxes, badgers, red and roe deer, marten, stoats, weasels, and red squirrels). Camera traps placed adjacent to paths recorded how long mammals remained on camera. Observers standing on the path counted off-leash dogs passing in each six-hour window.
+
+The dataset (`dog_disturbance.txt` on MyAberdeen) contains:
+
+- `seconds`: total time (in seconds) mammals spent in view of a camera trap during a six-hour period
+- `dogs`: number of off-leash dogs observed during that same six-hour period
+
+Your tasks: carry out an EDA, fit a model capable of answering the researchers' question, diagnose the model, and produce a figure of the predicted relationship. You have the remainder of the session for this.
+
+<div class="question-block">
+<p><strong>Question 1.</strong> Carry out an EDA. Do you notice anything unusual?</p>
+<textarea class="student-answer" rows="3" placeholder="Describe any unusual observations..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>One observation has 6120.112 dogs and zero seconds of mammal activity. The maximum number of dogs in all other rows is around 9. This is clearly a data entry error: the values appear to belong in the same row but are in the wrong columns. It is most likely 6120.112 seconds of mammal activity with 0 dogs, not 6120 dogs.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 2.</strong> What is the range of the <code>dogs</code> variable?</p>
+<textarea class="student-answer" rows="2" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<pre><code class="language-r">range(dogs$dogs)
+# Returns 0 and 6120.112; the erroneous observation is obvious immediately.</code></pre>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 3.</strong> How should the erroneous observation be corrected? Do not change the data yet.</p>
+<textarea class="student-answer" rows="3" placeholder="Describe your proposed correction..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The values appear swapped: the row should have 0 dogs and 6120.112 seconds. Correct it by swapping the column values for that row:</p>
+<pre><code class="language-r">dogs[dogs$dogs > 6000, ] <- c(6120.112, 0)</code></pre>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 4.</strong> Is <code>dogs</code> the explanatory or the response variable in a model answering the researchers' question?</p>
+<div class="mc-options">
+  <label><input type="radio" name="dogs-q4" data-correct="false"> Response: the researchers want to predict dog numbers from mammal activity</label>
+  <label><input type="radio" name="dogs-q4" data-correct="true"> Explanatory: it predicts how mammal activity (seconds on camera) changes as off-leash dog numbers increase</label>
+  <label><input type="radio" name="dogs-q4" data-correct="false"> Both: in a linear model, either variable can play either role</label>
+  <label><input type="radio" name="dogs-q4" data-correct="false"> Neither: <code>dogs</code> is a nuisance variable to be controlled for</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p><code>dogs</code> is the explanatory variable. The research question is: how does mammal activity (seconds on camera) change as the number of off-leash dogs increases? If <code>dogs</code> were the response, the question would instead be whether mammal activity predicts dog numbers, reversing the causal direction.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 5.</strong> Fit a model and check the diagnostic plots. Which plot signals a problem?</p>
+<textarea class="student-answer" rows="3" placeholder="Describe what you see..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Although all plots look slightly unusual, only the Residuals vs Leverage plot shows a clear problem: one observation has an extremely large Cook's distance, far beyond the contour lines. This is the erroneous observation from Question 1.</p>
+<pre><code class="language-r">dog_mod <- lm(seconds ~ dogs, data = dogs)
+par(mfrow = c(2, 2))
+plot(dog_mod)
+par(mfrow = c(1, 1))</code></pre>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 6.</strong> Is the observation flagged by the diagnostic plot the same one you spotted in the EDA?</p>
+<div class="mc-options">
+  <label><input type="radio" name="dogs-q6" data-correct="false"> No: the flagged observation is a different row from the one identified in the EDA</label>
+  <label><input type="radio" name="dogs-q6" data-correct="true"> Yes: the Residuals vs Leverage plot labels it as row 132, the same row with the implausible dog count from the EDA</label>
+  <label><input type="radio" name="dogs-q6" data-correct="false"> It is impossible to tell without running additional checks</label>
+  <label><input type="radio" name="dogs-q6" data-correct="false"> Yes, but only by coincidence since the two checks are independent</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Yes. The Residuals vs Leverage plot labels the problematic observation with its row number (row 132). That is the same row containing the implausible value of 6120 dogs identified in the EDA.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 7.</strong> Correct the erroneous observation and refit the model. Do the diagnostics look acceptable now?</p>
+<textarea class="student-answer" rows="4" placeholder="Describe the corrected diagnostics..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<pre><code class="language-r">dogs[dogs$dogs > 6000, ] <- c(6120.112, 0)
+dog_mod <- lm(seconds ~ dogs, data = dogs)
+par(mfrow = c(2, 2))
+plot(dog_mod)
+par(mfrow = c(1, 1))</code></pre>
+<p>After correction the diagnostics look reasonable. The Residuals vs Fitted and Scale-Location plots show no strong pattern, the Q-Q is acceptable, and no observation approaches a Cook's distance of 1.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 8.</strong> Assuming the model is adequate, what is the estimated change in seconds of mammal activity for each additional off-leash dog?</p>
+<textarea class="student-answer" rows="2" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The slope is approximately &minus;382 seconds per dog. For every additional off-leash dog observed, mammal activity on camera decreases by around 382 seconds, or about 6 minutes, in a six-hour window.</p>
+<pre><code class="language-r">summary(dog_mod)</code></pre>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 9.</strong> Are there any remaining assumptions that should give us pause before interpreting the results?</p>
+<textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p><strong>Representativeness</strong> is worth flagging. The data capture mammal activity <em>on camera</em>, which may not represent all mammal activity in the area. Camera placement matters: a camera on a path will miss badgers active away from trails; a camera in a tree will miss ground-level activity. Whether camera activity is a valid proxy for overall mammal behaviour in the presence of dogs is a substantive question that cannot be resolved with diagnostics alone.</p>
+</div>
+</div>
+
+# Assumption reference
+
+| Assumption | Description | Example of violation |
+|---|---|---|
+| 1. Validity | The data can answer the research question. | Using IQ to measure overall intelligence. |
+| 2. Representativeness | The data reflects the population being studied. | Using survey data from a rural area to draw conclusions about an urban population. |
+| 3. Additivity | Effects of predictors are additive with no interactions. | Assuming study hours and sleep independently affect exam scores without considering their combined effect. |
+| 4. Linearity | The relationship between predictors and the outcome is linear. | Assuming plant growth continues to increase indefinitely without levelling off. |
+| 5. Independence of errors | Observations are independent of each other. | Modelling height using repeated measurements of the same children over time. |
+| 6. Equal variance of errors | Residuals have constant variance across all predictor levels. | Modelling income, where salary variability differs across levels of a company hierarchy. |
+| 7. Normality of errors | Residuals are approximately normally distributed. | Modelling income, where a small number of extremely wealthy individuals produce a heavily skewed residual distribution. |
+
+```{=html}
+<button id="glossary-btn" onclick="toggleGlossary()">词典 / Glossary</button>
+
+<div id="glossary-panel">
+  <div id="glossary-header">
+    <span>Glossary / 词典</span>
+    <button id="glossary-close" onclick="toggleGlossary()">&#x2715;</button>
+  </div>
+  <div id="glossary-body">
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Residual</span>
+        <span class="glossary-zh-term">残差</span>
+      </div>
+      <div class="glossary-en-def">The difference between an observed value and its model-predicted value: residual = observed &minus; predicted. Residuals are the core of all model diagnostics.</div>
+      <div class="glossary-zh-def">观测值与模型预测值之差：残差 = 观测值 &minus; 预测值，是所有模型诊断的核心。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Fitted value</span>
+        <span class="glossary-zh-term">拟合值</span>
+      </div>
+      <div class="glossary-en-def">The value the model predicts for each observation in the original dataset. Obtained with predict(model) when no newdata argument is provided.</div>
+      <div class="glossary-zh-def">模型对原始数据集中每个观测值的预测值，不提供 newdata 参数时直接调用 predict(model) 即可获得。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Diagnostic plot</span>
+        <span class="glossary-zh-term">诊断图</span>
+      </div>
+      <div class="glossary-en-def">A plot used after model fitting to check whether the model's assumptions are reasonably met. In R, plot(model) produces four standard diagnostic plots.</div>
+      <div class="glossary-zh-def">模型拟合后用于检查模型假设是否合理满足的图表。在 R 中，plot(model) 可生成四张标准诊断图。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Residuals vs Fitted</span>
+        <span class="glossary-zh-term">残差 vs 拟合值图</span>
+      </div>
+      <div class="glossary-en-def">A diagnostic plot showing residuals on the y-axis and fitted values on the x-axis. Used to check linearity (no wave pattern) and equal variance (no fan shape).</div>
+      <div class="glossary-zh-def">以残差为纵轴、拟合值为横轴的诊断图，用于检验线性性（无波浪形状）和等方差性（无扇形分布）。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Scale-Location plot</span>
+        <span class="glossary-zh-term">尺度位置图</span>
+      </div>
+      <div class="glossary-en-def">A diagnostic plot showing the square root of absolute residuals against fitted values. Complements Residuals vs Fitted for checking equal variance; a flat smoothed line is ideal.</div>
+      <div class="glossary-zh-def">以残差绝对值的平方根对拟合值作图的诊断图，与残差 vs 拟合值图互为补充，用于检验等方差性，理想状态下平滑线应保持平直。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Q-Q plot</span>
+        <span class="glossary-zh-term">Q-Q 图（分位数图）</span>
+      </div>
+      <div class="glossary-en-def">A plot comparing the quantiles of the model's residuals to the quantiles of a theoretical Normal distribution. Points falling close to the diagonal line indicate approximately Normal residuals.</div>
+      <div class="glossary-zh-def">将模型残差的分位数与理论正态分布的分位数进行比较的图表，点落在对角线附近表示残差近似正态分布。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Residuals vs Leverage</span>
+        <span class="glossary-zh-term">残差 vs 杠杆值图</span>
+      </div>
+      <div class="glossary-en-def">A diagnostic plot used to identify influential observations. Cook's distance contour lines are overlaid; observations close to or beyond a Cook's distance of 1 warrant investigation.</div>
+      <div class="glossary-zh-def">用于识别影响性观测值的诊断图，叠加有库克距离等高线，接近或超过库克距离 1 的观测值需要进一步检查。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Cook's distance</span>
+        <span class="glossary-zh-term">库克距离</span>
+      </div>
+      <div class="glossary-en-def">A measure of how much all fitted values would change if a particular observation were removed. High values (approaching 1) indicate that an observation is pulling the fitted line substantially toward itself.</div>
+      <div class="glossary-zh-def">衡量移除某个观测值后所有拟合值变化程度的指标。值接近 1 表明该观测值对拟合线有显著牵引作用。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Leverage</span>
+        <span class="glossary-zh-term">杠杆值</span>
+      </div>
+      <div class="glossary-en-def">A measure of how far an observation's predictor value is from the centre of the predictor space. High-leverage points have the potential to be influential, particularly if they also have large residuals.</div>
+      <div class="glossary-zh-def">衡量某观测值的预测变量取值离预测变量中心有多远的指标。高杠杆值的点尤其在残差也较大时，可能对模型拟合具有重大影响。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Influential observation</span>
+        <span class="glossary-zh-term">影响性观测值</span>
+      </div>
+      <div class="glossary-en-def">An observation whose removal would substantially change the model's estimated parameters. Identified by high Cook's distance in the Residuals vs Leverage plot.</div>
+      <div class="glossary-zh-def">移除后会导致模型估计参数发生显著变化的观测值，通过残差 vs 杠杆值图中较高的库克距离来识别。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Heteroscedasticity</span>
+        <span class="glossary-zh-term">异方差性</span>
+      </div>
+      <div class="glossary-en-def">A violation of the <strong>equal variance of errors</strong> assumption, in which residual spread changes systematically across fitted values. Often appears as a fan or funnel shape in the Residuals vs Fitted and Scale-Location plots.</div>
+      <div class="glossary-zh-def">违反<strong>误差等方差</strong>假设的情形，表现为残差的离散程度随拟合值系统性改变，在残差 vs 拟合值图和尺度位置图中常呈扇形或漏斗形。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Homoscedasticity</span>
+        <span class="glossary-zh-term">同方差性</span>
+      </div>
+      <div class="glossary-en-def">The <strong>equal variance of errors</strong> assumption is satisfied: residuals have roughly constant spread across all fitted values. Seen as a horizontal band with no fan or funnel in the Residuals vs Fitted and Scale-Location plots.</div>
+      <div class="glossary-zh-def"><strong>误差等方差</strong>假设得到满足：残差在所有拟合值上的离散程度大致恒定，在残差 vs 拟合值图和尺度位置图中表现为无扇形或漏斗形的水平带状分布。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Non-linearity</span>
+        <span class="glossary-zh-term">非线性</span>
+      </div>
+      <div class="glossary-en-def">A violation of the linearity assumption in which the true relationship between predictor and response follows a curve rather than a straight line. Produces a wave pattern in the Residuals vs Fitted plot.</div>
+      <div class="glossary-zh-def">线性假设被违反的情形，即预测变量与响应变量之间的真实关系呈曲线而非直线，在残差 vs 拟合值图中表现为波浪形。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Standard error</span>
+        <span class="glossary-zh-term">标准误差</span>
+      </div>
+      <div class="glossary-en-def">A measure of the uncertainty in an estimated parameter. Heteroscedasticity inflates standard errors, making confidence intervals wider than they should be.</div>
+      <div class="glossary-zh-def">参数估计值不确定性的度量。异方差性会导致标准误差膨胀，使置信区间比实际应有的更宽。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">performance (package)</span>
+        <span class="glossary-zh-term">performance 包</span>
+      </div>
+      <div class="glossary-en-def">An R package that produces enhanced model diagnostic plots via check_model(). Includes a Posterior Predictive Check panel and guidance text on each plot.</div>
+      <div class="glossary-zh-def">通过 check_model() 生成增强版模型诊断图的 R 包，包含后验预测检验面板及每张图的说明文字。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Posterior Predictive Check</span>
+        <span class="glossary-zh-term">后验预测检验</span>
+      </div>
+      <div class="glossary-en-def">A diagnostic that uses the fitted model to simulate multiple datasets and compares them to the observed data. If the simulated distributions resemble the real data, the model is considered a plausible data-generating process.</div>
+      <div class="glossary-zh-def">使用已拟合模型模拟多个数据集并与观测数据进行比较的诊断方法。若模拟分布与真实数据相似，则认为该模型是合理的数据生成过程。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">par(mfrow)</span>
+        <span class="glossary-zh-term">par(mfrow)</span>
+      </div>
+      <div class="glossary-en-def">A base R graphics parameter that partitions the plot window into a grid. par(mfrow = c(2, 2)) creates a 2x2 grid so four plots display together. Reset to par(mfrow = c(1, 1)) afterwards.</div>
+      <div class="glossary-zh-def">将绘图窗口分割为网格的 R 基础图形参数。par(mfrow = c(2, 2)) 创建 2x2 网格使四张图同时显示，完成后需重置为 par(mfrow = c(1, 1))。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Thermal optimum</span>
+        <span class="glossary-zh-term">热适温度</span>
+      </div>
+      <div class="glossary-en-def">The temperature at which an organism performs best. For burying beetles in the workshop dataset, offspring production peaks around 20°C and declines at both lower and higher temperatures, producing a non-linear relationship that a linear model cannot capture.</div>
+      <div class="glossary-zh-def">生物体表现最佳的温度。在本次工作坊的埋葬甲虫数据集中，后代产量在约 20°C 时达到峰值，温度过低或过高均导致产量下降，形成线性模型无法捕捉的非线性关系。</div>
+    </div>
+
+  </div>
+</div>
+```

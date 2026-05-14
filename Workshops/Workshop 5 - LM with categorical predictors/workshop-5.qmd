@@ -1,0 +1,1142 @@
+---
+title: "Workshop 5: Linear models with a categorical predictor"
+subtitle: "BI3010 Statistics for Biologists"
+author: "Roos & Pinard"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    theme: [cosmo, ../custom.scss]
+    highlight-style: github
+    embed-resources: true
+    code-copy: true
+    code-tools: false
+    html-math-method: mathjax
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show = "show",
+                      message = FALSE, warning = FALSE)
+library(ggplot2)
+```
+
+```{=html}
+<script>
+/* --- answer lock --- */
+var WS_PASS_SHA256 = '4e18123e0f06635b3cab7a620ecf4bbeff385a2f34cecd808dd232fb47b0e655';
+var WS_PASS_DJB2   = '7c595c0c';
+var _wsUnlocked = false;
+
+function _wsDjb2(s) {
+  var h = 5381;
+  for (var i = 0; i < s.length; i++) { h = ((h << 5) + h + s.charCodeAt(i)) | 0; }
+  return (h >>> 0).toString(16).padStart(8, '0');
+}
+function wsVerifyPass() {
+  var inp = document.getElementById('ws-pass-input'); if (!inp) return;
+  var msg = document.getElementById('ws-pass-msg');
+  function finish(ok) {
+    if (ok) {
+      _wsUnlocked = true; sessionStorage.setItem('ws-unlocked', WS_PASS_SHA256);
+      document.body.classList.remove('ws-locked');
+      var b = document.getElementById('ws-lock-banner');
+      if (b) { b.style.transition = 'opacity 0.4s'; b.style.opacity = '0'; setTimeout(function () { b.remove(); }, 450); }
+    } else {
+      inp.classList.add('ws-wrong'); if (msg) msg.textContent = 'Incorrect password.';
+      setTimeout(function () { inp.classList.remove('ws-wrong'); if (msg) msg.textContent = ''; }, 2000);
+    }
+  }
+  if (window.crypto && crypto.subtle) {
+    crypto.subtle.digest('SHA-256', new TextEncoder().encode(inp.value))
+      .then(function (buf) { var hex = Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join(''); finish(hex === WS_PASS_SHA256); })
+      .catch(function () { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); });
+  } else { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); }
+}
+function wsFlashBanner() {
+  var b = document.getElementById('ws-lock-banner'); if (!b) return;
+  b.classList.remove('ws-flash'); void b.offsetWidth; b.classList.add('ws-flash');
+}
+function wsInitLock() {
+  if (sessionStorage.getItem('ws-unlocked') === WS_PASS_SHA256) { _wsUnlocked = true; return; }
+  document.body.classList.add('ws-locked');
+  var b = document.createElement('div'); b.id = 'ws-lock-banner';
+  b.innerHTML = '<span style="font-size:1.15rem;line-height:1;">🔒</span>' +
+    '<span>Answers are locked. Enter the workshop password to reveal them.</span>' +
+    '<span class="ws-unlock-form">' +
+      '<input type="password" id="ws-pass-input" placeholder="Password"' +
+      ' onkeydown="if(event.key===\'Enter\')wsVerifyPass();">' +
+      '<button id="ws-unlock-btn" onclick="wsVerifyPass()">Unlock</button>' +
+    '</span><span id="ws-pass-msg"></span>';
+  var t = document.getElementById('title-block-header');
+  if (t) t.insertAdjacentElement('afterend', b); else document.body.prepend(b);
+}
+document.addEventListener('DOMContentLoaded', wsInitLock);
+/* --- end lock --- */
+
+function revealAnswer(btn) {
+  if (!_wsUnlocked) { wsFlashBanner(); return; }
+  var block = btn.closest('.question-block, .puzzle-block');
+  var answerClass = block.classList.contains('puzzle-block') ? '.puzzle-answer' : '.instructor-answer';
+
+  var textarea = block.querySelector('.student-answer');
+  if (textarea) {
+    if (textarea.value.trim() === '') {
+      textarea.classList.add('missing');
+      textarea.placeholder = 'Please write your answer before revealing...';
+      textarea.focus();
+      return;
+    }
+    textarea.classList.remove('missing');
+  }
+
+  var mcOptions = block.querySelector('.mc-options');
+  if (mcOptions) {
+    var radios = mcOptions.querySelectorAll('input[type=radio]');
+    var anyChecked = Array.from(radios).some(function(r) { return r.checked; });
+    if (!anyChecked) {
+      mcOptions.classList.add('unanswered');
+      return;
+    }
+    mcOptions.classList.remove('unanswered');
+    radios.forEach(function(r) {
+      r.disabled = true;
+      var label = r.closest('label');
+      if (r.dataset.correct === 'true') {
+        label.classList.add('mc-correct');
+      } else if (r.checked) {
+        label.classList.add('mc-incorrect');
+      }
+    });
+  }
+
+  var answer = block.querySelector(answerClass);
+  if (answer) answer.style.display = 'block';
+  btn.textContent = 'Answer shown';
+  btn.disabled = true;
+}
+
+function toggleGlossary() {
+  document.getElementById('glossary-panel').classList.toggle('open');
+}
+</script>
+```
+
+```{=html}
+<style>
+#glossary-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: #00b494;
+  color: #fff;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  transition: background 0.15s;
+  font-family: inherit;
+}
+#glossary-btn:hover { background: #009478; }
+
+#glossary-panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 380px;
+  height: 100vh;
+  background: #fff;
+  border-left: 3px solid #00b494;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+  z-index: 1001;
+  transition: right 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+#glossary-panel.open { right: 0; }
+
+#glossary-header {
+  background: #0d1e2c;
+  color: #fff;
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+#glossary-header span { font-weight: 600; font-size: 0.95rem; letter-spacing: 0.03em; }
+#glossary-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.7;
+}
+#glossary-close:hover { opacity: 1; }
+#glossary-body { overflow-y: auto; flex: 1; }
+
+.glossary-entry {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #e8f5f0;
+}
+.glossary-entry:last-child { border-bottom: none; }
+.glossary-terms {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.3rem;
+}
+.glossary-en-term { font-weight: 600; color: #0d1e2c; font-size: 0.92rem; }
+.glossary-zh-term { color: #00b494; font-weight: 600; font-size: 0.92rem; }
+.glossary-en-def  { font-size: 0.845rem; color: #444; line-height: 1.5; margin-bottom: 0.25rem; }
+.glossary-zh-def  { font-size: 0.845rem; color: #1c3a50; line-height: 1.65; }
+</style>
+```
+
+::: {.callout-note}
+## Workshop structure
+
+As always, we are using the workflow below to structure the workshops:
+
+1. Formulate a research question.
+2. Perform exploratory data analysis.
+3. Identify any hidden assumptions.
+4. Fit an appropriate model **[Focus of today]**.
+5. Diagnose the model and check assumptions.
+6. Summarise the results.
+7. Interpret and provide inferences.
+:::
+
+::: {.callout-tip}
+## Learning objectives
+
+1. Understand how a categorical predictor is encoded as a dummy variable in a linear model.
+2. Identify the reference group and interpret $\beta_0$ and $\beta_1$ in a categorical model.
+3. Fit a linear model with a categorical predictor using `lm()`.
+4. Generate model predictions with 95% confidence intervals and visualise them.
+5. Reflect critically on hidden assumptions that formal diagnostics cannot detect.
+:::
+
+# 1. Formulating a research question
+
+This workshop introduces fitting a linear model with a single categorical explanatory variable. The dataset comes from Japan, specifically the Ryukyu islands, far to the south of mainland Japan. Two islands are home to the Amami rabbit (*Pentalagus furnessi*), an ancient species designated a natural monument of Japan and currently threatened by the invasive Java mongoose.
+
+Researchers in Japan have asked us whether the invasive mongoose is causing rabbit size to decline. They have provided weights from two islands: Oshima, where mongoose are confirmed present (multiple captures, with a control programme underway), and Tokunoshima, where no sightings have been reported by local residents.
+
+The dataset contains two columns:
+
+- `weight`: weight of the Amami rabbit (grams)
+- `mongoose`: whether the rabbit was caught on the island with mongoose `Present` (Oshima) or `Absent` (Tokunoshima)
+
+Load the data to get started:
+
+```{r, eval=FALSE}
+rabbit <- read.table("rabbits.txt", header = TRUE)
+```
+
+As always, begin by looking at the structure and a summary of the data:
+
+```{r, eval=FALSE}
+str(rabbit)
+summary(rabbit)
+```
+
+# 2. Exploratory data analysis
+
+Before we can work with this dataset, our colleagues in Japan have emailed to flag two data entry mistakes. They report:
+
+**Mistake 1:** The rabbit in the 7th row was actually from Oshima, not Tokunoshima.
+
+**Mistake 2:** They cannot remember which rabbit, but they accidentally added 100 to its weight.
+
+They ask you to resolve both issues and also check for any other possible mistakes.
+
+## Cleaning the rabbit data
+
+::: {.question-block}
+**Question 1.** What `mongoose` value should the rabbit in row 7 have?
+
+<textarea class="student-answer" rows="2" placeholder="Write your answer here..."></textarea>
+<button onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+We were told it is row 7. We can inspect that row using square brackets:
+
+```r
+rabbit[7, ]
+```
+
+The rabbit is currently recorded as `Absent`, but it should be `Present` (it came from Oshima).
+</div>
+:::
+
+::: {.question-block}
+**Question 2.** Correct the mistake from Question 1 and confirm it has worked.
+
+<textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
+<button onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+
+```r
+rabbit$mongoose[7] <- "Present"
+# Or equivalently:
+rabbit[7, 1] <- "Present"
+
+# Confirm:
+rabbit[7, ]
+```
+
+Both lines do the same thing. After the correction, row 7 should show `Present`.
+</div>
+:::
+
+::: {.question-block}
+**Question 3.** Which rabbit had the incorrect weight? Find it and correct the mistake at the same time.
+
+<textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
+<button onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+A histogram reveals the outlier clearly:
+
+```r
+ggplot(rabbit) +
+  geom_histogram(aes(x = weight))
+```
+
+There is one rabbit much heavier than all others, well above 350 g. We can use that as a condition to identify it and subtract 100:
+
+```r
+rabbit[rabbit$weight > 350, ]
+# Row 41 is the culprit.
+```
+</div>
+:::
+
+::: {.question-block}
+**Question 4.** Correct the mistake from Question 3 and confirm it has worked.
+
+<textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
+<button onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+
+```r
+rabbit$weight[rabbit$weight > 350] <- rabbit$weight[rabbit$weight > 350] - 100
+
+# Confirm:
+rabbit[41, ]
+# Or replot the histogram to check no outlier remains.
+ggplot(rabbit) +
+  geom_histogram(aes(x = weight))
+```
+</div>
+:::
+
+::: {.question-block}
+**Question 5.** Can you spot any additional data entry mistakes in the dataset?
+
+<textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
+<button onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+Nothing else obvious. The histogram and summary look reasonable once the outlier has been corrected.
+</div>
+:::
+
+# 3. Hidden assumptions
+
+Having resolved the data issues, it is time to think carefully about what assumptions we are making before fitting any model. "Hidden assumptions" refers broadly to all the assumptions underlying our analysis — some we can think through carefully, and some we can even check. What makes them "hidden" is that they are easy to overlook and are not automatically flagged by any software. Validity and representativeness deserve particular attention because there are no formal diagnostic checks for them at all; evaluating them depends entirely on domain knowledge and thinking critically about how the data were collected and what they actually measure.
+
+## Assumptions for the mongoose analysis
+
+::: {.question-block}
+**Question 1.** Can you identify any hidden assumptions with this dataset?
+
+<textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
+<button onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+The key issue is whether mongoose are truly absent from Tokunoshima. All we know is that local residents have not reported any sightings. That is not the same as confirmed absence. It is plausible that a small mongoose population exists on the island but has simply not been detected.
+
+This puts us at risk of violating the assumption of validity: our `mongoose` variable may not actually measure what we think it does.
+</div>
+:::
+
+::: {.question-block}
+**Question 2.** If you have identified any issues, can we do anything about them?
+
+<textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
+<button onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+Ideally we would confirm the absence of mongoose on Tokunoshima before proceeding, but that is not feasible here. We have two options:
+
+1. Decline to perform the analysis because of the assumption violation.
+2. Perform the analysis but include clear, prominent statements about this limitation.
+
+Both are defensible. For the purposes of this workshop (learning the method), we go with option 2. In a real project, you would want to push hard for option 1, or at minimum ensure any report makes the caveat impossible to overlook.
+</div>
+:::
+
+::: {.question-block}
+**Question 3.** If mongoose are actually present on Tokunoshima, what effect would that have on the analysis?
+
+<textarea class="student-answer" rows="5" placeholder="Write your answer here..."></textarea>
+<button onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+If mongoose are present on both islands and they do reduce rabbit weight, then rabbit weights on both islands would be similarly suppressed. The model would find little or no difference between groups, leading us to incorrectly conclude that mongoose have no effect.
+
+The frustrating part is that finding no difference is ambiguous: it could mean mongoose are present on both islands, or that mongoose genuinely do not affect rabbit weight. We cannot tell which from the data alone.
+
+This is a good example of why validity is the hardest assumption to check and the most consequential to violate.
+</div>
+:::
+
+# 4. Fitting the model
+
+Assuming we are comfortable proceeding, the model looks like this:
+
+$$weight_i \sim \text{Normal}(\mu_i, \sigma)$$
+
+$$\mu_i = \beta_0 + \beta_1 \times \underline{\phantom{Present}}_i$$
+
+Where:
+
+- $weight_i$ is the weight of rabbit $i$, assumed to follow a Normal distribution with mean $\mu_i$ and standard deviation $\sigma$.
+- $\mu_i$ is determined by $\beta_0$ and $\beta_1$.
+
+The table below shows how R converts a categorical variable into dummy variables. Try changing the category in each row using the dropdowns, or enter different variable names and levels to see how the encoding changes.
+
+```{=html}
+<div style="border:1px solid #d0ecea;border-radius:6px;padding:1.25rem;margin:1rem 0 1.5rem;background:#fafefe;">
+<p style="font-weight:600;margin:0 0 0.3rem;color:#0d1e2c;font-size:0.95rem;">From categories to dummy variables</p>
+<p style="font-size:0.84rem;color:#555;margin:0 0 0.85rem;">
+  R sorts levels alphabetically and uses the first as the reference group (the intercept, &beta;<sub>0</sub>).
+  One dummy column is created per remaining level: it takes the value&nbsp;1 when the observation belongs to that
+  level and 0 otherwise. The reference group is identified by all dummy columns being 0.
+</p>
+
+<div style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;margin-bottom:0.8rem;">
+  <label style="font-size:0.84rem;font-weight:600;color:#0d1e2c;">Variable&nbsp;name:</label>
+  <input id="dw-varname" type="text" value="mongoose"
+    style="font-size:0.84rem;padding:0.25rem 0.5rem;border:1px solid #ccc;border-radius:4px;width:9em;font-family:monospace;">
+  <label style="font-size:0.84rem;font-weight:600;color:#0d1e2c;">Levels&nbsp;(comma-separated):</label>
+  <input id="dw-levels" type="text" value="Absent, Present"
+    style="font-size:0.84rem;padding:0.25rem 0.5rem;border:1px solid #ccc;border-radius:4px;width:18em;font-family:inherit;">
+  <button onclick="dwRebuild()"
+    style="padding:0.25rem 0.75rem;background:#00b494;color:#fff;border:none;border-radius:4px;
+           cursor:pointer;font-size:0.84rem;font-family:inherit;transition:background 0.12s;">
+    Rebuild table
+  </button>
+</div>
+
+<div id="dw-container" style="overflow-x:auto;"></div>
+<p id="dw-note" style="font-size:0.83rem;color:#444;margin:0.65rem 0 0;line-height:1.5;"></p>
+</div>
+
+<script>
+(function(){
+  var N = 10;
+  var rows = ['Absent','Present','Absent','Present','Absent','Present','Present','Absent','Present','Absent'];
+  var levels = [];
+
+  function parseLevels(str){
+    return str.split(',').map(function(s){return s.trim();})
+              .filter(function(s){return s.length>0;})
+              .sort();
+  }
+
+  function render(){
+    var varname = (document.getElementById('dw-varname').value.trim()||'x');
+    var container = document.getElementById('dw-container');
+    var noteEl = document.getElementById('dw-note');
+
+    if(levels.length < 2){
+      container.innerHTML = '<p style="color:#b00;font-size:0.84rem;margin:0;">Please enter at least two levels.</p>';
+      noteEl.innerHTML = '';
+      return;
+    }
+
+    var ref = levels[0];
+    var dummies = levels.slice(1);
+
+    /* ---- table ---- */
+    var th = function(s, bg){
+      return '<th style="border:1px solid #b0cfd4;padding:0.4rem 0.65rem;background:'+bg+
+             ';color:#fff;text-align:center;white-space:nowrap;font-size:0.83rem;">'+s+'</th>';
+    };
+
+    var html = '<table style="border-collapse:collapse;font-size:0.84rem;">';
+    html += '<thead><tr>';
+    html += th(varname, '#1c3a50');
+    dummies.forEach(function(d){ html += th('<span style="font-family:monospace;">'+varname+d+'</span>', '#00635a'); });
+    html += '</tr></thead><tbody>';
+
+    for(var i=0; i<N; i++){
+      /* snap invalid selections to reference */
+      if(levels.indexOf(rows[i]) === -1) rows[i] = ref;
+
+      var isRef = (rows[i] === ref);
+      var rowBg = isRef ? '#f0f5f8' : (i%2===0 ? '#fff' : '#f8fffe');
+
+      html += '<tr style="background:'+rowBg+';">';
+
+      /* dropdown cell */
+      html += '<td style="border:1px solid #d0dde0;padding:0.28rem 0.45rem;">';
+      html += '<select data-row="'+i+'" onchange="dwSelect('+i+', this.value)" '+
+              'style="font-size:0.83rem;border:1px solid #bbb;border-radius:3px;'+
+              'padding:0.12rem 0.3rem;font-family:inherit;background:'+rowBg+';">';
+      levels.forEach(function(lv){
+        html += '<option value="'+lv+'"'+(rows[i]===lv?' selected':'')+'>'+lv+'</option>';
+      });
+      html += '</select></td>';
+
+      /* dummy columns */
+      dummies.forEach(function(d){
+        var val = (rows[i] === d) ? 1 : 0;
+        var cellBg = val===1 ? '#d4f5ea' : (isRef ? '#e8eef2' : '#fff');
+        var cellCol = val===1 ? '#006644' : '#888';
+        var fw = val===1 ? '700' : '400';
+        html += '<td style="border:1px solid #d0dde0;padding:0.28rem 0.65rem;text-align:center;'+
+                'background:'+cellBg+';color:'+cellCol+';font-weight:'+fw+';font-size:0.9rem;">'+val+'</td>';
+      });
+
+      html += '</tr>';
+    }
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+
+    /* ---- note ---- */
+    var dColList = dummies.map(function(d){
+      return '<code style="font-size:0.82rem;">'+varname+d+'</code>';
+    }).join(', ');
+
+    noteEl.innerHTML =
+      '<strong>Reference group: '+ref+'</strong> (shaded rows, all dummies&nbsp;=&nbsp;0). '+
+      '&beta;<sub>0</sub> estimates the mean response for <em>'+ref+'</em>. '+
+      'R\'s <code style="font-size:0.82rem;">summary()</code> output will show a row labelled '+
+      '<code style="font-size:0.82rem;">(Intercept)</code> for &beta;<sub>0</sub> and separate rows for '+
+      dColList+'. '+
+      'Try entering <strong>habitat</strong> as the variable name and '+
+      '<strong>Dry Forest, Mangrove, Rainforest, Spiny Forest</strong> as the levels to see a four-level example.';
+  }
+
+  window.dwSelect = function(i, val){ rows[i]=val; render(); };
+  window.dwRebuild = function(){
+    levels = parseLevels(document.getElementById('dw-levels').value);
+    render();
+  };
+
+  levels = parseLevels('Absent, Present');
+  render();
+})();
+</script>
+```
+
+## Understanding the model equation
+
+If you are finding the questions below difficult, skip ahead and run the model, then return and use the `summary()` output to help.
+
+::: {.question-block}
+**Question 1.** What replaces the blank in the equation below?
+
+$$\mu_i = \beta_0 + \beta_1 \times \underline{\phantom{MongoosePresent}}_i$$
+
+<div class="mc-options">
+  <label><input type="radio" name="qs3-q1" data-correct="false"> <code>mongoose</code></label>
+  <label><input type="radio" name="qs3-q1" data-correct="false"> <code>Absent</code></label>
+  <label><input type="radio" name="qs3-q1" data-correct="true"> <code>Present</code></label>
+  <label><input type="radio" name="qs3-q1" data-correct="false"> $\beta_1$</label>
+</div>
+<button onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+`Present` replaces the blank.
+
+If you said `mongoose`, remember that `mongoose` has two values (`"Present"` and `"Absent"`), which cannot be used directly in an equation. Instead, R takes one group and converts it to a binary dummy variable (0 or 1). R picks the group that comes first alphabetically as the reference, so `Absent` becomes the reference (0) and `Present` becomes the dummy (1). When `Present = 0`, it must be `Absent`.
+</div>
+:::
+
+::: {.question-block}
+**Question 2.** What does $\beta_0$ represent in this model?
+
+<div class="mc-options">
+  <label><input type="radio" name="qs3-q2" data-correct="false"> The slope: how much weight changes per unit change in mongoose presence</label>
+  <label><input type="radio" name="qs3-q2" data-correct="false"> The predicted mean weight of a rabbit where mongoose are present</label>
+  <label><input type="radio" name="qs3-q2" data-correct="true"> The predicted mean weight of a rabbit where mongoose are absent (the reference group)</label>
+  <label><input type="radio" name="qs3-q2" data-correct="false"> The standard deviation of the residuals</label>
+</div>
+<button onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+$\beta_0$ is the predicted weight of rabbits in the reference group, i.e. when mongoose are `Absent` (Tokunoshima). It is the model's estimate of the mean weight where `Present = 0`.
+</div>
+:::
+
+::: {.question-block}
+**Question 3.** What does $\beta_1$ represent in this model?
+
+<div class="mc-options">
+  <label><input type="radio" name="qs3-q3" data-correct="false"> The predicted mean weight of a rabbit where mongoose are present</label>
+  <label><input type="radio" name="qs3-q3" data-correct="true"> The difference in predicted weight between rabbits where mongoose are present versus absent</label>
+  <label><input type="radio" name="qs3-q3" data-correct="false"> The slope of a continuous relationship between body weight and time</label>
+  <label><input type="radio" name="qs3-q3" data-correct="false"> The intercept when mongoose are present</label>
+</div>
+<button onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+$\beta_1$ is the *difference* in predicted weight between rabbits where mongoose are `Present` versus where they are `Absent`. It is not the predicted weight when mongoose are present; it is the change relative to $\beta_0$.
+</div>
+:::
+
+## Running the model
+
+Let's fit the model:
+
+```{r, eval=FALSE}
+rabbit_mod <- lm(weight ~ mongoose, data = rabbit)
+```
+
+Now inspect the estimated parameters:
+
+```{r, eval=FALSE}
+summary(rabbit_mod)
+```
+
+## Interpreting model output
+
+::: {.question-block}
+**Question 1.** Replace the blanks in the equation below with the values estimated by the model.
+
+```{=html}
+<p style="margin: 0.75rem 0 0.25rem;">
+  weight<sub>i</sub> &sim; Normal(&mu;<sub>i</sub>, &sigma;)
+</p>
+<p style="font-family: monospace; font-size: 1rem; margin: 0 0 0.75rem;">
+  &mu;<sub>i</sub> =
+  <span style="border-bottom: 1px solid #333; display: inline-block; width: 5em;">&nbsp;</span>
+  +
+  <span style="border-bottom: 1px solid #333; display: inline-block; width: 5em;">&nbsp;</span>
+  &times; Present<sub>i</sub>
+</p>
+```
+
+<textarea class="student-answer" rows="2" placeholder="Write the completed equation here..."></textarea>
+<button onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+
+$$\mu_i = 269.6 + (-2.9) \times \text{Present}_i$$
+
+The first blank is 269.566 ($\beta_0$) and the second is &minus;2.866 ($\beta_1$). Rounding to one decimal place is appropriate here given that weights are recorded in whole grams and the estimated difference is small.
+</div>
+:::
+
+::: {.question-block}
+**Question 2.** Using your completed equation, what weight ($\mu$) would you predict for a rabbit where mongoose are present?
+
+<div class="mc-options">
+  <label><input type="radio" name="qs4-q2" data-correct="false"> 269.6 g</label>
+  <label><input type="radio" name="qs4-q2" data-correct="false"> 272.5 g</label>
+  <label><input type="radio" name="qs4-q2" data-correct="true"> 266.7 g</label>
+  <label><input type="radio" name="qs4-q2" data-correct="false"> 2.9 g</label>
+</div>
+<button onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+Substitute `Present = 1`:
+
+$$\mu_i = 269.6 + (-2.9) \times 1 = 266.7 \text{ g}$$
+
+Note: I am rounding to one decimal place throughout. Rabbit weights were recorded as whole grams and the estimated coefficient is small, so claiming more decimal places would imply more precision than the data actually support.
+</div>
+:::
+
+::: {.question-block}
+**Question 3.** Using your completed equation, what weight ($\mu$) would you predict for a rabbit where mongoose are absent?
+
+<div class="mc-options">
+  <label><input type="radio" name="qs4-q3" data-correct="false"> 266.7 g</label>
+  <label><input type="radio" name="qs4-q3" data-correct="false"> 272.5 g</label>
+  <label><input type="radio" name="qs4-q3" data-correct="true"> 269.6 g</label>
+  <label><input type="radio" name="qs4-q3" data-correct="false"> 0 g</label>
+</div>
+<button onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+Substitute `Present = 0`:
+
+$$\mu_i = 269.6 + (-2.9) \times 0 = 269.6 \text{ g}$$
+
+When the dummy variable is 0, $\beta_1$ drops out completely and we are left with $\beta_0$ alone.
+</div>
+:::
+
+::: {.question-block}
+**Question 4.** Is the presence of mongoose associated with a decline in rabbit weight, as the researchers hypothesised?
+
+<textarea class="student-answer" rows="5" placeholder="Write your answer here..."></textarea>
+<button onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+The model suggests mongoose presence is associated with a weight reduction of about 3 g, but the standard error on that estimate is large (5.4 g). A quick 95% confidence interval:
+
+- Upper limit: &minus;2.9 + (5.4 &times; 1.96) = +7.7 g
+- Lower limit: &minus;2.9 &minus; (5.4 &times; 1.96) = &minus;13.5 g
+
+The confidence interval spans zero, meaning the data are consistent with no effect at all. There is very little statistical evidence for a meaningful difference.
+</div>
+:::
+
+::: {.question-block}
+**Question 5.** Is the association sufficient to be of biological concern?
+
+<textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
+<button onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+A 3 g difference is negligible for a species that weighs on average around 2.7 kg. Combined with the wide uncertainty and the unresolved question of whether mongoose are even absent from Tokunoshima, it is very hard to draw any firm biological conclusion.
+
+The model produced a number, but that number tells us very little we can act on with confidence.
+</div>
+:::
+
+# 5. Model diagnostics
+
+We will cover this on Friday.
+
+# 6. Summarising and visualising results
+
+We will return to model diagnostics on Friday. For now, let's focus on step 6: turning the model output into a figure. Just like last week, there are two options.
+
+## Using `ggeffects`
+
+Make sure `ggeffects` is installed and loaded:
+
+```{r, eval=FALSE}
+library(ggeffects)
+```
+
+Ask `ggeffects` to predict rabbit weight across the two `mongoose` categories:
+
+```{r, eval=FALSE}
+preds <- ggpredict(rabbit_mod)
+```
+
+When you run this, you will likely see a `Warning` (not an `Error`) telling you that `ggeffects` prefers factors over character strings. Converting is simple:
+
+```{r, eval=FALSE}
+rabbit$mongoose <- factor(rabbit$mongoose)
+```
+
+Then refit and rerun `ggpredict()`. In practice, I tend to convert categorical variables to factors before fitting any model, since some packages refuse to work with character strings. Whether you do so is up to you, but given how little effort it takes, it is worth the habit.
+
+Regardless of whether you convert, plot the predictions:
+
+```{r, eval=FALSE}
+plot(preds)
+```
+
+## Building the prediction yourself
+
+We can also follow the same manual approach as last week, with small adjustments for a categorical predictor.
+
+When building the `fake` dataset, `mongoose` only needs the values that appear in the real data. The `unique()` function handles this neatly, which is especially useful when there are many groups:
+
+```{r, eval=FALSE}
+fake <- data.frame(
+  mongoose = unique(rabbit$mongoose)
+)
+fake
+```
+
+This gives a two-row dataset, one row for `Absent` and one for `Present`.
+
+Last week we only extracted the point predictions (`fit`). This week we also want the 95% confidence intervals, so we ask `predict()` for the standard error too:
+
+```{r, eval=FALSE}
+preds <- predict(rabbit_mod, newdata = fake, se.fit = TRUE)
+```
+
+Extract the point predictions first:
+
+```{r, eval=FALSE}
+fake$fit <- preds$fit
+```
+
+### Confidence intervals
+
+The 95% confidence interval is constructed by multiplying the standard error by 1.96, then adding and subtracting from `fit`:
+
+```{r, eval=FALSE}
+fake$low95 <- preds$fit - 1.96 * preds$se.fit
+fake$upp95 <- preds$fit + 1.96 * preds$se.fit
+# You can also use confint(rabbit_mod) to check these values.
+```
+
+Now plot the predictions with error bars:
+
+```{r, eval=FALSE}
+ggplot(fake) +
+  geom_errorbar(aes(x = mongoose, ymin = low95, ymax = upp95)) +
+  geom_point(aes(x = mongoose, y = fit)) +
+  labs(x = "Java mongoose",
+       y = "Predicted weight of rabbits (g)") +
+  theme_minimal()
+```
+
+## The full workflow
+
+Here is the complete analysis from start to finish, suitable for a clean script:
+
+```{r, eval=FALSE}
+# Analysis of Amami rabbit weight in relation to mongoose presence
+
+# Load data
+rabbit <- read.table("rabbits.txt", header = TRUE)
+
+# EDA
+summary(rabbit)
+str(rabbit)
+ggplot(rabbit) +
+  geom_histogram(aes(x = weight))
+ggplot(rabbit) +
+  geom_point(aes(x = mongoose, y = weight))
+
+# Correct two data entry errors flagged by researchers
+rabbit$mongoose[7] <- "Present"
+rabbit$weight[rabbit$weight > 350] <- rabbit$weight[rabbit$weight > 350] - 100
+
+# Concern prior to modelling:
+# It is unclear whether mongoose are genuinely absent from Tokunoshima,
+# or simply undetected. This caveat limits our conclusions.
+
+# Fit model
+rabbit_mod <- lm(weight ~ mongoose, data = rabbit)
+
+# Diagnostics (covered in Workshop 6)
+
+# Inference
+summary(rabbit_mod)
+
+# Visualise predictions with 95% CI
+fake <- data.frame(mongoose = unique(rabbit$mongoose))
+preds <- predict(rabbit_mod, newdata = fake, se.fit = TRUE)
+fake$fit   <- preds$fit
+fake$low95 <- preds$fit - 1.96 * preds$se.fit
+fake$upp95 <- preds$fit + 1.96 * preds$se.fit
+
+ggplot(fake) +
+  geom_errorbar(aes(x = mongoose, ymin = low95, ymax = upp95)) +
+  geom_point(aes(x = mongoose, y = fit)) +
+  labs(x = "Java mongoose",
+       y = "Predicted weight of rabbits (g)") +
+  theme_minimal()
+```
+
+## Should we share these results?
+
+::: {.question-block}
+**Question 1.** Once you have completed this analysis (excluding diagnostics, which come on Friday), discuss in groups whether you think these results should be shared with the local government as evidence to inform mongoose eradication decisions.
+
+<textarea class="student-answer" rows="6" placeholder="Write your thoughts here..."></textarea>
+<button onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+There is no clean answer here, and that is the point.
+
+The assumption of validity is questionable (we do not truly know mongoose are absent from Tokunoshima). The estimated effect is tiny (about 3 g in an animal weighing 2.7 kg) and the uncertainty is large enough to include zero. The effect could also reflect something mundane, such as using different scales on the two islands.
+
+The hardest part of statistics has nothing to do with equations or distributions. It is deciding whether the data are appropriate for the question. If the results of this analysis were to influence a real conservation decision, how confident would you need to be to put your name on them?
+
+Personally, I would not be comfortable sharing this with the local government without first making a serious effort to confirm whether mongoose are present on Tokunoshima.
+</div>
+:::
+
+# The lemur dataset
+
+Once you have finished the Amami rabbit analysis, move on to the `lemurs.txt` dataset. This comes from researchers interested in how activity levels (hours active per day) vary across four habitat types in Madagascar.
+
+The dataset contains:
+
+- `activity`: number of hours lemurs were active in a day (measured to two decimal places)
+- `habitat`: one of four habitat types; Rainforest, Dry Forest, Spiny Forest, and Mangrove
+
+Load the data and go through the same workflow you just used for the rabbit analysis:
+
+```{r, eval=FALSE}
+lemur <- read.table("lemurs.txt", header = TRUE)
+```
+
+Work through each step: EDA (including checking for data issues), hidden assumptions, model fitting, and visualising predictions. The goal is to identify which habitat type lemurs are most active in.
+
+::: {.question-block}
+**Full lemur analysis.** Work through the complete workflow. When you are done, compare your approach with the instructor solution.
+
+<textarea class="student-answer" rows="8" placeholder="Describe your approach and key findings here..."></textarea>
+<button onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+
+```r
+# Analysis of lemur activity by habitat type
+
+library(ggplot2)
+library(ggeffects)
+
+lemur <- read.table("lemurs.txt", header = TRUE)
+
+# EDA
+str(lemur)      # n = 120, two columns
+summary(lemur)  # check ranges
+
+ggplot(lemur) +
+  geom_histogram(aes(x = activity), colour = "white", binwidth = 0.5) +
+  theme_minimal()
+
+ggplot(lemur) +
+  geom_histogram(aes(x = activity, fill = habitat),
+                 colour = "white", binwidth = 0.5) +
+  theme_minimal()
+# One habitat is recorded as "Rain forest" rather than "Rainforest".
+# This is clearly a typo, so we can correct without needing confirmation.
+
+lemur$habitat[lemur$habitat == "Rain forest"] <- "Rainforest"
+
+# Confirm the correction
+ggplot(lemur) +
+  geom_histogram(aes(x = activity, fill = habitat),
+                 colour = "white", binwidth = 0.5) +
+  theme_minimal()
+
+# Hidden assumptions
+# - Validity: how is activity measured? Accuracy may differ across habitats
+#   (e.g., tracking lemurs is easier in Dry Forest than dense Rainforest).
+# - Equal variance: may differ across habitat types. Worth checking diagnostics.
+
+# Fit model
+lem_mod <- lm(activity ~ habitat, data = lemur)
+
+# Diagnostics (covered in Workshop 6)
+
+# Summarise
+summary(lem_mod)
+# Dry Forest is the reference group (first alphabetically).
+# Model predicts ~7.9 h in Dry Forest.
+# Mangrove: ~1.1 h less (so ~6.8 h total)
+# Rainforest: ~1.8 h more (so ~9.7 h total)
+# Spiny Forest: ~1.8 h less (so ~6.1 h total)
+
+preds <- ggpredict(lem_mod)
+plot(preds)
+
+# Interpretation:
+# Lemurs are most active in Rainforest and least active in Spiny Forest.
+# This does not necessarily mean Rainforest is more important habitat;
+# it is just where activity rates are highest.
+# Measurement bias (easier tracking in open habitats) is a real concern.
+```
+</div>
+:::
+
+# Assumption table
+
+| Assumption | Description | Example of violation |
+|---|---|---|
+| 1. Validity | The data can answer the research question. | Using IQ to measure overall intelligence. |
+| 2. Representativeness | The data reflects the population being studied. | Drawing conclusions about an urban population from rural survey data. |
+| 3. Additivity | Effects of predictors combine additively with no interactions. | Assuming study hours and sleep hours affect exam scores independently, without considering how they interact. |
+| 4. Linearity | The relationship between predictor and outcome is linear. | Assuming plant growth increases indefinitely with light exposure. |
+| 5. Independence of errors | Observations are independent of each other. | Modelling height using repeated measurements from the same children over time. |
+| 6. Equal variance of errors | Residuals have constant spread across predictor levels (homoscedasticity). | Variability in income differs widely across levels of a company's hierarchy. |
+| 7. Normality of errors | Residuals follow a Normal distribution. | Modelling income, where a few extremely wealthy individuals create extreme residuals. |
+
+```{=html}
+<button id="glossary-btn" onclick="toggleGlossary()">Glossary 词汇表</button>
+
+<div id="glossary-panel">
+  <div id="glossary-header">
+    <span>Glossary / 词汇表</span>
+    <button id="glossary-close" onclick="toggleGlossary()">&#10005;</button>
+  </div>
+  <div id="glossary-body">
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Categorical variable</span>
+        <span class="glossary-zh-term">分类变量</span>
+      </div>
+      <div class="glossary-en-def">A variable whose values are discrete named groups (e.g., Present/Absent, habitat type) rather than numbers on a continuous scale.</div>
+      <div class="glossary-zh-def">取值为离散命名类别（如在场/缺失、栖息地类型）而非连续数值的变量。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Dummy variable</span>
+        <span class="glossary-zh-term">虚拟变量</span>
+      </div>
+      <div class="glossary-en-def">A binary (0/1) variable created from a categorical predictor so it can be used in a mathematical equation. R creates these automatically.</div>
+      <div class="glossary-zh-def">由分类预测变量生成的二元（0/1）变量，使其能用于数学方程。R会自动创建。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Reference group</span>
+        <span class="glossary-zh-term">参照组</span>
+      </div>
+      <div class="glossary-en-def">The group assigned a dummy variable value of 0. R chooses the group that comes first alphabetically by default. The intercept (&beta;&#8320;) is the predicted response for this group.</div>
+      <div class="glossary-zh-def">虚拟变量取值为0的组。R默认选择字母顺序最靠前的组。截距（&beta;&#8320;）即该组的预测响应值。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Intercept (&beta;&#8320;)</span>
+        <span class="glossary-zh-term">截距（&beta;&#8320;）</span>
+      </div>
+      <div class="glossary-en-def">In a categorical model, the predicted mean response for the reference group (when all dummy variables equal 0).</div>
+      <div class="glossary-zh-def">在分类预测变量模型中，参照组（所有虚拟变量为0）的预测均值。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Coefficient (&beta;&#8321;)</span>
+        <span class="glossary-zh-term">系数（&beta;&#8321;）</span>
+      </div>
+      <div class="glossary-en-def">In a categorical model, the estimated difference in mean response between the non-reference group and the reference group.</div>
+      <div class="glossary-zh-def">在分类模型中，非参照组与参照组之间均值响应的估计差异。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Confidence interval (95% CI)</span>
+        <span class="glossary-zh-term">置信区间（95% CI）</span>
+      </div>
+      <div class="glossary-en-def">A range constructed so that, before seeing the data, 95% of such intervals would contain the true parameter value. Wider intervals indicate more uncertainty.</div>
+      <div class="glossary-zh-def">在观测数据之前，该区间有95%的概率包含真实参数值。区间越宽表示不确定性越大。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Standard error (SE)</span>
+        <span class="glossary-zh-term">标准误（SE）</span>
+      </div>
+      <div class="glossary-en-def">A measure of how precisely a parameter has been estimated. Multiply by 1.96 to get the half-width of a 95% confidence interval.</div>
+      <div class="glossary-zh-def">衡量参数估计精度的指标。乘以1.96得到95%置信区间的半宽。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">factor()</span>
+        <span class="glossary-zh-term">factor()函数</span>
+      </div>
+      <div class="glossary-en-def">Converts a character or numeric vector to a factor in R, making group membership explicit and ensuring R treats the variable as categorical.</div>
+      <div class="glossary-zh-def">将字符或数值向量转换为R中的因子，明确组别归属，确保R将变量视为分类变量。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">unique()</span>
+        <span class="glossary-zh-term">unique()函数</span>
+      </div>
+      <div class="glossary-en-def">Returns all unique values in a vector. Useful for building a fake prediction dataset when a categorical variable has many levels.</div>
+      <div class="glossary-zh-def">返回向量中所有唯一值。当分类变量有多个水平时，可方便地构建预测数据集。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">predict()</span>
+        <span class="glossary-zh-term">predict()函数</span>
+      </div>
+      <div class="glossary-en-def">Generates model predictions for a new dataset. With <code>se.fit = TRUE</code> it also returns the standard error of each prediction, needed for confidence intervals.</div>
+      <div class="glossary-zh-def">为新数据集生成模型预测值。设置<code>se.fit = TRUE</code>时还返回每个预测值的标准误，用于计算置信区间。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">se.fit</span>
+        <span class="glossary-zh-term">拟合标准误</span>
+      </div>
+      <div class="glossary-en-def">The standard error of a fitted (predicted) value, returned by <code>predict(..., se.fit = TRUE)</code>. Used to compute confidence intervals.</div>
+      <div class="glossary-zh-def"><code>predict(..., se.fit = TRUE)</code>返回的拟合值标准误，用于计算置信区间。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">geom_errorbar()</span>
+        <span class="glossary-zh-term">误差棒图层</span>
+      </div>
+      <div class="glossary-en-def">A ggplot2 layer that draws vertical error bars between <code>ymin</code> and <code>ymax</code>. Used to show confidence intervals on a categorical plot.</div>
+      <div class="glossary-zh-def">ggplot2图层，在<code>ymin</code>和<code>ymax</code>之间绘制垂直误差棒，用于在分类图中显示置信区间。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">ggeffects</span>
+        <span class="glossary-zh-term">ggeffects包</span>
+      </div>
+      <div class="glossary-en-def">An R package that automates model prediction and plotting. <code>ggpredict()</code> returns predictions with confidence intervals; <code>plot()</code> produces the figure.</div>
+      <div class="glossary-zh-def">自动化模型预测和绘图的R包。<code>ggpredict()</code>返回带置信区间的预测值；<code>plot()</code>生成图形。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">lm()</span>
+        <span class="glossary-zh-term">lm()函数</span>
+      </div>
+      <div class="glossary-en-def">Fits a linear model in R. The formula <code>y ~ x</code> specifies the response and predictor. Works with both continuous and categorical predictors.</div>
+      <div class="glossary-zh-def">在R中拟合线性模型。公式<code>y ~ x</code>指定响应变量和预测变量，支持连续和分类预测变量。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Validity (assumption)</span>
+        <span class="glossary-zh-term">效度假设</span>
+      </div>
+      <div class="glossary-en-def">The assumption that the data and variables actually measure what we intend them to measure. One of the hardest assumptions to test formally.</div>
+      <div class="glossary-zh-def">数据和变量确实测量了我们意图测量内容的假设。最难通过正式检验来评估的假设之一。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Representativeness (assumption)</span>
+        <span class="glossary-zh-term">代表性假设</span>
+      </div>
+      <div class="glossary-en-def">The assumption that the sampled data reflect the broader population of interest. Violations lead to conclusions that do not generalise.</div>
+      <div class="glossary-zh-def">样本数据能代表更广泛目标总体的假设。违反此假设会导致结论无法推广。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Invasive species</span>
+        <span class="glossary-zh-term">入侵物种</span>
+      </div>
+      <div class="glossary-en-def">A non-native species introduced (accidentally or deliberately) to an ecosystem, often causing harm to native species and habitats.</div>
+      <div class="glossary-zh-def">被（偶然或刻意）引入某生态系统的外来物种，通常对本地物种和栖息地造成危害。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Habitat</span>
+        <span class="glossary-zh-term">栖息地</span>
+      </div>
+      <div class="glossary-en-def">The natural environment in which a species lives, characterised by its physical and biological features (e.g., Rainforest, Dry Forest).</div>
+      <div class="glossary-zh-def">物种生活的自然环境，以其物理和生物特征为特征（如雨林、旱林）。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">confint()</span>
+        <span class="glossary-zh-term">confint()函数</span>
+      </div>
+      <div class="glossary-en-def">Computes confidence intervals for model parameters in R. A quick alternative to calculating them manually from the standard error.</div>
+      <div class="glossary-zh-def">计算R中模型参数置信区间的函数，是手动根据标准误计算的快捷替代方法。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Ecological fallacy</span>
+        <span class="glossary-zh-term">生态谬误</span>
+      </div>
+      <div class="glossary-en-def">The error of drawing conclusions about individuals from group-level data, or assuming that group patterns apply to every member of that group.</div>
+      <div class="glossary-zh-def">从群体水平数据推断个体结论的错误，即假设群体规律适用于该群体每一个成员。</div>
+    </div>
+
+  </div>
+</div>
+```

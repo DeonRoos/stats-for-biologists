@@ -1,0 +1,1378 @@
+---
+title: "Workshop 7: Linear models with multiple predictors"
+subtitle: "BI3010 Statistics for Biologists"
+author: "Roos & Pinard"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    theme: [cosmo, ../custom.scss]
+    highlight-style: github
+    embed-resources: true
+    code-copy: true
+    code-tools: false
+    html-math-method: mathjax
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show = "show",
+                      message = FALSE, warning = FALSE)
+library(ggplot2)
+```
+
+```{=html}
+<script>
+function revealAnswer(btn) {
+  var block = btn.closest('.question-block, .puzzle-block');
+  var answerClass = block.classList.contains('puzzle-block') ? '.puzzle-answer' : '.instructor-answer';
+
+  var textarea = block.querySelector('.student-answer');
+  if (textarea) {
+    if (textarea.value.trim() === '') {
+      textarea.classList.add('missing');
+      textarea.placeholder = 'Please write your answer before revealing...';
+      textarea.focus();
+      return;
+    }
+    textarea.classList.remove('missing');
+  }
+
+  var mcOptions = block.querySelector('.mc-options');
+  if (mcOptions) {
+    var radios = mcOptions.querySelectorAll('input[type=radio]');
+    var anyChecked = Array.from(radios).some(function(r) { return r.checked; });
+    if (!anyChecked) {
+      mcOptions.classList.add('unanswered');
+      return;
+    }
+    mcOptions.classList.remove('unanswered');
+    radios.forEach(function(r) {
+      r.disabled = true;
+      var label = r.closest('label');
+      if (r.dataset.correct === 'true') {
+        label.classList.add('mc-correct');
+      } else if (r.checked) {
+        label.classList.add('mc-incorrect');
+      }
+    });
+  }
+
+  var answer = block.querySelector(answerClass);
+  if (answer) answer.style.display = 'block';
+  btn.textContent = 'Answer shown';
+  btn.disabled = true;
+}
+
+function toggleGlossary() {
+  document.getElementById('glossary-panel').classList.toggle('open');
+}
+</script>
+```
+
+```{=html}
+<style>
+#glossary-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: #00b494;
+  color: #fff;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  transition: background 0.15s;
+  font-family: inherit;
+}
+#glossary-btn:hover { background: #009478; }
+
+#glossary-panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 380px;
+  height: 100vh;
+  background: #fff;
+  border-left: 3px solid #00b494;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+  z-index: 1001;
+  transition: right 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+#glossary-panel.open { right: 0; }
+
+#glossary-header {
+  background: #0d1e2c;
+  color: #fff;
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+#glossary-header span { font-weight: 600; font-size: 0.95rem; letter-spacing: 0.03em; }
+#glossary-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.7;
+}
+#glossary-close:hover { opacity: 1; }
+#glossary-body { overflow-y: auto; flex: 1; }
+
+.glossary-entry {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #e8f5f0;
+}
+.glossary-entry:last-child { border-bottom: none; }
+.glossary-terms {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.3rem;
+}
+.glossary-en-term { font-weight: 600; color: #0d1e2c; font-size: 0.92rem; }
+.glossary-zh-term { color: #00b494; font-weight: 600; font-size: 0.92rem; }
+.glossary-en-def  { font-size: 0.845rem; color: #444; line-height: 1.5; margin-bottom: 0.25rem; }
+.glossary-zh-def  { font-size: 0.845rem; color: #1c3a50; line-height: 1.65; }
+
+/* ---- Causal inference interactives ---- */
+.stat-display {
+  text-align: center; padding: 1.25rem; background: white;
+  border-radius: 8px; border: 1px solid #dee2e6; margin: 0.75rem 0;
+}
+.stat-value { font-size: 2.4rem; font-weight: 700; display: block; line-height: 1.1; }
+.stat-value.positive  { color: #2d6a4f; }
+.stat-value.near-zero { color: #4a5568; }
+.stat-value.negative  { color: #c0392b; }
+.stat-label { font-size: 0.82rem; color: #4a5568; margin-top: 0.35rem; }
+</style>
+
+<button id="glossary-btn" onclick="toggleGlossary()">Glossary 词汇表</button>
+
+<div id="glossary-panel">
+  <div id="glossary-header">
+    <span>Glossary / 词汇表</span>
+    <button id="glossary-close" onclick="toggleGlossary()">&#10005;</button>
+  </div>
+  <div id="glossary-body">
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Multiple linear regression</span>
+        <span class="glossary-zh-term">多元线性回归</span>
+      </div>
+      <div class="glossary-en-def">A linear model with more than one explanatory variable. Each predictor gets its own coefficient, estimated while holding all other predictors constant. Multiple linear regression models can serve either predictive or causal goals depending on how they are built and interpreted.</div>
+      <div class="glossary-zh-def">包含多个解释变量的线性模型。每个预测变量在其他变量保持不变的情况下，估计各自的系数。多元线性回归模型可根据构建方式和解读目的，服务于预测或因果两种不同目标。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Predictive model</span>
+        <span class="glossary-zh-term">预测模型</span>
+      </div>
+      <div class="glossary-en-def">A model whose goal is to produce accurate predictions of the response variable. Predictors can be included freely to improve accuracy without requiring causal justification. Example: given a flat with 60 m², 3 rooms, EPC C, and Tax band C, predict its monthly rent.</div>
+      <div class="glossary-zh-def">以准确预测响应变量为目标的模型。可以自由纳入预测变量以提高准确性，无需进行因果论证。示例：给定一套60平方米、3个房间、EPC等级C、税级C的公寓，预测其月租金。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Causal model</span>
+        <span class="glossary-zh-term">因果模型</span>
+      </div>
+      <div class="glossary-en-def">A model whose goal is to estimate the causal effect of a specific predictor on the response variable. Which variables to include or exclude is determined by causal reasoning (e.g. a DAG), not predictive performance. Example: by how much does monthly rent increase for each additional square metre of floor area, if you could change only the floor area?</div>
+      <div class="glossary-zh-def">以估计特定预测变量对响应变量因果效应为目标的模型。纳入或排除哪些变量由因果推理（如DAG）决定，而非预测性能。示例：若仅改变建筑面积，每增加一平方米，月租金会增加多少？</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">DAG (Directed Acyclic Graph)</span>
+        <span class="glossary-zh-term">有向无环图</span>
+      </div>
+      <div class="glossary-en-def">A diagram representing assumed causal relationships between variables. Arrows point from cause to effect. Used with the Backdoor Criterion to decide which variables to include in a causal model.</div>
+      <div class="glossary-zh-def">表示变量间假定因果关系的图形。箭头从原因指向结果，结合后门准则决定因果模型中应纳入哪些变量。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Exposure</span>
+        <span class="glossary-zh-term">暴露变量</span>
+      </div>
+      <div class="glossary-en-def">A term borrowed from medicine and epidemiology for the explanatory variable whose causal effect you are trying to estimate, equivalent to the predictor of interest. In observational research this is typically something subjects were exposed to rather than something a researcher assigned.</div>
+      <div class="glossary-zh-def">借自医学与流行病学的术语，指你试图估计其因果效应的解释变量，等同于"感兴趣的预测变量"。在观察性研究中，通常指受试者所"暴露"的某种因素，而非研究者人为分配的干预。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Outcome</span>
+        <span class="glossary-zh-term">结局变量</span>
+      </div>
+      <div class="glossary-en-def">A term borrowed from medicine and epidemiology for the response variable: the quantity you are trying to explain or predict. Equivalent to the response or dependent variable in a regression context.</div>
+      <div class="glossary-zh-def">借自医学与流行病学的术语，指响应变量——即你试图解释或预测的量，等同于回归分析中的响应变量或因变量。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Confounder</span>
+        <span class="glossary-zh-term">混淆变量</span>
+      </div>
+      <div class="glossary-en-def">A variable that is a common cause of both the predictor of interest and the response variable. Failing to account for a confounder creates a spurious association between the predictor and the response. Confounders arise from the fork structure in a DAG.</div>
+      <div class="glossary-zh-def">同时导致感兴趣的预测变量和响应变量的变量。未控制混淆变量会在预测变量与响应变量之间产生虚假关联，混淆变量源于DAG中的叉形结构。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Fork</span>
+        <span class="glossary-zh-term">叉形结构</span>
+      </div>
+      <div class="glossary-en-def">A causal structure in which a third variable Z causes both the predictor of interest X and the response variable Y (X ← Z → Y). This creates a spurious association between X and Y that disappears when Z is included in the model. The fork is the structure that produces confounding; the fix is to adjust for Z.</div>
+      <div class="glossary-zh-def">一种因果结构，其中第三个变量Z同时导致感兴趣的预测变量X和响应变量Y（X←Z→Y）。这在X与Y之间产生虚假关联，纳入Z后关联消失。叉形结构是产生混淆的根本原因，解决方法是将Z纳入模型。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Pipe</span>
+        <span class="glossary-zh-term">管道变量</span>
+      </div>
+      <div class="glossary-en-def">A variable that lies on the causal pathway from the predictor of interest to the response variable (predictor → pipe → response). Including a pipe in a causal model blocks part of the causal effect you are trying to estimate. Sometimes called a mediator.</div>
+      <div class="glossary-zh-def">位于感兴趣的预测变量到响应变量因果路径上的变量（预测变量→管道→响应变量）。在因果模型中纳入管道变量会阻断部分因果效应。有时也称为中介变量。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Collider</span>
+        <span class="glossary-zh-term">对撞变量</span>
+      </div>
+      <div class="glossary-en-def">A variable Z that is caused by both the predictor of interest X and the response variable Y (X → Z ← Y). X and Y have no genuine association, but including Z in the model opens a spurious path between them and manufactures a false relationship. Colliders should be left out of causal models.</div>
+      <div class="glossary-zh-def">同时被感兴趣的预测变量X和响应变量Y所导致的变量Z（X→Z←Y）。X与Y之间本无真实关联，但将Z纳入模型会在它们之间开启虚假路径，制造出不存在的关系。对撞变量不应纳入因果模型。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Backdoor criterion</span>
+        <span class="glossary-zh-term">后门准则</span>
+      </div>
+      <div class="glossary-en-def">A rule for determining which variables to condition on (include in the model) in order to block all non-causal paths between the predictor of interest and the response variable while keeping causal paths open.</div>
+      <div class="glossary-zh-def">确定哪些变量需要加以控制（纳入模型）的规则，旨在阻断感兴趣的预测变量与响应变量之间所有非因果路径，同时保持因果路径畅通。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Total causal effect</span>
+        <span class="glossary-zh-term">总因果效应</span>
+      </div>
+      <div class="glossary-en-def">The combined effect of the predictor of interest on the response variable through all causal pathways, including indirect paths via pipes. Contrasts with the direct effect, which excludes paths running through pipes.</div>
+      <div class="glossary-zh-def">感兴趣的预测变量通过所有因果路径（包括经管道变量的间接路径）对响应变量的综合效应，与仅排除管道路径的直接效应相对。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Table 2 Fallacy</span>
+        <span class="glossary-zh-term">"表2谬误"</span>
+      </div>
+      <div class="glossary-en-def">The mistake of interpreting all coefficients in a multiple regression as causal effects. In a causal model targeting one predictor of interest, other included variables are there to adjust for confounding and their coefficients should not be interpreted causally.</div>
+      <div class="glossary-zh-def">将多元回归中所有系数都解读为因果效应的错误。在针对某一感兴趣的预测变量构建的因果模型中，其他变量的纳入是为了控制混淆，其系数不应作因果解释。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Discretisation</span>
+        <span class="glossary-zh-term">离散化</span>
+      </div>
+      <div class="glossary-en-def">Converting a continuous variable into a categorical one (e.g. energy efficiency score → EPC band A to G). Discretisation loses information and greatly increases the number of parameters a model must estimate.</div>
+      <div class="glossary-zh-def">将连续变量转换为分类变量（如能效评分→EPC等级A至G）。离散化会损失信息，并大幅增加模型需要估计的参数数量。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Residual</span>
+        <span class="glossary-zh-term">残差</span>
+      </div>
+      <div class="glossary-en-def">The difference between an observed value and its model-predicted value: residual = observed &minus; predicted. Residuals are the core of all model diagnostics.</div>
+      <div class="glossary-zh-def">观测值与模型预测值之差：残差 = 观测值 &minus; 预测值，是所有模型诊断的核心。</div>
+    </div>
+
+  </div>
+</div>
+```
+
+# Workshop structure
+
+::: {.callout-note}
+## Workflow
+
+1. Formulate a research question.
+2. Perform exploratory data analysis (EDA).
+3. Identify any hidden assumptions.
+4. **Fit an appropriate model** ← main focus today.
+5. Diagnose the model and check assumptions.
+6. Summarise the results.
+7. Interpret and draw conclusions.
+:::
+
+Today we work through the same dataset twice: once to build a predictive model and once to build a causal model. Using the same data for both goals shows how the purpose of the model shapes every decision you make about it.
+
+The dataset is the Aberdeen rental flats data from Workshop 2. Load it now:
+
+```{r, eval=FALSE}
+abdn <- read.table("abdn_flats.txt", header = TRUE)
+```
+
+# Predictive modelling
+
+Predictive models are a natural starting point for multiple-predictor models because the inclusion criteria are simple: add variables that improve predictions. We do not need to worry about causal assumptions; we just want the model to guess the rent accurately.
+
+## 1. Formulate a research question
+
+The question is: can we predict the monthly rent of a listed property? We will use floor area (m²), total number of rooms, energy efficiency band (EPC), and council tax band as predictors.
+
+## 2. Perform exploratory data analysis
+
+Spend a few minutes exploring the dataset. Check for odd values. The dataset includes a URL for each property, so you can check unusual entries directly, a rare luxury.
+
+One thing to be aware of: some properties may have had their listed price changed since the data were collected. You will need to decide for yourself how to handle these. Your options are: (1) keep the original price, (2) update to the current price, or (3) create a new row for the "new" listing. Option 3 violates an assumption. Can you identify which one?
+
+## 3. Identify any hidden assumptions
+
+<div class="question-block">
+<p><strong>Question 1.</strong> The dataset mixes houses and flats without distinguishing between them. What effect might this have on the predictive model?</p>
+<textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Property type (house vs flat) almost certainly affects rent, so excluding it from the model leaves an important variable out. Predictions will be less accurate than they could be, perhaps by a lot, perhaps only a little. It will also tend to create unequal variance of errors: the model will struggle most with expensive properties (which are more often houses), producing larger residuals at the upper end of the predicted rent range.</p>
+</div>
+</div>
+
+## 4. Fit an appropriate model
+
+In predictive modelling, we can include all sensible explanatory variables without worrying about the underlying causal relationships. The dataset variables are:
+
+| Variable | Description |
+|---|---|
+| `Price` | Monthly rent (£) |
+| `Bedrooms` | Number of bedrooms |
+| `PublicRooms` | Number of living rooms |
+| `Rooms` | Total rooms (bedrooms + living rooms) |
+| `Bathrooms` | Number of bathrooms |
+| `FloorArea` | Total floor area (m²) |
+| `EPC` | Energy Performance Certificate band (A = most efficient, G = least) |
+| `Tax` | Council tax band (A = lowest, H = highest) |
+| `DayAdded` | Date the record was added to the dataset |
+| `PropertyURL` | Listing URL |
+| `Address` | Property address |
+| `Latitude` | Latitude coordinates |
+| `Longitude` | Longitude coordinates |
+| `UniCommuteTime` | Walking time to the Zoology Building (minutes) |
+| `HouseType` | Detached, semi-detached, terrace, or flat |
+| `Furnished` | Fully furnished, part furnished, or unfurnished |
+
+We will keep it to four predictors: `FloorArea`, `Rooms`, `EPC`, and `Tax`.
+
+One complication: `EPC` and `Tax` are inherently continuous quantities (energy efficiency and property value) that have been **discretised** into letter bands. This forces R to create a separate dummy variable for every band except the reference. Written out in full, the model equation is:
+
+$$Price_i \sim \text{Normal}(\mu_i, \sigma)$$
+
+$$\begin{align}
+\mu_i = \; &\beta_0 + \beta_1 \times FloorArea_i + \beta_2 \times Rooms_i \\
+          + \; &\beta_3 \times EPC\text{B}_i + \beta_4 \times EPC\text{C}_i + \beta_5 \times EPC\text{D}_i \\
+          + \; &\beta_6 \times EPC\text{E}_i + \beta_7 \times EPC\text{F}_i + \beta_8 \times EPC\text{G}_i \\
+          + \; &\beta_9 \times Tax\text{B}_i + \beta_{10} \times Tax\text{C}_i + \beta_{11} \times Tax\text{D}_i \\
+          + \; &\beta_{12} \times Tax\text{E}_i + \beta_{13} \times Tax\text{F}_i + \beta_{14} \times Tax\text{G}_i
+\end{align}$$
+
+where $\beta_0$ is the predicted rent for a property with zero floor area, zero rooms, EPC band A, and tax band A; $\beta_1$ is the change per additional m²; $\beta_2$ is the change per additional room; and $\beta_3$ through $\beta_8$ and $\beta_9$ through $\beta_{14}$ are the differences between each band and the reference (band A in each case).
+
+That is 14 parameters, compared to just 4 if `EPC` and `Tax` had been kept as continuous scores. Discretising continuous variables into categories creates a lot of extra work and often loses information in the process. Avoid it where you can.
+
+Despite the notation complexity, fitting the model in R is straightforward:
+
+```{r, eval=FALSE}
+rent_mod <- lm(Price ~ FloorArea + Rooms + EPC + Tax, data = abdn)
+summary(rent_mod)
+```
+
+## 5. Diagnose the model and check assumptions
+
+```{r, eval=FALSE}
+par(mfrow = c(2, 2))
+plot(rent_mod)
+par(mfrow = c(1, 1))
+```
+
+### Question set 1
+
+<div class="question-block">
+<p><strong>Question 1.</strong> Do the Residuals vs Fitted and Scale-Location plots suggest any assumption is violated?</p>
+<div class="mc-options">
+  <label><input type="radio" name="qs1-q1" data-correct="false"> No: residual spread is equal across all fitted values</label>
+  <label><input type="radio" name="qs1-q1" data-correct="true"> Yes: residual spread increases with fitted values, indicating heteroscedasticity</label>
+  <label><input type="radio" name="qs1-q1" data-correct="false"> Yes: there is clear non-linearity in the residuals</label>
+  <label><input type="radio" name="qs1-q1" data-correct="false"> Yes: there is a strong normality violation in both plots</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Yes: residual spread tends to increase with fitted values, a sign of heteroscedasticity (unequal variance of errors). This is not surprising given that the dataset mixes houses and flats of very different price ranges.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 2.</strong> What is the main consequence of violating the equal variance of errors assumption?</p>
+<div class="mc-options">
+  <label><input type="radio" name="qs1-q2" data-correct="false"> Parameter estimates become biased</label>
+  <label><input type="radio" name="qs1-q2" data-correct="true"> Confidence intervals become too wide or too narrow, making uncertainty estimates unreliable</label>
+  <label><input type="radio" name="qs1-q2" data-correct="false"> The model cannot be fitted at all</label>
+  <label><input type="radio" name="qs1-q2" data-correct="false"> The linearity assumption is automatically violated as well</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Heteroscedasticity inflates standard errors, so confidence intervals become either too wide or too narrow. The parameter estimates (predicted means) remain unbiased, but uncertainty estimates are not reliable.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 3.</strong> Does the Q-Q Residuals plot suggest a normality problem?</p>
+<textarea class="student-answer" rows="3" placeholder="Describe what you see..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The residuals are not perfectly normally distributed. A small number of properties deviate notably from the diagonal line, either cheaper or more expensive than the model expects given their characteristics. The departure is not extreme, but it is present. Minor deviations of this kind are expected in real data and are not grounds for rejecting the model outright.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 4.</strong> Does the Residuals vs Leverage plot flag any observations with disproportionate influence on the model?</p>
+<div class="mc-options">
+  <label><input type="radio" name="qs1-q4" data-correct="false"> No: all observations have low Cook's distance</label>
+  <label><input type="radio" name="qs1-q4" data-correct="true"> Yes: one or more observations appear near or beyond the Cook's distance contour lines</label>
+  <label><input type="radio" name="qs1-q4" data-correct="false"> The plot does not show Cook's distance contour lines so no conclusion can be drawn</label>
+  <label><input type="radio" name="qs1-q4" data-correct="false"> Yes: most observations have Cook's distance above 1</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Yes. One or more observations typically appear with notably high Cook's distance. These are usually expensive properties (large houses) whose price is hard for a model fitted mainly on flats to predict well.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 5.</strong> If there are influential observations, what should you do?</p>
+<textarea class="student-answer" rows="5" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>You have three options, in increasing order of rigour:</p>
+<ol>
+<li><strong>Collect more data.</strong> Influential observations are most damaging in small datasets. More data dilutes their effect. Not practical here, but the right long-term solution.</li>
+<li><strong>Remove and rerun.</strong> Many papers do this, but only if they also report the original results and clearly explain why they removed observations. Silently dropping data is not acceptable.</li>
+<li><strong>Fit both models and compare.</strong> Run the model with and without the influential observations, then compare the parameter estimates side by side. If removing them barely changes the estimates, keep the original model and note that you checked. If the estimates shift substantially, report both models and discuss which you think is more reliable.</li>
+</ol>
+<pre><code class="language-r"># Example: remove rows 324 and 534 and compare
+abdn_trimmed <- abdn[-c(324, 534), ]
+trimmed_rent_mod <- lm(Price ~ FloorArea + Rooms + EPC + Tax, data = abdn_trimmed)
+coef(trimmed_rent_mod)
+coef(rent_mod)</code></pre>
+<p>Your row numbers may differ depending on how you handled any data issues earlier. Remove any observation whose Cook's distance is at or above 1, rerun the model, and check the diagnostics again.</p>
+</div>
+</div>
+
+If you identified influential observations, remove them and refit the model before proceeding:
+
+```{r, eval=FALSE}
+abdn <- abdn[-c(row_number), ]   # replace row_number with your identified row(s)
+rent_mod <- lm(Price ~ FloorArea + Rooms + EPC + Tax, data = abdn)
+par(mfrow = c(2, 2))
+plot(rent_mod)
+par(mfrow = c(1, 1))
+```
+
+## 6. Summarise the results
+
+With multiple predictors, `ggeffects` makes plotting much easier than building every prediction data frame by hand:
+
+```{r, eval=FALSE}
+library(ggeffects)
+summary(rent_mod)
+preds <- ggpredict(rent_mod)
+plot(preds)
+```
+
+If `ggeffects` warns about character variables, convert your categorical columns to factors first:
+
+```{r, eval=FALSE}
+abdn$EPC <- factor(abdn$EPC)
+abdn$Tax <- factor(abdn$Tax)
+rent_mod  <- lm(Price ~ FloorArea + Rooms + EPC + Tax, data = abdn)
+preds     <- ggpredict(rent_mod)
+plot(preds)
+```
+
+To build the `FloorArea` prediction plot manually, holding other predictors at representative values:
+
+```{r, eval=FALSE}
+fake <- data.frame(
+  FloorArea = seq(from = min(abdn$FloorArea), to = max(abdn$FloorArea), by = 5),
+  Rooms     = median(abdn$Rooms),
+  Tax       = "D",
+  EPC       = "D"
+)
+preds <- predict(rent_mod, newdata = fake, se.fit = TRUE)
+fake$fit <- preds$fit
+fake$low <- preds$fit - preds$se.fit * 1.96
+fake$upp <- preds$fit + preds$se.fit * 1.96
+
+ggplot(fake) +
+  geom_ribbon(aes(x = FloorArea, ymin = low, ymax = upp), fill = "lightgrey", alpha = 0.8) +
+  geom_line(aes(x = FloorArea, y = fit)) +
+  labs(x = "Square metres", y = "Predicted monthly rent (£)") +
+  theme_minimal()
+```
+
+### Question set 2
+
+<div class="question-block">
+<p><strong>Question 1.</strong> Can we read the coefficient for <code>FloorArea</code> from this model as a causal effect, for example "adding 10 m² to a property causes rent to increase by X"?</p>
+<div class="mc-options">
+  <label><input type="radio" name="qs2-q1" data-correct="false"> Yes: linear model coefficients always represent causal effects</label>
+  <label><input type="radio" name="qs2-q1" data-correct="false"> Yes: because we controlled for other variables, the coefficient is causal</label>
+  <label><input type="radio" name="qs2-q1" data-correct="true"> No: this model was built to predict, not to isolate a causal effect; the coefficient reflects an adjusted association, not a causal quantity</label>
+  <label><input type="radio" name="qs2-q1" data-correct="false"> No: linear models cannot estimate causal effects under any circumstances</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>No. The predictive model includes variables to improve predictive accuracy, not because a causal analysis told us to. When all of <code>FloorArea</code>, <code>Rooms</code>, <code>EPC</code>, and <code>Tax</code> are in the model, each coefficient represents the association with price after adjusting for the others, but "adjusting for" is not the same as "identifying the causal effect of." The causal model section below shows how the goal changes the analysis.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 2.</strong> The coefficient for <code>FloorArea</code> in this model is probably smaller than you might expect, only a few pounds per m². Why might that be?</p>
+<textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>When <code>FloorArea</code>, <code>Rooms</code>, <code>EPC</code>, and <code>Tax</code> are all in the model, each coefficient only captures the portion of the association not explained by the others. <code>FloorArea</code> drives much of the variation in <code>Rooms</code>, <code>EPC</code>, and <code>Tax</code> as well. By including all of them together, the model distributes the "credit" for predicting rent across all four variables, so <code>FloorArea</code>'s individual coefficient ends up smaller than the true causal effect of floor area alone. The causal model below, which uses a DAG to correctly specify the model, will produce a larger and more interpretable coefficient.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 3.</strong> Go to <a href="https://www.aspc.co.uk/" target="_blank">ASPC</a> and find a recently listed rental property. Use your model to predict its monthly rent, then compare the prediction with the listed price.</p>
+<textarea class="student-answer" rows="5" placeholder="Paste the URL, enter the property's values, and note the predicted vs actual rent..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<pre><code class="language-r"># Example using a hypothetical property with 3 rooms, 61 m², EPC C, Tax C
+my_property <- data.frame(
+  Rooms     = 3,
+  FloorArea = 61,
+  EPC       = "C",
+  Tax       = "C"
+)
+
+predict(rent_mod, newdata = my_property)
+
+# Add 95% confidence interval
+predict(rent_mod, newdata = my_property, interval = "confidence")</code></pre>
+<p>The residual is the difference between your model's prediction and the listed price. If the true price falls within the confidence interval, the model's uncertainty correctly captured the listing.</p>
+<p>For a version of this model built into a web interface, see <a href="https://deonroos.shinyapps.io/BI3010_Rent/" target="_blank">this demonstration app</a>. Note the "Fancy model" also accounts for spatial patterns in rent across Aberdeen.</p>
+</div>
+</div>
+
+# Causal modelling
+
+We now switch goals. Instead of predicting rent as accurately as possible, we want to understand the **causal effect of floor area on rent**: if a property had an extra 10 m², how much more would we expect it to rent for?
+
+This is a different question and requires a different analytical approach.
+
+## Confounders
+
+Before starting the analysis, let's go over the three types of confounds again to help solidify your understanding. Below we'll go through each type in turn and see the effect of including the confounded variable in a model or not.
+
+### The pipe: mediator sitting between cause and effect
+
+In a pipe, Z is caused by the predictor of interest X and in turn causes the response variable Y: the structure is X → Z → Y. The effect of X on Y is real, but it flows *through* Z. Including Z in the model blocks the pathway, absorbing the X effect and making the X coefficient shrink towards zero. X still matters; you have removed the route through which it acts.
+
+Click Z in the DAG to add or remove it from the model.
+
+```{ojs}
+//| echo: false
+pipe_data = {
+  const n = 260, s = 0.85;
+  const rows = [];
+  for (let i = 0; i < n; i++) {
+    const x = Math.random() * 10;
+    const z = s * x + (1 - s) * Math.random() * 10;
+    const y = s * z + (1 - s) * Math.random() * 10;
+    rows.push({ x, y, z });
+  }
+  return rows;
+}
+```
+
+```{ojs}
+//| echo: false
+pipe_interactive = {
+  const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+  const ols  = (xa, ya) => {
+    const mx = mean(xa), my = mean(ya);
+    const b1 = xa.reduce((s, x, i) => s + (x - mx) * (ya[i] - my), 0) /
+               xa.reduce((s, x)    => s + (x - mx) ** 2, 0);
+    return { b0: my - b1 * mx, b1 };
+  };
+
+  let sel = false;
+
+  const computeModel = () => {
+    const xs = pipe_data.map(d => d.x);
+    const ys = pipe_data.map(d => d.y);
+    const zs = pipe_data.map(d => d.z);
+    const n  = xs.length;
+    let b0, b1, mse, sxx, mX;
+    if (!sel) {
+      ({ b0, b1 } = ols(xs, ys));
+      mX  = mean(xs);
+      sxx = xs.reduce((s, x) => s + (x - mX) ** 2, 0);
+      mse = xs.reduce((s, x, i) => s + (ys[i] - b0 - b1 * x) ** 2, 0) / (n - 2);
+    } else {
+      const rY = ols(zs, ys), rX = ols(zs, xs);
+      const eY = ys.map((y, i) => y - rY.b0 - rY.b1 * zs[i]);
+      const eX = xs.map((x, i) => x - rX.b0 - rX.b1 * zs[i]);
+      b1  = ols(eX, eY).b1;
+      mX  = mean(xs);
+      b0  = mean(ys) - b1 * mX;
+      const rFW = eY.map((e, i) => e - b1 * eX[i]);
+      mse = rFW.reduce((s, r) => s + r ** 2, 0) / (n - 3);
+      sxx = eX.reduce((s, e) => s + e ** 2, 0);
+    }
+    const se = Math.sqrt(mse / sxx), ci_lo = b1 - 1.96 * se, ci_hi = b1 + 1.96 * se;
+    const xMin = Math.min(...xs), xMax = Math.max(...xs);
+    const xSeq = Array.from({ length: 60 }, (_, i) => xMin + i * (xMax - xMin) / 59);
+    const band = xSeq.map(x => ({
+      x,
+      y1: b0 + b1 * x - 1.96 * Math.sqrt(mse * (1/n + (x - mX)**2 / sxx)),
+      y2: b0 + b1 * x + 1.96 * Math.sqrt(mse * (1/n + (x - mX)**2 / sxx))
+    }));
+    return { slope: b1, ci_lo, ci_hi,
+      line: [{ x: xMin, y: b0 + b1*xMin }, { x: xMax, y: b0 + b1*xMax }], band };
+  };
+
+  const wrapper = document.createElement("div");
+  const row     = document.createElement("div");
+  row.style.cssText = "display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;";
+  const plotDiv = document.createElement("div");
+  const coefDiv = document.createElement("div");
+  coefDiv.className = "stat-display";
+  const msgDiv  = document.createElement("div");
+  msgDiv.style.marginTop = "0.8rem";
+  wrapper.append(row, coefDiv, msgDiv);
+
+  const NS = "http://www.w3.org/2000/svg";
+  const dagSvg = document.createElementNS(NS, "svg");
+  dagSvg.setAttribute("width", "220"); dagSvg.setAttribute("height", "88");
+  dagSvg.setAttribute("style", "cursor:default;font-family:inherit;flex-shrink:0;");
+
+  const addMarker = (id, color) => {
+    const m = document.createElementNS(NS, "marker");
+    m.setAttribute("id", id); m.setAttribute("markerWidth", "10");
+    m.setAttribute("markerHeight", "7"); m.setAttribute("refX", "9");
+    m.setAttribute("refY", "3.5"); m.setAttribute("orient", "auto");
+    const p = document.createElementNS(NS, "polygon");
+    p.setAttribute("points", "0 0, 10 3.5, 0 7"); p.setAttribute("fill", color);
+    m.appendChild(p); return m;
+  };
+  const defs = document.createElementNS(NS, "defs");
+  defs.appendChild(addMarker("pp-ca", "#2d6a4f"));
+  defs.appendChild(addMarker("pp-cl", "#adb5bd"));
+  dagSvg.appendChild(defs);
+
+  const R = 25;
+  const P = { x: {cx:35,cy:44}, z: {cx:110,cy:44}, y: {cx:185,cy:44} };
+  const mkEdge = (fr, to) => {
+    const dx = P[to].cx - P[fr].cx, dy = P[to].cy - P[fr].cy, d = Math.hypot(dx, dy);
+    const ln = document.createElementNS(NS, "line");
+    ln.setAttribute("x1", P[fr].cx + R*dx/d); ln.setAttribute("y1", P[fr].cy + R*dy/d);
+    ln.setAttribute("x2", P[to].cx - R*dx/d); ln.setAttribute("y2", P[to].cy - R*dy/d);
+    ln.setAttribute("stroke-width", "2.2"); dagSvg.appendChild(ln); return ln;
+  };
+  const eXZ = mkEdge("x", "z"), eZY = mkEdge("z", "y");
+
+  const mkNode = (cx, cy, label, stroke, clickable) => {
+    const g = document.createElementNS(NS, "g");
+    if (clickable) g.setAttribute("style", "cursor:pointer;user-select:none;");
+    const c = document.createElementNS(NS, "circle");
+    c.setAttribute("cx", cx); c.setAttribute("cy", cy); c.setAttribute("r", R);
+    c.setAttribute("fill", "white"); c.setAttribute("stroke", stroke);
+    c.setAttribute("stroke-width", "2.5");
+    const t = document.createElementNS(NS, "text");
+    t.setAttribute("x", cx); t.setAttribute("y", cy + 5);
+    t.setAttribute("text-anchor", "middle"); t.setAttribute("font-size", "13");
+    t.setAttribute("font-weight", "600"); t.setAttribute("fill", stroke);
+    t.textContent = label;
+    g.appendChild(c); g.appendChild(t); dagSvg.appendChild(g);
+    return { g, c, t };
+  };
+  mkNode(P.x.cx, P.x.cy, "X", "#2d6a4f", false);
+  const nZ = mkNode(P.z.cx, P.z.cy, "Z", "#4a5568", true);
+  mkNode(P.y.cx, P.y.cy, "Y", "#d4a017", false);
+  row.append(plotDiv, dagSvg);
+
+  const renderAll = () => {
+    const [col, dash, mk] = sel
+      ? ["#adb5bd", "6,4", "url(#pp-cl)"]
+      : ["#2d6a4f", "none", "url(#pp-ca)"];
+    [eXZ, eZY].forEach(e => {
+      e.setAttribute("stroke", col); e.setAttribute("stroke-dasharray", dash);
+      e.setAttribute("marker-end", mk);
+    });
+    nZ.c.setAttribute("fill",   sel ? "#fef9e7" : "white");
+    nZ.c.setAttribute("stroke", sel ? "#d4a017" : "#4a5568");
+    nZ.t.setAttribute("fill",   sel ? "#d4a017" : "#4a5568");
+
+    const m = computeModel();
+    plotDiv.replaceChildren(Plot.plot({
+      marks: [
+        Plot.areaY(m.band, { x:"x", y1:"y1", y2:"y2", fill:"#d4a017", fillOpacity:0.15 }),
+        Plot.dot(pipe_data, { x:"x", y:"y", fill:"#2d6a4f", opacity:0.55, r:4 }),
+        Plot.line(m.line, { x:"x", y:"y", stroke:"#d4a017", strokeWidth:2.5 })
+      ],
+      x: { label: "X (e.g. floor area)" }, y: { label: "Y (e.g. price)" },
+      width: 380, height: 280, style: { background: "transparent", fontSize: 12 }
+    }));
+
+    const fmt = x => (x >= 0 ? "+" : "") + x.toFixed(2);
+    const cls = Math.abs(m.slope) < 0.15 ? "near-zero" : m.slope > 0 ? "positive" : "negative";
+    coefDiv.innerHTML = `
+      <span class="stat-value ${cls}">${fmt(m.slope)}</span>
+      <div class="stat-label">X coefficient &middot; change in Y per unit X<br>
+        95% CI: [${fmt(m.ci_lo)}, ${fmt(m.ci_hi)}]<br>
+        <code style="font-size:0.9em">${sel ? "lm(Y ~ X + Z)" : "lm(Y ~ X)"}</code>
+      </div>`;
+
+    if (!sel) {
+      msgDiv.style.cssText = "padding:0.75rem 1rem;border-radius:6px;font-size:0.9em;line-height:1.5;background:#f0fdf4;border-left:4px solid #2d6a4f;margin-top:0.5rem;";
+      msgDiv.innerHTML = "<strong>Total effect estimated.</strong> Z is the mechanism through which X affects Y. Leaving Z out keeps the full X&rarr;Z&rarr;Y pathway open and captures the total causal effect of X on Y.";
+    } else {
+      msgDiv.style.cssText = "padding:0.75rem 1rem;border-radius:6px;font-size:0.9em;line-height:1.5;background:#fff5f5;border-left:4px solid #c0392b;margin-top:0.5rem;";
+      msgDiv.innerHTML = "<strong>Over-controlled.</strong> Z is a mediator carrying the X&rarr;Y effect. Including it blocks the causal pathway and the X coefficient collapses towards zero. X still has an effect; you have removed the route through which it acts.";
+    }
+  };
+
+  nZ.g.addEventListener("click", () => { sel = !sel; renderAll(); });
+  renderAll();
+  return wrapper;
+}
+```
+
+Within this data: `FloorArea` → `Rooms` → `Price`. Larger properties have more rooms, and more rooms drives price. Including `Rooms` when asking about the causal effect of `FloorArea` would block this path. The correct causal model leaves `Rooms` out.
+
+<div class="question-block">
+<p><strong>Question 1.</strong> In the structure <code>FloorArea → Rooms → Price</code>, what causal role does <code>Rooms</code> play?</p>
+<div class="mc-options">
+  <label><input type="radio" name="conf-q1" data-correct="false"> Fork: <code>Rooms</code> is a common cause of both <code>FloorArea</code> and <code>Price</code></label>
+  <label><input type="radio" name="conf-q1" data-correct="true"> Pipe: <code>Rooms</code> lies on the causal pathway between <code>FloorArea</code> and <code>Price</code></label>
+  <label><input type="radio" name="conf-q1" data-correct="false"> Collider: <code>FloorArea</code> and <code>Price</code> both cause <code>Rooms</code></label>
+  <label><input type="radio" name="conf-q1" data-correct="false"> Confounder: <code>Rooms</code> creates a spurious association between <code>FloorArea</code> and <code>Price</code></label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p><code>Rooms</code> is a pipe. Floor area causes the number of rooms a property has (larger properties have more rooms), and the number of rooms in turn influences price. The causal chain runs FloorArea → Rooms → Price: <code>Rooms</code> is a step along the route from cause to effect, not a separate cause of both.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 2.</strong> When estimating the total causal effect of <code>FloorArea</code> on <code>Price</code>, should <code>Rooms</code> be included in the model?</p>
+<div class="mc-options">
+  <label><input type="radio" name="conf-q2" data-correct="false"> Yes: controlling for <code>Rooms</code> isolates the direct floor area effect and gives a cleaner estimate</label>
+  <label><input type="radio" name="conf-q2" data-correct="false"> Yes: including more predictors always improves causal estimation</label>
+  <label><input type="radio" name="conf-q2" data-correct="true"> No: <code>Rooms</code> is a pipe; including it blocks the FloorArea → Rooms → Price pathway and absorbs part of the effect we are trying to measure</label>
+  <label><input type="radio" name="conf-q2" data-correct="false"> No: <code>Rooms</code> and <code>FloorArea</code> are perfectly collinear, so R will drop one automatically</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>No. Including a pipe blocks the causal pathway it sits on. If <code>Rooms</code> enters the model, the model estimates how much <code>FloorArea</code> affects <code>Price</code> <em>over and above</em> the rooms it provides: a narrower, less interpretable quantity. To capture the total effect of floor area (everything it does to price, including through the rooms it provides), leave <code>Rooms</code> out.</p>
+</div>
+</div>
+
+### The fork: a confounder causing both predictor and response
+
+In a fork, Z causes both X and Y: the structure is X ← Z → Y. X and Y appear associated, but neither causes the other. The association is driven by Z. Without adjusting for Z, the X coefficient picks up Z's influence and is inflated. Including Z closes the confounded path.
+
+Click Z in the DAG to add or remove it from the model.
+
+```{ojs}
+//| echo: false
+fork_data = {
+  const n = 280, s = 0.8;
+  const rows = [];
+  for (let i = 0; i < n; i++) {
+    const z = Math.random();
+    const x = s * z * 10 + (1 - s) * Math.random() * 10;
+    const y = s * z * 10 + (1 - s) * Math.random() * 10;
+    rows.push({ x, y, z });
+  }
+  return rows;
+}
+```
+
+```{ojs}
+//| echo: false
+fork_interactive = {
+  const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+  const ols  = (xa, ya) => {
+    const mx = mean(xa), my = mean(ya);
+    const b1 = xa.reduce((s, x, i) => s + (x - mx) * (ya[i] - my), 0) /
+               xa.reduce((s, x)    => s + (x - mx) ** 2, 0);
+    return { b0: my - b1 * mx, b1 };
+  };
+
+  let sel = false;
+
+  const computeModel = () => {
+    const xs = fork_data.map(d => d.x);
+    const ys = fork_data.map(d => d.y);
+    const zs = fork_data.map(d => d.z);
+    const n  = xs.length;
+    let b0, b1, mse, sxx, mX;
+    if (!sel) {
+      ({ b0, b1 } = ols(xs, ys));
+      mX  = mean(xs);
+      sxx = xs.reduce((s, x) => s + (x - mX) ** 2, 0);
+      mse = xs.reduce((s, x, i) => s + (ys[i] - b0 - b1 * x) ** 2, 0) / (n - 2);
+    } else {
+      const rY = ols(zs, ys), rX = ols(zs, xs);
+      const eY = ys.map((y, i) => y - rY.b0 - rY.b1 * zs[i]);
+      const eX = xs.map((x, i) => x - rX.b0 - rX.b1 * zs[i]);
+      b1  = ols(eX, eY).b1;
+      mX  = mean(xs);
+      b0  = mean(ys) - b1 * mX;
+      const rFW = eY.map((e, i) => e - b1 * eX[i]);
+      mse = rFW.reduce((s, r) => s + r ** 2, 0) / (n - 3);
+      sxx = eX.reduce((s, e) => s + e ** 2, 0);
+    }
+    const se = Math.sqrt(mse / sxx), ci_lo = b1 - 1.96 * se, ci_hi = b1 + 1.96 * se;
+    const xMin = Math.min(...xs), xMax = Math.max(...xs);
+    const xSeq = Array.from({ length: 60 }, (_, i) => xMin + i * (xMax - xMin) / 59);
+    const band = xSeq.map(x => ({
+      x,
+      y1: b0 + b1 * x - 1.96 * Math.sqrt(mse * (1/n + (x - mX)**2 / sxx)),
+      y2: b0 + b1 * x + 1.96 * Math.sqrt(mse * (1/n + (x - mX)**2 / sxx))
+    }));
+    return { slope: b1, ci_lo, ci_hi,
+      line: [{ x: xMin, y: b0 + b1*xMin }, { x: xMax, y: b0 + b1*xMax }], band };
+  };
+
+  const wrapper = document.createElement("div");
+  const row     = document.createElement("div");
+  row.style.cssText = "display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;";
+  const plotDiv = document.createElement("div");
+  const coefDiv = document.createElement("div");
+  coefDiv.className = "stat-display";
+  const msgDiv  = document.createElement("div");
+  msgDiv.style.marginTop = "0.8rem";
+  wrapper.append(row, coefDiv, msgDiv);
+
+  const NS = "http://www.w3.org/2000/svg";
+  const dagSvg = document.createElementNS(NS, "svg");
+  dagSvg.setAttribute("width", "220"); dagSvg.setAttribute("height", "155");
+  dagSvg.setAttribute("style", "cursor:default;font-family:inherit;flex-shrink:0;");
+
+  const addMarker = (id, color) => {
+    const m = document.createElementNS(NS, "marker");
+    m.setAttribute("id", id); m.setAttribute("markerWidth", "10");
+    m.setAttribute("markerHeight", "7"); m.setAttribute("refX", "9");
+    m.setAttribute("refY", "3.5"); m.setAttribute("orient", "auto");
+    const p = document.createElementNS(NS, "polygon");
+    p.setAttribute("points", "0 0, 10 3.5, 0 7"); p.setAttribute("fill", color);
+    m.appendChild(p); return m;
+  };
+  const defs = document.createElementNS(NS, "defs");
+  defs.appendChild(addMarker("fk-bd", "#c0392b"));
+  defs.appendChild(addMarker("fk-cl", "#adb5bd"));
+  dagSvg.appendChild(defs);
+
+  const R = 25;
+  const P = { z: {cx:110,cy:35}, x: {cx:38,cy:125}, y: {cx:182,cy:125} };
+  const mkEdge = (fr, to) => {
+    const dx = P[to].cx - P[fr].cx, dy = P[to].cy - P[fr].cy, d = Math.hypot(dx, dy);
+    const ln = document.createElementNS(NS, "line");
+    ln.setAttribute("x1", P[fr].cx + R*dx/d); ln.setAttribute("y1", P[fr].cy + R*dy/d);
+    ln.setAttribute("x2", P[to].cx - R*dx/d); ln.setAttribute("y2", P[to].cy - R*dy/d);
+    ln.setAttribute("stroke-width", "2.2"); dagSvg.appendChild(ln); return ln;
+  };
+  const eZX = mkEdge("z", "x"), eZY = mkEdge("z", "y");
+
+  const mkNode = (cx, cy, label, stroke, clickable) => {
+    const g = document.createElementNS(NS, "g");
+    if (clickable) g.setAttribute("style", "cursor:pointer;user-select:none;");
+    const c = document.createElementNS(NS, "circle");
+    c.setAttribute("cx", cx); c.setAttribute("cy", cy); c.setAttribute("r", R);
+    c.setAttribute("fill", "white"); c.setAttribute("stroke", stroke);
+    c.setAttribute("stroke-width", "2.5");
+    const t = document.createElementNS(NS, "text");
+    t.setAttribute("x", cx); t.setAttribute("y", cy + 5);
+    t.setAttribute("text-anchor", "middle"); t.setAttribute("font-size", "13");
+    t.setAttribute("font-weight", "600"); t.setAttribute("fill", stroke);
+    t.textContent = label;
+    g.appendChild(c); g.appendChild(t); dagSvg.appendChild(g);
+    return { g, c, t };
+  };
+  const nZ = mkNode(P.z.cx, P.z.cy, "Z", "#4a5568", true);
+  mkNode(P.x.cx, P.x.cy, "X", "#2d6a4f", false);
+  mkNode(P.y.cx, P.y.cy, "Y", "#d4a017", false);
+  row.append(plotDiv, dagSvg);
+
+  const renderAll = () => {
+    const [col, dash, mk] = sel
+      ? ["#adb5bd", "6,4", "url(#fk-cl)"]
+      : ["#c0392b", "none", "url(#fk-bd)"];
+    [eZX, eZY].forEach(e => {
+      e.setAttribute("stroke", col); e.setAttribute("stroke-dasharray", dash);
+      e.setAttribute("marker-end", mk);
+    });
+    nZ.c.setAttribute("fill",   sel ? "#fef9e7" : "white");
+    nZ.c.setAttribute("stroke", sel ? "#d4a017" : "#4a5568");
+    nZ.t.setAttribute("fill",   sel ? "#d4a017" : "#4a5568");
+
+    const m = computeModel();
+    plotDiv.replaceChildren(Plot.plot({
+      marks: [
+        Plot.areaY(m.band, { x:"x", y1:"y1", y2:"y2", fill:"#d4a017", fillOpacity:0.15 }),
+        Plot.dot(fork_data, { x:"x", y:"y", fill:"#2d6a4f", opacity:0.55, r:4 }),
+        Plot.line(m.line, { x:"x", y:"y", stroke:"#d4a017", strokeWidth:2.5 })
+      ],
+      x: { label: "X (e.g. EPC band)" }, y: { label: "Y (e.g. price)" },
+      width: 380, height: 280, style: { background: "transparent", fontSize: 12 }
+    }));
+
+    const fmt = x => (x >= 0 ? "+" : "") + x.toFixed(2);
+    const cls = Math.abs(m.slope) < 0.15 ? "near-zero" : m.slope > 0 ? "positive" : "negative";
+    coefDiv.innerHTML = `
+      <span class="stat-value ${cls}">${fmt(m.slope)}</span>
+      <div class="stat-label">X coefficient &middot; change in Y per unit X<br>
+        95% CI: [${fmt(m.ci_lo)}, ${fmt(m.ci_hi)}]<br>
+        <code style="font-size:0.9em">${sel ? "lm(Y ~ X + Z)" : "lm(Y ~ X)"}</code>
+      </div>`;
+
+    if (sel) {
+      msgDiv.style.cssText = "padding:0.75rem 1rem;border-radius:6px;font-size:0.9em;line-height:1.5;background:#f0fdf4;border-left:4px solid #2d6a4f;margin-top:0.5rem;";
+      msgDiv.innerHTML = "<strong>Correctly specified.</strong> Including Z closes the confounded path X&larr;Z&rarr;Y. The X coefficient now estimates the true direct effect, near zero, because the apparent X&ndash;Y association was created by Z acting on both.";
+    } else {
+      msgDiv.style.cssText = "padding:0.75rem 1rem;border-radius:6px;font-size:0.9em;line-height:1.5;background:#fff5f5;border-left:4px solid #c0392b;margin-top:0.5rem;";
+      msgDiv.innerHTML = "<strong>Confounded.</strong> Z causes both X and Y, inflating the X coefficient. The apparent X&rarr;Y association runs through Z, not from X to Y directly.";
+    }
+  };
+
+  nZ.g.addEventListener("click", () => { sel = !sel; renderAll(); });
+  renderAll();
+  return wrapper;
+}
+```
+
+Within this data: `EPC` ← `FloorArea` → `Price`. Larger properties tend to have better energy efficiency ratings and also cost more. Any apparent EPC effect on price in a model without `FloorArea` would partly be floor area in disguise. Including `FloorArea` as an adjustment variable closes this confounded path.
+
+<div class="question-block">
+<p><strong>Question 3.</strong> In the structure <code>EPC ← FloorArea → Price</code>, what causal role does <code>FloorArea</code> play?</p>
+<div class="mc-options">
+  <label><input type="radio" name="conf-q3" data-correct="false"> Pipe: <code>FloorArea</code> lies on the causal path from <code>EPC</code> to <code>Price</code></label>
+  <label><input type="radio" name="conf-q3" data-correct="false"> Collider: <code>EPC</code> and <code>Price</code> both cause <code>FloorArea</code></label>
+  <label><input type="radio" name="conf-q3" data-correct="true"> Fork: <code>FloorArea</code> is a common cause of both <code>EPC</code> and <code>Price</code>, creating a spurious EPC–Price association</label>
+  <label><input type="radio" name="conf-q3" data-correct="false"> None: <code>FloorArea</code> is caused by <code>EPC</code>, so it cannot confound their relationship</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p><code>FloorArea</code> is a fork (confounder). Larger properties tend to have better energy efficiency ratings because there is more scope for insulation (FloorArea → EPC), and larger properties also command higher rents (FloorArea → Price). Without adjusting for <code>FloorArea</code>, any apparent EPC–Price association partly reflects this shared driver rather than a genuine effect of energy efficiency on rent.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 4.</strong> When estimating the causal effect of <code>EPC</code> on <code>Price</code>, what should you do with <code>FloorArea</code>?</p>
+<div class="mc-options">
+  <label><input type="radio" name="conf-q4" data-correct="false"> Exclude it: floor area is not relevant to energy efficiency ratings</label>
+  <label><input type="radio" name="conf-q4" data-correct="false"> Exclude it: including it would block the causal effect of <code>EPC</code> on <code>Price</code></label>
+  <label><input type="radio" name="conf-q4" data-correct="true"> Include it: it closes the backdoor path EPC ← FloorArea → Price, removing the confounded part of the EPC–Price association</label>
+  <label><input type="radio" name="conf-q4" data-correct="false"> Include it: it makes the model more predictive and accuracy always improves causal estimates</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Include <code>FloorArea</code>. It sits at the top of a fork: it causes both the predictor of interest (<code>EPC</code>) and the response (<code>Price</code>). That fork is a backdoor path, and without closing it, the <code>EPC</code> coefficient picks up <code>FloorArea</code>'s influence on <code>Price</code> as well as any genuine EPC effect. Adding <code>FloorArea</code> to the model closes this path. Note that <code>FloorArea</code> is included only as an adjustment variable; its own coefficient should not be given a causal interpretation (this would be the Table 2 Fallacy).</p>
+</div>
+</div>
+
+### The collider: including it manufactures a spurious association
+
+In a collider, both X and Y independently cause Z: the structure is X → Z ← Y. X and Y have no association. Including Z in the model opens a confounded path and creates a spurious relationship from nothing.
+
+A concrete example: imagine both floor area and property condition independently influence how quickly a property lets. If you restrict your analysis to only recently let properties (conditioning on letting speed), you introduce a spurious negative correlation between floor area and condition, because among fast-letting properties, a small floor area must be "compensated for" by good condition, and vice versa.
+
+The collider structure does not appear in the current flats DAG, but it is the hardest mistake to spot. "Controlling for more variables" sounds rigorous, but adding a collider makes the model *worse*, not better. Click Z to see the effect.
+
+```{ojs}
+//| echo: false
+coll_interactive = {
+  const n = 350;
+  const allRows = [];
+  for (let i = 0; i < n; i++) {
+    const x = Math.random() * 10;
+    const y = Math.random() * 10;
+    const z = x + y + (Math.random() - 0.5) * 2;
+    allRows.push({ x, y, z });
+  }
+
+  const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+  const ols  = (xa, ya) => {
+    const mx = mean(xa), my = mean(ya);
+    const b1 = xa.reduce((s, x, i) => s + (x - mx) * (ya[i] - my), 0) /
+               xa.reduce((s, x)    => s + (x - mx) ** 2, 0);
+    return { b0: my - b1 * mx, b1 };
+  };
+
+  let sel = false;
+
+  const computeModel = () => {
+    const xs = allRows.map(d => d.x);
+    const ys = allRows.map(d => d.y);
+    const zs = allRows.map(d => d.z);
+    const nn = xs.length;
+    let b0, b1, mse, sxx, mX;
+    if (!sel) {
+      ({ b0, b1 } = ols(xs, ys));
+      mX  = mean(xs);
+      sxx = xs.reduce((s, x) => s + (x - mX) ** 2, 0);
+      mse = xs.reduce((s, x, i) => s + (ys[i] - b0 - b1 * x) ** 2, 0) / (nn - 2);
+    } else {
+      const rY = ols(zs, ys), rX = ols(zs, xs);
+      const eY = ys.map((y, i) => y - rY.b0 - rY.b1 * zs[i]);
+      const eX = xs.map((x, i) => x - rX.b0 - rX.b1 * zs[i]);
+      b1  = ols(eX, eY).b1;
+      mX  = mean(xs);
+      b0  = mean(ys) - b1 * mX;
+      const rFW = eY.map((e, i) => e - b1 * eX[i]);
+      mse = rFW.reduce((s, r) => s + r ** 2, 0) / (nn - 3);
+      sxx = eX.reduce((s, e) => s + e ** 2, 0);
+    }
+    const se = Math.sqrt(mse / sxx), ci_lo = b1 - 1.96 * se, ci_hi = b1 + 1.96 * se;
+    const xMin = Math.min(...xs), xMax = Math.max(...xs);
+    const xSeq = Array.from({ length: 60 }, (_, i) => xMin + i * (xMax - xMin) / 59);
+    const band = xSeq.map(x => ({
+      x,
+      y1: b0 + b1 * x - 1.96 * Math.sqrt(mse * (1/nn + (x - mX)**2 / sxx)),
+      y2: b0 + b1 * x + 1.96 * Math.sqrt(mse * (1/nn + (x - mX)**2 / sxx))
+    }));
+    return { slope: b1, ci_lo, ci_hi,
+      line: [{ x: xMin, y: b0 + b1*xMin }, { x: xMax, y: b0 + b1*xMax }], band };
+  };
+
+  const wrapper = document.createElement("div");
+  const row     = document.createElement("div");
+  row.style.cssText = "display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;";
+  const plotDiv = document.createElement("div");
+  const coefDiv = document.createElement("div");
+  coefDiv.className = "stat-display";
+  const msgDiv  = document.createElement("div");
+  msgDiv.style.marginTop = "0.8rem";
+  wrapper.append(row, coefDiv, msgDiv);
+
+  const NS = "http://www.w3.org/2000/svg";
+  const dagSvg = document.createElementNS(NS, "svg");
+  dagSvg.setAttribute("width", "220"); dagSvg.setAttribute("height", "155");
+  dagSvg.setAttribute("style", "cursor:default;font-family:inherit;flex-shrink:0;");
+
+  const addMarker = (id, color) => {
+    const m = document.createElementNS(NS, "marker");
+    m.setAttribute("id", id); m.setAttribute("markerWidth", "10");
+    m.setAttribute("markerHeight", "7"); m.setAttribute("refX", "9");
+    m.setAttribute("refY", "3.5"); m.setAttribute("orient", "auto");
+    const p = document.createElementNS(NS, "polygon");
+    p.setAttribute("points", "0 0, 10 3.5, 0 7"); p.setAttribute("fill", color);
+    m.appendChild(p); return m;
+  };
+  const defs = document.createElementNS(NS, "defs");
+  defs.appendChild(addMarker("cc-cl", "#adb5bd"));
+  defs.appendChild(addMarker("cc-op", "#e67e22"));
+  dagSvg.appendChild(defs);
+
+  const R = 25;
+  const P = { x: {cx:38,cy:35}, y: {cx:182,cy:35}, z: {cx:110,cy:125} };
+  const mkEdge = (fr, to) => {
+    const dx = P[to].cx - P[fr].cx, dy = P[to].cy - P[fr].cy, d = Math.hypot(dx, dy);
+    const ln = document.createElementNS(NS, "line");
+    ln.setAttribute("x1", P[fr].cx + R*dx/d); ln.setAttribute("y1", P[fr].cy + R*dy/d);
+    ln.setAttribute("x2", P[to].cx - R*dx/d); ln.setAttribute("y2", P[to].cy - R*dy/d);
+    ln.setAttribute("stroke-width", "2.2"); dagSvg.appendChild(ln); return ln;
+  };
+  const eXZ = mkEdge("x", "z"), eYZ = mkEdge("y", "z");
+
+  const mkNode = (cx, cy, label, stroke, clickable) => {
+    const g = document.createElementNS(NS, "g");
+    if (clickable) g.setAttribute("style", "cursor:pointer;user-select:none;");
+    const c = document.createElementNS(NS, "circle");
+    c.setAttribute("cx", cx); c.setAttribute("cy", cy); c.setAttribute("r", R);
+    c.setAttribute("fill", "white"); c.setAttribute("stroke", stroke);
+    c.setAttribute("stroke-width", "2.5");
+    const t = document.createElementNS(NS, "text");
+    t.setAttribute("x", cx); t.setAttribute("y", cy + 5);
+    t.setAttribute("text-anchor", "middle"); t.setAttribute("font-size", "13");
+    t.setAttribute("font-weight", "600"); t.setAttribute("fill", stroke);
+    t.textContent = label;
+    g.appendChild(c); g.appendChild(t); dagSvg.appendChild(g);
+    return { g, c, t };
+  };
+  mkNode(P.x.cx, P.x.cy, "X", "#2d6a4f", false);
+  mkNode(P.y.cx, P.y.cy, "Y", "#d4a017", false);
+  const nZ = mkNode(P.z.cx, P.z.cy, "Z", "#4a5568", true);
+  row.append(plotDiv, dagSvg);
+
+  const renderAll = () => {
+    const [col, dash, mk] = sel
+      ? ["#e67e22", "none", "url(#cc-op)"]
+      : ["#adb5bd", "6,4",  "url(#cc-cl)"];
+    [eXZ, eYZ].forEach(e => {
+      e.setAttribute("stroke", col); e.setAttribute("stroke-dasharray", dash);
+      e.setAttribute("marker-end", mk);
+    });
+    nZ.c.setAttribute("fill",   sel ? "#fff3e0" : "white");
+    nZ.c.setAttribute("stroke", sel ? "#e67e22" : "#4a5568");
+    nZ.t.setAttribute("fill",   sel ? "#e67e22" : "#4a5568");
+
+    const m = computeModel();
+    plotDiv.replaceChildren(Plot.plot({
+      marks: [
+        Plot.areaY(m.band, { x:"x", y1:"y1", y2:"y2", fill:"#d4a017", fillOpacity:0.15 }),
+        Plot.dot(allRows,  { x:"x", y:"y",   fill:"#2d6a4f", opacity:0.55, r:4 }),
+        Plot.line(m.line,  { x:"x", y:"y",   stroke:"#d4a017", strokeWidth:2.5 })
+      ],
+      x: { label: "X", nice: true }, y: { label: "Y", nice: true },
+      width: 380, height: 280, style: { background: "transparent", fontSize: 12 }
+    }));
+
+    const fmt = x => (x >= 0 ? "+" : "") + x.toFixed(2);
+    const cls = Math.abs(m.slope) < 0.08 ? "near-zero" : m.slope > 0 ? "positive" : "negative";
+    coefDiv.innerHTML = `
+      <span class="stat-value ${cls}">${fmt(m.slope)}</span>
+      <div class="stat-label">X coefficient &middot; change in Y per unit X<br>
+        95% CI: [${fmt(m.ci_lo)}, ${fmt(m.ci_hi)}]<br>
+        <code style="font-size:0.9em">${sel ? "lm(Y ~ X + Z)" : "lm(Y ~ X)"}</code>
+      </div>`;
+
+    if (!sel) {
+      msgDiv.style.cssText = "padding:0.75rem 1rem;border-radius:6px;font-size:0.9em;line-height:1.5;background:#f0fdf4;border-left:4px solid #2d6a4f;margin-top:0.5rem;";
+      msgDiv.innerHTML = "<strong>Correctly specified.</strong> Z is a collider: leave it out. X and Y are truly independent, and the near-zero slope reflects that.";
+    } else {
+      msgDiv.style.cssText = "padding:0.75rem 1rem;border-radius:6px;font-size:0.9em;line-height:1.5;background:#fff5f5;border-left:4px solid #c0392b;margin-top:0.5rem;";
+      msgDiv.innerHTML = "<strong>Collider bias.</strong> Including Z conditions on a common effect of X and Y. Because Z = X + Y + noise, holding Z constant forces higher X to be offset by lower Y, creating a strong spurious negative slope where none exists in reality.";
+    }
+  };
+
+  nZ.g.addEventListener("click", () => { sel = !sel; renderAll(); });
+  renderAll();
+  return wrapper;
+}
+```
+
+<div class="question-block">
+<p><strong>Question 5.</strong> A colleague adds a variable Z to their causal model because "it is associated with both X and Y, so it must be important to control for." Z is in fact caused by both X and Y. What is wrong with this reasoning?</p>
+<div class="mc-options">
+  <label><input type="radio" name="conf-q5" data-correct="false"> Nothing: variables associated with both predictor and response should always be included</label>
+  <label><input type="radio" name="conf-q5" data-correct="false"> The model will fail to converge because Z is perfectly collinear with X and Y</label>
+  <label><input type="radio" name="conf-q5" data-correct="true"> Z is a collider; including it opens a spurious path between X and Y and introduces bias that was not there before</label>
+  <label><input type="radio" name="conf-q5" data-correct="false"> Z should be included only if its association with X and Y is statistically significant</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Z is a collider. Because both X and Y cause Z, conditioning on Z (including it in the model) opens a path between X and Y that was previously closed. The result is a spurious association between X and Y: bias that the model introduces rather than removes. Being associated with both predictor and response is a description of a confounder, a pipe, <em>and</em> a collider: the association alone does not tell you which structure applies. Only the arrows in the DAG do that.</p>
+</div>
+</div>
+
+---
+
+Start by reloading the data cleanly so that any changes made for the predictive model do not carry over:
+
+```{r, eval=FALSE}
+abdn <- read.table("abdn_flats.txt", header = TRUE)
+```
+
+## 1. Formulate a research question
+
+"How much does monthly rent change when the floor area of a property increases?" We want the *causal* effect of `FloorArea` on `Price`, not just a predictive association.
+
+## Creating a DAG
+
+To estimate a causal effect responsibly, we need to reason about confounding. We do this by drawing a Directed Acyclic Graph (DAG) that captures our beliefs about how variables cause one another. The `check_dag()` function from the `performance` package helps build and interrogate DAGs in R.
+
+This requires the developer version of `performance`. Install it with:
+
+```{r, eval=FALSE}
+install.packages(c("performance", "see"), repos = "https://easystats.r-universe.dev")
+```
+
+Then build the DAG. Each line states what causes what. For example, `Rooms ~ FloorArea` says "the number of rooms in a property is caused by its floor area."
+
+```{r, eval=FALSE}
+library(performance)
+library(see)
+
+rent_dag <- check_dag(
+  Price ~ Rooms + FloorArea + Tax + EPC,
+  Rooms ~ FloorArea,
+  EPC   ~ FloorArea,
+  Tax   ~ FloorArea,
+  exposure = "FloorArea",
+  outcome  = "Price"
+)
+
+plot(rent_dag)
+```
+
+> The exact layout of variables in the plot is semi-random, so your figure may look slightly different each time, but the arrows should be the same.
+
+The plot shows two versions of the DAG. The left panel shows the model as specified by `exposure` and `outcome` alone (`Price ~ FloorArea`). The right panel shows what would be needed to estimate the *total causal effect* of `FloorArea` on `Price`. In this case, both panels are identical.
+
+Why? Because `FloorArea` drives `Rooms`, `EPC`, and `Tax`, and those variables all flow into `Price`. These are mediating paths (pipes): `FloorArea` → `Rooms` → `Price`, and `FloorArea` → `EPC` → `Price`, and so on. When we ask "what is the total causal effect of `FloorArea`?", we want to include all the ways extra floor area changes price, including through the extra rooms it allows and the tax band it implies. Blocking those paths by adding `Rooms`, `EPC`, and `Tax` to the model would give us only the *direct* effect of `FloorArea`, not the total effect.
+
+To confirm, print the DAG object:
+
+```{r, eval=FALSE}
+rent_dag
+```
+
+This confirms: to estimate the **total causal effect** of `FloorArea` on `Price`, no additional adjustment variables are needed. The correct model is simply:
+
+```{r, eval=FALSE}
+lm(Price ~ FloorArea, data = abdn)
+```
+
+> This will not always be the case. Most of the time, estimating a causal effect requires including specific adjustment variables to close non-causal (backdoor) paths. It is a coincidence of this particular DAG that no adjustment is needed here.
+
+## 4. Fit an appropriate model
+
+```{r, eval=FALSE}
+rent_causal_mod <- lm(Price ~ FloorArea, data = abdn)
+```
+
+## 5. Diagnose the model and check assumptions
+
+```{r, eval=FALSE}
+par(mfrow = c(2, 2))
+plot(rent_causal_mod)
+par(mfrow = c(1, 1))
+```
+
+Two issues commonly appear:
+
+**Heteroscedasticity.** Residual spread tends to increase with fitted values. There are two reasons for this. First, landlords tend to round rents to the nearest £25 to £50 for cheaper properties and to the nearest £50 to £100 for more expensive ones, which creates measurement "noise" that scales with price. Second, it is easier to pin down the right rent for a cheaper property (the difference between £500 and £750 is proportionally large) whereas for expensive properties a £250 difference is relatively small, so estimates naturally vary more.
+
+**Influential observations.** One or more expensive properties may appear beyond the Cook's distance contour lines. Confirm whether the recorded price is correct using the `PropertyURL`. If the price is correct, you have two options: ignore the problem and note it when reporting, or remove the observation.
+
+Fix any influential observations and rerun:
+
+```{r, eval=FALSE}
+abdn_trimmed <- abdn[-c(row_number), ]   # replace with your identified row(s)
+rent_causal_mod <- lm(Price ~ FloorArea, data = abdn_trimmed)
+par(mfrow = c(2, 2))
+plot(rent_causal_mod)
+par(mfrow = c(1, 1))
+```
+
+## 6. Summarise the results
+
+```{r, eval=FALSE}
+summary(rent_causal_mod)
+```
+
+Look at the coefficient for `FloorArea`. It should be noticeably larger than the same coefficient in the predictive model. The causal model, which keeps all the mediating paths open, attributes the full effect of extra floor area to `FloorArea` alone. The predictive model spread that effect across `FloorArea`, `Rooms`, `EPC`, and `Tax`, making each individual coefficient smaller.
+
+Plot the estimated relationship:
+
+```{r, eval=FALSE}
+fake <- data.frame(
+  FloorArea = seq(from = min(abdn$FloorArea), to = max(abdn$FloorArea), length.out = 50)
+)
+preds <- predict(rent_causal_mod, newdata = fake, se.fit = TRUE)
+fake$fit <- preds$fit
+fake$low <- preds$fit - preds$se.fit * 1.96
+fake$upp <- preds$fit + preds$se.fit * 1.96
+
+ggplot(fake) +
+  geom_ribbon(aes(x = FloorArea, ymin = low, ymax = upp), fill = "lightgrey", alpha = 0.7) +
+  geom_line(aes(x = FloorArea, y = fit)) +
+  labs(x = "Floor area (m²)", y = "Predicted monthly rent (£)") +
+  theme_minimal()
+```
+
+Assuming the DAG is correct, the slope from this model is our best estimate of the **total causal effect** of floor area on rent: the expected change in monthly rent for each additional m², accounting for all the downstream ways that extra space affects price.
+
+# What is the causal effect of EPC on price?
+
+Repeat the full causal workflow, but now asking: "What is the causal effect of energy efficiency band (EPC) on rent?" The DAG structure is the same, but the exposure changes.
+
+Reload the data cleanly before starting:
+
+```{r, eval=FALSE}
+abdn <- read.table("abdn_flats.txt", header = TRUE)
+```
+
+<div class="question-block">
+<p><strong>EPC causal analysis.</strong> Build the DAG with <code>EPC</code> as the exposure, identify which model to run, fit it, diagnose it, and interpret the results. Compare the DAG-recommended model with what you would have fitted without a DAG.</p>
+<textarea class="student-answer" rows="6" placeholder="Note your DAG reasoning, the model you fitted, and your key findings..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+
+```r
+library(performance)
+library(see)
+
+# Same DAG structure, different exposure
+rent_dag_epc <- check_dag(
+  Price ~ Rooms + FloorArea + Tax + EPC,
+  Rooms ~ FloorArea,
+  EPC   ~ FloorArea,
+  Tax   ~ FloorArea,
+  exposure = "EPC",
+  outcome  = "Price"
+)
+plot(rent_dag_epc)
+rent_dag_epc
+
+# check_dag() now recommends including FloorArea to block the backdoor path:
+# FloorArea → EPC (exposure), but also FloorArea → Price (directly)
+# Without adjusting for FloorArea, we confound the EPC → Price relationship
+EPC_mod <- lm(Price ~ EPC + FloorArea, data = abdn)
+
+par(mfrow = c(2, 2))
+plot(EPC_mod)
+par(mfrow = c(1, 1))
+# Diagnostics are generally acceptable
+
+summary(EPC_mod)
+
+library(ggeffects)
+plot(ggpredict(EPC_mod, terms = "EPC"))
+```
+
+<p>The DAG recommends including <code>FloorArea</code> as an adjustment variable to block the backdoor path (FloorArea causes both EPC and Price). Without it, any apparent EPC effect would be partly a floor area effect in disguise.</p>
+
+<p>Important: in this model, <code>FloorArea</code> is included only to adjust for confounding. Its coefficient should <em>not</em> be interpreted causally; doing so would be the Table 2 Fallacy.</p>
+
+<p>The EPC effect estimates are often noisy with this dataset, with wide confidence intervals that span zero for some bands. This either means the DAG is more complex than assumed, or the dataset is too small to estimate the EPC effect reliably with this approach.</p>
+
+<p>A more complete DAG (accounting for property age, property type, and historic price) would likely change which variables need to be included, and might reveal that the current dataset cannot answer this causal question at all without collecting additional variables.</p>
+</div>
+</div>
+
+# Assumption reference
+
+| Assumption | Description | Example of violation |
+|---|---|---|
+| 1. Validity | The data can answer the research question. | Using IQ to measure overall intelligence. |
+| 2. Representativeness | The data reflects the population being studied. | Using survey data from a rural area to draw conclusions about an urban population. |
+| 3. Additivity | Effects of predictors are additive with no interactions. | Assuming study hours and sleep independently affect exam scores without considering their combined effect. |
+| 4. Linearity | The relationship between predictors and the outcome is linear. | Assuming plant growth continues to increase indefinitely without levelling off. |
+| 5. Independence of errors | Observations are independent of each other. | Modelling height using repeated measurements of the same children over time. |
+| 6. Equal variance of errors | Residuals have constant variance across all predictor levels. | Modelling income, where salary variability differs across levels of a company hierarchy. |
+| 7. Normality of errors | Residuals follow a normal distribution. | Modelling income, where a few extremely wealthy individuals create extreme residuals. |

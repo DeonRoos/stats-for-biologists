@@ -1,0 +1,632 @@
+---
+title: "Workshop 8: Linear models with interactions"
+subtitle: "BI3010 Statistics for Biologists"
+author: "Roos & Pinard"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    theme: [cosmo, ../custom.scss]
+    highlight-style: github
+    embed-resources: true
+    code-copy: true
+    code-tools: false
+    html-math-method: mathjax
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show = "show",
+                      message = FALSE, warning = FALSE)
+library(ggplot2)
+```
+
+```{=html}
+<script>
+function revealAnswer(btn) {
+  var block = btn.closest('.question-block, .puzzle-block');
+  var answerClass = block.classList.contains('puzzle-block') ? '.puzzle-answer' : '.instructor-answer';
+
+  var textarea = block.querySelector('.student-answer');
+  if (textarea) {
+    if (textarea.value.trim() === '') {
+      textarea.classList.add('missing');
+      textarea.placeholder = 'Please write your answer before revealing...';
+      textarea.focus();
+      return;
+    }
+    textarea.classList.remove('missing');
+  }
+
+  var mcOptions = block.querySelector('.mc-options');
+  if (mcOptions) {
+    var radios = mcOptions.querySelectorAll('input[type=radio]');
+    var anyChecked = Array.from(radios).some(function(r) { return r.checked; });
+    if (!anyChecked) {
+      mcOptions.classList.add('unanswered');
+      return;
+    }
+    mcOptions.classList.remove('unanswered');
+    radios.forEach(function(r) {
+      r.disabled = true;
+      var label = r.closest('label');
+      if (r.dataset.correct === 'true') {
+        label.classList.add('mc-correct');
+      } else if (r.checked) {
+        label.classList.add('mc-incorrect');
+      }
+    });
+  }
+
+  var answer = block.querySelector(answerClass);
+  if (answer) answer.style.display = 'block';
+  btn.textContent = 'Answer shown';
+  btn.disabled = true;
+}
+
+function toggleGlossary() {
+  document.getElementById('glossary-panel').classList.toggle('open');
+}
+</script>
+```
+
+```{=html}
+<style>
+#glossary-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: #00b494;
+  color: #fff;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  transition: background 0.15s;
+  font-family: inherit;
+}
+#glossary-btn:hover { background: #009478; }
+
+#glossary-panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 380px;
+  height: 100vh;
+  background: #fff;
+  border-left: 3px solid #00b494;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+  z-index: 1001;
+  transition: right 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+#glossary-panel.open { right: 0; }
+
+#glossary-header {
+  background: #0d1e2c;
+  color: #fff;
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+#glossary-header span { font-weight: 600; font-size: 0.95rem; letter-spacing: 0.03em; }
+#glossary-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.7;
+}
+#glossary-close:hover { opacity: 1; }
+#glossary-body { overflow-y: auto; flex: 1; }
+
+.glossary-entry {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #e8f5f0;
+}
+.glossary-entry:last-child { border-bottom: none; }
+.glossary-terms {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.3rem;
+}
+.glossary-en-term { font-weight: 600; color: #0d1e2c; font-size: 0.92rem; }
+.glossary-zh-term { color: #00b494; font-weight: 600; font-size: 0.92rem; }
+.glossary-en-def  { font-size: 0.845rem; color: #444; line-height: 1.5; margin-bottom: 0.25rem; }
+.glossary-zh-def  { font-size: 0.845rem; color: #1c3a50; line-height: 1.65; }
+</style>
+
+<button id="glossary-btn" onclick="toggleGlossary()">Glossary 词汇表</button>
+
+<div id="glossary-panel">
+  <div id="glossary-header">
+    <span>Glossary / 词汇表</span>
+    <button id="glossary-close" onclick="toggleGlossary()">&#10005;</button>
+  </div>
+  <div id="glossary-body">
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Interaction</span>
+        <span class="glossary-zh-term">交互作用</span>
+      </div>
+      <div class="glossary-en-def">When the effect of one predictor on the response depends on the value of a second predictor. Two variables interact if knowing the value of one changes how you interpret the slope of the other. An interaction violates the additivity assumption and requires an interaction term in the model.</div>
+      <div class="glossary-zh-def">当一个预测变量对响应变量的影响取决于另一个预测变量的值时，称两者存在交互作用。若一个变量的值改变了另一个变量斜率的解读，则两者存在交互。交互作用违反了可加性假设，需在模型中加入交互项。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Main effect</span>
+        <span class="glossary-zh-term">主效应</span>
+      </div>
+      <div class="glossary-en-def">The estimated effect of a single predictor on the response when all other predictors are held at zero. In an interaction model, the main effect slopes (β₁ and β₂) describe what happens when the other predictor is exactly zero, not the average effect across all values. Interpreting main effects in isolation from their interaction is usually misleading.</div>
+      <div class="glossary-zh-def">在其他预测变量等于零时，单个预测变量对响应变量的估计效应。在含交互作用的模型中，主效应斜率（β₁和β₂）描述的是另一个预测变量恰好为零时的情况，而非所有取值下的平均效应。单独解读主效应通常会产生误导。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Interaction term (β₃)</span>
+        <span class="glossary-zh-term">交互项（β₃）</span>
+      </div>
+      <div class="glossary-en-def">The additional parameter in an interaction model, multiplied by both predictors (β₃ × x₁ × x₂). It captures how much the slope of one predictor changes for every one-unit increase in the other. A positive β₃ means the two predictors reinforce each other; a negative β₃ means they dampen each other's effects.</div>
+      <div class="glossary-zh-def">交互作用模型中的额外参数，乘以两个预测变量（β₃×x₁×x₂）。它描述了一个预测变量的斜率随另一个预测变量每增加一个单位而变化的量。正的β₃表示两个预测变量相互增强；负的β₃表示两者相互削弱各自的效应。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Additivity</span>
+        <span class="glossary-zh-term">可加性</span>
+      </div>
+      <div class="glossary-en-def">The assumption that each predictor's effect on the response is independent of all other predictors. When additivity holds, the combined effect of two predictors equals the sum of their individual effects. An interaction violates this: the combined effect is larger or smaller than the sum of the parts.</div>
+      <div class="glossary-zh-def">每个预测变量对响应变量的效应与其他所有预测变量无关的假设。当可加性成立时，两个预测变量的联合效应等于各自效应之和。交互作用违反了这一假设：联合效应大于或小于各部分之和。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">HARKing</span>
+        <span class="glossary-zh-term">事后假设</span>
+      </div>
+      <div class="glossary-en-def">Hypothesising After Results are Known. Presenting post-hoc explanations of unexpected findings as if they were the original, pre-registered hypothesis. HARKing makes exploratory findings look confirmatory, inflates apparent evidence for a hypothesis, and is widely considered a form of scientific misconduct.</div>
+      <div class="glossary-zh-def">即"结果已知后再提出假设"。将意外发现的事后解释伪装成原本就有的、预先注册的假设。这种做法使探索性发现看起来像是验证性发现，夸大了对假设的表面证据，被普遍认为是一种科学不端行为。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Prediction grid</span>
+        <span class="glossary-zh-term">预测网格</span>
+      </div>
+      <div class="glossary-en-def">A dataset containing all combinations of predictor values of interest, typically created with <code>expand.grid()</code>. Used as the <code>newdata</code> argument in <code>predict()</code> to generate model predictions across a range of conditions, for example when plotting predicted values across all combinations of two continuous predictors.</div>
+      <div class="glossary-zh-def">包含所有感兴趣的预测变量值组合的数据集，通常通过<code>expand.grid()</code>创建。作为<code>predict()</code>的<code>newdata</code>参数，用于在一系列条件下生成模型预测值，例如绘制两个连续预测变量交互作用的曲面。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Heatmap</span>
+        <span class="glossary-zh-term">热力图</span>
+      </div>
+      <div class="glossary-en-def">A two-dimensional plot that uses fill colour to represent a third continuous variable across combinations of two predictors. Created in ggplot2 with <code>geom_tile()</code>. Useful for visualising predicted values across all combinations of two continuous predictors. Conveying uncertainty on heatmaps is difficult; one workaround is to produce two additional plots showing the upper and lower 95% confidence limits, though this is imperfect.</div>
+      <div class="glossary-zh-def">一种使用填充颜色表示第三个连续变量在两个预测变量组合中取值的二维图形。在ggplot2中通过<code>geom_tile()</code>创建，适用于可视化连续×连续交互作用的预测响应面。在热力图上表达不确定性较为困难；分别绘制置信区间上下界的热力图是常见但并不完美的替代方案。</div>
+    </div>
+
+  </div>
+</div>
+```
+
+# Workshop structure
+
+As always, we work through the same seven-step workflow:
+
+1. Formulate a research question.
+2. Perform exploratory data analysis (EDA).
+3. Identify any hidden assumptions.
+4. Fit an appropriate model ← main focus today.
+5. Diagnose the model and check assumptions.
+6. Summarise the results.
+7. Interpret and draw conclusions.
+
+Today's focus is on interactions between predictors. We will first fit a model with only main effects, find a problem in the diagnostics, and then fix it by including an interaction term. We then work through visualising interactions and finish with an independent extension exercise on a second dataset.
+
+## 1. Formulate a research question
+
+For this workshop we use a dataset from a study set in the coral reef ecosystems of the Coral Triangle, a biodiversity hotspot in the Indo-Pacific (`reef.txt` on MyAberdeen). The dataset contains three variables:
+
+- `shark_density`: Tiger shark (*Galeocerdo cuvier*) density, estimated from underwater visual surveys along transects. Units are sharks per km².
+- `reef_complexity`: A standardised structural complexity index combining coral cover, surface rugosity, and habitat diversity. Higher values indicate more structurally complex reefs.
+- `biomass_change`: Net change in fish biomass (kg/m²) over a six-month period, measured using underwater cameras. Positive values indicate population growth; negative values indicate decline.
+
+Our research question is: how does fish biomass change as shark density and reef complexity change? This is a predictive question: we want to know which combinations of shark density and reef complexity are associated with higher or lower biomass change, not to make a causal claim about either variable.
+
+Load the data:
+
+```{r, eval=FALSE}
+reef <- read.table("Data/reef.txt", header = TRUE)
+```
+
+## 2. Perform exploratory data analysis
+
+Spend a few minutes exploring the dataset. Check for any obvious errors or unusual values. Useful functions include `str()`, `summary()`, `hist()`, and scatter plots.
+
+```{r, eval=FALSE}
+str(reef)
+summary(reef)
+```
+
+```{r, eval=FALSE}
+hist(reef$shark_density)
+hist(reef$reef_complexity)
+hist(reef$biomass_change)
+```
+
+```{r, eval=FALSE}
+ggplot(reef, aes(x = shark_density, y = biomass_change)) +
+  geom_point() +
+  theme_minimal()
+
+ggplot(reef, aes(x = reef_complexity, y = biomass_change)) +
+  geom_point() +
+  theme_minimal()
+```
+
+## 3. Identify hidden assumptions
+
+Once you have explored the data, think about the hidden assumptions the model will rely on: validity, representativeness, and additivity. The additivity assumption is especially relevant here. Ask yourself: is it plausible that the effect of shark density on biomass is the same regardless of reef complexity? Or might the two predictors act together in some way?
+
+## 4. Fit an appropriate model
+
+We start with a model that includes only main effects, where the effects of shark density and reef complexity are assumed to be independent of each other. The statistical form of this model is:
+
+$$biomass_i \sim \text{Normal}(\mu_i, \sigma)$$
+
+$$\mu_i = \beta_0 + \beta_1 \times shark_i + \beta_2 \times reef_i$$
+
+where $\beta_0$ is the predicted biomass change when both predictors are zero, $\beta_1$ is the change in predicted biomass for each additional shark per km², and $\beta_2$ is the change for each additional unit of reef complexity.
+
+```{r, eval=FALSE}
+bio_mod <- lm(biomass_change ~ shark_density + reef_complexity, data = reef)
+```
+
+## 5. Diagnose the model and check assumptions
+
+Before interpreting the model, check the residual plots:
+
+```{r, eval=FALSE}
+par(mfrow = c(2, 2))
+plot(bio_mod)
+par(mfrow = c(1, 1))
+```
+
+<div class="question-block">
+<p><strong>Question 1.</strong> Do the residual plots give you any cause for concern?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w8-q1" data-correct="false"> No: the plots all look fine and there are no obvious violations.</label>
+  <label><input type="radio" name="w8-q1" data-correct="true"> Yes: the residuals vs fitted plot shows a curved, non-random pattern, suggesting the additivity assumption may be violated.</label>
+  <label><input type="radio" name="w8-q1" data-correct="false"> Yes: the normal Q-Q plot shows a severe departure from normality.</label>
+  <label><input type="radio" name="w8-q1" data-correct="false"> Yes: there is strong heteroscedasticity, with residual spread increasing sharply with fitted values.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The residuals vs fitted plot shows a curved pattern rather than a random scatter around zero. This is a signal that the additivity assumption is violated: the model is missing a combined effect of the two predictors. The normal Q-Q plot and scale-location plot look reasonable; the problem is the non-random pattern in the residuals vs fitted plot.</p>
+</div>
+</div>
+
+## 6. Summarise the results
+
+Despite the concern about additivity, let's look at the parameter estimates to understand what the main-effects model is telling us before we fix it:
+
+```{r, eval=FALSE}
+summary(bio_mod)
+```
+
+<div class="question-block">
+<p><strong>Question 2.</strong> From the <code>summary()</code> output, how much does predicted biomass change for each additional unit of shark density?</p>
+<textarea class="student-answer" rows="3" placeholder="Write your answer here, using the coefficient from your model output..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The <code>shark_density</code> coefficient is approximately 3.22. According to this model, predicted biomass change increases by roughly 3.2 kg/m² for each additional shark per km². This result will look suspicious once you interpret it in the next question.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 3.</strong> How much does predicted biomass change for each additional unit of reef complexity?</p>
+<textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The <code>reef_complexity</code> coefficient is approximately 7.12. Predicted biomass change increases by roughly 7.1 kg/m² for each additional unit of reef complexity, holding shark density constant.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 4.</strong> Using the model coefficients, predict biomass change when shark density is 5 and reef complexity is 0.1. Then predict it again when shark density is 10 and reef complexity is 0.1. What does the difference between those two predictions tell you?</p>
+<textarea class="student-answer" rows="5" placeholder="Show your working and write both predictions here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Using the approximate coefficients from the model:</p>
+<pre><code>-27.21 + 3.22 * 5  + 7.12 * 0.1  # ≈ -10.4 kg/m²
+-27.21 + 3.22 * 10 + 7.12 * 0.1  # ≈  +5.7 kg/m²</code></pre>
+<p>Going from 5 to 10 sharks increases predicted biomass by about 16 kg/m² (the difference is simply 5 × β₁ ≈ 5 × 3.22). In a main-effects model this difference is the same regardless of reef complexity, because the additivity assumption forces the shark slope to be constant. You will see later why that assumption is wrong here.</p>
+</div>
+</div>
+
+Use `ggeffects` to quickly visualise the predicted relationship between each predictor and the response:
+
+```{r, eval=FALSE}
+library(ggeffects)
+preds <- ggpredict(bio_mod)
+plot(preds)
+```
+
+## 7. Interpret and draw conclusions
+
+<div class="question-block">
+<p><strong>Question 5.</strong> The main-effects model suggests that higher shark density is associated with <em>higher</em> fish biomass. How would you explain this result? Is there anything problematic about how you arrive at that explanation?</p>
+<textarea class="student-answer" rows="5" placeholder="Think carefully before checking the answer..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Predators eating prey is one of the most well-established relationships in ecology, so a positive shark-biomass association is hard to explain biologically. You might try: trophic cascades, a landscape of fear effect reducing prey movement, compensatory breeding by prey, shifts in species composition, and so on.</p>
+<p>The problem is that you are doing this <em>after</em> seeing the result. That is HARKing: Hypothesising After Results are Known. Any sufficiently creative thinker can construct a plausible-sounding story for almost any result after the fact. The dangerous part is that these stories then get presented as if they were the original hypothesis, which makes the evidence look far stronger than it is. Any explanation you come up with after seeing the result should always be labelled as exploratory ("we did not predict this, but one possible interpretation is..."), not as confirmation of a prediction. We will see shortly that the result changes completely once we account for the interaction, making this exercise even more telling.</p>
+</div>
+</div>
+
+# Including an interaction
+
+The main-effects model treats the effects of shark density and reef complexity as independent. But think about what is ecologically plausible. In a structurally simple reef with few hiding places, more sharks should reduce fish biomass substantially. In a complex reef with many refuges, the same number of sharks might have much less impact because prey can avoid them. This means the effect of shark density on biomass is not constant: it depends on reef complexity. That is an interaction.
+
+The statistical notation for a model with both main effects and an interaction is:
+
+$$biomass_i \sim \text{Normal}(\mu_i, \sigma)$$
+
+$$\mu_i = \beta_0 + \beta_1 \times shark_i + \beta_2 \times reef_i + (\beta_3 \times shark_i \times reef_i)$$
+
+where $\beta_3$ is the interaction term: the change in the shark slope for every one-unit increase in reef complexity (and symmetrically, the change in the reef slope per unit of shark density).
+
+In R, there are two equivalent ways to write the same model:
+
+```r
+biomass_change ~ shark_density + reef_complexity + shark_density:reef_complexity
+biomass_change ~ shark_density * reef_complexity
+```
+
+The `*` notation is shorthand and preferred for readability.
+
+<div class="question-block">
+<p><strong>Question 6.</strong> Which of the following correctly completes the interaction model equation?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w8-q6" data-correct="false"> $\mu_i = \beta_0 + \beta_1 \times shark_i + \beta_2 \times reef_i + (\beta_3 \times shark_i + reef_i)$</label>
+  <label><input type="radio" name="w8-q6" data-correct="true"> $\mu_i = \beta_0 + \beta_1 \times shark_i + \beta_2 \times reef_i + (\beta_3 \times shark_i \times reef_i)$</label>
+  <label><input type="radio" name="w8-q6" data-correct="false"> $\mu_i = \beta_0 + \beta_1 \times shark_i \times reef_i$</label>
+  <label><input type="radio" name="w8-q6" data-correct="false"> $\mu_i = \beta_0 + \beta_3 \times (shark_i + reef_i)$</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The interaction term multiplies both predictors together: $\beta_3 \times shark_i \times reef_i$. The main effects ($\beta_1 \times shark_i$ and $\beta_2 \times reef_i$) remain in the model alongside the interaction; removing them would change the meaning of the other parameters entirely. The brackets around the interaction term are not required by R but help readers identify it visually.</p>
+</div>
+</div>
+
+Now fit the model with the interaction:
+
+```{r, eval=FALSE}
+bio_mod <- lm(biomass_change ~ shark_density * reef_complexity, data = reef)
+```
+
+## Diagnose the interaction model
+
+Check the residuals again:
+
+```{r, eval=FALSE}
+par(mfrow = c(2, 2))
+plot(bio_mod)
+par(mfrow = c(1, 1))
+```
+
+<div class="question-block">
+<p><strong>Question 7.</strong> Does adding the interaction resolve the concern from Question 1?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w8-q7" data-correct="false"> No: the residuals vs fitted plot still shows the same curved pattern.</label>
+  <label><input type="radio" name="w8-q7" data-correct="false"> No: interactions affect coefficient estimates but never change residual diagnostics.</label>
+  <label><input type="radio" name="w8-q7" data-correct="true"> Yes: the residuals vs fitted plot now shows a random scatter around zero, suggesting the additivity assumption is now met.</label>
+  <label><input type="radio" name="w8-q7" data-correct="false"> Yes: but only because we added a parameter, which always improves residual plots regardless of whether the interaction is real.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Yes, the curved pattern in the residuals vs fitted plot disappears. This is not just a mechanical effect of adding a parameter: it is evidence that the original model was missing the interaction. The interaction term captures the combined effect that the main-effects model could not, and once it is included, the residuals no longer show a pattern.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 8.</strong> Does meeting these residual assumptions make the model inherently trustworthy?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w8-q8" data-correct="false"> Yes: if all four residual plots look acceptable, the model is valid.</label>
+  <label><input type="radio" name="w8-q8" data-correct="true"> No: the residual plots only check assumptions about the errors (normality, equal variance, independence, and linearity). Hidden assumptions such as validity and representativeness cannot be checked with these plots.</label>
+  <label><input type="radio" name="w8-q8" data-correct="false"> No: models are never trustworthy regardless of diagnostics.</label>
+  <label><input type="radio" name="w8-q8" data-correct="false"> Yes: passing the diagnostic checks proves that the model has no hidden assumptions.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Good diagnostics can reveal problems with linearity, equal variance of errors, normality of errors, and influential observations, but they say nothing about whether the data actually measure what we think they do, or whether the sample represents the population we want to generalise to. Those hidden assumptions require domain knowledge and careful study design, not residual plots.</p>
+</div>
+</div>
+
+## Summarise the interaction model
+
+```{r, eval=FALSE}
+summary(bio_mod)
+```
+
+<div class="question-block">
+<p><strong>Question 9.</strong> What does the intercept ($\beta_0$) represent in this model?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w8-q9" data-correct="false"> The average biomass change across all sites in the dataset.</label>
+  <label><input type="radio" name="w8-q9" data-correct="true"> The predicted biomass change when shark density is zero and reef complexity is zero.</label>
+  <label><input type="radio" name="w8-q9" data-correct="false"> The predicted biomass change at the mean shark density and mean reef complexity.</label>
+  <label><input type="radio" name="w8-q9" data-correct="false"> The same value as the intercept from the main-effects model.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The intercept is the predicted value when all predictors are zero, and that definition does not change when an interaction is added. In this case, zero sharks and zero reef complexity is an unlikely combination in reality, so the intercept has limited direct biological meaning. Its value will also differ from the main-effects model because the interaction changes how the other parameters are estimated.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 10.</strong> What does the interaction coefficient (<code>shark_density:reef_complexity</code>, or $\beta_3$) represent?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w8-q10" data-correct="false"> The total combined effect of shark density and reef complexity on biomass.</label>
+  <label><input type="radio" name="w8-q10" data-correct="false"> The average of the shark density slope and the reef complexity slope.</label>
+  <label><input type="radio" name="w8-q10" data-correct="true"> How much the shark density slope changes for every one-unit increase in reef complexity (and symmetrically, how much the reef complexity slope changes per unit increase in shark density).</label>
+  <label><input type="radio" name="w8-q10" data-correct="false"> The correlation between shark density and reef complexity in the dataset.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The interaction term is symmetrical: you can read it in either direction. If $\beta_3$ is positive, the shark density slope becomes more positive (or less negative) as reef complexity increases. You can also say that the reef complexity slope becomes more positive as shark density increases. To understand the full effect of either predictor requires plugging both values into the complete equation, not just looking at a single coefficient.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 11.</strong> Does the interaction model still suggest that higher shark density increases biomass?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w8-q11" data-correct="false"> Yes: the interaction model confirms that more sharks are associated with higher biomass across all conditions.</label>
+  <label><input type="radio" name="w8-q11" data-correct="true"> No: the <code>shark_density</code> coefficient (β₁) is now negative, meaning more sharks reduce biomass when reef complexity is zero. The positive interaction term means this negative effect becomes less pronounced as reef complexity increases.</label>
+  <label><input type="radio" name="w8-q11" data-correct="false"> No: the interaction term absorbs the entire shark effect, making the shark coefficient meaningless.</label>
+  <label><input type="radio" name="w8-q11" data-correct="false"> The direction cannot be determined from an interaction model without specifying a value of reef complexity.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The shark coefficient is now negative, which is what ecology would predict: more predators, less prey. In the main-effects model, the positive coefficient was an artefact of a model that was missing the interaction term. Once the interaction is included, the model correctly captures that the shark effect is negative but varies with reef complexity. This is also why we should always diagnose before interpreting: a model with violated assumptions can produce coefficients that are not just imprecise but point in the wrong direction.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 12.</strong> The interaction coefficient is positive. What does this tell you about the system?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w8-q12" data-correct="false"> Higher shark density causes reef complexity to increase over time.</label>
+  <label><input type="radio" name="w8-q12" data-correct="true"> The negative effect of shark density on biomass is weaker in more complex reefs, suggesting that structural complexity provides shelter for prey and reduces shark hunting efficiency.</label>
+  <label><input type="radio" name="w8-q12" data-correct="false"> High shark density and high reef complexity independently maximise biomass, with no true interaction between them.</label>
+  <label><input type="radio" name="w8-q12" data-correct="false"> In highly complex reefs, sharks cause biomass to increase.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>A positive $\beta_3$ means that as reef complexity increases, the (negative) shark slope gets closer to zero. In a structurally simple reef, many sharks reduce biomass substantially; in a complex reef with many hiding places, the same number of sharks has a smaller impact on biomass. This is a biologically coherent interpretation: reef complexity acts as a refuge for prey, buffering the effect of predators.</p>
+<p>Note that interpreting this as a causal claim requires additional causal reasoning. We framed this as a predictive question, so the interaction describes an association, not necessarily a mechanism.</p>
+</div>
+</div>
+
+# Visualising interactions
+
+A coefficient table tells you the direction and magnitude of an interaction but not what it looks like across the range of your data. For two continuous predictors, a heatmap is one of the most effective ways to show predicted values across all combinations of the two predictors.
+
+## Building a prediction grid
+
+To produce the heatmap, we need predicted values at every combination of shark density and reef complexity. The `expand.grid()` function generates a data frame containing exactly those combinations:
+
+```{r, eval=FALSE}
+shark_density_seq <- seq(from = min(reef$shark_density),
+                         to   = max(reef$shark_density),
+                         length.out = 20)
+
+reef_complexity_seq <- seq(from = min(reef$reef_complexity),
+                           to   = max(reef$reef_complexity),
+                           length.out = 20)
+
+fake <- expand.grid(
+  shark_density   = shark_density_seq,
+  reef_complexity = reef_complexity_seq
+)
+```
+
+`expand.grid()` produces one row for every combination of the two sequences: 20 × 20 = 400 rows. The variable names must match those in the original dataset exactly, because `predict()` will look for them by name.
+
+Now add the model predictions:
+
+```{r, eval=FALSE}
+fake$fit <- predict(bio_mod, newdata = fake)
+```
+
+## Plotting the heatmap
+
+```{r, eval=FALSE}
+ggplot(fake) +
+  geom_tile(aes(x = shark_density, y = reef_complexity, fill = fit)) +
+  labs(x = "Shark density",
+       y = "Reef complexity",
+       fill = "Predicted biomass change") +
+  theme_minimal()
+```
+
+The heatmap makes the interaction visible: the highest predicted biomass occurs at high reef complexity combined with high shark density. Without the interaction in mind, high shark density alone would predict low biomass. The interaction flips that relationship at high reef complexity.
+
+The default blue palette can be hard to read. The viridis `"magma"` palette gives better contrast across the full range:
+
+```{r, eval=FALSE}
+ggplot(fake) +
+  geom_tile(aes(x = shark_density, y = reef_complexity, fill = fit)) +
+  scale_fill_viridis_c(option = "magma") +
+  labs(x = "Shark density",
+       y = "Reef complexity",
+       fill = "Predicted biomass change") +
+  theme_minimal()
+```
+
+One limitation of heatmaps is that it is hard to communicate uncertainty on them. A common workaround is to produce two additional plots: one showing predictions at the upper 95% confidence limit and one at the lower. This is imperfect because our eyes struggle to compare the same region across three separate plots, but it is better than showing no uncertainty at all.
+
+# A new challenger: Asian elephants
+
+If time allows, work through the following dataset on human-wildlife conflict in Asian elephant populations (`elephants.txt` on MyAberdeen). Researchers recorded elephant activity at sites varying in vegetation cover and proximity to human settlements. The research question is predictive: which combinations of vegetation cover and proximity to towns are associated with higher or lower elephant activity?
+
+The dataset contains:
+
+- `veg_cover`: Vegetation cover at each site (continuous, 0 to 100%).
+- `prox_town`: Proximity to the nearest human settlement (categorical: `"Far"`, `"Near"`, `"Very Near"`).
+- `activity`: An activity index measuring deviation from a baseline level observed in elephants in an undisturbed, dense-vegetation area. Negative values indicate reduced activity relative to that baseline; positive values indicate increased activity.
+
+```{r, eval=FALSE}
+eleph <- read.table("Data/elephants.txt", header = TRUE)
+```
+
+Go through the full seven-step workflow. A few things to keep in mind:
+
+1. The interaction here is between a continuous variable (`veg_cover`) and a categorical variable (`prox_town`), not two continuous variables. R handles this automatically when you use `*` in the formula, but the interpretation changes: instead of a single $\beta_3$, you get a separate interaction coefficient for each category of `prox_town` other than the baseline category.
+
+2. For a continuous × categorical interaction, a heatmap is not appropriate. Use `ggpredict()` from `ggeffects` with both terms to produce separate regression lines per proximity level.
+
+3. Think carefully about hidden assumptions. The `activity` variable is defined relative to a "pristine" baseline. What assumptions does that involve, and are they likely to hold?
+
+```{r, eval=FALSE}
+# Your analysis here
+```
+
+<div class="question-block">
+<p><strong>Question 13.</strong> After completing your elephant analysis, summarise your main finding. Does the effect of vegetation cover on elephant activity differ by proximity to towns, and if so, how?</p>
+<textarea class="student-answer" rows="6" placeholder="Describe the direction and pattern of the interaction in plain language..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>When elephant herds are far from towns, activity increases with vegetation cover: denser vegetation is associated with more normal activity, which makes biological sense as undisturbed habitat. When herds are near or very near to towns, the relationship reverses: higher vegetation cover is associated with reduced activity. One interpretation is that elephants near human settlements use dense vegetation to hide and reduce movement rather than to forage, effectively avoiding contact with people. The interaction means you cannot summarise the vegetation effect with a single slope; its direction depends on proximity to towns.</p>
+<p>The hidden assumptions worth flagging: the "baseline" activity level is measured in a separate group of elephants in pristine habitat, so the activity variable assumes those elephants are comparable to the study animals. The validity of the activity index as a measure of genuine ecological behaviour (rather than observer bias or measurement artefact) is also worth questioning.</p>
+</div>
+</div>
+
+---
+
+# Assumption table
+
+| Assumption | Description | Example of violation |
+|---|---|---|
+| 1. Validity | The data can answer the research question. | Using an activity index defined relative to an arbitrary baseline to measure true ecological behaviour. |
+| 2. Representativeness | The sample reflects the population of interest. | Reef sites selected for accessibility by divers may not represent remote, undisturbed reefs. |
+| 3. Additivity | Predictor effects are independent and additive. | Shark density and reef complexity interact: the shark effect depends on complexity. |
+| 4. Linearity | The relationship between predictors and response is linear on the scale modelled. | Biomass change increasing indefinitely with reef complexity rather than levelling off. |
+| 5. Independence of errors | Observations are independent. | Multiple transects sampled at the same reef site on the same day. |
+| 6. Equal variance of errors | Residuals have constant variance across fitted values. | Biomass variability increasing in high-complexity reefs. |
+| 7. Normality of errors | Residuals are approximately normally distributed. | A few extreme biomass collapses pulling the residual distribution heavily left. |

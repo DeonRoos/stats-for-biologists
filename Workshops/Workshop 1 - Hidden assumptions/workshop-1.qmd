@@ -1,0 +1,1182 @@
+---
+title: "Workshop 1: Getting Back into R"
+subtitle: "BI3010 Statistics for Biologists"
+author: "Roos & Pinard"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    theme: [cosmo, ../custom.scss]
+    highlight-style: github
+    embed-resources: true
+    code-copy: true
+    code-tools: false
+    html-math-method: plain
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+ali   <- read.table("Data/alligator_bite.txt", header = TRUE)
+fast  <- read.table("Data/animal_speed.txt",   header = TRUE)
+chupa <- read.table("Data/chupa.txt",          header = TRUE)
+```
+
+```{=html}
+<script>
+/* --- answer lock --- */
+var WS_PASS_SHA256 = '080bc338a7350d4c37f8018a9a50ae0112a164d6098731f73c6f6ec8ee1dd8b6';
+var WS_PASS_DJB2   = '7c94b439';
+var _wsUnlocked = false;
+
+function _wsDjb2(s) {
+  var h = 5381;
+  for (var i = 0; i < s.length; i++) { h = ((h << 5) + h + s.charCodeAt(i)) | 0; }
+  return (h >>> 0).toString(16).padStart(8, '0');
+}
+function wsVerifyPass() {
+  var inp = document.getElementById('ws-pass-input'); if (!inp) return;
+  var msg = document.getElementById('ws-pass-msg');
+  function finish(ok) {
+    if (ok) {
+      _wsUnlocked = true; sessionStorage.setItem('ws-unlocked', WS_PASS_SHA256);
+      document.body.classList.remove('ws-locked');
+      var b = document.getElementById('ws-lock-banner');
+      if (b) { b.style.transition = 'opacity 0.4s'; b.style.opacity = '0'; setTimeout(function () { b.remove(); }, 450); }
+    } else {
+      inp.classList.add('ws-wrong'); if (msg) msg.textContent = 'Incorrect password.';
+      setTimeout(function () { inp.classList.remove('ws-wrong'); if (msg) msg.textContent = ''; }, 2000);
+    }
+  }
+  if (window.crypto && crypto.subtle) {
+    crypto.subtle.digest('SHA-256', new TextEncoder().encode(inp.value))
+      .then(function (buf) { var hex = Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join(''); finish(hex === WS_PASS_SHA256); })
+      .catch(function () { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); });
+  } else { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); }
+}
+function wsFlashBanner() {
+  var b = document.getElementById('ws-lock-banner'); if (!b) return;
+  b.classList.remove('ws-flash'); void b.offsetWidth; b.classList.add('ws-flash');
+}
+function wsInitLock() {
+  if (sessionStorage.getItem('ws-unlocked') === WS_PASS_SHA256) { _wsUnlocked = true; return; }
+  document.body.classList.add('ws-locked');
+  var b = document.createElement('div'); b.id = 'ws-lock-banner';
+  b.innerHTML = '<span style="font-size:1.15rem;line-height:1;">🔒</span>' +
+    '<span>Answers are locked. Enter the workshop password to reveal them.</span>' +
+    '<span class="ws-unlock-form">' +
+      '<input type="password" id="ws-pass-input" placeholder="Password"' +
+      ' onkeydown="if(event.key===\'Enter\')wsVerifyPass();">' +
+      '<button id="ws-unlock-btn" onclick="wsVerifyPass()">Unlock</button>' +
+    '</span><span id="ws-pass-msg"></span>';
+  var t = document.getElementById('title-block-header');
+  if (t) t.insertAdjacentElement('afterend', b); else document.body.prepend(b);
+}
+document.addEventListener('DOMContentLoaded', wsInitLock);
+/* --- end lock --- */
+
+function revealAnswer(btn) {
+  if (!_wsUnlocked) { wsFlashBanner(); return; }
+  var block = btn.closest('.question-block, .puzzle-block');
+  var answerClass = block.classList.contains('puzzle-block') ? '.puzzle-answer' : '.instructor-answer';
+
+  // Free-text gate
+  var textarea = block.querySelector('.student-answer');
+  if (textarea) {
+    if (textarea.value.trim() === '') {
+      textarea.classList.add('missing');
+      textarea.placeholder = 'Please write your answer before revealing...';
+      textarea.focus();
+      return;
+    }
+    textarea.classList.remove('missing');
+  }
+
+  // Multiple-choice gate
+  var mcOptions = block.querySelector('.mc-options');
+  if (mcOptions) {
+    var radios = mcOptions.querySelectorAll('input[type=radio]');
+    var anyChecked = Array.from(radios).some(function(r) { return r.checked; });
+    if (!anyChecked) {
+      mcOptions.classList.add('unanswered');
+      return;
+    }
+    mcOptions.classList.remove('unanswered');
+    radios.forEach(function(r) {
+      r.disabled = true;
+      var label = r.closest('label');
+      if (r.dataset.correct === 'true') {
+        label.classList.add('mc-correct');
+      } else if (r.checked) {
+        label.classList.add('mc-incorrect');
+      }
+    });
+  }
+
+  var answer = block.querySelector(answerClass);
+  if (answer) answer.style.display = 'block';
+  btn.textContent = 'Answer shown';
+  btn.disabled = true;
+}
+
+function toggleGlossary() {
+  document.getElementById('glossary-panel').classList.toggle('open');
+}
+</script>
+```
+
+```{=html}
+<style>
+#glossary-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: #00b494;
+  color: #fff;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  transition: background 0.15s;
+  font-family: inherit;
+}
+#glossary-btn:hover { background: #009478; }
+
+#glossary-panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 380px;
+  height: 100vh;
+  background: #fff;
+  border-left: 3px solid #00b494;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+  z-index: 1001;
+  transition: right 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+#glossary-panel.open { right: 0; }
+
+#glossary-header {
+  background: #0d1e2c;
+  color: #fff;
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+#glossary-header span {
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
+}
+#glossary-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.7;
+}
+#glossary-close:hover { opacity: 1; }
+
+#glossary-body {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.glossary-entry {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #e8f5f0;
+}
+.glossary-entry:last-child { border-bottom: none; }
+
+.glossary-terms {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.3rem;
+}
+.glossary-en-term {
+  font-weight: 600;
+  color: #0d1e2c;
+  font-size: 0.92rem;
+}
+.glossary-zh-term {
+  color: #00b494;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+.glossary-en-def {
+  font-size: 0.845rem;
+  color: #444;
+  line-height: 1.5;
+  margin-bottom: 0.25rem;
+}
+.glossary-zh-def {
+  font-size: 0.845rem;
+  color: #1c3a50;
+  line-height: 1.65;
+}
+</style>
+```
+
+# Workshop Structure
+
+::: {.callout-note}
+## The Analytical Workflow
+
+These workshops follow an analytical workflow built around linear models, but the same steps apply to almost any analysis: you're learning how to go from a raw dataset to an evidenced answer.
+
+The general workflow we'll be using can be broken down into:
+
+1. Formulate a research question.
+2. Perform exploratory data analysis [Focus of today].
+3. Identify any hidden assumptions.
+4. Fit an appropriate model.
+5. Diagnose the model and check assumptions.
+6. Summarise the results.
+7. Interpret and provide inferences.
+
+We'll skip Step 1 here for convenience, but in your own work it's the most important step. Every subsequent decision — how to collect data, which model to fit, how to interpret results — depends on having a clear question. Don't mistake its absence in these workshops for evidence that it doesn't matter.
+:::
+
+# Learning Objectives
+
+::: {.callout-tip}
+## By the end of this workshop you will be able to:
+
+1. (Re)familiarise yourself with the basics of `R`;
+2. Use `R` to perform simple descriptive summaries of data and data processing;
+3. Use the results of the EDA (Exploratory Data Analysis) to identify any issues in the data;
+4. Begin thinking about the assumptions we make with a specific dataset even before we begin using statistics.
+
+These skills apply every time you pick up a new dataset and will come up throughout the course.
+:::
+
+# Instruction Orientation
+
+## Commenting guide
+
+Good comments are notes about intent, not narration. They'll save you time when you return to old code, and some jobs will check them too.
+
+Opinions vary (see [here](https://statmodeling.stat.columbia.edu/2024/02/07/when-all-else-fails-add-a-code-comment/) for a stern take), but my rule: briefly describe what you're *trying to do*, not what each line does.
+
+For example, I would write:
+
+```{r, eval=FALSE}
+# Get R set up
+library(ggplot2)  # For plots
+setwd("my/file/path")
+my_data <- read.csv("data/sales_data.csv")
+
+# Plot the data
+ggplot(my_data, aes(x = country, y = total_sales)) +
+  geom_bar()
+```
+
+And not:
+
+```{r, eval=FALSE}
+# Load the ggplot2 package into the R environment so we can create plots later
+# What happened to ggplot1?
+library(ggplot2)
+
+# Use the read.csv function to read the sales_data.csv file from the data directory
+# and store the resulting data frame in a data frame called 'my_data'
+# Remember that it's called my_data and not data. Calling it data made things break :(
+my_data <- read.csv("data/sales_data.csv")
+# my_data <- read.table("data/sales_data.csv") # DONT USE THIS IT DOESNT WORK
+# mi_data <- read_csv("data/sales_data.csv") # ALSO DIDN'T WORK - DUNNO WHY
+
+# Use ggplot to create a bar plot of the total sales by country for 2024.
+# The x-axis represents the categories, and the y-axis represents the total sales.
+ggplot(my_data, aes(x = country, y = total_sales)) + # using ggplot, take my_data, then plot country on the x and sales on the y
+  geom_bar() # then have the data visualised as bar, using the structure described in the previous line of code
+# When I see comments like this IRL, I die a little bit inside. Keep it clean and concise.
+```
+
+Reading those comments is more work than reading the code itself. Think of comments as post-it notes: short signals for sections you might want to revisit, not a line-by-line narration of what the code does.
+
+## On using LLMs
+
+::: {.callout-caution}
+## On using LLMs
+
+LLMs (Large Language Models, or AI) have become common tools in programming and data analysis: good for boring or fiddly tasks, one-off problems, and tidying code (see [here](https://nicholas.carlini.com/writing/2024/how-i-use-ai.html) for a pragmatic take on this). The catch is that you need to know enough to tell when the output is correct and when it's plausible-sounding nonsense. That line blurs fast as the code gets more complex. For analysis, without a sound theoretical understanding, they tend to get it wrong **60%** of the time if the user cannot specify their data and question properly (see [here](https://doi.org/10.1111/2041-210x.70267)). To make sure that doesn't happen to you, you need to understand statistical theory and assumptions.
+
+Using them well is a skill in itself. Make your prompt specific: describe what you want, paste the relevant code, include any error messages, and say you're working in `R` (otherwise you'll get Python). Mention any packages you want to use, or specify base `R`.
+:::
+
+# Getting Started with R
+
+::: {.callout-note collapse="true"}
+## New to RStudio? Expand here
+
+Before we begin the workshop, let's make sure that you are set up to work with `R` and RStudio. If you're working on your own machine, make sure you have `R` and RStudio installed. If you don't, you can download `R` from [CRAN](https://cran.r-project.org/) and RStudio from [RStudio's website](https://www.rstudio.com/products/rstudio/download/). On university computers, these should already be installed.
+
+Once you have `R` and RStudio set up, open RStudio. You should see a window with four main panes:
+
+- **Source:** This is where you write your scripts.
+- **Console:** This is where you can type and execute R code directly.
+- **Environment/History:** This pane shows you the objects that are currently stored in R's memory.
+- **Files/Plots/Packages/Help/Viewer:** This is a multi-tabbed pane that allows you to navigate files, view plots, manage packages, and access documentation.
+
+**Running Code**
+
+There are a few ways to run `R` code:
+
+- **Directly in the console:** You can type `R` commands directly into the Console pane and press Enter to run them. This is useful for very quick tests and calculations but avoid using this for project work (none of it is saved).
+- **From a script:** Scripts are simple text files that contain `R` code. You can write multiple lines of code in a script and run them together or one by one. This is particularly useful for more complex analyses where you want to keep a record of your code.
+
+To run code from a script, you can:
+
+- Click the "Run" button at the top of the Source pane to run the selected line or code chunk.
+- Press `Ctrl + Enter` (or `Cmd + Enter` on a Mac) to run the current line or selected code.
+:::
+
+# Workshop Instructions
+
+In this workshop, we're going to load two datasets, starting with alligator bite strength, and carry out Exploratory Data Analysis (EDA) alongside some simple Data Quality Assurance. The aim is to find weird things in the data, things that might indicate mistakes.
+
+Errors in data entry are more common than you'd think. Imagine entering 5,000 nearly identical observations into a spreadsheet. People get bored, lose their place, hit the wrong key. If we don't catch those mistakes before analysis, they can quietly wreck the results.
+
+The good news: we don't need complex statistics to check for this, and the `R` coding is *relatively* straightforward.
+
+## Set working directory
+
+If you haven't already, create a folder for this course. On university computers the H drive works well: `H:\BI3010\workshop1`.
+
+Open RStudio and create a new R script (`File > New File > R Script` or `Ctrl + Shift + N`). To run code, press the Run button or use `Ctrl + Enter`.
+
+To set the working directory, you have two options:
+
+**Option 1:**
+
+Find the file path to your folder using File Explorer. It will look something like `H:\BI3010\workshop1`. One catch: `R` doesn't like backslashes, so swap them to forward slashes before using it (`H:/BI3010/workshop1`). Mac paths are already fine (`~/Documents/BI3010/workshop1`). Use `setwd()` to point `R` at that folder, with the path in quotation marks:
+
+```{r, eval=FALSE}
+setwd("H:/BI3010/workshop1")
+# Or for Mac:
+setwd("~/Documents/BI3010/workshop1")
+```
+
+**Option 2:**
+
+Use the drop-down menu: `Session > Set Working Directory > Choose Directory...`
+
+Convenient for a one-off session, but you'll need to repeat it every time you reopen the project. Option 1 is worth the extra minute.
+
+We can check if the working directory has been set correctly by asking `R` what the current directory is:
+
+```{r, eval=FALSE}
+getwd() # to check which directory RStudio is using
+```
+
+## Download the File
+
+*You can download the data from MyAberdeen. Make sure to save the file to your working directory.*
+
+On MyAberdeen in the Tuesday - Workshop folder within Week 1, you'll find a file called `alligator_bite.txt`. Either click on the file to download it or, if that isn't working, use the three dots to the right of the content area that has the file name to download it.
+
+Once downloaded, make sure to move it to your `H:/BI3010/workshop1` folder (or whatever you chose to call your folders).
+
+## Load File into RStudio
+
+Now we can load the data. The `.txt` extension tells us it's a plain text file, so we use `read.table()`. We need two arguments: the filename, and `header = TRUE` to tell `R` that the first row contains column names rather than data.
+
+Tip: `?read.table` (or `?` followed by any function name) opens the help page.
+
+```{r, eval=FALSE}
+ali <- read.table("alligator_bite.txt", header = TRUE)
+```
+
+The above fits on one line, but you can split it for readability:
+
+```{r, eval=FALSE}
+ali <- read.table("alligator_bite.txt",
+                  header = TRUE)
+```
+
+## Checking It Worked
+
+If you hit an error, don't panic. Nothing in `R` is permanent (unless you very explicitly make it so). Run the code again, fix the issue, move on. The only thing that is permanent is your script and original data, so save your script often and comment as you go. Not sure whether removing something will break things? Comment it out with `#` first rather than deleting it.
+
+If you get an error loading data, common causes are:
+
+- You may have set the wrong working directory.
+- You may have misspelled one of the words (including using a capital letter instead of lower case).
+- Your file may be missing a column heading.
+- The file is not in the correct format (e.g., the file saved as a `.csv` instead of a `.txt`).
+- The quotation marks are in the wrong location.
+- You may have missed the final bracket `)` in the `read.table()` function.
+
+To confirm that the file has been read properly, click the blue button next to the name in the Environment panel (normally in the upper right of RStudio).
+
+To inspect the data, you have a few options. The following shows the first six rows (use `n` to change how many, e.g. `head(ali, n = 10)`):
+
+```{r}
+head(ali)
+```
+
+Or open the full dataset in a new tab — `View()` gives a spreadsheet-like view with sorting and filtering:
+
+```{r, eval=FALSE}
+View(ali)
+```
+
+Or print everything to the console:
+
+```{r, eval=FALSE}
+ali
+```
+
+Not recommended — it floods the console and is hard to read.
+
+## Question Set One
+
+<div class="question-block">
+<p><strong>Question 1.</strong> How many variables do we have in this dataset?</p>
+<div class="mc-options">
+  <label><input type="radio" name="q1s1_q1"> 1</label>
+  <label><input type="radio" name="q1s1_q1" data-correct="true"> 2</label>
+  <label><input type="radio" name="q1s1_q1"> 4</label>
+  <label><input type="radio" name="q1s1_q1"> 6</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>There are <strong>2 variables</strong>. There are several ways to check this:</p>
+<pre><code class="language-r">summary(ali)
+ncol(ali)   # Number of columns (i.e., variables) in the ali dataset
+str(ali)    # Structure of the ali dataset
+head(ali)   # Displays the first few rows
+View(ali)   # Opens the dataset in a spreadsheet-like view</code></pre>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 2.</strong> What are the variable names?</p>
+<div class="mc-options">
+  <label><input type="radio" name="q1s1_q2"> <code>size</code> and <code>force</code></label>
+  <label><input type="radio" name="q1s1_q2" data-correct="true"> <code>length</code> and <code>bite</code></label>
+  <label><input type="radio" name="q1s1_q2"> <code>length</code> and <code>pressure</code></label>
+  <label><input type="radio" name="q1s1_q2"> <code>weight</code> and <code>bite</code></label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The variable names are <code>bite</code> and <code>length</code>. The functions above will show you this (except <code>ncol()</code>, which only counts columns).</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 3.</strong> Are the variable names capitalised?</p>
+<div class="mc-options">
+  <label><input type="radio" name="q1s1_q3" data-correct="true"> No, both are lower case</label>
+  <label><input type="radio" name="q1s1_q3"> Yes, both start with a capital letter</label>
+  <label><input type="radio" name="q1s1_q3"> Only <code>Length</code> is capitalised</label>
+  <label><input type="radio" name="q1s1_q3"> Only <code>Bite</code> is capitalised</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>No, <code>bite</code> and <code>length</code> are both lower case. A general tip: keep variable names short and all lower case. You will type them a lot, so save yourself the effort. Avoid names like <code>Alligator_Bite_Strength_PSI</code>.</p>
+</div>
+</div>
+
+These questions may seem trivial, but honestly, they're the first questions we ask ourselves when we load a dataset into `R` for the first time.
+
+# Getting to Know the Data
+
+The dataset has `r nrow(ali)` alligators from Parker Island Gator Farm, Florida. For each one, bite strength (pounds per square inch) and body length nose-to-tail (centimeters, one decimal place) were recorded.
+
+Before going further, do a quick search: what's the bite strength of a typical alligator, and how long are they? EDA means looking for things that seem *weird*, and you can only spot weird if you know what normal looks like. Note the typical values as a comment in your script.
+
+Now let's check that the data is sensibly structured — numbers stored as numbers, text as characters, and so on. A value like `2174.94BIGBITE` would cause `R` to treat the entire column as text, which breaks any numerical analysis.
+
+To do this quickly, we can use the `str()` function (short for "structure"):
+
+```{r}
+str(ali)
+```
+
+`ali` is a `data.frame` with `r nrow(ali)` observations and two variables. Both `length` and `bite` are `num` (numeric). All good. The `$` in `ali$bite` is how `R` pulls a single column out of a dataset; you'll use it constantly.
+
+Nothing unusual so far.
+
+If we wanted to, we could extract the `length` variable from the dataset by doing:
+
+```{r, results="hide"}
+ali$length
+```
+
+How would you extract the `bite` variable?
+
+Let's calculate some summary statistics. The average length:
+
+```{r}
+mean(ali$length)
+```
+
+The average alligator here is `r round(mean(ali$length), digits = 1)` cm — longer than wild alligators, but farm animals often are. Compare this with what you found online. Small differences are fine; large ones are worth questioning.
+
+Now calculate the average bite strength:
+
+```{r}
+mean(ali$bite)
+```
+
+If you found alligator bite strength to be around 2,000 PSI, ours are averaging 1,500 PSI *above* that. We can't be certain there's a problem, but it warrants investigation.
+
+`summary()` gives a quick overview of the whole dataset. Run it now and see if anything stands out:
+
+```{r}
+summary(ali)
+```
+
+Keep in mind, with EDA we're looking for anything *weird* in the data.
+
+## Question Set Two
+
+<div class="question-block">
+<p><strong>Question 1.</strong> How small is the smallest alligator in the farm for which we have data, and what's the biggest?</p>
+<textarea class="student-answer" rows="2" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The smallest alligator is <strong>153.5 cm</strong> and the largest is <strong>2293.0 cm</strong>. Multiple approaches work:</p>
+<pre><code class="language-r">range(ali&#36;length)    # minimum and maximum
+min(ali&#36;length)      # minimum
+max(ali&#36;length)      # maximum
+summary(ali)         # summary for all variables
+summary(ali&#36;length)  # summary for length only</code></pre>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 2.</strong> What are the minimum and maximum values for bite strength?</p>
+<textarea class="student-answer" rows="2" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The minimum bite strength is <strong>832.9 PSI</strong> and the maximum is <strong>123,632.0 PSI</strong>.</p>
+<pre><code class="language-r">range(ali&#36;bite)</code></pre>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 3.</strong> Do any of these minimums or maximums seem strange?</p>
+<div class="mc-options">
+  <label><input type="radio" name="q2_q3" data-correct="true"> Yes, both the maximum length and maximum bite strength look suspicious</label>
+  <label><input type="radio" name="q2_q3"> Yes, only the maximum length looks suspicious</label>
+  <label><input type="radio" name="q2_q3"> Yes, only the maximum bite strength looks suspicious</label>
+  <label><input type="radio" name="q2_q3"> No, all values seem reasonable</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Yes. A 2293 cm alligator is longer than a bus. And 123,632 PSI is about 60 times the average bite strength of 2,000 PSI. At least one of these values is almost certainly a data entry error.</p>
+</div>
+</div>
+
+# Data Detective
+
+Hopefully you spotted at least one suspicious value. Let's track it down.
+
+We know there's an alligator recorded as `r max(ali$length)` cm long — that's `r round(max(ali$length)/100, digits = 0)` m, longer than a bus. Here's how to find it.
+
+Square brackets `[]` are R's indexing tool: they extract specific rows or columns from a dataframe using the format `dataset[row, column]`. Omit the row number and you get all rows; omit the column and you get all columns. For example, to see all columns for row 30:
+
+```{r}
+ali[30,]
+```
+
+To find our giant alligator, we need a condition: find rows where `length` equals `r max(ali$length)`. In R, "equal to" is `==` (a single `=` assigns a value; `==` tests whether two things match). The result is a `TRUE`/`FALSE` for every row:
+
+```{r}
+ali$length == 2293.0
+```
+
+We can use that condition directly inside square brackets to pull out the matching rows:
+
+```{r}
+ali[ali$length == 2293,]
+```
+
+`length` is about 10 times what we'd expect (200--400 cm), and `bite` is about 100 times typical. Neither has a decimal point. Let's compare against a normal observation:
+
+```{r}
+ali[1, ]
+```
+
+The first alligator looks fine. So either giant alligators are among us, or there's been a data entry mistake.
+
+## Question Set Three
+
+<div class="question-block">
+<p><strong>Question 1.</strong> What may have occurred to cause this apparent data entry mistake?</p>
+<div class="mc-options">
+  <label><input type="radio" name="q3_q1"> The data was deliberately falsified</label>
+  <label><input type="radio" name="q3_q1" data-correct="true"> Decimal points were accidentally omitted during data entry</label>
+  <label><input type="radio" name="q3_q1"> The measurements were recorded in the wrong units</label>
+  <label><input type="radio" name="q3_q1"> A duplicate row was accidentally added to the dataset</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The decimal points were accidentally omitted during data entry. The correct values are 229.3 cm and 1236.32 PSI. If you look at the raw data file, neither value has a decimal point.</p>
+</div>
+</div>
+
+# A More Refined Detective
+
+The approach above works, but typing `r max(ali$length)` every time is awkward. Better to store the maximum in a variable and reference that instead:
+
+```{r}
+# Get the maximum alligator length
+max_length <- max(ali$length)
+
+# Now use this value to find the problematic rows
+ali[ali$length == max_length, ]
+```
+
+Storing the result means we don't have to repeat the raw number, and the code reads more clearly.
+
+The same logic works with other conditions, for example, all alligators longer than average:
+
+```{r}
+# Calculate the average alligator length
+average_length <- mean(ali$length)
+
+# Extract all rows where the alligator length is greater than the average
+ali[ali$length > average_length, ]
+```
+
+More than one alligator qualifies this time. Our problem observation is still in there.
+
+Let's go one step further with `quantile()`. Look back at `summary(ali)` — the `1st Qu.` and `3rd Qu.` values are the 25th and 75th percentiles. We can retrieve them directly:
+
+```{r}
+quantile(ali$length, probs = c(0.25,0.75))
+```
+
+`probs` sets which percentiles to return. `c()` combines multiple values into a vector — needed here because we're asking for two at once. For a single percentile, write `quantile(ali$length, probs = 0.75)` without `c()`.
+
+## Question Set Four
+
+<div class="question-block">
+<p><strong>Question 1.</strong> Using <code>quantile()</code>, extract all rows in the <code>ali</code> dataset where <code>bite</code> values are above the 3rd quantile.</p>
+<textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<pre><code class="language-r">ali[ali&#36;bite > quantile(ali&#36;bite, probs = 0.75),]</code></pre>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 2.</strong> Repeat the above, but for <code>bite</code> values <em>less than or equal to</em> the 33% quantile. If you're unsure how to specify "less than or equal to", have a quick search online or use your preferred LLM.</p>
+<textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<pre><code class="language-r">ali[ali&#36;bite <= quantile(ali&#36;bite, probs = 0.33),]</code></pre>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 3.</strong> Using the tools from above, can you identify any other possible data entry mistakes caused by missing decimal points?</p>
+<div class="mc-options">
+  <label><input type="radio" name="q4_q3"> Yes, there is at least one more observation with missing decimal points</label>
+  <label><input type="radio" name="q4_q3" data-correct="true"> No, row 20 appears to be the only case</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Row 20 appears to be the only observation with this problem. The other bite and length values all look plausible.</p>
+</div>
+</div>
+
+# Correcting Data
+
+So, we've identified a problem. What now? Do we delete the observation? Declare that [*Sarcosuchus*](https://en.wikipedia.org/wiki/Sarcosuchus) are not extinct and are alive and well in Parker Island Gator Farm, Florida, USA (and have actually doubled in size)? Set up a Facebook group to share our concrete and irrefutable evidence of *Sarcosuchus* and start producing a [film](https://www.facebook.com/cryptofilm/) to share this wonderful news with the world? Obviously not. That'd be silly.
+
+But we do need to do something. Row 20 of our dataset is clearly a mistake, but correcting it is a really sensitive topic. Part of the reason for that sensitivity is because a non-trivial number of scientists have been found to actually *fake* their data in order to further their own careers and prestige (e.g. see [here](https://www.science.org/content/article/university-investigation-found-prominent-spider-biologist-fabricated-falsified-data), [here](https://www.science.org/content/article/does-ocean-acidification-alter-fish-behavior-fraud-allegations-create-sea-doubt), and most ironically [here](https://behavioralscientist.org/harvard-professor-under-scrutiny-for-alleged-data-fraud/) for examples).
+
+We want to be better than that. So before touching anything, go back to the source — not the downloaded file, but the original recorded values. Here that means contacting Parker Island Gator Farm to confirm our suspicion that row 20 is simply missing decimal points.
+
+In the interest of time, I'll confirm that it's missing decimal points so we can move on to fixing the problem. Specifically, `bite` should have two decimal points, and `length` should have one.
+
+We have two options: edit `alligator_bite.txt` directly and reload, or fix it in `R`. Do it in `R`. If you edit the raw file, there's no record of what changed or why, and that starts to look a lot like the data manipulation we were just reading about. The correction in code is transparent; it's right there for anyone auditing your work.
+
+The fix uses the indexing skills from above. `ali$bite[20]` points to row 20 of the `bite` column specifically (no comma needed since we're already working with a single column).
+
+We can start by replacing row 20 with itself (which does nothing, but makes the pattern clear):
+
+```{r}
+ali$bite[20] <- ali$bite[20]
+```
+
+Now we just divide, which shifts the decimal two places to the right:
+
+```{r}
+# Resolving data entry issue with missing decimal point
+ali$bite[20] <- ali$bite[20] / 100
+```
+
+## Question Set Five
+
+<div class="question-block">
+<p><strong>Question 1.</strong> Resolve the data entry mistake for <code>ali&#36;length</code>. Be sure to add a clear comment indicating that you have made this change, so that if anyone reviews your code, they understand the reason for the modification and don't suspect any foul play.</p>
+<textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<pre><code class="language-r"># Correcting missing decimal point
+# Confirmed by Parker Island Gator Farm on 1/1/2020
+ali&#36;length[20] <- ali&#36;length[20] / 10</code></pre>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 2.</strong> Having made any changes to your data, it's always worthwhile checking it again to make sure you did not create a new mistake. Do so now using any techniques you feel are appropriate.</p>
+<textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<pre><code class="language-r">summary(ali)</code></pre>
+</div>
+</div>
+
+# Do it for Real
+
+On MyAberdeen you'll find `animal_speed.txt`. The goal is the same: find all the data entry mistakes. This dataset is larger and the errors are harder to spot, so you'll need to be more systematic. A few hints:
+
+1. `unique()` lists every distinct value in a column — useful for spotting typos in text columns.
+2. `mean()` returns `NA` if any values are missing. Add `na.rm = TRUE` to ignore them: `mean(variable, na.rm = TRUE)`.
+3. There are five mistakes in total.
+
+Start with an EDA as before. Can you find them all?
+
+::: {.callout-note}
+## Information about the dataset
+
+| Variable | Description |
+|---|---|
+| `species` | One of three species: Peregrine Falcon, Saiga Antelope, or Cheetah |
+| `weight` | Body weight in grams |
+| `speed` | Speed over a 50 m distance, in km/h |
+
+- A total of 500 individuals were measured, but these were not equally divided between the three species.
+- Multiple people participated in data entry, and it is believed that not all were confident in how to do this.
+- Physical copies of the data are available should any data need to be verified (contact one of the teaching staff if you need a data entry confirmed).
+:::
+
+```{r, eval=FALSE}
+fast <- read.table("animal_speed.txt", header = TRUE)
+```
+
+```{r, results="hide"}
+# Start your exploration here
+summary(fast)
+str(fast)
+unique(fast$species)
+```
+
+<div class="question-block">
+<p><strong>Mistake 1.</strong> One observation has an impossible weight value. Find it, identify which row it is in, and write the code to correct it. (Hint: look at the minimum weight value.)</p>
+<textarea class="student-answer" rows="3" placeholder="Describe the error and write your correction code here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>One individual has a recorded weight of <strong>0 g</strong>, which is impossible. After confirming with the data provider, the correct weight is 45,514 g.</p>
+<pre><code class="language-r">fast[fast&#36;weight == 0,]
+fast&#36;weight[fast&#36;weight == 0] <- 45514</code></pre>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Mistake 2.</strong> There is a second unusual weight in this dataset. Find it, identify which row it is in, and write the code to correct it.</p>
+<textarea class="student-answer" rows="3" placeholder="Describe the error and write your correction code here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>One individual has a recorded weight of <strong>3 g</strong>. The smallest of the three species (Peregrine Falcon) typically weighs around 400 to 1,300 g, so 3 g is clearly wrong. The correct weight is 47,255 g.</p>
+<pre><code class="language-r">fast[fast&#36;weight == 3,]
+fast&#36;weight[fast&#36;weight == 3] <- 47255</code></pre>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Mistake 3.</strong> One of the species names has been entered incorrectly. Use <code>unique()</code> on the species column to find the problem.</p>
+<textarea class="student-answer" rows="3" placeholder="Describe the error and write your correction code here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>One entry reads <strong>"Peregrin Took"</strong> instead of "Peregrine Falcon". This is almost certainly a typo (with a <em>Lord of the Rings</em> flavour).</p>
+<pre><code class="language-r">unique(fast&#36;species)
+fast&#36;species[fast&#36;species == "Peregrin Took"] <- "Peregrine Falcon"
+fast&#36;species <- factor(fast&#36;species)</code></pre>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Mistake 4.</strong> One observation has a speed value that is physically impossible for any living thing. Find it and correct it.</p>
+<textarea class="student-answer" rows="3" placeholder="Describe the error and write your correction code here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>One Peregrine Falcon has a recorded speed of <strong>35,711 km/h</strong>. The fastest recorded speed for a Peregrine Falcon is around 390 km/h. Dividing by 100 gives 357.11 km/h, which is plausible, so this is another missing decimal point error. Note that the <code>NA</code> in the speed column makes <code>max()</code> tricky here.</p>
+<pre><code class="language-r">fast[fast&#36;speed == max(fast&#36;speed, na.rm = TRUE),]
+fast&#36;speed[15] <- fast&#36;speed[15] / 100</code></pre>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Mistake 5.</strong> There is one remaining issue in the dataset. What is it, where is it, and how should it be handled?</p>
+<textarea class="student-answer" rows="3" placeholder="Describe the issue and explain your reasoning..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>One observation has a missing value (<code>NA</code>) in the speed column. <code>NA</code> means "not available" and is R's standard way to represent missing data. The data provider cannot confirm what the true value should be, so the only honest option is to leave it as <code>NA</code>. Functions like <code>mean()</code> will return <code>NA</code> when any value is missing unless you add <code>na.rm = TRUE</code>.</p>
+<p>After all corrections, run a final check:</p>
+<pre><code class="language-r">summary(fast)</code></pre>
+</div>
+</div>
+
+## Question Set Six
+
+::: {.callout-warning}
+Make sure you have corrected all five data entry errors before answering these questions - the answers depend on the corrected dataset.
+:::
+
+<div class="question-block">
+<p><strong>Question 1.</strong> What is the median weight in this dataset?</p>
+<textarea class="student-answer" rows="2" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<pre><code class="language-r">median(fast&#36;weight)</code></pre>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 2.</strong> What is the median speed in this dataset?</p>
+<textarea class="student-answer" rows="2" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<pre><code class="language-r">median(fast&#36;speed, na.rm = TRUE)</code></pre>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 3.</strong> Which species is most common in this dataset?</p>
+<textarea class="student-answer" rows="2" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The <code>table()</code> function gives a count per species, but there are other ways to check:</p>
+<pre><code class="language-r">table(fast&#36;species)</code></pre>
+</div>
+</div>
+
+# Chupacabras, Aliens and Beer
+
+The final dataset is `chupa.txt`. We'll work through it together in the last 30 minutes, but start early if you're ahead. It contains the following variables:
+
+- `year`: The year in which data was collected
+- `city`: The city where the data was collected
+- `alc`: The average alcohol consumption in that city, in that year
+- `ufo`: The number of [unidentified flying objects](https://en.wikipedia.org/wiki/Unidentified_flying_object) (i.e. aliens) reported in that city, in that year
+- `belief`: The most common response from a selection of members of the public when asked if they believe in the supernatural, in that city, in that year
+- `chupa`: The growth rate of [chupacabra](https://en.wikipedia.org/wiki/Chupacabra) sightings from the previous year to the current year, in that city (where a value of zero means the number of sightings is constant, -0.5 means the number of sightings has declined by 50%, and 0.5 means they have increased by 50%).
+
+There are data entry errors in this dataset. Find them all using EDA.
+
+As a group, we'll look at snippets of code and identify the errors.
+
+```{r, eval=FALSE}
+chupa <- read.table("chupa.txt", header = TRUE)
+```
+
+```{r, results="hide"}
+head(chupa)
+str(chupa)
+unique(chupa$city)
+summary(chupa)
+unique(chupa$belief)
+```
+
+<div class="question-block">
+<p><strong>Find and fix all data entry errors</strong> in the <code>chupa</code> dataset. Describe each error and write the correction code.</p>
+<textarea class="student-answer" rows="6" placeholder="Describe each error and your correction code here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p><strong>Error 1 - Two spellings of Amarillo</strong><br>
+One row has the city entered as "amarillo" (lower case a) while all other rows use "Amarillo". Use <code>unique(chupa$city)</code> to spot this, then check the rows affected with indexing.</p>
+
+<p><strong>Error 2 - Placeholder value in ufo (9999)</strong><br>
+The <code>ufo</code> column contains one value of 9999, which appears to be a placeholder for missing data rather than a real count. A histogram of <code>ufo</code> makes this obvious. This value should be replaced with <code>NA</code>.</p>
+
+<p><strong>Error 3 - Negative value in alc</strong><br>
+Alcohol consumption cannot be negative. There is one observation with a value of -5 in the <code>alc</code> column. A histogram will reveal it as a clear outlier on the left. The correct value is 5. Note: negative values in the <code>chupa</code> column are fine and expected, since it is a growth rate.</p>
+</div>
+</div>
+
+# Coding Puzzles
+
+In the following snippets of code, can you identify the error? If you're not sure, try running them and see what the error says.
+
+<div class="puzzle-block">
+<p><strong>Puzzle 1.</strong></p>
+<pre><code class="language-r">summary(alc)</code></pre>
+<textarea class="student-answer" rows="2" placeholder="What is the error?"></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="puzzle-answer">
+<pre><code class="language-r"># We have not specified that this is in the chupa dataset
+summary(chupa&#36;alc)</code></pre>
+</div>
+</div>
+
+<div class="puzzle-block">
+<p><strong>Puzzle 2.</strong></p>
+<pre><code class="language-r">chupa[chupa&#36;ufo==9999]</code></pre>
+<textarea class="student-answer" rows="2" placeholder="What is the error?"></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="puzzle-answer">
+<pre><code class="language-r"># We're missing the comma to specify which columns to show
+chupa[chupa&#36;ufo == 9999, ]</code></pre>
+</div>
+</div>
+
+<div class="puzzle-block">
+<p><strong>Puzzle 3.</strong></p>
+<pre><code class="language-r">chupa[chupa&#36;ufo = 9999, ]</code></pre>
+<textarea class="student-answer" rows="2" placeholder="What is the error?"></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="puzzle-answer">
+<pre><code class="language-r"># = assigns a value; use == for a conditional test
+chupa[chupa&#36;ufo == 9999, ]</code></pre>
+</div>
+</div>
+
+<div class="puzzle-block">
+<p><strong>Puzzle 4.</strong></p>
+<pre><code class="language-r">chupa[chupa&#36;city = Houston,]</code></pre>
+<textarea class="student-answer" rows="2" placeholder="What is the error?"></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="puzzle-answer">
+<pre><code class="language-r"># Houston needs to be in quotation marks (it's a string, not an object)
+# Also = should be ==
+chupa[chupa&#36;city == "Houston", ]</code></pre>
+</div>
+</div>
+
+<div class="puzzle-block">
+<p><strong>Puzzle 5.</strong></p>
+<pre><code class="language-r">ali[ali&#36;Length > 200, ]</code></pre>
+<textarea class="student-answer" rows="2" placeholder="What is the error?"></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="puzzle-answer">
+<pre><code class="language-r"># Names are case sensitive. Should be `length`, not `Length`
+ali[ali&#36;length > 200, ]</code></pre>
+</div>
+</div>
+
+<div class="puzzle-block">
+<p><strong>Puzzle 6.</strong></p>
+<pre><code class="language-r">ali[ali&#36;bite > mean(ali&#36;bite), ]</code></pre>
+<textarea class="student-answer" rows="2" placeholder="What is the error?"></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="puzzle-answer">
+<pre><code class="language-r"># If there are NAs in bite this will fail - include na.rm = TRUE
+ali[ali&#36;bite > mean(ali&#36;bite, na.rm = TRUE), ]</code></pre>
+</div>
+</div>
+
+```{=html}
+<button id="glossary-btn" onclick="toggleGlossary()">词典 / Glossary</button>
+
+<div id="glossary-panel">
+  <div id="glossary-header">
+    <span>Glossary / 词典</span>
+    <button id="glossary-close" onclick="toggleGlossary()">&#x2715;</button>
+  </div>
+  <div id="glossary-body">
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Exploratory Data Analysis (EDA)</span>
+        <span class="glossary-zh-term">探索性数据分析</span>
+      </div>
+      <div class="glossary-en-def">An initial investigation of a dataset using summaries and plots to understand its structure, spot patterns, and identify potential problems before modelling.</div>
+      <div class="glossary-zh-def">在建模之前，通过统计摘要和图表初步了解数据结构、发现规律并识别潜在问题的过程。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Variable</span>
+        <span class="glossary-zh-term">变量</span>
+      </div>
+      <div class="glossary-en-def">A column in a dataset. Each variable holds one type of measurement or attribute recorded for every observation.</div>
+      <div class="glossary-zh-def">数据集中的一列，记录每个观测值的某种测量或属性。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Observation</span>
+        <span class="glossary-zh-term">观测值</span>
+      </div>
+      <div class="glossary-en-def">A single row in a dataset, representing one instance of data collection (e.g. one animal, one survey response).</div>
+      <div class="glossary-zh-def">数据集中的一行，代表一次数据采集的记录（如一只动物、一份问卷回答）。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Data frame</span>
+        <span class="glossary-zh-term">数据框</span>
+      </div>
+      <div class="glossary-en-def">R's standard table structure: rows are observations, columns are variables. Most datasets you work with in R will be data frames.</div>
+      <div class="glossary-zh-def">R 中最常用的表格结构：行为观测值，列为变量。大多数在 R 中处理的数据集都是数据框。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Numeric</span>
+        <span class="glossary-zh-term">数值型</span>
+      </div>
+      <div class="glossary-en-def">A variable type that holds numbers (e.g. length, weight, temperature). R calls these <code>num</code> or <code>int</code> in <code>str()</code> output.</div>
+      <div class="glossary-zh-def">存储数字的变量类型（如长度、重量、温度）。在 R 的 <code>str()</code> 输出中显示为 <code>num</code> 或 <code>int</code>。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Character</span>
+        <span class="glossary-zh-term">字符型</span>
+      </div>
+      <div class="glossary-en-def">A variable type that holds text (e.g. species names, city names). R calls these <code>chr</code> in <code>str()</code> output.</div>
+      <div class="glossary-zh-def">存储文本的变量类型（如物种名称、城市名称）。在 R 的 <code>str()</code> 输出中显示为 <code>chr</code>。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Factor</span>
+        <span class="glossary-zh-term">因子</span>
+      </div>
+      <div class="glossary-en-def">A categorical variable with a fixed set of levels (e.g. sex: male/female). R stores factors efficiently and uses them correctly in models.</div>
+      <div class="glossary-zh-def">具有固定类别水平的分类变量（如性别：雄性/雌性）。R 以因子形式高效存储并在模型中正确使用。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Mean</span>
+        <span class="glossary-zh-term">均值</span>
+      </div>
+      <div class="glossary-en-def">The arithmetic average: sum of all values divided by the number of values. Sensitive to extreme outliers.</div>
+      <div class="glossary-zh-def">算术平均数：所有值的总和除以值的个数。对极端离群值较为敏感。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Median</span>
+        <span class="glossary-zh-term">中位数</span>
+      </div>
+      <div class="glossary-en-def">The middle value when data are sorted. More robust than the mean when outliers are present.</div>
+      <div class="glossary-zh-def">数据排序后的中间值。在存在离群值时比均值更稳健。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Quantile</span>
+        <span class="glossary-zh-term">分位数</span>
+      </div>
+      <div class="glossary-en-def">A cut point that divides data into equal-sized groups. The 25th and 75th percentiles (Q1 and Q3) bracket the middle half of the data.</div>
+      <div class="glossary-zh-def">将数据分成等份的分界点。第25和第75百分位数（Q1和Q3）框定了数据的中间一半。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Range</span>
+        <span class="glossary-zh-term">极差</span>
+      </div>
+      <div class="glossary-en-def">The difference between the maximum and minimum values in a variable. A quick check for implausible values.</div>
+      <div class="glossary-zh-def">变量中最大值与最小值之差。可快速检查是否存在不合理的值。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">NA</span>
+        <span class="glossary-zh-term">缺失值</span>
+      </div>
+      <div class="glossary-en-def">R's symbol for a missing value. Functions like <code>mean()</code> return <code>NA</code> if any value is missing unless you add <code>na.rm = TRUE</code>.</div>
+      <div class="glossary-zh-def">R 中缺失值的符号。若数据中存在 <code>NA</code>，<code>mean()</code> 等函数会返回 <code>NA</code>，除非添加 <code>na.rm = TRUE</code>。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Outlier</span>
+        <span class="glossary-zh-term">离群值</span>
+      </div>
+      <div class="glossary-en-def">A value that sits far from the rest of the data. May be a genuine extreme observation or a data entry error.</div>
+      <div class="glossary-zh-def">远离其他数据点的值。可能是真实的极端观测值，也可能是数据录入错误。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Working directory</span>
+        <span class="glossary-zh-term">工作目录</span>
+      </div>
+      <div class="glossary-en-def">The folder R looks in by default when reading or writing files. Set it with <code>setwd()</code> or via the RStudio menu.</div>
+      <div class="glossary-zh-def">R 读写文件时默认查找的文件夹。可通过 <code>setwd()</code> 或 RStudio 菜单设置。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Script</span>
+        <span class="glossary-zh-term">脚本</span>
+      </div>
+      <div class="glossary-en-def">A plain text file (usually <code>.R</code>) containing a sequence of R commands. Run it top to bottom to reproduce an analysis exactly.</div>
+      <div class="glossary-zh-def">包含一系列 R 命令的纯文本文件（通常为 <code>.R</code>）。从上到下运行即可完整重现分析过程。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Function</span>
+        <span class="glossary-zh-term">函数</span>
+      </div>
+      <div class="glossary-en-def">A named operation in R (e.g. <code>mean()</code>, <code>summary()</code>). You pass inputs inside the parentheses and get an output back.</div>
+      <div class="glossary-zh-def">R 中的命名操作（如 <code>mean()</code>、<code>summary()</code>）。在括号内传入输入值，函数返回输出结果。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Argument</span>
+        <span class="glossary-zh-term">参数</span>
+      </div>
+      <div class="glossary-en-def">An input you provide to a function, e.g. <code>na.rm = TRUE</code> in <code>mean(x, na.rm = TRUE)</code>. Arguments control how the function behaves.</div>
+      <div class="glossary-zh-def">传递给函数的输入值，例如 <code>mean(x, na.rm = TRUE)</code> 中的 <code>na.rm = TRUE</code>。参数控制函数的行为方式。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Indexing</span>
+        <span class="glossary-zh-term">索引</span>
+      </div>
+      <div class="glossary-en-def">Selecting specific rows or columns from a data frame using square brackets: <code>df[rows, columns]</code>. Leave a slot blank to mean "all".</div>
+      <div class="glossary-zh-def">使用方括号从数据框中选取特定的行或列：<code>df[行, 列]</code>。留空表示"全部"。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Conditional statement</span>
+        <span class="glossary-zh-term">条件语句</span>
+      </div>
+      <div class="glossary-en-def">A logical test that returns <code>TRUE</code> or <code>FALSE</code> (e.g. <code>x > 5</code>). Used inside square brackets to filter rows that meet a condition.</div>
+      <div class="glossary-zh-def">返回 <code>TRUE</code> 或 <code>FALSE</code> 的逻辑判断（如 <code>x > 5</code>）。用于方括号内筛选满足条件的行。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Data entry error</span>
+        <span class="glossary-zh-term">数据录入错误</span>
+      </div>
+      <div class="glossary-en-def">A mistake introduced when recording or entering data (e.g. a typo, wrong units, a placeholder value left in). EDA is the main tool for catching these.</div>
+      <div class="glossary-zh-def">在记录或输入数据时引入的错误（如错别字、单位错误、遗留的占位符值）。探索性数据分析是发现此类错误的主要方法。</div>
+    </div>
+
+  </div>
+</div>
+```

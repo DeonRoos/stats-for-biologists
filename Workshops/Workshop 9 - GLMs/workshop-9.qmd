@@ -1,0 +1,612 @@
+---
+title: "Workshop 9: Poisson GLMs"
+subtitle: "BI3010 Statistics for Biologists"
+author: "Roos & Pinard"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    theme: [cosmo, ../custom.scss]
+    highlight-style: github
+    embed-resources: true
+    code-copy: true
+    code-tools: false
+    html-math-method: mathjax
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show = "show",
+                      message = FALSE, warning = FALSE)
+library(ggplot2)
+```
+
+```{=html}
+<script>
+function revealAnswer(btn) {
+  var block = btn.closest('.question-block, .puzzle-block');
+  var answerClass = block.classList.contains('puzzle-block') ? '.puzzle-answer' : '.instructor-answer';
+
+  var textarea = block.querySelector('.student-answer');
+  if (textarea) {
+    if (textarea.value.trim() === '') {
+      textarea.classList.add('missing');
+      textarea.placeholder = 'Please write your answer before revealing...';
+      textarea.focus();
+      return;
+    }
+    textarea.classList.remove('missing');
+  }
+
+  var mcOptions = block.querySelector('.mc-options');
+  if (mcOptions) {
+    var radios = mcOptions.querySelectorAll('input[type=radio]');
+    var anyChecked = Array.from(radios).some(function(r) { return r.checked; });
+    if (!anyChecked) {
+      mcOptions.classList.add('unanswered');
+      return;
+    }
+    mcOptions.classList.remove('unanswered');
+    radios.forEach(function(r) {
+      r.disabled = true;
+      var label = r.closest('label');
+      if (r.dataset.correct === 'true') {
+        label.classList.add('mc-correct');
+      } else if (r.checked) {
+        label.classList.add('mc-incorrect');
+      }
+    });
+  }
+
+  var answer = block.querySelector(answerClass);
+  if (answer) answer.style.display = 'block';
+  btn.textContent = 'Answer shown';
+  btn.disabled = true;
+}
+
+function toggleGlossary() {
+  document.getElementById('glossary-panel').classList.toggle('open');
+}
+</script>
+```
+
+```{=html}
+<style>
+#glossary-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: #00b494;
+  color: #fff;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  transition: background 0.15s;
+  font-family: inherit;
+}
+#glossary-btn:hover { background: #009478; }
+
+#glossary-panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 380px;
+  height: 100vh;
+  background: #fff;
+  border-left: 3px solid #00b494;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+  z-index: 1001;
+  transition: right 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+#glossary-panel.open { right: 0; }
+
+#glossary-header {
+  background: #0d1e2c;
+  color: #fff;
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+#glossary-header span { font-weight: 600; font-size: 0.95rem; letter-spacing: 0.03em; }
+#glossary-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.7;
+}
+#glossary-close:hover { opacity: 1; }
+#glossary-body { overflow-y: auto; flex: 1; }
+
+.glossary-entry {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #e8f5f0;
+}
+.glossary-entry:last-child { border-bottom: none; }
+.glossary-terms {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.3rem;
+}
+.glossary-en-term { font-weight: 600; color: #0d1e2c; font-size: 0.92rem; }
+.glossary-zh-term { color: #00b494; font-weight: 600; font-size: 0.92rem; }
+.glossary-en-def  { font-size: 0.845rem; color: #444; line-height: 1.5; margin-bottom: 0.25rem; }
+.glossary-zh-def  { font-size: 0.845rem; color: #1c3a50; line-height: 1.65; }
+</style>
+
+<button id="glossary-btn" onclick="toggleGlossary()">Glossary 词汇表</button>
+
+<div id="glossary-panel">
+  <div id="glossary-header">
+    <span>Glossary / 词汇表</span>
+    <button id="glossary-close" onclick="toggleGlossary()">&#10005;</button>
+  </div>
+  <div id="glossary-body">
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Generalised Linear Model (GLM)</span>
+        <span class="glossary-zh-term">广义线性模型</span>
+      </div>
+      <div class="glossary-en-def">An extension of the linear model that allows the response variable to follow distributions other than Normal. A GLM has three components: a distribution family (describing how the response is generated), a link function (connecting the linear predictor to the mean of that distribution), and the linear predictor itself (the equation of predictors and coefficients).</div>
+      <div class="glossary-zh-def">线性模型的扩展，允许响应变量遵循正态分布以外的分布。GLM由三个部分组成：分布族（描述响应变量如何产生）、连接函数（将线性预测子与该分布的均值相连接）以及线性预测子本身（预测变量与系数的方程）。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Poisson distribution</span>
+        <span class="glossary-zh-term">泊松分布</span>
+      </div>
+      <div class="glossary-en-def">A probability distribution for count data: non-negative integers (0, 1, 2, ...). It is described by a single parameter λ (lambda), which is both the mean and the variance of the distribution. The Poisson distribution is the natural choice when modelling species counts, event frequencies, or any response that cannot be negative or fractional.</div>
+      <div class="glossary-zh-def">用于计数数据（非负整数：0, 1, 2, ...）的概率分布，由单一参数λ（lambda）描述，该参数同时是分布的均值和方差。当对物种数量、事件频率或任何不能为负数或小数的响应变量建模时，泊松分布是自然之选。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Link function</span>
+        <span class="glossary-zh-term">连接函数</span>
+      </div>
+      <div class="glossary-en-def">A function that connects the linear predictor (which can take any value from −∞ to +∞) to the mean of the response distribution (which may be constrained, e.g. counts must be positive). The link function ensures that model predictions respect the natural constraints of the response. The link function transforms the linear predictor, not the observed data.</div>
+      <div class="glossary-zh-def">将线性预测子（可取从−∞到+∞的任意值）与响应分布的均值（可能受到约束，例如计数必须为正）相连接的函数。连接函数确保模型预测值符合响应变量的自然约束。连接函数变换的是线性预测子，而非观测数据本身。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Log link</span>
+        <span class="glossary-zh-term">对数连接</span>
+      </div>
+      <div class="glossary-en-def">The default link function for Poisson GLMs. On the link scale, the linear predictor is log(λ), so it can range from −∞ to +∞. Applying the inverse (exponentiating with <code>exp()</code>) converts predictions back to the response scale, where they are always positive. Slopes on the log scale describe multiplicative changes on the response scale.</div>
+      <div class="glossary-zh-def">泊松GLM的默认连接函数。在连接尺度上，线性预测子为log(λ)，可从−∞到+∞取任意值。通过取逆（使用<code>exp()</code>指数化）将预测值转换回响应尺度，在该尺度上始终为正值。对数尺度上的斜率描述的是响应尺度上的乘法变化。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Linear predictor</span>
+        <span class="glossary-zh-term">线性预测子</span>
+      </div>
+      <div class="glossary-en-def">The linear combination of predictors and coefficients: β₀ + β₁x₁ + β₂x₂ + .... In a GLM, the link function connects the linear predictor to the expected value of the response. The linear predictor itself is always linear in the coefficients, even when the relationship between predictors and response is not linear on the response scale.</div>
+      <div class="glossary-zh-def">预测变量与系数的线性组合：β₀ + β₁x₁ + β₂x₂ + ...。在GLM中，连接函数将线性预测子与响应变量的期望值相连接。即使预测变量与响应变量在响应尺度上的关系不是线性的，线性预测子本身在系数上始终是线性的。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Overdispersion</span>
+        <span class="glossary-zh-term">过度离散</span>
+      </div>
+      <div class="glossary-en-def">When the observed variation in the data is greater than the distribution assumes. For a Poisson GLM, the variance is assumed to equal the mean (λ). Overdispersion occurs when the variance is much larger than the mean. It makes standard errors too small, p-values too low, and confidence intervals too narrow. Checked by dividing residual deviance by residual degrees of freedom: values well above 1 indicate overdispersion.</div>
+      <div class="glossary-zh-def">当数据中观测到的变异大于分布所假设的变异时出现的问题。对于泊松GLM，方差被假定等于均值（λ）。当方差远大于均值时，就会出现过度离散。它使标准误差偏小，p值偏低，置信区间偏窄。通过将残差偏差除以残差自由度来检验：远大于1的值表明存在过度离散。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Back-transformation</span>
+        <span class="glossary-zh-term">反变换</span>
+      </div>
+      <div class="glossary-en-def">Converting a prediction from the link scale back to the response scale. For a log link, this means applying <code>exp()</code> to the predicted value. Back-transformation is needed when reporting or plotting predictions in interpretable units (e.g. expected species counts rather than log-expected species counts). Confidence intervals must also be back-transformed after being calculated on the link scale.</div>
+      <div class="glossary-zh-def">将预测值从连接尺度转换回响应尺度。对于对数连接，这意味着对预测值应用<code>exp()</code>。当以可解释单位（例如预期物种数而非对数预期物种数）报告或绘制预测值时，需要进行反变换。置信区间也必须在连接尺度上计算后再进行反变换。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Residual deviance</span>
+        <span class="glossary-zh-term">残差偏差</span>
+      </div>
+      <div class="glossary-en-def">A measure of how well the fitted model describes the data, analogous to the residual sum of squares in a linear model. Reported in the <code>summary()</code> output alongside residual degrees of freedom. For a Poisson GLM, dividing residual deviance by residual degrees of freedom gives the dispersion statistic: a value close to 1 is expected, values well above 1 indicate overdispersion.</div>
+      <div class="glossary-zh-def">衡量拟合模型对数据描述程度的指标，类似于线性模型中的残差平方和。在<code>summary()</code>输出中与残差自由度一起报告。对于泊松GLM，将残差偏差除以残差自由度得到离散统计量：接近1的值是正常的，远大于1的值表明存在过度离散。</div>
+    </div>
+
+  </div>
+</div>
+```
+
+# Workshop structure
+
+As always, we work through the same seven-step workflow:
+
+1. Formulate a research question.
+2. Perform exploratory data analysis (EDA).
+3. Identify any hidden assumptions.
+4. Fit an appropriate model ← main focus today.
+5. Diagnose the model and check assumptions ← main focus today.
+6. Summarise the results ← main focus today.
+7. Interpret and draw conclusions.
+
+All previous workshops used linear models with a Normal distribution for the response. Today we extend that to Generalised Linear Models (GLMs), which allow the response variable to follow a different distribution. The specific case here is count data, which calls for a Poisson GLM.
+
+## 1. Formulate a research question
+
+The dataset for this workshop (`species.txt` on MyAberdeen) comes from a study of plant diversity across 90 plots of land. Each row is one plot. The variables are:
+
+- `Species`: the number of plant species recorded in the plot (a count).
+- `Biomass`: the total weight of plants in the plot, in kg.
+- `pH`: the soil acidity category (`"High"`, `"Mid"`, or `"Low"`).
+
+The researchers wanted to describe how species count is associated with plant biomass and soil pH. This is a predictive question: no causal claim is being made about either predictor.
+
+Load the data:
+
+```{r, eval=FALSE}
+species <- read.table("Data/species.txt", header = TRUE)
+```
+
+## 2. Perform exploratory data analysis
+
+Spend a few minutes exploring the dataset. Check the structure, look at distributions, and plot the response against each predictor. Useful functions: `str()`, `summary()`, `hist()`, `table()`, `ggplot()`.
+
+```{r, eval=FALSE}
+str(species)
+summary(species)
+```
+
+```{r, eval=FALSE}
+hist(species$Species)
+hist(species$Biomass)
+table(species$pH)
+```
+
+```{r, eval=FALSE}
+ggplot(species, aes(x = Biomass, y = Species)) +
+  geom_point() +
+  theme_minimal()
+
+ggplot(species, aes(x = pH, y = Species)) +
+  geom_boxplot() +
+  theme_minimal()
+```
+
+## 3. Identify hidden assumptions
+
+Before fitting any model, think about the hidden assumptions. The standard ones apply: validity, representativeness, additivity, and linearity. But there is also a new one specific to Poisson GLMs: dispersion. We will return to this after fitting.
+
+## 4. Fit an appropriate model
+
+### Choosing a distribution
+
+The response variable `Species` is a count: it can only take non-negative integer values (0, 1, 2, ...). A Normal distribution generates continuous values and allows negatives, so it is a poor fit for count data. The Poisson distribution is designed for counts. It is described by a single parameter λ (lambda), which is both the mean and the expected count.
+
+The distributional assumption for this model is:
+
+$$Species_i \sim Poisson(\lambda_i)$$
+
+where $Species_i$ is the count of species in plot $i$, modelled as coming from a Poisson distribution with mean $\lambda_i$.
+
+### Choosing a link function
+
+Because λ must always be positive (you cannot have a negative expected count), we cannot fit a straight line directly to λ — the line could go below zero. The log link solves this: it maps the linear predictor (which can be any value) onto the log scale, where values can range freely, and then the inverse (`exp()`) maps back to always-positive predictions.
+
+The important point: the link function transforms the linear predictor, not the observed species counts. The data never change.
+
+The equation for the linear predictor is:
+
+$$log(\lambda_i) = \beta_0 + \beta_1 \times Biomass_i$$
+
+where $\beta_0$ is the intercept (the log expected species count when Biomass = 0) and $\beta_1$ is the slope for biomass on the log scale.
+
+### Fitting the model
+
+We start with just `Biomass` as a predictor to keep things simple before adding `pH`. In R, a GLM is fitted with `glm()` rather than `lm()`. The `family` argument specifies both the distribution and the link function:
+
+```{r, eval=FALSE}
+species_mod <- glm(Species ~ Biomass,
+                   family = poisson(link = "log"),
+                   data = species)
+```
+
+## 5. Diagnose the model and check assumptions
+
+The same four diagnostic plots apply. However, the interpretation of two of them changes for a Poisson GLM:
+
+- The normal Q-Q plot: for a linear model we check whether residuals are approximately Normal. A Poisson GLM does not assume Normal residuals, so this plot has very limited use here and can mostly be ignored.
+- The residuals vs fitted and scale-location plots: these still check for patterns in the residuals, but they also pick up overdispersion, which is a Poisson-specific concern.
+
+```{r, eval=FALSE}
+par(mfrow = c(2, 2))
+plot(species_mod)
+par(mfrow = c(1, 1))
+```
+
+<div class="question-block">
+<p><strong>Question 1.</strong> What does the residuals vs fitted plot show?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w9-q1" data-correct="false"> No concern: residuals scatter randomly around zero with no pattern.</label>
+  <label><input type="radio" name="w9-q1" data-correct="true"> Concern: there is a clear funnel pattern where the spread of residuals increases as fitted values get larger, suggesting the equal variance assumption is not met and overdispersion may be present.</label>
+  <label><input type="radio" name="w9-q1" data-correct="false"> Concern: there is a strong curved pattern, indicating the relationship between biomass and species is not linear.</label>
+  <label><input type="radio" name="w9-q1" data-correct="false"> Concern: most residuals fall outside ±2, indicating a poor overall fit.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The plot shows a funnel: residuals are small and fairly well-behaved at low fitted values but spread out considerably at higher fitted values. This is a sign that the variation in the data is larger than a Poisson model expects, which is known as overdispersion. A well-fitting Poisson model should show roughly equal spread throughout.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 2.</strong> What should you conclude from the normal Q-Q plot for this Poisson GLM?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w9-q2" data-correct="false"> The residuals depart strongly from the diagonal, so the normality of errors assumption is violated.</label>
+  <label><input type="radio" name="w9-q2" data-correct="false"> The residuals fall close to the diagonal, confirming the model assumptions are met.</label>
+  <label><input type="radio" name="w9-q2" data-correct="true"> Very little: a Poisson GLM does not assume normally distributed residuals, so the Q-Q plot is largely uninformative here and should not be used to assess model fit.</label>
+  <label><input type="radio" name="w9-q2" data-correct="false"> The Q-Q plot confirms whether the Poisson distribution was an appropriate choice for the response.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The normality of errors assumption belongs to linear models, not Poisson GLMs. A Poisson GLM assumes counts follow a Poisson distribution, not that residuals are Normal. The Q-Q plot here checks something we never assumed in the first place, so it tells us very little. Focus on the residuals vs fitted and scale-location plots instead.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 3.</strong> What does the scale-location plot show?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w9-q3" data-correct="false"> No concern: the line through the plot is flat and residuals are evenly spread.</label>
+  <label><input type="radio" name="w9-q3" data-correct="true"> Concern: the spread of residuals increases sharply for larger fitted values, consistent with the funnel seen in the residuals vs fitted plot and suggesting overdispersion.</label>
+  <label><input type="radio" name="w9-q3" data-correct="false"> Concern: the spread of residuals decreases as fitted values increase, suggesting underdispersion.</label>
+  <label><input type="radio" name="w9-q3" data-correct="false"> No concern: the scale-location plot is only interpreted for Normal linear models.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The scale-location plot reinforces the picture from the residuals vs fitted plot: the standardised residuals grow in size as fitted values increase. Both plots are pointing to the same problem: the variance in the data is growing faster than a Poisson model expects.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 4.</strong> What does the residuals vs leverage plot show?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w9-q4" data-correct="false"> Serious concern: several observations exceed a Cook's distance of 1 and should be removed.</label>
+  <label><input type="radio" name="w9-q4" data-correct="true"> Mild concern: no observations exceed a Cook's distance of 1, but a handful are closer to the boundary than is ideal. Worth keeping an eye on but not enough to stop the analysis.</label>
+  <label><input type="radio" name="w9-q4" data-correct="false"> No concern at all: Cook's distances are all tiny and well within acceptable limits.</label>
+  <label><input type="radio" name="w9-q4" data-correct="false"> No concern: Cook's distance is only relevant for linear models and can be ignored for GLMs.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>No observations exceed a Cook's distance of 1, which would be the threshold for serious concern. However, a few observations sit closer to the dashed lines than we would like. This does not invalidate the model, but it is worth noting. The bigger problem here is overdispersion, not influential observations.</p>
+</div>
+</div>
+
+### Checking for overdispersion
+
+The residual plots suggested overdispersion. We can put a number on it using the model summary. Run `summary(species_mod)` and find the residual deviance and the residual degrees of freedom in the output. Dividing residual deviance by residual degrees of freedom gives the dispersion statistic. For a Poisson model this should be close to 1; values well above 1 indicate overdispersion.
+
+```{r, eval=FALSE}
+summary(species_mod)
+```
+
+<div class="question-block">
+<p><strong>Question 5.</strong> Calculate the dispersion statistic for this model. What does the value tell you?</p>
+<textarea class="student-answer" rows="4" placeholder="Write the calculation and your interpretation here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>From the summary output: residual deviance ≈ 433.6 on 88 degrees of freedom.</p>
+<pre><code>433.6 / 88  # ≈ 4.9</code></pre>
+<p>A value of 4.9 is far above 1 and indicates severe overdispersion. The variation in species counts is roughly five times larger than the Poisson distribution predicts. As a consequence, the standard errors for the coefficients will be too small, making p-values lower than they should be and confidence intervals too narrow. The model as it stands should be treated with caution.</p>
+</div>
+</div>
+
+## 6. Summarise the results
+
+Despite the overdispersion, we will use this model to practise making predictions on the link scale and on the response scale. We will fix the overdispersion in the next section.
+
+From `summary(species_mod)`, the fitted equation on the log scale is approximately:
+
+$$log(\hat{\lambda}_i) = 3.55 + (-0.20) \times Biomass_i$$
+
+### Predictions on the link scale
+
+To predict on the link scale, substitute the biomass value into the equation directly.
+
+<div class="question-block">
+<p><strong>Question 6.</strong> On the log scale, what is the predicted species count for a plot with 0 kg of biomass? And for a plot with 5 kg of biomass?</p>
+<textarea class="student-answer" rows="4" placeholder="Show your working for both values..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<pre><code>3.55 + (-0.20) * 0   # = 3.55  (at 0 kg biomass)
+3.55 + (-0.20) * 5   # = 2.55  (at 5 kg biomass)</code></pre>
+<p>These predictions are on the log scale. A value of 3.55 does not mean 3.55 species; it means log(expected species) = 3.55. To get the actual expected species count, we need to back-transform.</p>
+</div>
+</div>
+
+### Predictions on the response scale
+
+To convert a prediction from the log scale to the expected species count, apply `exp()` to the log-scale value.
+
+<div class="question-block">
+<p><strong>Question 7.</strong> On the response scale, what is the expected species count for plots with 0, 5, and 10 kg of biomass?</p>
+<textarea class="student-answer" rows="5" placeholder="Use exp() to back-transform your log-scale predictions..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<pre><code>exp(3.55 + (-0.20) * 0)   # ≈ 34.8 species at 0 kg
+exp(3.55 + (-0.20) * 5)   # ≈ 12.8 species at 5 kg
+exp(3.55 + (-0.20) * 10)  # ≈  4.7 species at 10 kg</code></pre>
+<p>According to this model, expected species count drops from roughly 35 at zero biomass to roughly 5 at 10 kg. The relationship is not linear on the response scale: equal increases in biomass produce proportionally smaller reductions in species count as biomass grows. This is a direct consequence of the log link.</p>
+</div>
+</div>
+
+### Plotting the predictions
+
+Rather than calculating one prediction at a time, we can generate a smooth prediction curve across the full range of biomass values, in the same way we did for linear models: create a fake dataset, run `predict()`, back-transform, and plot.
+
+Because the model uses a log link, we need to exponentiate the predictions. We also need to back-transform the confidence interval limits, and we do this after adding and subtracting the standard error, not before.
+
+```{r, eval=FALSE}
+fake <- data.frame(Biomass = seq(from = min(species$Biomass),
+                                 to   = max(species$Biomass),
+                                 length.out = 20))
+
+preds       <- predict(species_mod, newdata = fake, se.fit = TRUE)
+fake$fit    <- exp(preds$fit)
+fake$low    <- exp(preds$fit - 1.96 * preds$se.fit)
+fake$upp    <- exp(preds$fit + 1.96 * preds$se.fit)
+```
+
+<div class="question-block">
+<p><strong>Question 8.</strong> Using the <code>fake</code> dataset above, create a figure showing the predicted species count against biomass, with a 95% confidence band. Use <code>geom_ribbon()</code> for the band and <code>geom_line()</code> for the fitted line.</p>
+<textarea class="student-answer" rows="5" placeholder="Write your ggplot2 code here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<pre><code>ggplot(fake) +
+  geom_ribbon(aes(x = Biomass, ymin = low, ymax = upp), fill = "grey80") +
+  geom_line(aes(x = Biomass, y = fit)) +
+  labs(x = "Biomass (kg)",
+       y = "Expected species count") +
+  theme_minimal()</code></pre>
+<p>The curve is not a straight line on the response scale because of the log link. The confidence band widens at higher biomass values, partly because there are fewer observations there and partly because the overdispersion means the model is less certain than it should be.</p>
+</div>
+</div>
+
+## 7. Interpret and draw conclusions
+
+Based on this model, biomass has a negative association with species count: plots with more plant biomass tend to have fewer plant species. However, the severe overdispersion (dispersion ≈ 4.9) means we should not place much confidence in the specific p-values or the width of the confidence intervals. The model as fitted is not well calibrated.
+
+# Resolving the violations
+
+The overdispersion in the first model may partly reflect a missing predictor. We also set out to describe the association with both `Biomass` and `pH`, not just `Biomass`. Adding `pH` to the model may absorb some of the unexplained variation and reduce overdispersion.
+
+Run a Poisson GLM with both `Biomass` and `pH`:
+
+```{r, eval=FALSE}
+species_mod2 <- glm(Species ~ Biomass + pH,
+                    family = poisson(link = "log"),
+                    data = species)
+```
+
+## Diagnose the new model
+
+With every new model, we diagnose before we interpret.
+
+```{r, eval=FALSE}
+par(mfrow = c(2, 2))
+plot(species_mod2)
+par(mfrow = c(1, 1))
+
+summary(species_mod2)
+```
+
+<div class="question-block">
+<p><strong>Question 9.</strong> Do the diagnostic plots improve compared to the first model? Calculate the new dispersion statistic and interpret it.</p>
+<div class="mc-options">
+  <label><input type="radio" name="w9-q9" data-correct="false"> No improvement: the funnel pattern remains and dispersion is still well above 4.</label>
+  <label><input type="radio" name="w9-q9" data-correct="true"> Clear improvement: the funnel pattern largely disappears, and dispersion drops to approximately 0.9, close to the ideal value of 1.</label>
+  <label><input type="radio" name="w9-q9" data-correct="false"> Partial improvement: the funnel is smaller but dispersion is still around 3, which remains problematic.</label>
+  <label><input type="radio" name="w9-q9" data-correct="false"> The diagnostics get worse because adding pH introduces collinearity.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The residual plots improve substantially. The funnel in the residuals vs fitted plot is much less pronounced. From the summary: residual deviance ≈ 77.1 on 86 degrees of freedom, giving a dispersion of 77.1 / 86 ≈ 0.9. This is very close to 1 and gives no cause for concern. Including pH absorbed the extra variation that was making the first model look overdispersed.</p>
+<p>Note that underdispersion (values below 1) is generally less of a problem than overdispersion, though it can indicate the model is slightly over-fitted.</p>
+</div>
+</div>
+
+## Interpret the parameters
+
+Run `summary(species_mod2)` and look at the coefficient table.
+
+```{r, eval=FALSE}
+summary(species_mod2)
+```
+
+<div class="question-block">
+<p><strong>Question 10.</strong> Which pH level is the reference (baseline) category in this model, and how can you tell?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w9-q10" data-correct="false"> Low pH, because it comes first alphabetically.</label>
+  <label><input type="radio" name="w9-q10" data-correct="false"> Mid pH, because it is in the middle of the three levels.</label>
+  <label><input type="radio" name="w9-q10" data-correct="true"> High pH, because there is no coefficient labelled <code>pHhigh</code> in the output. Its effect is absorbed into the intercept.</label>
+  <label><input type="radio" name="w9-q10" data-correct="false"> There is no reference category; all three levels are estimated directly.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>R sets the reference category to the first level alphabetically unless you specify otherwise. Here that is "High". Because "High" is the reference, there is no separate <code>pHhigh</code> coefficient: its effect is part of the intercept. The <code>pHlow</code> and <code>pHmid</code> coefficients are the estimated differences from "High" on the log scale.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 11.</strong> The <code>Biomass</code> coefficient is approximately −0.16. What does this mean on the log scale, and what does it imply on the response scale?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w9-q11" data-correct="false"> Each additional kg of biomass reduces expected species count by 0.16, holding pH constant.</label>
+  <label><input type="radio" name="w9-q11" data-correct="true"> Each additional kg of biomass reduces log(expected species count) by 0.16, which means expected species count is multiplied by exp(−0.16) ≈ 0.85: a reduction of about 15%, holding pH constant.</label>
+  <label><input type="radio" name="w9-q11" data-correct="false"> Each additional kg of biomass reduces expected species count by 16%.</label>
+  <label><input type="radio" name="w9-q11" data-correct="false"> The negative sign means the model predicts fewer species overall compared to the null model.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>On the log scale, the slope is −0.16 per kg of biomass. To convert to the response scale, exponentiate: exp(−0.16) ≈ 0.85. This means that for each additional kg of biomass, the expected species count is multiplied by 0.85, a reduction of about 15%, holding pH constant. This is how slopes work on a log link: they are multiplicative on the response scale, not additive.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 12.</strong> The <code>pHlow</code> coefficient is approximately −1.13. What does this represent?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w9-q12" data-correct="false"> The expected species count in low-pH plots is −1.13.</label>
+  <label><input type="radio" name="w9-q12" data-correct="false"> Low-pH plots have 1.13 fewer species than high-pH plots on average.</label>
+  <label><input type="radio" name="w9-q12" data-correct="true"> Low-pH plots have a log expected species count that is 1.13 lower than high-pH plots, holding biomass constant. On the response scale this means exp(−1.13) ≈ 0.32: low-pH plots are expected to have about 32% as many species as high-pH plots.</label>
+  <label><input type="radio" name="w9-q12" data-correct="false"> The slope of the relationship between pH and species count for the low-pH category only.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The <code>pHlow</code> coefficient is a difference on the log scale between low-pH plots and the reference category (high-pH plots), holding biomass constant. To interpret it on the response scale: exp(−1.13) ≈ 0.32, meaning low-pH plots are expected to have roughly 32% as many species as comparable high-pH plots. Similarly, <code>pHmid</code> ≈ −0.47, so mid-pH plots have exp(−0.47) ≈ 0.62: about 62% as many species as high-pH plots.</p>
+</div>
+</div>
+
+## Plot the model fit
+
+Use `ggeffects` to produce separate predicted relationships for each predictor:
+
+```{r, eval=FALSE}
+library(ggeffects)
+
+bio_pred <- ggpredict(species_mod2, terms = "Biomass")
+plot(bio_pred)
+
+ph_pred <- ggpredict(species_mod2, terms = "pH")
+plot(ph_pred)
+```
+
+These plots show the predicted relationship between each predictor and the expected species count, with the other predictor held at its average. The predictions are on the response scale (expected counts), making them directly interpretable.
+
+---
+
+# Assumption table
+
+| Assumption | Description | Example of violation |
+|---|---|---|
+| 1. Validity | The data can answer the research question. | Using a count of species in a plot to measure overall ecosystem diversity, when diversity also includes abundance and evenness. |
+| 2. Representativeness | The sample reflects the population of interest. | Plots selected near roads because they were easiest to reach may not represent remote areas. |
+| 3. Additivity | Predictor effects are additive and independent. | The effect of biomass on species count may differ between low and high pH soils. |
+| 4. Linearity | The relationship between predictors and log(λ) is linear. | Species count declining steeply at first then levelling off, rather than following the log-linear form. |
+| 5. Independence of errors | Observations are independent. | Plots that are physically close to each other may share species, violating independence. |
+| 6. Equal variance of errors | Relevant for linear models; for Poisson GLMs, dispersion replaces this check. | Residuals spreading out at higher fitted values (funnel pattern), indicating overdispersion. |
+| 7. Normality of errors | Relevant for linear models; not assumed for Poisson GLMs. | Not applicable here: the Q-Q plot is largely uninformative for Poisson residuals. |
+| 8. Dispersion | For Poisson GLMs, variance should equal the mean (λ). Residual deviance / residual df should be close to 1. | Residual deviance / df ≈ 4.9 in the first model: severe overdispersion, resolved by including pH. |

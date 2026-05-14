@@ -1,0 +1,596 @@
+---
+title: "Workshop 10: Bernoulli GLMs"
+subtitle: "BI3010 Statistics for Biologists"
+author: "Roos & Pinard"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    theme: [cosmo, ../custom.scss]
+    highlight-style: github
+    embed-resources: true
+    code-copy: true
+    code-tools: false
+    html-math-method: mathjax
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show = "show",
+                      message = FALSE, warning = FALSE)
+library(ggplot2)
+```
+
+```{r data-generation, include=FALSE}
+set.seed(2024)
+n <- 180
+
+territory_quality <- round(runif(n, 1, 10), 1)
+experience <- factor(
+  sample(c("First", "Experienced"), n, replace = TRUE, prob = c(0.4, 0.6)),
+  levels = c("First", "Experienced")
+)
+
+log_odds <- -3.0 + 0.5 * territory_quality + 1.5 * (experience == "Experienced")
+p_success <- plogis(log_odds)
+success   <- rbinom(n, size = 1, prob = p_success)
+
+oystercatcher <- data.frame(success, territory_quality, experience)
+
+dir.create("Data", showWarnings = FALSE)
+write.table(oystercatcher, "Data/oystercatcher.txt", row.names = FALSE)
+```
+
+```{=html}
+<script>
+function revealAnswer(btn) {
+  var block = btn.closest('.question-block, .puzzle-block');
+  var answerClass = block.classList.contains('puzzle-block') ? '.puzzle-answer' : '.instructor-answer';
+
+  var textarea = block.querySelector('.student-answer');
+  if (textarea) {
+    if (textarea.value.trim() === '') {
+      textarea.classList.add('missing');
+      textarea.placeholder = 'Please write your answer before revealing...';
+      textarea.focus();
+      return;
+    }
+    textarea.classList.remove('missing');
+  }
+
+  var mcOptions = block.querySelector('.mc-options');
+  if (mcOptions) {
+    var radios = mcOptions.querySelectorAll('input[type=radio]');
+    var anyChecked = Array.from(radios).some(function(r) { return r.checked; });
+    if (!anyChecked) {
+      mcOptions.classList.add('unanswered');
+      return;
+    }
+    mcOptions.classList.remove('unanswered');
+    radios.forEach(function(r) {
+      r.disabled = true;
+      var label = r.closest('label');
+      if (r.dataset.correct === 'true') {
+        label.classList.add('mc-correct');
+      } else if (r.checked) {
+        label.classList.add('mc-incorrect');
+      }
+    });
+  }
+
+  var answer = block.querySelector(answerClass);
+  if (answer) answer.style.display = 'block';
+  btn.textContent = 'Answer shown';
+  btn.disabled = true;
+}
+
+function toggleGlossary() {
+  document.getElementById('glossary-panel').classList.toggle('open');
+}
+</script>
+```
+
+```{=html}
+<style>
+#glossary-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: #00b494;
+  color: #fff;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  transition: background 0.15s;
+  font-family: inherit;
+}
+#glossary-btn:hover { background: #009478; }
+
+#glossary-panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 380px;
+  height: 100vh;
+  background: #fff;
+  border-left: 3px solid #00b494;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+  z-index: 1001;
+  transition: right 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+#glossary-panel.open { right: 0; }
+
+#glossary-header {
+  background: #0d1e2c;
+  color: #fff;
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+#glossary-header span { font-weight: 600; font-size: 0.95rem; letter-spacing: 0.03em; }
+#glossary-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.7;
+}
+#glossary-close:hover { opacity: 1; }
+#glossary-body { overflow-y: auto; flex: 1; }
+
+.glossary-entry {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #e8f5f0;
+}
+.glossary-entry:last-child { border-bottom: none; }
+.glossary-terms {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.3rem;
+}
+.glossary-en-term { font-weight: 600; color: #0d1e2c; font-size: 0.92rem; }
+.glossary-zh-term { color: #00b494; font-weight: 600; font-size: 0.92rem; }
+.glossary-en-def  { font-size: 0.845rem; color: #444; line-height: 1.5; margin-bottom: 0.25rem; }
+.glossary-zh-def  { font-size: 0.845rem; color: #1c3a50; line-height: 1.65; }
+</style>
+
+<button id="glossary-btn" onclick="toggleGlossary()">Glossary 词汇表</button>
+
+<div id="glossary-panel">
+  <div id="glossary-header">
+    <span>Glossary / 词汇表</span>
+    <button id="glossary-close" onclick="toggleGlossary()">&#10005;</button>
+  </div>
+  <div id="glossary-body">
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Bernoulli distribution</span>
+        <span class="glossary-zh-term">伯努利分布</span>
+      </div>
+      <div class="glossary-en-def">A probability distribution for binary outcomes: observations can only take the value 0 (failure) or 1 (success). The distribution has a single parameter p, the probability of success. It is a special case of the Binomial distribution with one trial. In R, a Bernoulli GLM is fitted using <code>family = binomial(link = "logit")</code>, which handles 0/1 responses automatically.</div>
+      <div class="glossary-zh-def">用于二元结果的概率分布：观测值只能取0（失败）或1（成功）。该分布有一个参数p，即成功的概率。它是试验次数为1的二项分布的特例。在R中，伯努利GLM通过<code>family = binomial(link = "logit")</code>拟合，可自动处理0/1响应变量。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Odds</span>
+        <span class="glossary-zh-term">几率</span>
+      </div>
+      <div class="glossary-en-def">The ratio of the probability of success to the probability of failure: p / (1 − p). If the probability of success is 0.75, the odds are 0.75 / 0.25 = 3, meaning success is three times as likely as failure. Odds range from 0 (impossible) to +∞ (certain), unlike probabilities which range from 0 to 1.</div>
+      <div class="glossary-zh-def">成功概率与失败概率之比：p / (1 − p)。若成功概率为0.75，则几率为0.75 / 0.25 = 3，表示成功是失败可能性的三倍。与概率（范围0到1）不同，几率的范围从0（不可能）到+∞（必然）。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Log-odds</span>
+        <span class="glossary-zh-term">对数几率</span>
+      </div>
+      <div class="glossary-en-def">The natural logarithm of the odds: log(p / (1 − p)). Also called the logit of p. Log-odds can range from −∞ (probability of 0) to +∞ (probability of 1), making them suitable as the linear predictor in a Bernoulli GLM. A log-odds of 0 corresponds to a probability of 0.5; positive values correspond to probabilities above 0.5; negative values to probabilities below 0.5.</div>
+      <div class="glossary-zh-def">几率的自然对数：log(p / (1 − p))，也称为p的logit。对数几率的范围从−∞（概率为0）到+∞（概率为1），因此适合作为伯努利GLM的线性预测子。对数几率为0对应概率0.5；正值对应高于0.5的概率；负值对应低于0.5的概率。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Logit link</span>
+        <span class="glossary-zh-term">logit连接</span>
+      </div>
+      <div class="glossary-en-def">The link function used in a Bernoulli GLM. It transforms the probability p to the log-odds scale: logit(p) = log(p / (1 − p)). This allows the linear predictor to range from −∞ to +∞ while keeping predicted probabilities between 0 and 1. The logit link transforms the linear predictor, not the observed 0/1 data.</div>
+      <div class="glossary-zh-def">伯努利GLM中使用的连接函数。它将概率p变换到对数几率尺度：logit(p) = log(p / (1 − p))。这使得线性预测子可以在−∞到+∞范围内取值，同时将预测概率保持在0和1之间。logit连接变换的是线性预测子，而非观测到的0/1数据。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Back-transformation (logit)</span>
+        <span class="glossary-zh-term">反变换（logit）</span>
+      </div>
+      <div class="glossary-en-def">Converting a prediction from the log-odds scale back to a probability. The inverse of the logit function is the logistic function, applied in R with <code>plogis()</code>. For a log-odds value of x, the corresponding probability is <code>plogis(x)</code> = exp(x) / (1 + exp(x)). Confidence interval limits must also be back-transformed after being calculated on the log-odds scale.</div>
+      <div class="glossary-zh-def">将预测值从对数几率尺度转换回概率。logit函数的逆函数是logistic函数，在R中通过<code>plogis()</code>应用。对于对数几率值x，对应的概率为<code>plogis(x)</code> = exp(x) / (1 + exp(x))。置信区间上下限也必须在对数几率尺度上计算后再进行反变换。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Dispersion (Bernoulli)</span>
+        <span class="glossary-zh-term">离散度（伯努利）</span>
+      </div>
+      <div class="glossary-en-def">Unlike the Poisson distribution, the Bernoulli distribution has no free dispersion parameter. The variance is entirely determined by the mean: var = p(1 − p). There is therefore no overdispersion to check for in a Bernoulli GLM — the residual deviance / degrees of freedom check used in Workshop 9 does not apply here.</div>
+      <div class="glossary-zh-def">与泊松分布不同，伯努利分布没有自由的离散参数。方差完全由均值决定：var = p(1 − p)。因此，伯努利GLM中无需检查过度离散——第9次研讨课中使用的残差偏差/自由度检验在此不适用。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">plogis()</span>
+        <span class="glossary-zh-term">plogis()函数</span>
+      </div>
+      <div class="glossary-en-def">The R function that converts log-odds to a probability. <code>plogis(0)</code> = 0.5, <code>plogis(2)</code> ≈ 0.88, <code>plogis(-2)</code> ≈ 0.12. It is the inverse of <code>qlogis()</code> (which converts a probability to log-odds). Use it whenever you need to back-transform predictions or confidence interval limits from a Bernoulli GLM.</div>
+      <div class="glossary-zh-def">将对数几率转换为概率的R函数。<code>plogis(0)</code> = 0.5，<code>plogis(2)</code> ≈ 0.88，<code>plogis(-2)</code> ≈ 0.12。它是<code>qlogis()</code>（将概率转换为对数几率）的逆函数。每当需要将伯努利GLM的预测值或置信区间上下限进行反变换时，使用此函数。</div>
+    </div>
+
+  </div>
+</div>
+```
+
+# Workshop structure
+
+As always, we work through the same seven-step workflow:
+
+1. Formulate a research question.
+2. Perform exploratory data analysis (EDA).
+3. Identify any hidden assumptions.
+4. Fit an appropriate model ← main focus today.
+5. Diagnose the model and check assumptions ← main focus today.
+6. Summarise the results ← main focus today.
+7. Interpret and draw conclusions.
+
+In Workshop 9 we moved from Normal linear models to Poisson GLMs for count data. Today we take that one step further. The response variable is not a count but a binary outcome: each observation is either a 0 or a 1. The appropriate distribution is the Bernoulli distribution, and the appropriate link function is the logit. Together these form a Bernoulli GLM, more commonly known as logistic regression.
+
+## 1. Formulate a research question
+
+The dataset for this workshop (`oystercatcher.txt` on MyAberdeen) comes from a long-term study of Eurasian oystercatcher (*Haematopus ostralegus*) breeding at a coastal site. Each row is one breeding pair in one season. The variables are:
+
+- `success`: whether the pair fledged at least one chick that season (1 = yes, 0 = no).
+- `territory_quality`: a continuous index of territory quality, scored from 1 (poor) to 10 (excellent) based on food availability and nest-site safety.
+- `experience`: whether the pair were first-time breeders (`"First"`) or had bred at least once before (`"Experienced"`).
+
+The research question is predictive: which combinations of territory quality and breeding experience are associated with higher or lower probability of breeding success?
+
+Load the data:
+
+```{r, eval=FALSE}
+oystercatcher <- read.table("Data/oystercatcher.txt", header = TRUE)
+oystercatcher$experience <- factor(oystercatcher$experience,
+                                   levels = c("First", "Experienced"))
+```
+
+The second line sets the factor levels explicitly so that `"First"` is the reference (baseline) category in the model. This means the intercept will represent first-time breeders, and any `experience` coefficient will represent the difference for experienced breeders relative to first-time breeders.
+
+## 2. Perform exploratory data analysis
+
+The response variable is binary, so some of the usual EDA tools apply differently. `hist()` on a 0/1 variable produces a bar chart; `table()` gives counts; `mean()` gives the proportion of successes.
+
+```{r, eval=FALSE}
+str(oystercatcher)
+summary(oystercatcher)
+table(oystercatcher$success)
+mean(oystercatcher$success)   # overall success rate
+```
+
+```{r, eval=FALSE}
+table(oystercatcher$experience, oystercatcher$success)
+```
+
+For plotting, rather than a scatter plot of 0s and 1s (which is hard to read), plot the data as points with a small amount of vertical jitter so overlapping points are visible:
+
+```{r, eval=FALSE}
+ggplot(oystercatcher, aes(x = territory_quality, y = success)) +
+  geom_jitter(height = 0.05, alpha = 0.4) +
+  labs(x = "Territory quality", y = "Breeding success (0/1)") +
+  theme_minimal()
+```
+
+```{r, eval=FALSE}
+ggplot(oystercatcher, aes(x = experience, y = success)) +
+  geom_bar(stat = "summary", fun = "mean") +
+  labs(x = "Breeding experience", y = "Proportion successful") +
+  theme_minimal()
+```
+
+## 3. Identify hidden assumptions
+
+The usual hidden assumptions apply: validity (does `success` capture what we mean by breeding success?), representativeness (does this population generalise to oystercatchers elsewhere?), and independence (each pair must be a separate, independent observation — pairs sharing a territory or the same individual appearing across years would violate this).
+
+Dispersion is not a concern for Bernoulli GLMs. The variance of a Bernoulli outcome is p(1 − p), which is completely determined by p, the probability of success. There is no free dispersion parameter to estimate or check.
+
+## 4. Fit an appropriate model
+
+### Why not use a linear model?
+
+The response variable `success` can only be 0 or 1. A Normal linear model fitted to binary data has two problems. First, it can predict values below 0 and above 1, which are meaningless as probabilities. Second, the spread of 0/1 residuals is larger near p = 0.5 and smaller near p = 0 or p = 1, so the equal variance of errors assumption is violated by design.
+
+<div class="question-block">
+<p><strong>Question 1.</strong> If you fitted <code>lm(success ~ territory_quality, data = oystercatcher)</code>, which of the following would be a problem?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w10-q1" data-correct="false"> The linear model cannot handle a continuous predictor when the response is binary.</label>
+  <label><input type="radio" name="w10-q1" data-correct="false"> The linear model would refuse to run and return an error.</label>
+  <label><input type="radio" name="w10-q1" data-correct="true"> The linear model can predict values below 0 and above 1, which are not valid probabilities, and the equal variance of errors assumption is violated because residuals from a binary response are not uniformly spread.</label>
+  <label><input type="radio" name="w10-q1" data-correct="false"> The linear model assumes the response is a count, which conflicts with a binary response.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The linear model will run without error and produce coefficient estimates, but its predictions for territory quality at the extremes of the range will fall outside [0, 1]. For example, a predicted success probability of 1.3 or −0.2 has no meaning. The model also assumes equal spread of errors at all fitted values, but for a binary response the spread depends on the probability itself: it is largest when p ≈ 0.5 and smallest near p = 0 or p = 1. Both problems disappear when we use a GLM with the logit link.</p>
+</div>
+</div>
+
+### The Bernoulli distribution and logit link
+
+The Bernoulli distribution models a single binary trial: each observation is either 0 or 1, with probability p of being 1. The model for the distributional assumption is:
+
+$$success_i \sim Bernoulli(p_i)$$
+
+where $p_i$ is the probability of breeding success for pair $i$.
+
+The logit link connects the linear predictor to $p_i$ by transforming probabilities to log-odds:
+
+$$logit(p_i) = \log\!\left(\frac{p_i}{1-p_i}\right) = \beta_0 + \beta_1 \times quality_i$$
+
+Log-odds can range from $-\infty$ to $+\infty$, so they work as a linear predictor without risk of predictions outside [0, 1]. To get predicted probabilities from the log-odds, we apply `plogis()`.
+
+<div class="question-block">
+<p><strong>Question 2.</strong> A log-odds of 0 corresponds to which probability of success?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w10-q2" data-correct="false"> 0 (impossible)</label>
+  <label><input type="radio" name="w10-q2" data-correct="false"> 1 (certain)</label>
+  <label><input type="radio" name="w10-q2" data-correct="true"> 0.5 (equally likely to succeed or fail)</label>
+  <label><input type="radio" name="w10-q2" data-correct="false"> The probability cannot be determined from the log-odds alone.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Log-odds of 0 means the odds are exp(0) = 1, which means success and failure are equally likely: p = 0.5. You can verify this with <code>plogis(0)</code> in R. More generally: negative log-odds → probability below 0.5, positive log-odds → probability above 0.5.</p>
+</div>
+</div>
+
+### Fitting the model
+
+In R, a Bernoulli GLM uses `family = binomial(link = "logit")`. The `binomial` family handles 0/1 data as Bernoulli automatically. Start with `territory_quality` as the only predictor:
+
+```{r, eval=FALSE}
+success_mod <- glm(success ~ territory_quality,
+                   family = binomial(link = "logit"),
+                   data = oystercatcher)
+```
+
+## 5. Diagnose the model and check assumptions
+
+```{r, eval=FALSE}
+par(mfrow = c(2, 2))
+plot(success_mod)
+par(mfrow = c(1, 1))
+```
+
+The residual plots for a Bernoulli GLM look different from those of a linear model or Poisson GLM. Because each observation is either 0 or 1, the raw residuals cluster into two distinct bands in the residuals vs fitted plot: one band for observations where `success = 1` and one for where `success = 0`. This two-banded appearance is expected and does not indicate a problem.
+
+<div class="question-block">
+<p><strong>Question 3.</strong> You notice the residuals vs fitted plot shows two distinct bands of points rather than a single cloud. What does this mean?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w10-q3" data-correct="false"> The model has failed to converge and the estimates are unreliable.</label>
+  <label><input type="radio" name="w10-q3" data-correct="false"> There are two separate subgroups in the data that should be modelled separately.</label>
+  <label><input type="radio" name="w10-q3" data-correct="true"> This is expected for a binary response. The two bands are the residuals from observations where success = 1 and success = 0. It does not indicate a violation of assumptions.</label>
+  <label><input type="radio" name="w10-q3" data-correct="false"> The equal variance of errors assumption is violated and the model should be refitted with a transformation.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The two bands are a direct consequence of the binary response. Every observation either succeeded (residual for that band) or failed (residual for the other band). There is no single continuous cloud because the observed values are constrained to exactly 0 or 1. What you are looking for in the residuals vs fitted plot is a systematic trend within each band, which would indicate a problem with the model form. A funnel or curve within the bands is a concern; two parallel bands with no internal trend is fine.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 4.</strong> Should you use the normal Q-Q plot to assess this Bernoulli GLM?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w10-q4" data-correct="false"> Yes: the Q-Q plot shows whether residuals are normally distributed, which is an assumption of all GLMs.</label>
+  <label><input type="radio" name="w10-q4" data-correct="false"> Yes, but only if the sample size is small.</label>
+  <label><input type="radio" name="w10-q4" data-correct="true"> No: a Bernoulli GLM does not assume normally distributed residuals. The Q-Q plot is checking an assumption that was never made, so it tells us nothing useful about model fit.</label>
+  <label><input type="radio" name="w10-q4" data-correct="false"> No: Q-Q plots can only be used for continuous response variables.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>As with the Poisson GLM in Workshop 9, the Q-Q plot is largely uninformative here. Normality of residuals is an assumption of the Normal linear model, not of GLMs. A Bernoulli GLM assumes residuals follow the Bernoulli distribution, and the Q-Q plot does not check that. Focus your diagnostic attention on the residuals vs fitted and scale-location plots, and on the residuals vs leverage plot for influential observations.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 5.</strong> Do you need to check for overdispersion in this Bernoulli GLM?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w10-q5" data-correct="false"> Yes: calculate residual deviance divided by residual degrees of freedom, just as in Workshop 9.</label>
+  <label><input type="radio" name="w10-q5" data-correct="false"> Yes: binary data is even more prone to overdispersion than count data.</label>
+  <label><input type="radio" name="w10-q5" data-correct="true"> No: the Bernoulli distribution has no free dispersion parameter. The variance is fixed as p(1 − p) once p is estimated, so there is nothing to check.</label>
+  <label><input type="radio" name="w10-q5" data-correct="false"> No: dispersion only matters when the response variable has more than two possible values.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Overdispersion is a concern for some GLMs (including Poisson) but not for Bernoulli. For a Bernoulli outcome, once you know p, the variance is exactly p(1 − p): it is not a free parameter and cannot be larger or smaller than expected. The residual deviance / degrees of freedom check from Workshop 9 does not apply here.</p>
+</div>
+</div>
+
+## 6. Summarise the results
+
+```{r, eval=FALSE}
+summary(success_mod)
+```
+
+The coefficient table gives estimates on the log-odds scale. From the output, the fitted equation is approximately:
+
+$$logit(\hat{p}_i) = -3.0 + 0.5 \times quality_i$$
+
+### Predictions on the log-odds scale
+
+Substitute a value of `territory_quality` directly into the equation to get the predicted log-odds.
+
+<div class="question-block">
+<p><strong>Question 6.</strong> What is the predicted log-odds of success for a pair on a territory with quality = 4? And for quality = 8?</p>
+<textarea class="student-answer" rows="4" placeholder="Show your working for both values..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<pre><code>-3.0 + 0.5 * 4   # = -1.0  (quality = 4)
+-3.0 + 0.5 * 8   # =  1.0  (quality = 8)</code></pre>
+<p>A log-odds of −1.0 is below zero, so the probability of success is below 0.5. A log-odds of +1.0 is above zero, so the probability is above 0.5. To get exact probabilities, back-transform with <code>plogis()</code>.</p>
+</div>
+</div>
+
+### Predictions on the probability scale
+
+To convert log-odds to a probability, use `plogis()`. You can also work it out from the definition: p = exp(log-odds) / (1 + exp(log-odds)).
+
+<div class="question-block">
+<p><strong>Question 7.</strong> Using <code>plogis()</code>, convert your log-odds predictions from Question 6 to probabilities. At what territory quality does the model predict a 50% chance of success?</p>
+<textarea class="student-answer" rows="5" placeholder="Back-transform both log-odds values and solve for the 50% threshold..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<pre><code>plogis(-1.0)   # ≈ 0.27  (quality = 4: 27% chance of success)
+plogis( 1.0)   # ≈ 0.73  (quality = 8: 73% chance of success)</code></pre>
+<p>For a 50% chance of success, we need the log-odds to equal 0:</p>
+<pre><code>-3.0 + 0.5 * quality = 0
+quality = 3.0 / 0.5 = 6</code></pre>
+<p>The model predicts that territory quality of 6 gives a 50% probability of success for a first-time breeding pair. Below quality 6 the odds favour failure; above quality 6 they favour success.</p>
+</div>
+</div>
+
+### Plotting the probability curve
+
+Create a fake dataset, generate predictions on the log-odds scale, then back-transform with `plogis()` to get predicted probabilities and confidence interval limits:
+
+```{r, eval=FALSE}
+fake <- data.frame(territory_quality = seq(from = min(oystercatcher$territory_quality),
+                                           to   = max(oystercatcher$territory_quality),
+                                           length.out = 50))
+
+preds       <- predict(success_mod, newdata = fake, se.fit = TRUE)
+fake$fit    <- plogis(preds$fit)
+fake$low    <- plogis(preds$fit - 1.96 * preds$se.fit)
+fake$upp    <- plogis(preds$fit + 1.96 * preds$se.fit)
+```
+
+<div class="question-block">
+<p><strong>Question 8.</strong> Using the <code>fake</code> dataset, create a figure showing predicted probability of success against territory quality, with a 95% confidence band. Add the raw data points using <code>geom_jitter()</code>.</p>
+<textarea class="student-answer" rows="6" placeholder="Write your ggplot2 code here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<pre><code>ggplot() +
+  geom_ribbon(data = fake,
+              aes(x = territory_quality, ymin = low, ymax = upp),
+              fill = "grey80") +
+  geom_line(data = fake,
+            aes(x = territory_quality, y = fit)) +
+  geom_jitter(data = oystercatcher,
+              aes(x = territory_quality, y = success),
+              height = 0.03, alpha = 0.35) +
+  labs(x = "Territory quality",
+       y = "Probability of breeding success") +
+  theme_minimal()</code></pre>
+<p>The result is an S-shaped (logistic) curve: probability rises steeply across the middle of the quality range and flattens out near 0 and 1. The S-shape is a direct consequence of the logit link, and it ensures predictions stay within [0, 1] across the entire range of territory quality.</p>
+</div>
+</div>
+
+## 7. Interpret and draw conclusions
+
+The model predicts that breeding success increases with territory quality. The positive slope means that each additional unit of territory quality increases the log-odds of success by approximately 0.5. On the probability scale, the relationship is not linear: an increase from quality 2 to quality 3 has a smaller effect than an increase from quality 5 to quality 6 (where the curve is steepest).
+
+# Adding breeding experience
+
+So far we have only included `territory_quality`. The research question also asks about `experience`. Add it to the model:
+
+```{r, eval=FALSE}
+success_mod2 <- glm(success ~ territory_quality + experience,
+                    family = binomial(link = "logit"),
+                    data = oystercatcher)
+```
+
+## Diagnose the new model
+
+```{r, eval=FALSE}
+par(mfrow = c(2, 2))
+plot(success_mod2)
+par(mfrow = c(1, 1))
+```
+
+The diagnostic plots should look similar to the first model: two-banded residuals are still expected, and the Q-Q plot is still uninformative. Check the residuals vs leverage plot for any influential observations.
+
+## Summarise and interpret
+
+```{r, eval=FALSE}
+summary(success_mod2)
+```
+
+<div class="question-block">
+<p><strong>Question 9.</strong> The <code>experienceExperienced</code> coefficient is approximately +1.5. What does this mean?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w10-q9" data-correct="false"> Experienced breeders have a 1.5 percentage point higher success rate than first-time breeders.</label>
+  <label><input type="radio" name="w10-q9" data-correct="false"> Experienced breeders succeed on 1.5 more occasions per season than first-time breeders.</label>
+  <label><input type="radio" name="w10-q9" data-correct="true"> Holding territory quality constant, experienced breeders have a log-odds of success that is 1.5 higher than first-time breeders. This corresponds to multiplying the odds of success by exp(1.5) ≈ 4.5: experienced breeders have roughly 4.5 times the odds of success compared to first-time breeders at the same territory quality.</label>
+  <label><input type="radio" name="w10-q9" data-correct="false"> The effect of territory quality on success is 1.5 times stronger for experienced breeders than for first-time breeders.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>On the log-odds scale, the coefficient is the difference in log-odds between the two groups, holding all other predictors constant. To make this more intuitive, exponentiate it: exp(1.5) ≈ 4.5. Experienced breeders have roughly 4.5 times the odds of success compared to first-time breeders on the same territory. Note that this does not mean experienced breeders are 4.5 times more likely to succeed: odds and probabilities are not the same thing, particularly when probabilities are far from 0.5.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 10.</strong> Using your fitted equation from <code>success_mod2</code>, calculate the predicted probability of success for a first-time breeding pair on a territory with quality = 5, and for an experienced pair on the same territory.</p>
+<textarea class="student-answer" rows="6" placeholder="Write the log-odds for each, then apply plogis()..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>With approximate coefficients: intercept ≈ −3.0, territory_quality ≈ 0.5, experienceExperienced ≈ 1.5.</p>
+<pre><code># First-time breeder, quality = 5
+log_odds_first <- -3.0 + 0.5 * 5 + 0
+plogis(log_odds_first)   # plogis(-0.5) ≈ 0.38
+
+# Experienced breeder, quality = 5
+log_odds_exp <- -3.0 + 0.5 * 5 + 1.5
+plogis(log_odds_exp)     # plogis(1.0) ≈ 0.73</code></pre>
+<p>At the same territory quality of 5, first-time breeders have a predicted success probability of about 38%, while experienced breeders have about 73%. The difference is large in probability terms even though the log-odds difference is the fixed value of 1.5 regardless of quality.</p>
+</div>
+</div>
+
+## Plot the model fit
+
+Use `ggeffects` to produce a prediction plot for each predictor. When both predictors are included, `ggpredict()` with `terms = c("territory_quality", "experience")` shows separate probability curves for each experience level:
+
+```{r, eval=FALSE}
+library(ggeffects)
+
+preds2 <- ggpredict(success_mod2, terms = c("territory_quality", "experience"))
+plot(preds2)
+```
+
+The two S-curves will be offset from each other: the experienced-breeder curve sits to the left of the first-time-breeder curve, meaning experienced breeders achieve the same probability of success at a lower territory quality.
+
+---
+
+# Assumption table
+
+| Assumption | Description | Example of violation |
+|---|---|---|
+| 1. Validity | The data can answer the research question. | Counting a nest as successful if it survived to hatching but not checking whether chicks actually fledged. |
+| 2. Representativeness | The sample reflects the population of interest. | Data collected only from pairs on the best territories because those were easiest to monitor. |
+| 3. Additivity | The effects of territory quality and experience are independent and additive on the log-odds scale. | If experience matters more on poor territories than on good ones, the two predictors interact. |
+| 4. Linearity | The relationship between each continuous predictor and the log-odds of success is linear. | Success probability rising quickly at low quality then levelling off, rather than following the logistic form. |
+| 5. Independence of errors | Each observation is an independent breeding attempt. | The same individual appearing in multiple years without this being accounted for. |
+| 6. Equal variance of errors | Not assumed for Bernoulli GLMs. The variance is p(1 − p), fixed once p is known. | Not applicable: heteroscedasticity is built into the Bernoulli distribution and is not a violation. |
+| 7. Normality of errors | Not assumed for Bernoulli GLMs. | Not applicable: the Q-Q plot is uninformative and should not be used to assess model fit. |
+| 8. Dispersion | Not applicable. The Bernoulli distribution has no free dispersion parameter to check. | Unlike Poisson GLMs, overdispersion cannot occur with a true Bernoulli response. |

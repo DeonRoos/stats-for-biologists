@@ -1,0 +1,660 @@
+---
+title: "Workshop 1.5: Hidden Assumptions"
+subtitle: "BI3010 Statistics for Biologists"
+author: "Roos & Pinard"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    theme: [cosmo, ../custom.scss]
+    highlight-style: github
+    embed-resources: true
+    code-copy: true
+    code-tools: false
+    html-math-method: plain
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{=html}
+<script>
+/* --- answer lock --- */
+var WS_PASS_SHA256 = '080bc338a7350d4c37f8018a9a50ae0112a164d6098731f73c6f6ec8ee1dd8b6';
+var WS_PASS_DJB2   = '7c94b439';
+var _wsUnlocked = false;
+
+function _wsDjb2(s) {
+  var h = 5381;
+  for (var i = 0; i < s.length; i++) { h = ((h << 5) + h + s.charCodeAt(i)) | 0; }
+  return (h >>> 0).toString(16).padStart(8, '0');
+}
+function wsVerifyPass() {
+  var inp = document.getElementById('ws-pass-input'); if (!inp) return;
+  var msg = document.getElementById('ws-pass-msg');
+  function finish(ok) {
+    if (ok) {
+      _wsUnlocked = true; sessionStorage.setItem('ws-unlocked', WS_PASS_SHA256);
+      document.body.classList.remove('ws-locked');
+      var b = document.getElementById('ws-lock-banner');
+      if (b) { b.style.transition = 'opacity 0.4s'; b.style.opacity = '0'; setTimeout(function () { b.remove(); }, 450); }
+    } else {
+      inp.classList.add('ws-wrong'); if (msg) msg.textContent = 'Incorrect password.';
+      setTimeout(function () { inp.classList.remove('ws-wrong'); if (msg) msg.textContent = ''; }, 2000);
+    }
+  }
+  if (window.crypto && crypto.subtle) {
+    crypto.subtle.digest('SHA-256', new TextEncoder().encode(inp.value))
+      .then(function (buf) { var hex = Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join(''); finish(hex === WS_PASS_SHA256); })
+      .catch(function () { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); });
+  } else { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); }
+}
+function wsFlashBanner() {
+  var b = document.getElementById('ws-lock-banner'); if (!b) return;
+  b.classList.remove('ws-flash'); void b.offsetWidth; b.classList.add('ws-flash');
+}
+function wsInitLock() {
+  if (sessionStorage.getItem('ws-unlocked') === WS_PASS_SHA256) { _wsUnlocked = true; return; }
+  document.body.classList.add('ws-locked');
+  var b = document.createElement('div'); b.id = 'ws-lock-banner';
+  b.innerHTML = '<span style="font-size:1.15rem;line-height:1;">🔒</span>' +
+    '<span>Answers are locked. Enter the workshop password to reveal them.</span>' +
+    '<span class="ws-unlock-form">' +
+      '<input type="password" id="ws-pass-input" placeholder="Password"' +
+      ' onkeydown="if(event.key===\'Enter\')wsVerifyPass();">' +
+      '<button id="ws-unlock-btn" onclick="wsVerifyPass()">Unlock</button>' +
+    '</span><span id="ws-pass-msg"></span>';
+  var t = document.getElementById('title-block-header');
+  if (t) t.insertAdjacentElement('afterend', b); else document.body.prepend(b);
+}
+document.addEventListener('DOMContentLoaded', wsInitLock);
+/* --- end lock --- */
+
+function revealAnswer(btn) {
+  if (!_wsUnlocked) { wsFlashBanner(); return; }
+  var block = btn.closest('.question-block, .puzzle-block');
+  var answerClass = block.classList.contains('puzzle-block') ? '.puzzle-answer' : '.instructor-answer';
+
+  var textarea = block.querySelector('.student-answer');
+  if (textarea) {
+    if (textarea.value.trim() === '') {
+      textarea.classList.add('missing');
+      textarea.placeholder = 'Please write your answer before revealing...';
+      textarea.focus();
+      return;
+    }
+    textarea.classList.remove('missing');
+  }
+
+  var mcOptions = block.querySelector('.mc-options');
+  if (mcOptions) {
+    var radios = mcOptions.querySelectorAll('input[type=radio]');
+    var anyChecked = Array.from(radios).some(function(r) { return r.checked; });
+    if (!anyChecked) {
+      mcOptions.classList.add('unanswered');
+      return;
+    }
+    mcOptions.classList.remove('unanswered');
+    radios.forEach(function(r) {
+      r.disabled = true;
+      var label = r.closest('label');
+      if (r.dataset.correct === 'true') {
+        label.classList.add('mc-correct');
+      } else if (r.checked) {
+        label.classList.add('mc-incorrect');
+      }
+    });
+  }
+
+  var answer = block.querySelector(answerClass);
+  if (answer) answer.style.display = 'block';
+  btn.textContent = 'Answer shown';
+  btn.disabled = true;
+}
+
+function toggleGlossary() {
+  document.getElementById('glossary-panel').classList.toggle('open');
+}
+</script>
+```
+
+```{=html}
+<style>
+#glossary-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: #00b494;
+  color: #fff;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  transition: background 0.15s;
+  font-family: inherit;
+}
+#glossary-btn:hover { background: #009478; }
+
+#glossary-panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 380px;
+  height: 100vh;
+  background: #fff;
+  border-left: 3px solid #00b494;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+  z-index: 1001;
+  transition: right 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+#glossary-panel.open { right: 0; }
+
+#glossary-header {
+  background: #0d1e2c;
+  color: #fff;
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+#glossary-header span {
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
+}
+#glossary-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.7;
+}
+#glossary-close:hover { opacity: 1; }
+
+#glossary-body {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.glossary-entry {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #e8f5f0;
+}
+.glossary-entry:last-child { border-bottom: none; }
+
+.glossary-terms {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.3rem;
+}
+.glossary-en-term {
+  font-weight: 600;
+  color: #0d1e2c;
+  font-size: 0.92rem;
+}
+.glossary-zh-term {
+  color: #00b494;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+.glossary-en-def {
+  font-size: 0.845rem;
+  color: #444;
+  line-height: 1.5;
+  margin-bottom: 0.25rem;
+}
+.glossary-zh-def {
+  font-size: 0.845rem;
+  color: #1c3a50;
+  line-height: 1.65;
+}
+</style>
+```
+
+# Workshop Structure
+
+::: {.callout-note}
+## The Analytical Workflow
+
+As always, we are using the workflow below to structure the workshops:
+
+1. Formulate a research question.
+2. Perform exploratory data analysis.
+3. **Identify any hidden assumptions [Focus of today].**
+4. Fit an appropriate model.
+5. Diagnose the model and check assumptions.
+6. Summarise the results.
+7. Interpret and provide inferences.
+:::
+
+# Learning Objectives
+
+::: {.callout-tip}
+## By the end of this workshop you will be able to:
+
+1. Learn to identify potential issues (or "hidden assumptions") without seeing the data.
+2. Identify potential hidden assumptions in a real world dataset.
+3. Use `R` to perform simple descriptive summaries of the data to assist in this.
+
+These skills will be used throughout the course.
+:::
+
+# The Seven Assumptions
+
+In this workshop, you will come up with some examples of various datasets that are likely to violate a hidden assumption. Some of these are related to residual error, which we will cover in more detail next week. For now, understand residual error as the difference between what a model predicts and the actual observation. For example, if a model predicts a flat costs £850 to rent each month, but the actual rent was £800, then the residual error is observed minus predicted (Residual = y − ŷ). For the flat example, the residual error would be 800 − 850 = −50, or £-50 difference.
+
+These assumptions (with some simple examples) are:
+
+| **Assumption** | **Description** | **Example of violation** |
+|---|---|---|
+| 1. **Validity** | The data is able to answer the research question effectively. | Using IQ to measure overall intelligence (what does IQ even measure?). |
+| 2. **Representativeness** | The data reflects the population or group being studied. | Using survey data from a rural area to draw conclusions about an urban population. |
+| 3. **Additivity** | Effects of predictors are additive and there are no interactions between them. | Assuming that study hours and sleep hours independently affect exam scores without considering their combined effect. |
+| 4. **Linearity** | The relationship between predictors and the outcome is linear. | Assuming plant growth will continue to increase indefinitely without ever levelling out. |
+| 5. **Independence of errors** | Observations are independent of each other. | If modelling height, the data come from the same group of children over time. |
+| 6. **Equal variance of errors** | Residuals have constant variance across all levels of predictors ("homoscedasticity"). | If modelling income, variability in salaries is not the same across all levels of a company's hierarchy. |
+| 7. **Normality of errors** | Residuals should be normally distributed. | If modelling income, the presence of any extremely wealthy individuals will be hard for the model to understand and explain. |
+
+For this exercise, form groups of two to four at your table. Your task is to come up with seven datasets that you believe are likely to violate assumptions one to seven in the above table. Once you have come up with an example for a given assumption, choose one of your group to upload your example to the MyAberdeen discussion board, such that we build up a "portfolio" of lousy datasets.
+
+If it helps, you can think of this exercise as essentially asking you to be a terrible scientist. For each assumption, think of an experiment or how you might collect data in such a way as to violate one of these assumptions. You might decide to focus on trying to come up with a lousy experiment to understand, which you do in the worst possible way:
+
+- Ostrich wing length: *"we measured wing length by looking at the wing through binocs and guessing to the nearest mm"* (**Validity**)
+- European otter density: *"we measured the density of European otters in Tokyo zoo to understand otter dynamics in Spain"* (**Representativeness**)
+- Plant disease occurrence: *"we assume residual error of number of pathogens will be constant as a plant becomes older"* (**Equal variance of errors**)
+- Dolphin weight: *"we assume that dolphins will continue to grow at the same rate throughout their lives"* (**Linearity**)
+- Number of corrupt politicians: *"we assume most politicians are similar and that it's not just one or two that are extremely corrupt"* (**Normality of errors**)
+
+You're by no means limited to the silly examples above. Feel free to think of your own silly (or not) example datasets/context.
+
+To ensure that we have examples for each assumption, within your group, have one person run the following code to determine the order of assumptions (from 1. **Validity** to 7. **Normality of errors**) that you will work through:
+
+```{r, eval=FALSE}
+# The code below is essentially a lottery machine
+# x = the options you want to select from (here 1 to 7)
+# size = the number of draws you want made
+# replace = FALSE means once a number is selected, it cannot be selected again
+sample(x = 1:7, size = 7, replace = FALSE)
+```
+
+If you are unsure what to do, please ask a member of staff, and also discuss your ideas with them during this first task.
+
+## Check Your Understanding
+
+For each assumption below, select the scenario that best illustrates it being violated.
+
+<div class="question-block">
+<p><strong>Assumption 1: Validity.</strong> Which dataset is most likely to violate Validity?</p>
+<div class="mc-options">
+  <label><input type="radio" name="mc_valid"> Measuring the shell length of 200 mussels using calibrated callipers to estimate body size</label>
+  <label><input type="radio" name="mc_valid" data-correct="true"> Using the number of animal tracks found along a 1 km transect to estimate total population size</label>
+  <label><input type="radio" name="mc_valid"> Recording the mass of 500 seedlings using a calibrated scale</label>
+  <label><input type="radio" name="mc_valid"> Counting the number of flowers on 100 plants to measure reproductive output</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Track counts and population size are not the same thing. Track density depends on substrate, weather, species behaviour, and observer skill, not just how many animals are present. The data cannot directly answer the question it is being used for.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Assumption 2: Representativeness.</strong> Which study is most likely to violate Representativeness?</p>
+<div class="mc-options">
+  <label><input type="radio" name="mc_rep"> Randomly selecting 200 individuals from each of five age groups across the UK</label>
+  <label><input type="radio" name="mc_rep"> Sampling soil pH at random locations across a 100-hectare field</label>
+  <label><input type="radio" name="mc_rep" data-correct="true"> Collecting fish abundance data only from easily accessible riverbanks, then applying conclusions to the whole river system</label>
+  <label><input type="radio" name="mc_rep"> Using stratified random sampling across 50 plots per habitat type in Scotland</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Accessible riverbanks are not representative of the whole river system. Deeper water, faster currents, and remote stretches may hold very different fish communities. Sampling only what is convenient and generalising to the whole introduces systematic bias.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Assumption 3: Additivity.</strong> Which scenario is most likely to violate Additivity?</p>
+<div class="mc-options">
+  <label><input type="radio" name="mc_add"> Both temperature and rainfall independently affect crop yield</label>
+  <label><input type="radio" name="mc_add"> Exercise frequency and calorie intake both independently influence body weight</label>
+  <label><input type="radio" name="mc_add" data-correct="true"> A drug reduces blood pressure on its own, but causes a dangerous reaction when combined with alcohol</label>
+  <label><input type="radio" name="mc_add"> Both sunlight hours and soil nitrogen independently predict plant height</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The drug and alcohol interact: the combined effect is not simply the sum of each alone. Additivity assumes that predictors work independently, and this is a clear violation. The other examples describe situations where effects are independent and additive.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Assumption 4: Linearity.</strong> Which relationship is most likely to be non-linear?</p>
+<div class="mc-options">
+  <label><input type="radio" name="mc_lin"> The distance a ball rolls on a flat surface vs the force applied</label>
+  <label><input type="radio" name="mc_lin" data-correct="true"> The number of bacteria in a culture vs time, under ideal growing conditions</label>
+  <label><input type="radio" name="mc_lin"> The weight of water added to a container vs the volume added</label>
+  <label><input type="radio" name="mc_lin"> The number of pages read vs the time spent reading at a steady pace</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Bacterial growth is exponential: each bacterium divides to produce two, which divide to produce four, and so on. The relationship between time and population size is a curve, not a straight line. Assuming linearity here would badly underestimate growth at later time points.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Assumption 5: Independence of errors.</strong> Which study design is most likely to produce non-independent errors?</p>
+<div class="mc-options">
+  <label><input type="radio" name="mc_ind"> Taking one blood sample per person from 300 randomly selected individuals</label>
+  <label><input type="radio" name="mc_ind"> Measuring the wingspan of one butterfly from each of 200 different sites</label>
+  <label><input type="radio" name="mc_ind" data-correct="true"> Recording the weight of 10 piglets from each of 20 litters and treating each piglet as an independent observation</label>
+  <label><input type="radio" name="mc_ind"> Sampling 100 random soil cores from a 500-hectare field</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Piglets from the same litter share genetics and environment, so they are more similar to each other than to piglets from different litters. Treating them as 200 independent observations ignores this clustering. The effective sample size is closer to 20 (litters) than 200 (piglets).</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Assumption 6: Equal variance of errors.</strong> Which scenario is most likely to show unequal variance?</p>
+<div class="mc-options">
+  <label><input type="radio" name="mc_var"> The height of 200 adult Scots pine trees in a managed plantation</label>
+  <label><input type="radio" name="mc_var" data-correct="true"> The number of seeds produced by plants ranging from small herbs (tens of seeds) to large trees (millions of seeds)</label>
+  <label><input type="radio" name="mc_var"> The mass of eggs from a single breed of domestic chicken</label>
+  <label><input type="radio" name="mc_var"> The resting heart rate of 300 amateur athletes</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>When the outcome itself ranges across orders of magnitude, variance almost always scales with the mean. A herb producing around 50 seeds might vary by 10; a tree producing a million might vary by tens of thousands. Assuming constant variance across this range would be badly wrong.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Assumption 7: Normality of errors.</strong> Which dataset is most likely to produce non-normal residuals?</p>
+<div class="mc-options">
+  <label><input type="radio" name="mc_norm"> Heights of 1,000 adult women in the UK</label>
+  <label><input type="radio" name="mc_norm"> Resting heart rates of 500 healthy adults</label>
+  <label><input type="radio" name="mc_norm" data-correct="true"> Annual income of 500 randomly selected UK adults</label>
+  <label><input type="radio" name="mc_norm"> Birth weights of 400 full-term human babies</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Income distributions are strongly right-skewed. Most people earn a moderate amount, but a small number earn very large amounts, pulling the tail far to the right. A model assuming normal residuals will struggle with these extreme values, exactly the "extremely wealthy individual" problem from the table above.</p>
+</div>
+</div>
+
+# Red Deer in the UK
+
+Still within your groups, visit the following [NBN Atlas](https://species.nbnatlas.org/species/NBNSYS0000005143) page. This page contains all recordings of red deer in the UK. Spend some time exploring this page, as well as finding out how the data is collected.
+
+## Question Set One
+
+<div class="question-block">
+<p><strong>Question 1.</strong> Using this dataset, consider which assumptions it is most likely to violate.</p>
+<textarea class="student-answer" rows="5" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p><strong>Validity.</strong> A data point only appears when a deer was present, seen, and reported by an observer. We cannot guarantee that every observer spots a deer even when one is there, and skill levels will vary considerably. There is also the question of identification: what if it was a roe deer, a dog, or even Bigfoot?</p>
+
+<p><strong>Representativeness.</strong> The dataset only records successful sightings, not failed searches. Every blank area on the map has two possible meanings: someone looked and found no deer, or no one looked at all. These are very different situations but look identical in the data. Survey effort is also not uniform across the UK. Someone near Fort William is fairly accustomed to red deer, whereas someone spotting one in London would find it much more exciting and be far more likely to report it. That reporting bias makes the dataset unreliable as a picture of where deer actually are.</p>
+
+<p>In short, what the data captures is: <em>observations where a deer was present, seen, and reported</em>. What we want it to represent is: <em>observations where deer are either present or absent</em>. Those are not the same thing.</p>
+</div>
+</div>
+
+Having done this, compare the [NBN Atlas](https://species.nbnatlas.org/species/NBNSYS0000005143) with the [IUCN Red List range map](https://www.iucnredlist.org/species/55997072/142404453).
+
+## Question Set Two
+
+<div class="question-block">
+<p><strong>Question 1.</strong> How reliable do you think the IUCN geographic range is for the UK?</p>
+<textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The core of the range is likely reliable, but the range edge is not. As you approach a species' range boundary, animals become less common and are seen less often, recent colonisers may go locally extinct, and detection becomes less consistent. This makes range edges patchy, with some areas probably overestimated and others underestimated.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 2.</strong> Do you think the non-UK geographic range is as reliable, or less so?</p>
+<textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Probably less so. The UK public tends to be engaged with wildlife reporting, particularly for larger mammals and birds. In other countries this culture either doesn't exist or is less pronounced, and in some datasets it is more pronounced, with all observations from a single country coming from one highly motivated individual. Reporting intensity and accuracy will differ substantially across borders, making a multi-country range map inherently uneven.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 3.</strong> Do you think there is any value in the IUCN geographic range for decision making?</p>
+<textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>There is, but in a limited capacity. It is useful for very broad decisions ("red deer are present in country X") but is very likely to be misleading for fine-scale decisions ("red deer are expanding into neighbourhood Y of city X"). That is often the case in science: results may still be useful for broad-level understanding even when the underlying data are of limited quality, but for more precise and accurate decisions, the data really do need to be high quality.</p>
+</div>
+</div>
+
+# Revisiting the Alligator Data
+
+Return to the `alligator_bite.txt` dataset from the first workshop. We did not give you any information as to *how* the data were collected, so gauging how likely it was to meet or violate assumptions is difficult (but not impossible). To allow you to do so now, here is a description of data collection:
+
+> Each alligator was retrieved from a communal pond containing 100 alligators. Although the alligators were not individually tagged, farm staff were able to identify each one, ensuring that observations were independent. After retrieval, the alligator was blindfolded and moved to a safe and secure location. Once secured, the alligator was restrained by up to three technicians while its length was measured. To measure the length, two additional technicians used a tape measure from the tip of the nose to the tip of the tail. The tape was passed under the restraining technicians when possible to ensure accurate measurements. Lengths were recorded in centimetres, with one decimal point.
+
+> After measuring length, the blindfold was removed, and a modified gnathodynamometer was used to measure bite force in pounds per square inch. Since alligators may not immediately bite the gnathodynamometer, the device was placed in the alligator's mouth for up to 60 seconds to capture an appropriate bite strength. Once all measurements were taken, the alligator was returned to the pond before the next individual was retrieved.
+
+## Question Set Three
+
+<div class="question-block">
+<p><strong>Question 1.</strong> With the alligator dataset and data collection description, state which assumptions you believe may be most likely to be violated.</p>
+<textarea class="student-answer" rows="5" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p><strong>Independence of errors.</strong> Alligators are returned to the communal pond after measurement before the next one is retrieved. Despite staff assurances that individuals can be identified, it seems plausible that the same alligator could be captured twice. If so, some "observations" are repeated measurements of the same animal, a direct violation of independence.</p>
+
+<p><strong>Validity (bite force).</strong> Getting an alligator to bite a device on demand sounds unreliable. Did each animal bite as hard as it could, or just hard enough that the staff felt they had a measurement? If the latter, recorded values may not reflect true maximum bite strength.</p>
+
+<p><strong>Validity (length).</strong> Measuring a live, possibly moving alligator with a tape that had to be passed under and around restraining technicians does not inspire confidence in accuracy to one decimal place. That level of precision implies a measurement process far more controlled than what is described here.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 2.</strong> Describe how the data collection could have been improved so that the assumptions would be more likely to be met.</p>
+<textarea class="student-answer" rows="5" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>The most straightforward fix for independence is to mark each alligator after measurement (a non-toxic paint mark on the head, for instance) so that already-measured animals can be identified and skipped.</p>
+
+<p>Improving measurement accuracy is harder. Measuring a restrained, potentially moving alligator will always be difficult, and the current approach is probably about as good as it gets. One option is to acknowledge the measurement error explicitly and account for it in the model, though this is an advanced technique beyond the scope of this course.</p>
+
+<p>The broader point is that sometimes you cannot improve a dataset. In such cases, the important thing is to identify what impact the limitations will have on the results, something we will return to as the course progresses.</p>
+</div>
+</div>
+
+```{=html}
+<button id="glossary-btn" onclick="toggleGlossary()">词典 / Glossary</button>
+
+<div id="glossary-panel">
+  <div id="glossary-header">
+    <span>Glossary / 词典</span>
+    <button id="glossary-close" onclick="toggleGlossary()">&#x2715;</button>
+  </div>
+  <div id="glossary-body">
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Assumption</span>
+        <span class="glossary-zh-term">假设</span>
+      </div>
+      <div class="glossary-en-def">A condition that a statistical model requires to hold true for its results to be valid.</div>
+      <div class="glossary-zh-def">统计模型得出有效结论所需满足的条件。若假设被违反，模型结果可能不可靠。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Predictor</span>
+        <span class="glossary-zh-term">预测变量</span>
+      </div>
+      <div class="glossary-en-def">A variable used in a model to explain or predict an outcome. Also called an independent variable.</div>
+      <div class="glossary-zh-def">模型中用于解释或预测结果变量的变量，也称"自变量"。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Residual error</span>
+        <span class="glossary-zh-term">残差</span>
+      </div>
+      <div class="glossary-en-def">The difference between an observed value and the value a model predicted (Residual = Observed &#8722; Predicted).</div>
+      <div class="glossary-zh-def">观测值与模型预测值之间的差值（残差 = 观测值 &#8722; 预测值）。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Validity</span>
+        <span class="glossary-zh-term">效度</span>
+      </div>
+      <div class="glossary-en-def">Whether data actually measures what it is intended to measure.</div>
+      <div class="glossary-zh-def">数据是否真正测量了其所声称测量的内容。例如，用推特粉丝数衡量科研影响力，效度较低。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Representativeness</span>
+        <span class="glossary-zh-term">代表性</span>
+      </div>
+      <div class="glossary-en-def">The degree to which a sample accurately reflects the wider population it is drawn from.</div>
+      <div class="glossary-zh-def">样本是否准确反映了所研究的更广泛总体。仅对城市居民调查，则结论可能不适用于农村地区。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Additivity</span>
+        <span class="glossary-zh-term">可加性</span>
+      </div>
+      <div class="glossary-en-def">The assumption that predictors affect the outcome independently, so their effects simply add together without interacting.</div>
+      <div class="glossary-zh-def">假设各预测变量的效应相互独立，可以直接相加，彼此之间不存在交互作用。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Linearity</span>
+        <span class="glossary-zh-term">线性</span>
+      </div>
+      <div class="glossary-en-def">The assumption that the relationship between a predictor and the outcome follows a straight line.</div>
+      <div class="glossary-zh-def">假设预测变量与结果变量之间的关系是直线关系。若实际关系是曲线（如指数增长），则违反此假设。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Independence of errors</span>
+        <span class="glossary-zh-term">误差独立性</span>
+      </div>
+      <div class="glossary-en-def">The assumption that observations do not influence each other.</div>
+      <div class="glossary-zh-def">假设各观测值之间互不影响。对同一对象重复测量，或测量来自同一群体的个体，容易违反此假设。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Homoscedasticity</span>
+        <span class="glossary-zh-term">同方差性</span>
+      </div>
+      <div class="glossary-en-def">The assumption that residuals have constant variance across all levels of the predictors. Also called equal variance of errors.</div>
+      <div class="glossary-zh-def">假设残差的方差在所有预测变量水平上保持恒定，又称"等方差性"，是线性回归的重要假设之一。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Heteroscedasticity</span>
+        <span class="glossary-zh-term">异方差性</span>
+      </div>
+      <div class="glossary-en-def">The opposite of homoscedasticity: residual variance changes across levels of the predictor.</div>
+      <div class="glossary-zh-def">同方差性的对立概念，指残差的方差随预测变量水平的变化而改变，违反了等方差假设。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Normality of errors</span>
+        <span class="glossary-zh-term">误差正态性</span>
+      </div>
+      <div class="glossary-en-def">The assumption that model residuals follow a normal (bell-shaped) distribution.</div>
+      <div class="glossary-zh-def">假设模型残差服从正态分布（钟形曲线）。当数据中存在极端值时，此假设容易被违反。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Interaction</span>
+        <span class="glossary-zh-term">交互作用</span>
+      </div>
+      <div class="glossary-en-def">When the effect of one predictor on the outcome depends on the level of another predictor.</div>
+      <div class="glossary-zh-def">当一个预测变量对结果的影响取决于另一个预测变量的水平时，两变量之间存在交互作用。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Exponential growth</span>
+        <span class="glossary-zh-term">指数增长</span>
+      </div>
+      <div class="glossary-en-def">Growth where the rate of increase is proportional to the current value, producing an accelerating curve rather than a straight line.</div>
+      <div class="glossary-zh-def">增长速率与当前数量成正比的增长方式，如细菌不断倍增。与线性增长不同，指数增长会迅速变得极大。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Stratified random sampling</span>
+        <span class="glossary-zh-term">分层随机抽样</span>
+      </div>
+      <div class="glossary-en-def">A sampling method where the population is divided into subgroups (strata) and random samples are taken from each.</div>
+      <div class="glossary-zh-def">先将总体划分为若干子组（层），再从每层中独立随机抽取样本的方法，有助于确保样本的代表性。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Geographic range</span>
+        <span class="glossary-zh-term">地理分布范围</span>
+      </div>
+      <div class="glossary-en-def">The geographic area in which a species is known to occur.</div>
+      <div class="glossary-zh-def">某物种已知存在的地理区域。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">NBN Atlas</span>
+        <span class="glossary-zh-term">NBN物种图集</span>
+      </div>
+      <div class="glossary-en-def">The National Biodiversity Network Atlas: a UK database of wildlife observations submitted by members of the public.</div>
+      <div class="glossary-zh-def">英国国家生物多样性网络图集，收录由公众提交的野生动物观测记录，是英国最大的野生动物数据库之一。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">IUCN</span>
+        <span class="glossary-zh-term">国际自然保护联盟</span>
+      </div>
+      <div class="glossary-en-def">The International Union for Conservation of Nature: the global authority that assesses the conservation status of species and publishes the Red List.</div>
+      <div class="glossary-zh-def">国际自然保护联盟，是全球评估物种保护状况的权威机构，发布濒危物种红色名录（Red List）。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Gnathodynamometer</span>
+        <span class="glossary-zh-term">颌力计</span>
+      </div>
+      <div class="glossary-en-def">A device used to measure the bite force of an animal.</div>
+      <div class="glossary-zh-def">用于测量动物咬合力的仪器。词源来自希腊语："gnathos"意为颌骨，"dynamis"意为力量。</div>
+    </div>
+
+  </div>
+</div>
+```

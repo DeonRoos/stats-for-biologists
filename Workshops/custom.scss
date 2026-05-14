@@ -1,0 +1,330 @@
+/*-- scss:defaults --*/
+
+// University of Aberdeen palette (2025 rebrand)
+$uoa-dark:    #0d1e2c;
+$uoa-teal:    #00b494;
+$uoa-mid:     #1c3a50;
+$uoa-light:   #e8f5f0;
+$uoa-border:  #cddde4;
+
+// Typography
+$font-family-sans-serif: "Source Sans 3", system-ui, -apple-system, sans-serif;
+$font-family-monospace:  "JetBrains Mono", ui-monospace, "Courier New", monospace;
+$font-size-root:         16px;
+$line-height-base:       1.65;
+
+// Links
+$link-color:            $uoa-teal;
+$link-decoration:       none;
+$link-hover-decoration: underline;
+
+/*-- scss:rules --*/
+
+// --- Google Fonts ---
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+// --- Body ---
+body {
+  color: #1a2e3c;
+}
+
+// --- Title block ---
+#title-block-header {
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 3px solid #00b494;
+}
+
+// --- Headings ---
+h1, h2, h3, h4 {
+  color: #0d1e2c;
+}
+
+// Section h1s only — `section h1` excludes the document .title h1
+section h1 {
+  border-bottom: 2px solid #00b494;
+  padding-bottom: 0.35rem;
+  margin-top: 2.2rem;
+}
+
+h2 {
+  border-bottom: 1px solid #cddde4;
+  padding-bottom: 0.2rem;
+  margin-top: 1.8rem;
+}
+
+h3 {
+  color: #1c3a50;
+}
+
+// --- TOC sidebar ---
+// With toc-location: left, Quarto renders the TOC in #quarto-sidebar-toc-left.
+// #quarto-margin-sidebar is the empty right column — leave it alone.
+#quarto-sidebar-toc-left {
+  background-color: #0d1e2c !important;
+  padding: 1.5rem 1rem 2rem 1rem;
+}
+
+#quarto-sidebar-toc-left #toc-title {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#quarto-sidebar-toc-left nav[role=doc-toc] ul {
+  padding-left: 0;
+  list-style: none;
+}
+
+// Base styles — all TOC links
+#quarto-sidebar-toc-left nav[role=doc-toc] ul a {
+  color: #6a9ab0 !important;
+  font-size: 0.82rem;
+  padding: 0.25rem 0.5rem 0.25rem 0.75rem;
+  border-left: 3px solid transparent;
+  display: block;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  text-decoration: none;
+  line-height: 1.4;
+}
+
+// Top-level section links (h1) — brighter and slightly bolder
+#quarto-sidebar-toc-left nav[role=doc-toc] > ul > li > a {
+  color: #a8ccd8 !important;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+// Nested links (h2+) — dimmer and indented
+#quarto-sidebar-toc-left nav[role=doc-toc] ul ul a {
+  padding-left: 1.4rem;
+}
+
+#quarto-sidebar-toc-left nav[role=doc-toc] ul a:hover {
+  color: #ffffff !important;
+  border-left-color: rgba(0, 180, 148, 0.4);
+}
+
+// Active — background band so it's impossible to miss
+#quarto-sidebar-toc-left nav[role=doc-toc] ul a.active {
+  color: #ffffff !important;
+  background: rgba(0, 180, 148, 0.2);
+  border-left-color: #00b494;
+  font-weight: 600;
+}
+
+// --- Multiple choice questions ---
+.mc-options {
+  margin: 0.6rem 0 0.8rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.mc-options label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+  cursor: pointer;
+  font-size: 0.95rem;
+  background: #fff;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.mc-options label:hover {
+  background: #f0f9f6;
+  border-color: #00b494;
+}
+
+.mc-options input[type=radio] {
+  cursor: pointer;
+  flex-shrink: 0;
+  accent-color: #00b494;
+}
+
+.mc-options.unanswered label {
+  border-color: #dc3545;
+  background: #fff5f5;
+}
+
+label.mc-correct {
+  background: #d4f0e7 !important;
+  border-color: #00b494 !important;
+  font-weight: 600;
+}
+
+label.mc-incorrect {
+  background: #fde0e0 !important;
+  border-color: #dc3545 !important;
+}
+
+// --- Code blocks ---
+pre.sourceCode {
+  border-left: 3px solid #00b494;
+  border-radius: 0 4px 4px 0;
+}
+
+// --- Question blocks ---
+.question-block {
+  background: #f0f9f6;
+  border-left: 4px solid #00b494;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+  border-radius: 0 6px 6px 0;
+}
+.question-block p:first-child { margin-top: 0; }
+
+.student-answer {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0.6rem 0 0.5rem 0;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  resize: vertical;
+  background: #fff;
+  height: 5.5rem;       /* standard height across all workshops */
+  min-height: 5.5rem;   /* prevents collapsing below standard */
+}
+
+.student-answer.missing {
+  border-color: #dc3545;
+  background: #fff5f5;
+}
+
+.reveal-btn {
+  background: #00b494;
+  color: #fff;
+  border: none;
+  padding: 0.4rem 1.1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.15s;
+}
+.reveal-btn:hover:not(:disabled) { background: #009478; }
+.reveal-btn:disabled {
+  background: #6c757d;
+  cursor: default;
+}
+
+.instructor-answer {
+  display: none;
+  background: #d4f0e7;
+  border: 1px solid #9ed4c0;
+  border-radius: 4px;
+  padding: 0.8rem 1rem;
+  margin-top: 0.7rem;
+}
+.instructor-answer pre {
+  background: #eaf7f2;
+  border: none;
+  border-radius: 4px;
+  padding: 0.6rem 0.8rem;
+  overflow-x: auto;
+}
+.instructor-answer code { font-size: 0.88rem; }
+
+// --- Puzzle blocks ---
+.puzzle-block {
+  background: #fff8f0;
+  border-left: 4px solid #e67e22;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+  border-radius: 0 6px 6px 0;
+}
+
+.puzzle-answer {
+  display: none;
+  background: #fdebd0;
+  border: 1px solid #e8c99a;
+  border-radius: 4px;
+  padding: 0.8rem 1rem;
+  margin-top: 0.7rem;
+}
+.puzzle-answer pre {
+  background: #fef5e7;
+  border: none;
+  border-radius: 4px;
+  padding: 0.6rem 0.8rem;
+}
+
+// --- Answer lock banner ---
+#ws-lock-banner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  background: #fdf7e3;
+  border: 1px solid #f0c040;
+  border-left: 4px solid #e8a800;
+  border-radius: 0 6px 6px 0;
+  padding: 0.7rem 1.25rem;
+  margin: 0 0 1.5rem;
+  font-size: 0.9rem;
+  color: #5a4000;
+}
+
+@keyframes ws-flash {
+  0%, 100% { background: #fdf7e3; }
+  30%       { background: #ffe44d; }
+  60%       { background: #ffe44d; }
+}
+#ws-lock-banner.ws-flash { animation: ws-flash 0.55s ease; }
+
+.ws-unlock-form {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+#ws-pass-input {
+  padding: 0.28rem 0.55rem;
+  border: 1px solid #c8a800;
+  border-radius: 4px;
+  font-size: 0.87rem;
+  font-family: inherit;
+  width: 9em;
+  background: #fff;
+  transition: border-color 0.15s, background 0.15s;
+}
+#ws-pass-input.ws-wrong {
+  border-color: #dc3545;
+  background: #fff5f5;
+}
+
+#ws-unlock-btn {
+  padding: 0.28rem 0.8rem;
+  background: #0d1e2c;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.87rem;
+  font-family: inherit;
+  transition: background 0.12s;
+}
+#ws-unlock-btn:hover { background: #1c3a50; }
+
+#ws-pass-msg {
+  font-size: 0.82rem;
+  color: #c00;
+  font-weight: 500;
+}
+
+// Dim Show Answer buttons while locked
+body.ws-locked .reveal-btn,
+body.ws-locked button[onclick*="revealAnswer"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

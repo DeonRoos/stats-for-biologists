@@ -1,0 +1,660 @@
+---
+title: "Workshop 6: Diagnosing linear models with a categorical predictor"
+subtitle: "BI3010 Statistics for Biologists"
+author: "Roos & Pinard"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    theme: [cosmo, ../custom.scss]
+    highlight-style: github
+    embed-resources: true
+    code-copy: true
+    code-tools: false
+    html-math-method: mathjax
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show = "show",
+                      message = FALSE, warning = FALSE)
+library(ggplot2)
+library(performance)
+
+rabbit <- read.table("../Workshop 5 - LM with categorical predictors/Data/rabbits.txt",
+                     header = TRUE)
+rabbit$mongoose[7] <- "Present"
+rabbit$weight[rabbit$weight > 350] <- rabbit$weight[rabbit$weight > 350] - 100
+rabbit_mod <- lm(weight ~ mongoose, data = rabbit)
+
+set.seed(42)
+df_sim <- data.frame(x = sample(0:1, size = 50, replace = TRUE))
+df_sim$y <- rnorm(n = nrow(df_sim), mean = 0 + 2.5 * df_sim$x,
+                  sd = 1 + 1.5 * df_sim$x)
+df_sim$x <- factor(ifelse(df_sim$x == 0, "Group A", "Group B"))
+m1 <- lm(y ~ x, data = df_sim)
+fake_sim <- data.frame(x = c("Group A", "Group B"))
+fake_sim$fit <- predict(m1, newdata = fake_sim)
+prds_sim <- predict(m1, newdata = fake_sim, se.fit = TRUE)
+fake_sim$fit  <- prds_sim$fit
+fake_sim$low  <- prds_sim$fit - prds_sim$se.fit * 1.96
+fake_sim$upp  <- prds_sim$fit + prds_sim$se.fit * 1.96
+
+fake_rab <- data.frame(mongoose = unique(rabbit$mongoose))
+preds_rab <- predict(rabbit_mod, newdata = fake_rab, se.fit = TRUE)
+fake_rab$fit   <- preds_rab$fit
+fake_rab$low95 <- preds_rab$fit - 1.96 * preds_rab$se.fit
+fake_rab$upp95 <- preds_rab$fit + 1.96 * preds_rab$se.fit
+```
+
+```{=html}
+<script>
+/* --- answer lock --- */
+var WS_PASS_SHA256 = '3d192e1294672d33a5a23a7a6a8e1434eff8f13be9e628f06844dc14463787b4';
+var WS_PASS_DJB2   = 'a0d7a3b0';
+var _wsUnlocked = false;
+
+function _wsDjb2(s) {
+  var h = 5381;
+  for (var i = 0; i < s.length; i++) { h = ((h << 5) + h + s.charCodeAt(i)) | 0; }
+  return (h >>> 0).toString(16).padStart(8, '0');
+}
+function wsVerifyPass() {
+  var inp = document.getElementById('ws-pass-input'); if (!inp) return;
+  var msg = document.getElementById('ws-pass-msg');
+  function finish(ok) {
+    if (ok) {
+      _wsUnlocked = true; sessionStorage.setItem('ws-unlocked', WS_PASS_SHA256);
+      document.body.classList.remove('ws-locked');
+      var b = document.getElementById('ws-lock-banner');
+      if (b) { b.style.transition = 'opacity 0.4s'; b.style.opacity = '0'; setTimeout(function () { b.remove(); }, 450); }
+    } else {
+      inp.classList.add('ws-wrong'); if (msg) msg.textContent = 'Incorrect password.';
+      setTimeout(function () { inp.classList.remove('ws-wrong'); if (msg) msg.textContent = ''; }, 2000);
+    }
+  }
+  if (window.crypto && crypto.subtle) {
+    crypto.subtle.digest('SHA-256', new TextEncoder().encode(inp.value))
+      .then(function (buf) { var hex = Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join(''); finish(hex === WS_PASS_SHA256); })
+      .catch(function () { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); });
+  } else { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); }
+}
+function wsFlashBanner() {
+  var b = document.getElementById('ws-lock-banner'); if (!b) return;
+  b.classList.remove('ws-flash'); void b.offsetWidth; b.classList.add('ws-flash');
+}
+function wsInitLock() {
+  if (sessionStorage.getItem('ws-unlocked') === WS_PASS_SHA256) { _wsUnlocked = true; return; }
+  document.body.classList.add('ws-locked');
+  var b = document.createElement('div'); b.id = 'ws-lock-banner';
+  b.innerHTML = '<span style="font-size:1.15rem;line-height:1;">🔒</span>' +
+    '<span>Answers are locked. Enter the workshop password to reveal them.</span>' +
+    '<span class="ws-unlock-form">' +
+      '<input type="password" id="ws-pass-input" placeholder="Password"' +
+      ' onkeydown="if(event.key===\'Enter\')wsVerifyPass();">' +
+      '<button id="ws-unlock-btn" onclick="wsVerifyPass()">Unlock</button>' +
+    '</span><span id="ws-pass-msg"></span>';
+  var t = document.getElementById('title-block-header');
+  if (t) t.insertAdjacentElement('afterend', b); else document.body.prepend(b);
+}
+document.addEventListener('DOMContentLoaded', wsInitLock);
+/* --- end lock --- */
+
+function revealAnswer(btn) {
+  if (!_wsUnlocked) { wsFlashBanner(); return; }
+  var block = btn.closest('.question-block, .puzzle-block');
+  var answerClass = block.classList.contains('puzzle-block') ? '.puzzle-answer' : '.instructor-answer';
+
+  var textarea = block.querySelector('.student-answer');
+  if (textarea) {
+    if (textarea.value.trim() === '') {
+      textarea.classList.add('missing');
+      textarea.placeholder = 'Please write your answer before revealing...';
+      textarea.focus();
+      return;
+    }
+    textarea.classList.remove('missing');
+  }
+
+  var mcOptions = block.querySelector('.mc-options');
+  if (mcOptions) {
+    var radios = mcOptions.querySelectorAll('input[type=radio]');
+    var anyChecked = Array.from(radios).some(function(r) { return r.checked; });
+    if (!anyChecked) {
+      mcOptions.classList.add('unanswered');
+      return;
+    }
+    mcOptions.classList.remove('unanswered');
+    radios.forEach(function(r) {
+      r.disabled = true;
+      var label = r.closest('label');
+      if (r.dataset.correct === 'true') {
+        label.classList.add('mc-correct');
+      } else if (r.checked) {
+        label.classList.add('mc-incorrect');
+      }
+    });
+  }
+
+  var answer = block.querySelector(answerClass);
+  if (answer) answer.style.display = 'block';
+  btn.textContent = 'Answer shown';
+  btn.disabled = true;
+}
+
+function toggleGlossary() {
+  document.getElementById('glossary-panel').classList.toggle('open');
+}
+</script>
+```
+
+```{=html}
+<style>
+#glossary-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: #00b494;
+  color: #fff;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  transition: background 0.15s;
+  font-family: inherit;
+}
+#glossary-btn:hover { background: #009478; }
+
+#glossary-panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 380px;
+  height: 100vh;
+  background: #fff;
+  border-left: 3px solid #00b494;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+  z-index: 1001;
+  transition: right 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+#glossary-panel.open { right: 0; }
+
+#glossary-header {
+  background: #0d1e2c;
+  color: #fff;
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+#glossary-header span { font-weight: 600; font-size: 0.95rem; letter-spacing: 0.03em; }
+#glossary-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.7;
+}
+#glossary-close:hover { opacity: 1; }
+#glossary-body { overflow-y: auto; flex: 1; }
+
+.glossary-entry {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #e8f5f0;
+}
+.glossary-entry:last-child { border-bottom: none; }
+.glossary-terms {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.3rem;
+}
+.glossary-en-term { font-weight: 600; color: #0d1e2c; font-size: 0.92rem; }
+.glossary-zh-term { color: #00b494; font-weight: 600; font-size: 0.92rem; }
+.glossary-en-def  { font-size: 0.845rem; color: #444; line-height: 1.5; margin-bottom: 0.25rem; }
+.glossary-zh-def  { font-size: 0.845rem; color: #1c3a50; line-height: 1.65; }
+</style>
+
+<button id="glossary-btn" onclick="toggleGlossary()">Glossary 词汇表</button>
+
+<div id="glossary-panel">
+  <div id="glossary-header">
+    <span>Glossary / 词汇表</span>
+    <button id="glossary-close" onclick="toggleGlossary()">&#10005;</button>
+  </div>
+  <div id="glossary-body">
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Diagnostic plot</span>
+        <span class="glossary-zh-term">诊断图</span>
+      </div>
+      <div class="glossary-en-def">A graphical tool used to check whether a model's assumptions are adequately met. The four standard plots produced by <code>plot(model)</code> in R are Residuals vs Fitted, Scale-Location, Q-Q Residuals, and Residuals vs Leverage.</div>
+      <div class="glossary-zh-def">用于检验模型假设是否得到满足的图形工具。R 中 <code>plot(model)</code> 生成的四张标准诊断图分别为：残差与拟合值图、尺度-位置图、Q-Q 残差图和残差与杠杆点图。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Residuals vs Fitted plot</span>
+        <span class="glossary-zh-term">残差与拟合值图</span>
+      </div>
+      <div class="glossary-en-def">A diagnostic plot with fitted (predicted) values on the x-axis and residuals on the y-axis. Used to assess the equal variance of errors assumption. With a categorical predictor, there is no linearity assumption to check.</div>
+      <div class="glossary-zh-def">x 轴为拟合值，y 轴为残差的诊断图，用于评估误差等方差假设。对于分类预测变量，无需检验线性假设。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Scale-Location plot</span>
+        <span class="glossary-zh-term">尺度-位置图</span>
+      </div>
+      <div class="glossary-en-def">A diagnostic plot that plots the square root of the absolute standardised residuals against fitted values. Provides a second view of the equal variance of errors assumption; a flat smooth line indicates equal variance.</div>
+      <div class="glossary-zh-def">以拟合值为 x 轴、标准化残差绝对值的平方根为 y 轴的诊断图，提供对等方差假设的第二视角，平滑线平坦表示方差均等。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Q-Q Residuals plot</span>
+        <span class="glossary-zh-term">Q-Q 残差图</span>
+      </div>
+      <div class="glossary-en-def">A quantile-quantile plot that compares the distribution of model residuals to a theoretical normal distribution. Points following the diagonal dashed line indicate the normality of errors assumption is met.</div>
+      <div class="glossary-zh-def">将模型残差分布与理论正态分布进行比较的分位数图。点落在对角虚线上表明残差正态性假设得到满足。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Residuals vs Leverage plot</span>
+        <span class="glossary-zh-term">残差与杠杆点图</span>
+      </div>
+      <div class="glossary-en-def">A diagnostic plot that identifies disproportionately influential observations. Points with both high leverage and large residuals, indicated by Cook's distance contour lines, can substantially alter the fitted model.</div>
+      <div class="glossary-zh-def">识别对模型有不成比例影响的观测值的诊断图。具有高杠杆值和大残差的点（由库克距离等值线标示）会显著改变拟合模型。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Leverage</span>
+        <span class="glossary-zh-term">杠杆值</span>
+      </div>
+      <div class="glossary-en-def">A measure of how unusual an observation's predictor value is relative to the rest of the data. High-leverage points have the potential to exert strong influence on the fitted model, though they do not always do so.</div>
+      <div class="glossary-zh-def">衡量一个观测值的预测变量值相对于其他数据的异常程度。高杠杆点有可能对拟合模型产生较大影响，但并非总是如此。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Cook's distance</span>
+        <span class="glossary-zh-term">库克距离</span>
+      </div>
+      <div class="glossary-en-def">A measure of the overall influence of an observation on all fitted values. Values above 1 indicate the observation is changing the model substantially and warrants investigation.</div>
+      <div class="glossary-zh-def">衡量某个观测值对所有拟合值的综合影响程度。大于 1 的值表明该观测值对模型有实质性影响，需进一步调查。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Equal variance of errors / homoscedasticity</span>
+        <span class="glossary-zh-term">误差等方差性</span>
+      </div>
+      <div class="glossary-en-def">The assumption that residuals have roughly constant spread across all fitted values (or groups). A violation means the spread of residuals differs across groups, inflating or deflating standard errors.</div>
+      <div class="glossary-zh-def">假设残差在所有拟合值（或组别）上具有大致相同的离散程度。违反此假设意味着不同组别的残差离散程度不同，导致标准误被高估或低估。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Heteroscedasticity</span>
+        <span class="glossary-zh-term">异方差性</span>
+      </div>
+      <div class="glossary-en-def">A violation of the <strong>equal variance of errors</strong> assumption, where residual spread differs across fitted values or groups. It inflates standard errors and widens confidence intervals without biasing the parameter estimates themselves.</div>
+      <div class="glossary-zh-def">违反<strong>误差等方差</strong>假设，即不同拟合值或组别的残差离散程度不同。会使标准误膨胀、置信区间变宽，但不会使参数估计值本身产生偏差。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Normality of errors</span>
+        <span class="glossary-zh-term">残差正态性</span>
+      </div>
+      <div class="glossary-en-def">The assumption that residuals follow a normal distribution, assessed using the Q-Q Residuals plot. Modest departures are generally tolerable; severe departures may indicate that a different model family (e.g. a GLM) is needed.</div>
+      <div class="glossary-zh-def">假设残差服从正态分布，通过 Q-Q 残差图进行评估。轻微偏离通常可以接受；严重偏离可能意味着需要选择不同的模型族（如广义线性模型）。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Influential observation</span>
+        <span class="glossary-zh-term">影响观测值</span>
+      </div>
+      <div class="glossary-en-def">An observation whose removal would substantially change the fitted model. Identified using Cook's distance. An observation can be influential because of high leverage, a large residual, or both.</div>
+      <div class="glossary-zh-def">删除后会显著改变拟合模型的观测值，通过库克距离识别。高杠杆值、大残差或二者兼具均可导致一个观测值具有较大影响力。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Residual</span>
+        <span class="glossary-zh-term">残差</span>
+      </div>
+      <div class="glossary-en-def">The difference between an observed value and its model-predicted value: residual = observed &minus; predicted. Residuals are the core of all model diagnostics.</div>
+      <div class="glossary-zh-def">观测值与模型预测值之差：残差 = 观测值 &minus; 预测值，是所有模型诊断的核心。</div>
+    </div>
+
+  </div>
+</div>
+```
+
+# Workshop structure
+
+This workshop continues with the workflow introduced in earlier sessions:
+
+1. Formulate a research question.
+2. Perform exploratory data analysis.
+3. Identify any hidden assumptions.
+4. Fit an appropriate model.
+5. **Diagnose the model and check assumptions** ← focus of today.
+6. Summarise the results.
+7. Interpret and provide inferences.
+
+We pick up where Workshop 5 left off, returning to step 5 to check whether the rabbit model is worthy of our trust.
+
+If you did not finish Workshop 5, do so before continuing.
+
+# A reminder of the model
+
+In Workshop 5 you fitted a model to test whether Java mongoose are associated with a reduction in the average weight of Amami rabbits on two islands south of mainland Japan. The model was:
+
+$$weight_i \sim \text{Normal}(\mu_i, \sigma)$$
+
+$$\mu_i = \beta_0 + \beta_1 \times Present_i$$
+
+where $\beta_0$ is the average weight of rabbits when mongoose are absent ($Present = 0$) and $\beta_1$ is the difference from that average when mongoose are present ($Present = 1$).
+
+After fitting the model, the estimated parameters are:
+
+$$\mu_i = 269.6 + (-2.9) \times Present_i$$
+
+> If your parameter estimates differ, you have likely missed one or both of the data entry errors in the dataset. Return to Workshop 5 and resolve them before continuing.
+
+Using those estimates, we generated predictions and plotted them:
+
+```{r, echo=FALSE, results="show"}
+ggplot(fake_rab) +
+  geom_errorbar(aes(x = mongoose, ymin = low95, ymax = upp95), width = 0.15) +
+  geom_point(aes(x = mongoose, y = fit), size = 3) +
+  labs(x = "Java mongoose", y = "Predicted weight of rabbits (g)") +
+  theme_minimal()
+```
+
+Before presenting these results, we need to check whether the model's assumptions are adequately met.
+
+# Diagnosing
+
+Diagnosing a model with a categorical predictor follows the same process as with a continuous predictor. The only meaningful difference is in the Residuals vs Fitted plot, which we cover below. Run the full set of four diagnostic plots first:
+
+```{r, eval=FALSE}
+par(mfrow = c(2, 2))
+plot(rabbit_mod)
+par(mfrow = c(1, 1))
+```
+
+## Residuals vs Fitted
+
+```{r, echo=FALSE}
+plot(rabbit_mod, which = 1)
+```
+
+The y-axis shows residual errors (the difference between each observed weight and the model's prediction for that rabbit). The x-axis shows the fitted (predicted) values; here, the two group means for rabbits where mongoose are present or absent.
+
+### Linearity
+
+With a continuous predictor, we use this plot to check whether the relationship is approximately linear. With a categorical predictor there is no line to draw between the groups, so there is no linearity assumption to check here. One less thing to worry about.
+
+### Equal variance of errors
+
+What we can check is whether the residual spread is roughly equal across both groups. Look at the two vertical clusters of points: one around 266 g (mongoose present) and one around 270 g (mongoose absent). In both groups, individual rabbits deviate from the group mean by a similar amount, around 40 g in either direction. The assumption of equal variance of errors looks well met here.
+
+To understand what a problematic case looks like, consider this simulated dataset where Group B has much more variable responses than Group A:
+
+```{r, echo=FALSE, results="show"}
+ggplot() +
+  geom_jitter(data = df_sim, aes(x = x, y = y), size = 0.5, height = 0, width = 0.1) +
+  geom_point(data = fake_sim, aes(x = x, y = fit), colour = "#00b494", size = 3) +
+  labs(x = "Explanatory variable", y = "Response variable") +
+  theme_minimal()
+```
+
+In the Residuals vs Fitted plot for that simulated data:
+
+```{r, echo=FALSE}
+plot(m1, which = 1)
+```
+
+The residual spread for Group B is much wider than for Group A, a clear violation. When we add confidence intervals to the original plot:
+
+```{r, echo=FALSE, results="show"}
+ggplot() +
+  geom_jitter(data = df_sim, aes(x = x, y = y), size = 0.5, height = 0, width = 0.1) +
+  geom_point(data = fake_sim, aes(x = x, y = fit), colour = "#00b494", size = 3) +
+  geom_errorbar(data = fake_sim, aes(x = x, ymin = low, ymax = upp), colour = "#00b494") +
+  labs(x = "Explanatory variable", y = "Response variable") +
+  theme_minimal()
+```
+
+The intervals are the same width for both groups, even though Group A's data is much less variable. Heteroscedasticity inflates the standard error across the board. The group means themselves are estimated accurately, but the uncertainty around them is not.
+
+## Scale-Location
+
+The Scale-Location plot gives a second view of the equal variance assumption.
+
+```{r, echo=FALSE}
+plot(rabbit_mod, which = 3)
+```
+
+The spread is slightly larger for the group predicted at around 270 g than for the group at 266 g, but the difference is minor and well within acceptable limits. Compare it with the same plot for the simulated data:
+
+```{r, echo=FALSE}
+plot(m1, which = 3)
+```
+
+That is what a genuine violation looks like: a clear upward trend showing residual spread growing with the fitted value.
+
+## Q-Q Residuals
+
+```{r, echo=FALSE}
+plot(rabbit_mod, which = 2)
+```
+
+We are checking whether the residuals follow an approximately normal distribution. The assumption is met when points lie broadly along the diagonal dashed line. Modest deviations at the tails are normal and should not cause concern. Only very unusual patterns (a strong S-curve, for example) would signal a serious problem, potentially indicating a need for a different error distribution (a generalised linear model) or a missing predictor.
+
+## Residuals vs Leverage
+
+```{r, echo=FALSE}
+plot(rabbit_mod, which = 5)
+```
+
+This plot does not check the standard assumptions. Instead, it flags observations that have a disproportionate influence on the fitted model. We look for Cook's distance contour lines: observations beyond the 1.0 contour warrant investigation. Here, those contour lines do not appear in the plot at all, so no observation is pulling the model to any worrying degree.
+
+For an alternative view of Cook's distances without leverage on the x-axis:
+
+```{r, eval=FALSE}
+plot(rabbit_mod, which = 4)
+```
+
+## Question set 1
+
+<div class="question-block">
+<p><strong>Question 1.</strong> Which assumption can be assessed using the Residuals vs Fitted plot when the predictor is categorical?</p>
+<div class="mc-options">
+  <label><input type="radio" name="qs1-q1" data-correct="false"> Linearity only</label>
+  <label><input type="radio" name="qs1-q1" data-correct="false"> Linearity and equal variance of errors</label>
+  <label><input type="radio" name="qs1-q1" data-correct="true"> Equal variance of errors only</label>
+  <label><input type="radio" name="qs1-q1" data-correct="false"> Normality of errors</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Equal variance of errors only. With a categorical predictor there is no linear trend to assess, so linearity drops out. We are only asking whether the residual spread is similar across groups.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 2.</strong> Which assumption can be assessed using the Scale-Location plot when the predictor is categorical?</p>
+<div class="mc-options">
+  <label><input type="radio" name="qs1-q2" data-correct="false"> Normality of errors</label>
+  <label><input type="radio" name="qs1-q2" data-correct="true"> Equal variance of errors only</label>
+  <label><input type="radio" name="qs1-q2" data-correct="false"> Linearity and equal variance of errors</label>
+  <label><input type="radio" name="qs1-q2" data-correct="false"> Cook's distance and leverage</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Equal variance of errors. The Scale-Location plot is checking the same thing as the Residuals vs Fitted plot, but from a different angle. Running both is worthwhile because occasionally one reveals a pattern the other obscures.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 3.</strong> Which assumption does the Q-Q Residuals plot assess?</p>
+<div class="mc-options">
+  <label><input type="radio" name="qs1-q3" data-correct="false"> Equal variance of errors</label>
+  <label><input type="radio" name="qs1-q3" data-correct="true"> Normality of errors</label>
+  <label><input type="radio" name="qs1-q3" data-correct="false"> Independence of errors</label>
+  <label><input type="radio" name="qs1-q3" data-correct="false"> Linearity</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Normality of errors. The Q-Q plot compares the quantiles of the residuals to the quantiles of a theoretical normal distribution. Points close to the diagonal line indicate the assumption is met.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 4.</strong> How important is it to meet the equal variance of errors assumption?</p>
+<textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Less critical than the linearity assumption. Heteroscedasticity does not bias the parameter estimates (group means) themselves, but it inflates standard errors, which in turn makes confidence intervals wider or narrower than they should be. If you only need an accurate point estimate of the group mean, the impact is limited. For reliable inference, which usually requires trustworthy uncertainty estimates, meeting this assumption matters more.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 5.</strong> Looking at the rabbit model diagnostic plots, do any of them indicate a problem?</p>
+<div class="mc-options">
+  <label><input type="radio" name="qs1-q5" data-correct="false"> Yes: the Q-Q plot shows a serious normality violation</label>
+  <label><input type="radio" name="qs1-q5" data-correct="true"> No: the assumptions are reasonably well met across all four plots</label>
+  <label><input type="radio" name="qs1-q5" data-correct="false"> Yes: the Residuals vs Fitted plot shows clearly unequal variance between groups</label>
+  <label><input type="radio" name="qs1-q5" data-correct="false"> Yes: at least one observation has Cook's distance above 1</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>No. The residual spread is similar across both groups, the Q-Q plot shows only minor tail deviations, and no observation approaches Cook's distance of 1. The diagnostics raise no concerns.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 6.</strong> Does passing the diagnostic plots mean the model is trustworthy?</p>
+<textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>No. Passing the diagnostics only means we have not found evidence of specific statistical assumption violations. The more fundamental concern for this model was raised before fitting: we cannot be certain that mongoose are genuinely absent from Tokunoshima. No diagnostic plot can check that. The diagnostics address a subset of assumptions; domain knowledge and critical thinking about the data generating process are needed for the rest.</p>
+</div>
+</div>
+
+# A more visually appealing alternative
+
+The `performance` package produces the same diagnostics in a more informative layout. Note that for this particular model it does not work especially well; it tries to draw a smooth line between the two groups, which looks wiggly, but that is an artefact of the two-point structure and does not indicate a problem.
+
+```{r, eval=FALSE}
+library(performance)
+check_model(rabbit_mod)
+```
+
+# The lemurs
+
+Having diagnosed the rabbit model, move on to the lemur model from Workshop 5. If you have not fitted that model yet, do so now. Run the diagnostic plots and decide whether you are willing to trust the results.
+
+```{r, eval=FALSE}
+lemur <- read.table("lemurs.txt", header = TRUE)
+```
+
+<div class="question-block">
+<p><strong>Lemur diagnostics.</strong> Run the four diagnostic plots for your lemur model and note what you observe in each. Are there any concerns?</p>
+<textarea class="student-answer" rows="5" placeholder="Describe what you see in each plot and whether any assumption appears violated..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+
+```r
+# Full lemur analysis
+
+library(ggplot2)
+library(ggeffects)   # install.packages("ggeffects") if needed
+
+# Load data
+lemur <- read.table("lemurs.txt", header = TRUE)
+
+# EDA
+str(lemur)         # n = 120
+summary(lemur)     # no obvious numeric issues
+
+ggplot(lemur) +
+  geom_histogram(aes(x = activity, fill = habitat),
+                 colour = "white", binwidth = 0.5) +
+  theme_minimal()
+# One habitat is recorded as "Rain forest" instead of "Rainforest"; a data entry mistake
+
+# Correct the mistake
+lemur$habitat[lemur$habitat == "Rain forest"] <- "Rainforest"
+
+# Hidden assumptions
+# - Validity: how is "activity" measured? Accuracy may differ by habitat
+#   (e.g. easier to track lemurs in dry forest than in dense rainforest).
+# - Equal variance: variation may differ by habitat, something to check in diagnostics.
+
+# Fit model
+lem_mod <- lm(activity ~ habitat, data = lemur)
+
+# Diagnose
+par(mfrow = c(2, 2))
+plot(lem_mod)
+par(mfrow = c(1, 1))
+# No obvious violations. Residual spread looks broadly similar across habitats.
+# Q-Q plot shows minor tail deviations but nothing alarming.
+# No influential observations (Cook's distance contours do not appear).
+
+# Summarise
+summary(lem_mod)
+# Dry forest is the reference group (first alphabetically)
+# Predicted activity in Dry forest:   7.9 hours
+# Mangrove:    7.9 - 1.05 = 6.85 hours
+# Rainforest:  7.9 + 1.8  = 9.7 hours
+# Spiny forest: 7.9 - 1.8 = 6.1 hours
+
+# Plot predictions
+preds <- ggpredict(lem_mod)
+plot(preds)
+
+# Interpretation
+# Lemurs are most active in rainforests and least active in spiny forests.
+# This could reflect habitat preference, or differences in foraging effort
+# (e.g. spending more time searching for food in some habitats).
+# The validity concern about how activity is measured remains unresolved.
+```
+
+The diagnostics raise no serious concerns. The main assumptions to reflect on are validity (how activity is recorded and whether it is comparable across habitats) and representativeness (whether the sampled locations reflect the broader habitat types).
+
+</div>
+</div>
+
+# Assumption reference
+
+| Assumption | Description | Example of violation |
+|---|---|---|
+| 1. Validity | The data can answer the research question. | Using IQ to measure overall intelligence. |
+| 2. Representativeness | The data reflects the population being studied. | Using survey data from a rural area to draw conclusions about an urban population. |
+| 3. Additivity | Effects of predictors are additive with no interactions. | Assuming study hours and sleep independently affect exam scores without considering their combined effect. |
+| 4. Linearity | The relationship between predictors and the outcome is linear. | Assuming plant growth continues to increase indefinitely without levelling off. |
+| 5. Independence of errors | Observations are independent of each other. | Modelling height using repeated measurements of the same children over time. |
+| 6. Equal variance of errors | Residuals have constant variance across all predictor levels. | Modelling income, where salary variability differs across levels of a company hierarchy. |
+| 7. Normality of errors | Residuals follow a normal distribution. | Modelling income, where the presence of extremely wealthy individuals creates a heavily skewed residual distribution. |

@@ -32,63 +32,17 @@ beetles  <- read.table("../Workshop 3 - LM with continuous predictor/Data/beetle
 beet_mod <- lm(offspring ~ temperature, data = beetles)
 
 dogs <- read.table("Data/dog_disturbance.txt", header = TRUE)
+make_download_btn <- function(path, label = NULL) {
+  fname <- basename(path)
+  if (is.null(label)) label <- paste("Download", fname)
+  uri <- xfun::base64_uri(path)
+  sprintf('<a href="%s" download="%s" class="ws-download-btn">%s</a>', uri, fname, label)
+}
 ```
 
 ```{=html}
 <script>
-/* --- answer lock --- */
-var WS_PASS_SHA256 = '864ab12b1858361a2dd80e99b61740bb6e01c8abb3eae721754a8ec1a6463bcc';
-var WS_PASS_DJB2   = '23a4301e';
-var _wsUnlocked = false;
-
-function _wsDjb2(s) {
-  var h = 5381;
-  for (var i = 0; i < s.length; i++) { h = ((h << 5) + h + s.charCodeAt(i)) | 0; }
-  return (h >>> 0).toString(16).padStart(8, '0');
-}
-function wsVerifyPass() {
-  var inp = document.getElementById('ws-pass-input'); if (!inp) return;
-  var msg = document.getElementById('ws-pass-msg');
-  function finish(ok) {
-    if (ok) {
-      _wsUnlocked = true; sessionStorage.setItem('ws-unlocked', WS_PASS_SHA256);
-      document.body.classList.remove('ws-locked');
-      var b = document.getElementById('ws-lock-banner');
-      if (b) { b.style.transition = 'opacity 0.4s'; b.style.opacity = '0'; setTimeout(function () { b.remove(); }, 450); }
-    } else {
-      inp.classList.add('ws-wrong'); if (msg) msg.textContent = 'Incorrect password.';
-      setTimeout(function () { inp.classList.remove('ws-wrong'); if (msg) msg.textContent = ''; }, 2000);
-    }
-  }
-  if (window.crypto && crypto.subtle) {
-    crypto.subtle.digest('SHA-256', new TextEncoder().encode(inp.value))
-      .then(function (buf) { var hex = Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join(''); finish(hex === WS_PASS_SHA256); })
-      .catch(function () { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); });
-  } else { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); }
-}
-function wsFlashBanner() {
-  var b = document.getElementById('ws-lock-banner'); if (!b) return;
-  b.classList.remove('ws-flash'); void b.offsetWidth; b.classList.add('ws-flash');
-}
-function wsInitLock() {
-  if (sessionStorage.getItem('ws-unlocked') === WS_PASS_SHA256) { _wsUnlocked = true; return; }
-  document.body.classList.add('ws-locked');
-  var b = document.createElement('div'); b.id = 'ws-lock-banner';
-  b.innerHTML = '<span style="font-size:1.15rem;line-height:1;">🔒</span>' +
-    '<span>Answers are locked. Enter the workshop password to reveal them.</span>' +
-    '<span class="ws-unlock-form">' +
-      '<input type="password" id="ws-pass-input" placeholder="Password"' +
-      ' onkeydown="if(event.key===\'Enter\')wsVerifyPass();">' +
-      '<button id="ws-unlock-btn" onclick="wsVerifyPass()">Unlock</button>' +
-    '</span><span id="ws-pass-msg"></span>';
-  var t = document.getElementById('title-block-header');
-  if (t) t.insertAdjacentElement('afterend', b); else document.body.prepend(b);
-}
-document.addEventListener('DOMContentLoaded', wsInitLock);
-/* --- end lock --- */
-
 function revealAnswer(btn) {
-  if (!_wsUnlocked) { wsFlashBanner(); return; }
   var block = btn.closest('.question-block, .puzzle-block');
   var answerClass = block.classList.contains('puzzle-block') ? '.puzzle-answer' : '.instructor-answer';
 
@@ -127,6 +81,15 @@ function revealAnswer(btn) {
   if (answer) answer.style.display = 'block';
   btn.textContent = 'Answer shown';
   btn.disabled = true;
+
+  if (textarea) {
+    textarea.disabled = true;
+    textarea.classList.add('ws-answer-locked');
+    var badge = document.createElement('span');
+    badge.className = 'ws-submitted-badge';
+    badge.textContent = 'Submitted';
+    textarea.insertAdjacentElement('afterend', badge);
+  }
 }
 
 function toggleGlossary() {
@@ -211,6 +174,23 @@ function toggleGlossary() {
 .glossary-zh-term { color: #00b494; font-weight: 600; font-size: 0.92rem; }
 .glossary-en-def  { font-size: 0.845rem; color: #444; line-height: 1.5; margin-bottom: 0.25rem; }
 .glossary-zh-def  { font-size: 0.845rem; color: #1c3a50; line-height: 1.65; }
+.ws-answer-locked { background: #f5f5f5 !important; color: #555 !important; cursor: not-allowed; }
+.ws-submitted-badge { display: inline-block; margin-top: 0.3rem; background: #00b494; color: #fff; font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.55rem; border-radius: 3px; }
+.ws-download-btn { display: inline-block; margin: 0.4rem 0; padding: 0.35rem 0.9rem; background: #0d6efd; color: #fff !important; border-radius: 4px; text-decoration: none !important; font-size: 0.875rem; font-weight: 500; }
+.ws-download-btn:hover { background: #0b5ed7; }
+.glossary-section-header {
+  padding: 0.4rem 1.25rem 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #00b494;
+  background: #f0faf8;
+  border-bottom: 1px solid #d0ecea;
+  border-top: 2px solid #e8f5f0;
+  margin-top: 0.25rem;
+}
+.glossary-section-header:first-child { border-top: none; margin-top: 0; }
 </style>
 ```
 
@@ -247,7 +227,7 @@ $$length_i \sim \text{Normal}(\mu_i, \sigma)$$
 
 $$\mu_i = 213.2 + (-5.3) \times drought_i$$
 
-We used this to generate a figure, but how do we know if we can trust the result? The uncomfortable answer is that we can't confirm it with absolute certainty. The results might be completely unreliable, either because the data violated a hidden assumption or because the model is not well suited to the data. The particularly bad news is that we almost always get *some* answer from a model, even when the data or model are badly flawed.
+We used this to generate a figure, but how do we know if we can trust the result? How do we know we haven't been cursed by the Monkey's Paw? The uncomfortable answer is that we can't confirm it with absolute certainty. The results might be completely unreliable, either because the data violated a hidden assumption or because the model is not well suited to the data. The particularly bad news is that we almost always get *some* answer from a model, even when the data or model are badly flawed.
 
 This means it falls to us to actively look for signs that the model results should not be interpreted. This is especially important when a model could influence real-world decisions. We don't want to conclude a drug is safe only to discover later it has serious [side effects](https://pubmed.ncbi.nlm.nih.gov/21507989/).
 
@@ -272,6 +252,8 @@ par(mfrow = c(2, 2))  # arrange as 2x2 grid
 plot(boto_model)
 par(mfrow = c(1, 1))  # reset
 ```
+
+`plot()` works directly on a model object, returning all four diagnostic plots in one call. It uses base R graphics rather than ggplot2 — the output is plainer, but nothing extra needs setting up, which makes it the standard tool for a quick check. You will see a ggplot2-based alternative later in this workshop.
 
 Alternatively, press Return in the console after `plot(boto_model)` to step through them one at a time. Let's go through each plot and what it tells us.
 
@@ -367,7 +349,31 @@ plot(boto_model, which = 2)
 
 ### Normality of errors
 
-The Q-Q plot compares the distribution of the model's residuals to a theoretical Normal distribution. If the residuals are approximately Normal, the points fall close to the diagonal line. Systematic departures at the tails (points curving away from the line) indicate the residual distribution has heavier or lighter tails than Normal.
+The Q-Q plot is perhaps the least useful of the diagnostic plots, or at least only useful in specific circumstances. That said, it's worth understanding what it shows so you know when to pay attention to it.
+
+The Q-Q plot compares the distribution of the model's residuals to a theoretical Normal distribution. If the residuals are approximately Normal, the points fall close to the diagonal reference line. Systematic departures from the line indicate the residuals are not consistent with a Normal distribution. The three panels below show reference cases using simulated data.
+
+```{r qqref, fig.height=3.5}
+set.seed(42)
+n <- 300
+qq_ref <- rbind(
+  data.frame(x = rnorm(n),                 label = "Normal (no violation)"),
+  data.frame(x = scale(rlnorm(n, 0, 0.8)), label = "Violation: one tail"),
+  data.frame(x = rt(n, df = 3),            label = "Violation: both tails")
+)
+qq_ref$label <- factor(qq_ref$label,
+                       levels = c("Normal (no violation)",
+                                  "Violation: one tail",
+                                  "Violation: both tails"))
+ggplot(qq_ref, aes(sample = x)) +
+  geom_qq_line(colour = "red", linewidth = 0.6) +
+  geom_qq(alpha = 0.35, size = 0.7) +
+  facet_wrap(~label) +
+  labs(x = "Theoretical quantiles", y = "Sample quantiles") +
+  theme_minimal()
+```
+
+Left panel: residuals consistent with a Normal distribution, with points following the reference line closely. Centre panel: a violation where the upper tail curves above the line, because values further from zero appear more often than a Normal distribution would predict. Right panel: a violation where both tails deviate away from the line for the same reason, but in both directions.
 
 The following figure shows the same information in a different form, using a histogram of residuals overlaid with the theoretical Normal distribution. You are not expected to reproduce this, but the code is shown for reference:
 
@@ -389,7 +395,7 @@ ggplot() +
 
 The grey bars are the actual residuals; the green shaded area is the ideal Normal. Ideally the bars and the shading would align. Here, the bars extend slightly further in both tails than the Normal would predict, matching what the Q-Q plot shows.
 
-Does this matter for the boto model? Not really. Minor tail deviations are common and usually acceptable. Normality of errors is the least critical of the residual assumptions, because it only governs how well the model predicts *individual* observations. If the goal is to understand the relationship between drought and length rather than to predict individual dolphins precisely, moderate non-normality is not a serious problem.
+Does this matter for the boto model? Not really. Minor tail deviations are common and usually acceptable. Normality of errors is the least critical of the residual assumptions, because it only governs how well the model predicts *individual* observations. If you want to understand how drought impacts botos, do you really care how accurately you can predict each individual dolphin? Not really. Would we expect drought to be the only thing that determines a dolphin's length? Of course not. Moderate non-normality is not a serious problem when the goal is to understand a relationship rather than predict individuals precisely.
 
 ## Residuals vs Leverage
 
@@ -649,10 +655,10 @@ plot(boto_model, which = 4)
 
 # Prettier diagnostics with `performance`
 
-The standard `plot()` diagnostic output is useful but visually plain. The `performance` package produces the same diagnostics in a more informative layout, including an additional panel called the "Posterior Predictive Check." This check uses the fitted model to simulate a range of datasets and overlays them on the observed distribution. If the model is reasonable, the simulated datasets should look similar to the real data.
+The diagnostic plots we've used are standard and useful, but they're dull as hell. The `performance` package produces the same diagnostics in a more informative layout, including an additional panel called the "Posterior Predictive Check." This check uses the fitted model to simulate a range of datasets and overlays them on the observed distribution. If the model is reasonable, the simulated datasets should look similar to the real data.
 
 ```{r, echo=TRUE, eval=FALSE}
-install.packages("performance")  # Run once
+install.packages(c("performance", "see"))  # Run once
 library(performance)
 check_model(boto_model)
 ```
@@ -673,7 +679,7 @@ Bring across the beetle model from Workshop 3 (`beet_mod <- lm(offspring ~ tempe
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>Yes. The Residuals vs Fitted plot shows clear non-linearity: residuals follow a wave pattern, positive at low and high temperatures, negative in the middle. This reflects the beetles' thermal optimum around 20°C; they produce the most offspring near that temperature and fewer at both extremes. Fitting a straight line through a hump-shaped relationship produces biased estimates and should not be used for inference.</p>
+<p>Yes. The Residuals vs Fitted plot shows clear non-linearity: residuals follow a wave pattern, positive at low and high temperatures, negative in the middle. The beetles have a thermal optimum at around 20°C — too cold or too hot and they produce fewer offspring. Basically, we're trying to fit a straight line through a hump. It just doesn't work, and the parameter estimates are not suitable for inference.</p>
 <p>The Scale-Location also shows a wave, though it is less obvious. The Q-Q and Residuals vs Leverage plots look relatively acceptable, but those cannot override the clear linearity violation.</p>
 <pre><code class="language-r">par(mfrow = c(2, 2))
 plot(beet_mod)
@@ -686,7 +692,9 @@ par(mfrow = c(1, 1))
 
 To finish this workshop, work through a new dataset independently. The data come from Cairngorms National Park, where researchers wanted to quantify how much off-leash dogs disturb mammals (foxes, badgers, red and roe deer, marten, stoats, weasels, and red squirrels). Camera traps placed adjacent to paths recorded how long mammals remained on camera. Observers standing on the path counted off-leash dogs passing in each six-hour window.
 
-The dataset (`dog_disturbance.txt` on MyAberdeen) contains:
+The dataset contains:
+
+`r make_download_btn("Data/dog_disturbance.txt")`
 
 - `seconds`: total time (in seconds) mammals spent in view of a camera trap during a six-hour period
 - `dogs`: number of off-leash dogs observed during that same six-hour period
@@ -818,6 +826,8 @@ par(mfrow = c(1, 1))</code></pre>
   </div>
   <div id="glossary-body">
 
+    <div class="glossary-section-header">Model output</div>
+
     <div class="glossary-entry">
       <div class="glossary-terms">
         <span class="glossary-en-term">Residual</span>
@@ -835,6 +845,17 @@ par(mfrow = c(1, 1))</code></pre>
       <div class="glossary-en-def">The value the model predicts for each observation in the original dataset. Obtained with predict(model) when no newdata argument is provided.</div>
       <div class="glossary-zh-def">模型对原始数据集中每个观测值的预测值，不提供 newdata 参数时直接调用 predict(model) 即可获得。</div>
     </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Standard error</span>
+        <span class="glossary-zh-term">标准误差</span>
+      </div>
+      <div class="glossary-en-def">A measure of the uncertainty in an estimated parameter. Heteroscedasticity inflates standard errors, making confidence intervals wider than they should be.</div>
+      <div class="glossary-zh-def">参数估计值不确定性的度量。异方差性会导致标准误差膨胀，使置信区间比实际应有的更宽。</div>
+    </div>
+
+    <div class="glossary-section-header">Diagnostic plots</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
@@ -881,6 +902,8 @@ par(mfrow = c(1, 1))</code></pre>
       <div class="glossary-zh-def">用于识别影响性观测值的诊断图，叠加有库克距离等高线，接近或超过库克距离 1 的观测值需要进一步检查。</div>
     </div>
 
+    <div class="glossary-section-header">Influence and leverage</div>
+
     <div class="glossary-entry">
       <div class="glossary-terms">
         <span class="glossary-en-term">Cook's distance</span>
@@ -908,23 +931,7 @@ par(mfrow = c(1, 1))</code></pre>
       <div class="glossary-zh-def">移除后会导致模型估计参数发生显著变化的观测值，通过残差 vs 杠杆值图中较高的库克距离来识别。</div>
     </div>
 
-    <div class="glossary-entry">
-      <div class="glossary-terms">
-        <span class="glossary-en-term">Heteroscedasticity</span>
-        <span class="glossary-zh-term">异方差性</span>
-      </div>
-      <div class="glossary-en-def">A violation of the <strong>equal variance of errors</strong> assumption, in which residual spread changes systematically across fitted values. Often appears as a fan or funnel shape in the Residuals vs Fitted and Scale-Location plots.</div>
-      <div class="glossary-zh-def">违反<strong>误差等方差</strong>假设的情形，表现为残差的离散程度随拟合值系统性改变，在残差 vs 拟合值图和尺度位置图中常呈扇形或漏斗形。</div>
-    </div>
-
-    <div class="glossary-entry">
-      <div class="glossary-terms">
-        <span class="glossary-en-term">Homoscedasticity</span>
-        <span class="glossary-zh-term">同方差性</span>
-      </div>
-      <div class="glossary-en-def">The <strong>equal variance of errors</strong> assumption is satisfied: residuals have roughly constant spread across all fitted values. Seen as a horizontal band with no fan or funnel in the Residuals vs Fitted and Scale-Location plots.</div>
-      <div class="glossary-zh-def"><strong>误差等方差</strong>假设得到满足：残差在所有拟合值上的离散程度大致恒定，在残差 vs 拟合值图和尺度位置图中表现为无扇形或漏斗形的水平带状分布。</div>
-    </div>
+    <div class="glossary-section-header">Assumption violations</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
@@ -937,12 +944,23 @@ par(mfrow = c(1, 1))</code></pre>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
-        <span class="glossary-en-term">Standard error</span>
-        <span class="glossary-zh-term">标准误差</span>
+        <span class="glossary-en-term">Heteroscedasticity</span>
+        <span class="glossary-zh-term">异方差性</span>
       </div>
-      <div class="glossary-en-def">A measure of the uncertainty in an estimated parameter. Heteroscedasticity inflates standard errors, making confidence intervals wider than they should be.</div>
-      <div class="glossary-zh-def">参数估计值不确定性的度量。异方差性会导致标准误差膨胀，使置信区间比实际应有的更宽。</div>
+      <div class="glossary-en-def">A violation of the equal variance of errors assumption, in which residual spread changes systematically across fitted values. Often appears as a fan or funnel shape in the Residuals vs Fitted and Scale-Location plots.</div>
+      <div class="glossary-zh-def">违反误差等方差假设的情形，表现为残差的离散程度随拟合值系统性改变，在残差 vs 拟合值图和尺度位置图中常呈扇形或漏斗形。</div>
     </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Homoscedasticity</span>
+        <span class="glossary-zh-term">同方差性</span>
+      </div>
+      <div class="glossary-en-def">The equal variance of errors assumption is satisfied: residuals have roughly constant spread across all fitted values. Seen as a horizontal band with no fan or funnel in the Residuals vs Fitted and Scale-Location plots.</div>
+      <div class="glossary-zh-def">误差等方差假设得到满足：残差在所有拟合值上的离散程度大致恒定，在残差 vs 拟合值图和尺度位置图中表现为无扇形或漏斗形的水平带状分布。</div>
+    </div>
+
+    <div class="glossary-section-header">Tools</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
@@ -970,6 +988,8 @@ par(mfrow = c(1, 1))</code></pre>
       <div class="glossary-en-def">A base R graphics parameter that partitions the plot window into a grid. par(mfrow = c(2, 2)) creates a 2x2 grid so four plots display together. Reset to par(mfrow = c(1, 1)) afterwards.</div>
       <div class="glossary-zh-def">将绘图窗口分割为网格的 R 基础图形参数。par(mfrow = c(2, 2)) 创建 2x2 网格使四张图同时显示，完成后需重置为 par(mfrow = c(1, 1))。</div>
     </div>
+
+    <div class="glossary-section-header">Dataset terms</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">

@@ -21,6 +21,13 @@ format:
 knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show = "show",
                       message = FALSE, warning = FALSE)
 library(ggplot2)
+
+make_download_btn <- function(path, label = NULL) {
+  fname <- basename(path)
+  if (is.null(label)) label <- paste("Download", fname)
+  uri <- xfun::base64_uri(path)
+  sprintf('<a href="%s" download="%s" class="ws-download-btn">%s</a>', uri, fname, label)
+}
 ```
 
 ```{=html}
@@ -38,6 +45,12 @@ function revealAnswer(btn) {
       return;
     }
     textarea.classList.remove('missing');
+    textarea.disabled = true;
+    textarea.classList.add('ws-answer-locked');
+    var badge = document.createElement('span');
+    badge.className = 'ws-submitted-badge';
+    badge.textContent = 'Submitted';
+    textarea.insertAdjacentElement('afterend', badge);
   }
 
   var mcOptions = block.querySelector('.mc-options');
@@ -159,6 +172,12 @@ function toggleGlossary() {
 .stat-value.near-zero { color: #4a5568; }
 .stat-value.negative  { color: #c0392b; }
 .stat-label { font-size: 0.82rem; color: #4a5568; margin-top: 0.35rem; }
+.ws-answer-locked { background: #f5f5f5 !important; color: #555 !important; cursor: not-allowed; }
+.ws-submitted-badge { display: inline-block; margin-top: 0.3rem; background: #00b494; color: #fff; font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.55rem; border-radius: 3px; }
+.ws-download-btn { display: inline-block; margin: 0.4rem 0; padding: 0.35rem 0.9rem; background: #0d6efd; color: #fff !important; border-radius: 4px; text-decoration: none !important; font-size: 0.875rem; font-weight: 500; }
+.ws-download-btn:hover { background: #0b5ed7; }
+.glossary-section-header { padding: 0.4rem 1.25rem 0.3rem; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #00635a; background: #f0faf7; border-top: 2px solid #e8f5f0; margin-top: 0.25rem; }
+.glossary-section-header:first-child { border-top: none; margin-top: 0; }
 </style>
 
 <button id="glossary-btn" onclick="toggleGlossary()">Glossary 词汇表</button>
@@ -169,6 +188,8 @@ function toggleGlossary() {
     <button id="glossary-close" onclick="toggleGlossary()">&#10005;</button>
   </div>
   <div id="glossary-body">
+
+    <div class="glossary-section-header">Model types</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
@@ -196,6 +217,8 @@ function toggleGlossary() {
       <div class="glossary-en-def">A model whose goal is to estimate the causal effect of a specific predictor on the response variable. Which variables to include or exclude is determined by causal reasoning (e.g. a DAG), not predictive performance. Example: by how much does monthly rent increase for each additional square metre of floor area, if you could change only the floor area?</div>
       <div class="glossary-zh-def">以估计特定预测变量对响应变量因果效应为目标的模型。纳入或排除哪些变量由因果推理（如DAG）决定，而非预测性能。示例：若仅改变建筑面积，每增加一平方米，月租金会增加多少？</div>
     </div>
+
+    <div class="glossary-section-header">Causal concepts</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
@@ -287,6 +310,8 @@ function toggleGlossary() {
       <div class="glossary-zh-def">将多元回归中所有系数都解读为因果效应的错误。在针对某一感兴趣的预测变量构建的因果模型中，其他变量的纳入是为了控制混淆，其系数不应作因果解释。</div>
     </div>
 
+    <div class="glossary-section-header">Model parameters</div>
+
     <div class="glossary-entry">
       <div class="glossary-terms">
         <span class="glossary-en-term">Discretisation</span>
@@ -309,6 +334,18 @@ function toggleGlossary() {
 </div>
 ```
 
+# Learning objectives
+
+::: {.callout-tip}
+## Learning objectives
+
+1. Distinguish between predictive and causal modelling goals, and explain how the goal shapes which variables to include.
+2. Use a DAG to identify confounders, pipes, and colliders, and apply the backdoor criterion to select adjustment variables.
+3. Fit a multiple linear regression model and interpret its output in both a predictive and a causal context.
+4. Diagnose a multiple-predictor model and identify the consequences of common assumption violations.
+5. Avoid the Table 2 Fallacy by recognising that not all coefficients in a causal model should be interpreted causally.
+:::
+
 # Workshop structure
 
 ::: {.callout-note}
@@ -317,7 +354,7 @@ function toggleGlossary() {
 1. Formulate a research question.
 2. Perform exploratory data analysis (EDA).
 3. Identify any hidden assumptions.
-4. **Fit an appropriate model** ← main focus today.
+4. Fit an appropriate model **[Focus of today]**.
 5. Diagnose the model and check assumptions.
 6. Summarise the results.
 7. Interpret and draw conclusions.
@@ -325,7 +362,11 @@ function toggleGlossary() {
 
 Today we work through the same dataset twice: once to build a predictive model and once to build a causal model. Using the same data for both goals shows how the purpose of the model shapes every decision you make about it.
 
-The dataset is the Aberdeen rental flats data from Workshop 2. Load it now:
+The dataset is the Aberdeen rental flats data from Workshop 2. If you no longer have it, download it below and save it to your `BI3010/data/` folder.
+
+```{r, echo=FALSE, results='asis'}
+cat(make_download_btn("../Workshop 2 - Data vis/data/abdn_flats.txt"))
+```
 
 ```{r, eval=FALSE}
 abdn <- read.table("abdn_flats.txt", header = TRUE)
@@ -333,7 +374,7 @@ abdn <- read.table("abdn_flats.txt", header = TRUE)
 
 # Predictive modelling
 
-Predictive models are a natural starting point for multiple-predictor models because the inclusion criteria are simple: add variables that improve predictions. We do not need to worry about causal assumptions; we just want the model to guess the rent accurately.
+Predictive models are a natural starting point for multiple-predictor models because the inclusion criteria are simple: add variables that improve predictions. We do not need to worry about causal assumptions here (don't tell the Machine Learning folks I said that!); we just want the model to guess the rent accurately.
 
 ## 1. Formulate a research question
 
@@ -341,9 +382,9 @@ The question is: can we predict the monthly rent of a listed property? We will u
 
 ## 2. Perform exploratory data analysis
 
-Spend a few minutes exploring the dataset. Check for odd values. The dataset includes a URL for each property, so you can check unusual entries directly, a rare luxury.
+Spend a few minutes exploring the dataset. Check for odd values. The dataset includes a URL for each property, so you can check unusual entries directly, a rare luxury in science!
 
-One thing to be aware of: some properties may have had their listed price changed since the data were collected. You will need to decide for yourself how to handle these. Your options are: (1) keep the original price, (2) update to the current price, or (3) create a new row for the "new" listing. Option 3 violates an assumption. Can you identify which one?
+One thing to be aware of: some properties may have had their listed price changed since the data were collected. For example, there is one property that when I first added it to the dataset was listed at a whopping £3,200 a month but a year later, that price had dropped to £2,900 (because no one was willing to pay £3.2k in rent). You will need to decide for yourself how to handle these. Your options are: (1) keep the original price, (2) update to the current price, or (3) create a new row for the "new" listing. Option 3 violates an assumption. Can you identify which one?
 
 ## 3. Identify any hidden assumptions
 
@@ -381,6 +422,8 @@ In predictive modelling, we can include all sensible explanatory variables witho
 
 We will keep it to four predictors: `FloorArea`, `Rooms`, `EPC`, and `Tax`.
 
+For some reason, the value of a property in 1991 is how the council tax band is decided. I don't get why 1991 is special (I doubt it actually is) but that's what they do. It's dumb. C'est la vie.
+
 One complication: `EPC` and `Tax` are inherently continuous quantities (energy efficiency and property value) that have been **discretised** into letter bands. This forces R to create a separate dummy variable for every band except the reference. Written out in full, the model equation is:
 
 $$Price_i \sim \text{Normal}(\mu_i, \sigma)$$
@@ -395,7 +438,7 @@ $$\begin{align}
 
 where $\beta_0$ is the predicted rent for a property with zero floor area, zero rooms, EPC band A, and tax band A; $\beta_1$ is the change per additional m²; $\beta_2$ is the change per additional room; and $\beta_3$ through $\beta_8$ and $\beta_9$ through $\beta_{14}$ are the differences between each band and the reference (band A in each case).
 
-That is 14 parameters, compared to just 4 if `EPC` and `Tax` had been kept as continuous scores. Discretising continuous variables into categories creates a lot of extra work and often loses information in the process. Avoid it where you can.
+As you can see, `EPC` and `Tax` being recorded as categories has made our model stupidly and crazily more complicated than it would otherwise be. That is 14 parameters, compared to just 4 if they had been kept as continuous scores. Discretising continuous variables into categories creates a lot of extra work and often loses information in the process. Avoid it where you can.
 
 Despite the notation complexity, fitting the model in R is straightforward:
 
@@ -403,6 +446,8 @@ Despite the notation complexity, fitting the model in R is straightforward:
 rent_mod <- lm(Price ~ FloorArea + Rooms + EPC + Tax, data = abdn)
 summary(rent_mod)
 ```
+
+This produces a giant list of estimated parameters, reminding us why it's best to avoid excessive categorisation. Keep this in mind for your future work (including your Honour's project), both for simplicity and for more meaningful analyses!
 
 ## 5. Diagnose the model and check assumptions
 
@@ -506,7 +551,7 @@ preds <- ggpredict(rent_mod)
 plot(preds)
 ```
 
-If `ggeffects` warns about character variables, convert your categorical columns to factors first:
+If you want to appease the `ggeffects` gods, feel free to convert your categorical variables to factors first:
 
 ```{r, eval=FALSE}
 abdn$EPC <- factor(abdn$EPC)
@@ -536,6 +581,8 @@ ggplot(fake) +
   labs(x = "Square metres", y = "Predicted monthly rent (£)") +
   theme_minimal()
 ```
+
+Pay attention to the `Estimate` for `FloorArea`. The model is predicting that adding an extra square metre to a property only increases rent by a few pounds. Seems a bit low, right? Do we really think that the difference in price between a 50 m² flat and a 100 m² flat will only be a small amount extra per month? We'll come back to this after we run the causal version of this model.
 
 ### Question set 2
 
@@ -580,7 +627,7 @@ predict(rent_mod, newdata = my_property)
 # Add 95% confidence interval
 predict(rent_mod, newdata = my_property, interval = "confidence")</code></pre>
 <p>The residual is the difference between your model's prediction and the listed price. If the true price falls within the confidence interval, the model's uncertainty correctly captured the listing.</p>
-<p>For a version of this model built into a web interface, see <a href="https://deonroos.shinyapps.io/BI3010_Rent/" target="_blank">this demonstration app</a>. Note the "Fancy model" also accounts for spatial patterns in rent across Aberdeen.</p>
+<p>If you want to see how this kind of model could be translated into something you might see online, with some marketing saying something like "We're using the most advanced Generative Artificial Intelligence to predict how much rent you should be asking for", see <a href="https://deonroos.shinyapps.io/BI3010_Rent/" target="_blank">this demonstration app</a>. This is a little toy website I made (entirely in R). Two things to note: there's a decent chance the website will crash if lots of people try to use it at the same time, and the "Fancy model" also accounts for spatial patterns in rent across Aberdeen.</p>
 </div>
 </div>
 
@@ -1328,6 +1375,8 @@ library(performance)
 library(see)
 
 # Same DAG structure, different exposure
+# (But keep in mind, this doesn't include things like how nicely it's decorated,
+# its general maintenance, how greedy the landlord is, etc.)
 rent_dag_epc <- check_dag(
   Price ~ Rooms + FloorArea + Tax + EPC,
   Rooms ~ FloorArea,

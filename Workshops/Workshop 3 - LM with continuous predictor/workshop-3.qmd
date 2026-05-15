@@ -23,63 +23,17 @@ library(ggplot2)
 library(dplyr)
 boto <- read.table("../Workshop 2 - Data vis/Data/boto.txt", header = TRUE)
 boto_model <- lm(length ~ drought, data = boto)
+make_download_btn <- function(path, label = NULL) {
+  fname <- basename(path)
+  if (is.null(label)) label <- paste("Download", fname)
+  uri <- xfun::base64_uri(path)
+  sprintf('<a href="%s" download="%s" class="ws-download-btn">%s</a>', uri, fname, label)
+}
 ```
 
 ```{=html}
 <script>
-/* --- answer lock --- */
-var WS_PASS_SHA256 = 'caaed8c4eb8dfedde10e80b06341a9bdbae13582a49164bf00fb75a703df17c8';
-var WS_PASS_DJB2   = '2785fcc2';
-var _wsUnlocked = false;
-
-function _wsDjb2(s) {
-  var h = 5381;
-  for (var i = 0; i < s.length; i++) { h = ((h << 5) + h + s.charCodeAt(i)) | 0; }
-  return (h >>> 0).toString(16).padStart(8, '0');
-}
-function wsVerifyPass() {
-  var inp = document.getElementById('ws-pass-input'); if (!inp) return;
-  var msg = document.getElementById('ws-pass-msg');
-  function finish(ok) {
-    if (ok) {
-      _wsUnlocked = true; sessionStorage.setItem('ws-unlocked', WS_PASS_SHA256);
-      document.body.classList.remove('ws-locked');
-      var b = document.getElementById('ws-lock-banner');
-      if (b) { b.style.transition = 'opacity 0.4s'; b.style.opacity = '0'; setTimeout(function () { b.remove(); }, 450); }
-    } else {
-      inp.classList.add('ws-wrong'); if (msg) msg.textContent = 'Incorrect password.';
-      setTimeout(function () { inp.classList.remove('ws-wrong'); if (msg) msg.textContent = ''; }, 2000);
-    }
-  }
-  if (window.crypto && crypto.subtle) {
-    crypto.subtle.digest('SHA-256', new TextEncoder().encode(inp.value))
-      .then(function (buf) { var hex = Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join(''); finish(hex === WS_PASS_SHA256); })
-      .catch(function () { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); });
-  } else { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); }
-}
-function wsFlashBanner() {
-  var b = document.getElementById('ws-lock-banner'); if (!b) return;
-  b.classList.remove('ws-flash'); void b.offsetWidth; b.classList.add('ws-flash');
-}
-function wsInitLock() {
-  if (sessionStorage.getItem('ws-unlocked') === WS_PASS_SHA256) { _wsUnlocked = true; return; }
-  document.body.classList.add('ws-locked');
-  var b = document.createElement('div'); b.id = 'ws-lock-banner';
-  b.innerHTML = '<span style="font-size:1.15rem;line-height:1;">🔒</span>' +
-    '<span>Answers are locked. Enter the workshop password to reveal them.</span>' +
-    '<span class="ws-unlock-form">' +
-      '<input type="password" id="ws-pass-input" placeholder="Password"' +
-      ' onkeydown="if(event.key===\'Enter\')wsVerifyPass();">' +
-      '<button id="ws-unlock-btn" onclick="wsVerifyPass()">Unlock</button>' +
-    '</span><span id="ws-pass-msg"></span>';
-  var t = document.getElementById('title-block-header');
-  if (t) t.insertAdjacentElement('afterend', b); else document.body.prepend(b);
-}
-document.addEventListener('DOMContentLoaded', wsInitLock);
-/* --- end lock --- */
-
 function revealAnswer(btn) {
-  if (!_wsUnlocked) { wsFlashBanner(); return; }
   var block = btn.closest('.question-block, .puzzle-block');
   var answerClass = block.classList.contains('puzzle-block') ? '.puzzle-answer' : '.instructor-answer';
 
@@ -118,6 +72,15 @@ function revealAnswer(btn) {
   if (answer) answer.style.display = 'block';
   btn.textContent = 'Answer shown';
   btn.disabled = true;
+
+  if (textarea) {
+    textarea.disabled = true;
+    textarea.classList.add('ws-answer-locked');
+    var badge = document.createElement('span');
+    badge.className = 'ws-submitted-badge';
+    badge.textContent = 'Submitted';
+    textarea.insertAdjacentElement('afterend', badge);
+  }
 }
 
 function toggleGlossary() {
@@ -228,6 +191,22 @@ function toggleGlossary() {
   color: #1c3a50;
   line-height: 1.65;
 }
+.ws-answer-locked { background: #f5f5f5 !important; color: #555 !important; cursor: not-allowed; }
+.ws-submitted-badge { display: inline-block; margin-top: 0.3rem; background: #00b494; color: #fff; font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.55rem; border-radius: 3px; }
+.ws-download-btn { display: inline-block; margin: 0.4rem 0; padding: 0.35rem 0.9rem; background: #0d6efd; color: #fff !important; border-radius: 4px; text-decoration: none !important; font-size: 0.875rem; font-weight: 500; }
+.ws-download-btn:hover { background: #0b5ed7; }
+.glossary-section-header {
+  padding: 0.4rem 1.25rem 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #00635a;
+  background: #f0faf7;
+  border-top: 2px solid #e8f5f0;
+  margin-top: 0.25rem;
+}
+.glossary-section-header:first-child { border-top: none; margin-top: 0; }
 </style>
 ```
 
@@ -263,6 +242,12 @@ For this first workshop on linear models, we return to a familiar dataset: `boto
 - `length`: length of the boto dolphin (cm)
 
 The research question is whether the number of droughts in the past 20 years affects boto length. The broader motivation is climate change and dam construction in the Amazon basin: if droughts become more frequent, could dolphins become smaller and be in poorer condition?
+
+If you no longer have `boto.txt` from Workshop 2, download it here and place it in your `data/` folder:
+
+```{r, echo=FALSE, results='asis'}
+cat(make_download_btn("../Workshop 2 - Data vis/Data/boto.txt"))
+```
 
 From the question we can identify:
 
@@ -426,6 +411,10 @@ ggplot(fake_diag) +
   labs(x = "Number of drought years",
        y = "Predicted length of boto (cm)")
 ```
+
+Nobody talks much about $\sigma$, but it is doing important stuff in the model. $\beta_0$ and $\beta_1$ describe the line; $\sigma$ describes the cloud of points around it. Two dolphins with the same drought history will not be the same length. One is older, one had a better feeding season, one was awkward to measure. None of that is drought, and all of it ends up in $\sigma$.
+
+In the output, $\sigma$ is called the **Residual standard error**. For a Normal distribution, about two thirds of observations fall within one $\sigma$ of the fitted line. Friday's session is where we actually dig into what that number is telling us. For now, just know it exists and that it matters.
 
 ## Predictions from the equation
 
@@ -845,8 +834,8 @@ Here is the full workflow from loading the data to the final figure, as you migh
 
 library(ggplot2)
 
-setwd("H:/BI3010/workshop3")
-boto <- read.table("boto.txt", header = TRUE)
+# Open your R Project (.Rproj) before running this script
+boto <- read.table("data/boto.txt", header = TRUE)
 
 # EDA
 summary(boto)
@@ -891,6 +880,12 @@ Variables:
 - `offspring`: number of offspring produced
 - `temperature`: temperature (°C) to which beetles were exposed for 6 hours per day
 
+Download `beetles.txt` and place it in your `data/` folder:
+
+```{r, echo=FALSE, results='asis'}
+cat(make_download_btn("Data/beetles.txt"))
+```
+
 Carry out an EDA, consider which assumptions are likely violated, fit an appropriate model, and plot the results. Make sure you are comfortable with the full workflow, as an equivalent analysis may appear in a quiz.
 
 <div class="question-block">
@@ -901,8 +896,7 @@ Carry out an EDA, consider which assumptions are likely violated, fit an appropr
 <pre><code class="language-r">library(ggplot2)
 library(ggeffects)
 
-setwd("H:/BI3010/workshop3")
-beetles <- read.table("beetles.txt", header = TRUE)
+beetles <- read.table("data/beetles.txt", header = TRUE)
 
 # EDA
 str(beetles)      # n = 234
@@ -966,6 +960,8 @@ plot(preds, add.data = TRUE)
   </div>
   <div id="glossary-body">
 
+    <div class="glossary-section-header">Model concepts</div>
+
     <div class="glossary-entry">
       <div class="glossary-terms">
         <span class="glossary-en-term">Linear model</span>
@@ -1001,6 +997,35 @@ plot(preds, add.data = TRUE)
       <div class="glossary-en-def">The variable used to explain or predict the response (the "X" variable). Also called the explanatory variable, independent variable, or covariate.</div>
       <div class="glossary-zh-def">用于解释或预测响应变量的变量（即"X"变量），也称解释变量、自变量或协变量。</div>
     </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Continuous variable</span>
+        <span class="glossary-zh-term">连续变量</span>
+      </div>
+      <div class="glossary-en-def">A variable that can take any value within a range, including non-integer values. Length, weight, and temperature are continuous. Compatible with a Normal distribution.</div>
+      <div class="glossary-zh-def">可取某范围内任意值（包括非整数值）的变量。体长、体重和温度均为连续变量，与正态分布兼容。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Discrete variable</span>
+        <span class="glossary-zh-term">离散变量</span>
+      </div>
+      <div class="glossary-en-def">A variable that can only take specific values, usually integers (e.g. count of offspring). A Normal distribution is generally not appropriate for discrete variables.</div>
+      <div class="glossary-zh-def">只能取特定值（通常为整数）的变量，例如后代数量。正态分布通常不适用于离散变量。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Covariate</span>
+        <span class="glossary-zh-term">协变量</span>
+      </div>
+      <div class="glossary-en-def">Another term for a predictor variable. Often used when the predictor is continuous and included to control for its effect alongside the main variable of interest.</div>
+      <div class="glossary-zh-def">预测变量的另一种说法，通常指连续型预测变量，用于在研究主要变量的同时控制其影响。</div>
+    </div>
+
+    <div class="glossary-section-header">Model parameters</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
@@ -1049,21 +1074,34 @@ plot(preds, add.data = TRUE)
 
     <div class="glossary-entry">
       <div class="glossary-terms">
-        <span class="glossary-en-term">Continuous variable</span>
-        <span class="glossary-zh-term">连续变量</span>
+        <span class="glossary-en-term">Coefficient</span>
+        <span class="glossary-zh-term">系数</span>
       </div>
-      <div class="glossary-en-def">A variable that can take any value within a range, including non-integer values. Length, weight, and temperature are continuous. Compatible with a Normal distribution.</div>
-      <div class="glossary-zh-def">可取某范围内任意值（包括非整数值）的变量。体长、体重和温度均为连续变量，与正态分布兼容。</div>
+      <div class="glossary-en-def">An estimated parameter from the model (e.g. the intercept or slope). Reported in the Estimate column of summary() output.</div>
+      <div class="glossary-zh-def">模型估计的参数（如截距或斜率），显示在 summary() 输出的 Estimate 列中。</div>
+    </div>
+
+    <div class="glossary-section-header">Inference and uncertainty</div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Confidence interval</span>
+        <span class="glossary-zh-term">置信区间</span>
+      </div>
+      <div class="glossary-en-def">A range of values within which the true parameter is likely to fall, with a specified level of confidence (usually 95%). Covered in detail next week.</div>
+      <div class="glossary-zh-def">在指定置信水平（通常为95%）下，真实参数值可能落入的值域范围，将在下周详细介绍。</div>
     </div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
-        <span class="glossary-en-term">Discrete variable</span>
-        <span class="glossary-zh-term">离散变量</span>
+        <span class="glossary-en-term">Biased estimate</span>
+        <span class="glossary-zh-term">有偏估计</span>
       </div>
-      <div class="glossary-en-def">A variable that can only take specific values, usually integers (e.g. count of offspring). A Normal distribution is generally not appropriate for discrete variables.</div>
-      <div class="glossary-zh-def">只能取特定值（通常为整数）的变量，例如后代数量。正态分布通常不适用于离散变量。</div>
+      <div class="glossary-en-def">An estimate that is systematically too high or too low because the model is misspecified (e.g. fitting a straight line to curved data). Biased estimates should not be used for inference.</div>
+      <div class="glossary-zh-def">由于模型设定错误（如对曲线数据拟合直线）而系统性偏高或偏低的估计值，有偏估计不应用于推断。</div>
     </div>
+
+    <div class="glossary-section-header">R functions</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
@@ -1101,32 +1139,7 @@ plot(preds, add.data = TRUE)
       <div class="glossary-zh-def">自动生成模型预测值和置信区间，并用 ggplot2 绘图的 R 包，适用于快速可视化模型拟合结果。</div>
     </div>
 
-    <div class="glossary-entry">
-      <div class="glossary-terms">
-        <span class="glossary-en-term">Coefficient</span>
-        <span class="glossary-zh-term">系数</span>
-      </div>
-      <div class="glossary-en-def">An estimated parameter from the model (e.g. the intercept or slope). Reported in the Estimate column of summary() output.</div>
-      <div class="glossary-zh-def">模型估计的参数（如截距或斜率），显示在 summary() 输出的 Estimate 列中。</div>
-    </div>
-
-    <div class="glossary-entry">
-      <div class="glossary-terms">
-        <span class="glossary-en-term">Confidence interval</span>
-        <span class="glossary-zh-term">置信区间</span>
-      </div>
-      <div class="glossary-en-def">A range of values within which the true parameter is likely to fall, with a specified level of confidence (usually 95%). Covered in detail next week.</div>
-      <div class="glossary-zh-def">在指定置信水平（通常为95%）下，真实参数值可能落入的值域范围，将在下周详细介绍。</div>
-    </div>
-
-    <div class="glossary-entry">
-      <div class="glossary-terms">
-        <span class="glossary-en-term">Fecundity</span>
-        <span class="glossary-zh-term">繁殖力</span>
-      </div>
-      <div class="glossary-en-def">The reproductive output of an organism, typically measured as the number of offspring produced. The response variable in the burying beetle dataset.</div>
-      <div class="glossary-zh-def">生物体的生殖产出，通常以产生的后代数量衡量，是埋葬甲虫数据集中的响应变量。</div>
-    </div>
+    <div class="glossary-section-header">Assumptions</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
@@ -1137,22 +1150,15 @@ plot(preds, add.data = TRUE)
       <div class="glossary-zh-def">预测变量与响应变量之间关系呈直线的假设。当真实关系为曲线时（如甲虫温度数据），该假设被违反。</div>
     </div>
 
-    <div class="glossary-entry">
-      <div class="glossary-terms">
-        <span class="glossary-en-term">Biased estimate</span>
-        <span class="glossary-zh-term">有偏估计</span>
-      </div>
-      <div class="glossary-en-def">An estimate that is systematically too high or too low because the model is misspecified (e.g. fitting a straight line to curved data). Biased estimates should not be used for inference.</div>
-      <div class="glossary-zh-def">由于模型设定错误（如对曲线数据拟合直线）而系统性偏高或偏低的估计值，有偏估计不应用于推断。</div>
-    </div>
+    <div class="glossary-section-header">Dataset terms</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
-        <span class="glossary-en-term">Covariate</span>
-        <span class="glossary-zh-term">协变量</span>
+        <span class="glossary-en-term">Fecundity</span>
+        <span class="glossary-zh-term">繁殖力</span>
       </div>
-      <div class="glossary-en-def">Another term for a predictor variable. Often used when the predictor is continuous and included to control for its effect alongside the main variable of interest.</div>
-      <div class="glossary-zh-def">预测变量的另一种说法，通常指连续型预测变量，用于在研究主要变量的同时控制其影响。</div>
+      <div class="glossary-en-def">The reproductive output of an organism, typically measured as the number of offspring produced. The response variable in the burying beetle dataset.</div>
+      <div class="glossary-zh-def">生物体的生殖产出，通常以产生的后代数量衡量，是埋葬甲虫数据集中的响应变量。</div>
     </div>
 
   </div>

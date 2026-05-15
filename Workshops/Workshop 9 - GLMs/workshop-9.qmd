@@ -21,6 +21,13 @@ format:
 knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show = "show",
                       message = FALSE, warning = FALSE)
 library(ggplot2)
+
+make_download_btn <- function(path, label = NULL) {
+  fname <- basename(path)
+  if (is.null(label)) label <- paste("Download", fname)
+  uri <- xfun::base64_uri(path)
+  sprintf('<a href="%s" download="%s" class="ws-download-btn">%s</a>', uri, fname, label)
+}
 ```
 
 ```{=html}
@@ -38,6 +45,12 @@ function revealAnswer(btn) {
       return;
     }
     textarea.classList.remove('missing');
+    textarea.disabled = true;
+    textarea.classList.add('ws-answer-locked');
+    var badge = document.createElement('span');
+    badge.className = 'ws-submitted-badge';
+    badge.textContent = 'Submitted';
+    textarea.insertAdjacentElement('afterend', badge);
   }
 
   var mcOptions = block.querySelector('.mc-options');
@@ -148,6 +161,37 @@ function toggleGlossary() {
 .glossary-zh-term { color: #00b494; font-weight: 600; font-size: 0.92rem; }
 .glossary-en-def  { font-size: 0.845rem; color: #444; line-height: 1.5; margin-bottom: 0.25rem; }
 .glossary-zh-def  { font-size: 0.845rem; color: #1c3a50; line-height: 1.65; }
+
+.ws-answer-locked {
+  background: #f5f5f5 !important;
+  color: #555 !important;
+  cursor: not-allowed;
+}
+.ws-submitted-badge {
+  display: inline-block;
+  margin-top: 0.3rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #00b494;
+  color: #fff;
+}
+.ws-download-btn { display: inline-block; margin: 0.4rem 0; padding: 0.35rem 0.9rem; background: #0d6efd; color: #fff !important; border-radius: 4px; text-decoration: none !important; font-size: 0.875rem; font-weight: 500; }
+.ws-download-btn:hover { background: #0b5ed7; }
+
+.glossary-section-header {
+  padding: 0.4rem 1.25rem 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #00635a;
+  background: #f0faf7;
+  border-top: 2px solid #e8f5f0;
+  margin-top: 0.25rem;
+}
+.glossary-section-header:first-child { border-top: none; margin-top: 0; }
 </style>
 
 <button id="glossary-btn" onclick="toggleGlossary()">Glossary 词汇表</button>
@@ -159,6 +203,8 @@ function toggleGlossary() {
   </div>
   <div id="glossary-body">
 
+    <div class="glossary-section-header">The GLM framework</div>
+
     <div class="glossary-entry">
       <div class="glossary-terms">
         <span class="glossary-en-term">Generalised Linear Model (GLM)</span>
@@ -167,6 +213,8 @@ function toggleGlossary() {
       <div class="glossary-en-def">An extension of the linear model that allows the response variable to follow distributions other than Normal. A GLM has three components: a distribution family (describing how the response is generated), a link function (connecting the linear predictor to the mean of that distribution), and the linear predictor itself (the equation of predictors and coefficients).</div>
       <div class="glossary-zh-def">线性模型的扩展，允许响应变量遵循正态分布以外的分布。GLM由三个部分组成：分布族（描述响应变量如何产生）、连接函数（将线性预测子与该分布的均值相连接）以及线性预测子本身（预测变量与系数的方程）。</div>
     </div>
+
+    <div class="glossary-section-header">Distributions and link functions</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
@@ -204,6 +252,8 @@ function toggleGlossary() {
       <div class="glossary-zh-def">预测变量与系数的线性组合：β₀ + β₁x₁ + β₂x₂ + ...。在GLM中，连接函数将线性预测子与响应变量的期望值相连接。即使预测变量与响应变量在响应尺度上的关系不是线性的，线性预测子本身在系数上始终是线性的。</div>
     </div>
 
+    <div class="glossary-section-header">Diagnostics and interpretation</div>
+
     <div class="glossary-entry">
       <div class="glossary-terms">
         <span class="glossary-en-term">Overdispersion</span>
@@ -237,21 +287,41 @@ function toggleGlossary() {
 
 # Workshop structure
 
+::: {.callout-tip}
+## Learning objectives
+By the end of this workshop you should be able to:
+
+1. Explain why count data cannot be modelled with a Normal distribution and when the Poisson distribution is more appropriate.
+2. Describe the three components of a GLM: the distribution family, the link function, and the linear predictor.
+3. Fit a Poisson GLM in R using `glm()` and check for overdispersion using the dispersion statistic.
+4. Interpret model coefficients on the log scale and back-transform predictions to the response scale using `exp()`.
+5. Diagnose a Poisson GLM and explain why the normal Q-Q plot is largely uninformative for Poisson residuals.
+:::
+
+::: {.callout-note}
+## Workflow
 As always, we work through the same seven-step workflow:
 
 1. Formulate a research question.
 2. Perform exploratory data analysis (EDA).
 3. Identify any hidden assumptions.
-4. Fit an appropriate model ← main focus today.
-5. Diagnose the model and check assumptions ← main focus today.
-6. Summarise the results ← main focus today.
+4. Fit an appropriate model **[Focus of today]**.
+5. Diagnose the model and check assumptions **[Focus of today]**.
+6. Summarise the results **[Focus of today]**.
 7. Interpret and draw conclusions.
+:::
 
 All previous workshops used linear models with a Normal distribution for the response. Today we extend that to Generalised Linear Models (GLMs), which allow the response variable to follow a different distribution. The specific case here is count data, which calls for a Poisson GLM.
 
 ## 1. Formulate a research question
 
-The dataset for this workshop (`species.txt` on MyAberdeen) comes from a study of plant diversity across 90 plots of land. Each row is one plot. The variables are:
+The dataset for this workshop comes from a study of plant diversity across 90 plots of land. Download it below and save it to your `BI3010/data/` folder.
+
+```{r, echo=FALSE, results='asis'}
+cat(make_download_btn("../Workshop 10 - GLMs/Data/species.txt"))
+```
+
+Each row is one plot. The variables are:
 
 - `Species`: the number of plant species recorded in the plot (a count).
 - `Biomass`: the total weight of plants in the plot, in kg.
@@ -267,7 +337,7 @@ species <- read.table("Data/species.txt", header = TRUE)
 
 ## 2. Perform exploratory data analysis
 
-Spend a few minutes exploring the dataset. Check the structure, look at distributions, and plot the response against each predictor. Useful functions: `str()`, `summary()`, `hist()`, `table()`, `ggplot()`.
+Spend a few minutes exploring the dataset. Check the structure, look at distributions, and plot the response against each predictor. Useful functions: `str()`, `summary()`, `geom_histogram()`, `table()`, `ggplot()`.
 
 ```{r, eval=FALSE}
 str(species)
@@ -275,8 +345,8 @@ summary(species)
 ```
 
 ```{r, eval=FALSE}
-hist(species$Species)
-hist(species$Biomass)
+ggplot(species, aes(x = Species)) + geom_histogram() + theme_minimal()
+ggplot(species, aes(x = Biomass)) + geom_histogram() + theme_minimal()
 table(species$pH)
 ```
 
@@ -298,7 +368,7 @@ Before fitting any model, think about the hidden assumptions. The standard ones 
 
 ### Choosing a distribution
 
-The response variable `Species` is a count: it can only take non-negative integer values (0, 1, 2, ...). A Normal distribution generates continuous values and allows negatives, so it is a poor fit for count data. The Poisson distribution is designed for counts. It is described by a single parameter λ (lambda), which is both the mean and the expected count.
+The response variable `Species` is a count: it can only take non-negative integer values (0, 1, 2, ...). From this alone we can already deduce the appropriate distribution (the fact that this workshop is called Poisson GLMs may also offer a rather cryptic hint). A Normal distribution generates continuous values and allows negatives, so it is a poor fit for count data. The Poisson distribution is designed for counts. It is described by a single parameter λ (lambda), which is both the mean and the expected count.
 
 The distributional assumption for this model is:
 
@@ -310,7 +380,7 @@ where $Species_i$ is the count of species in plot $i$, modelled as coming from a
 
 Because λ must always be positive (you cannot have a negative expected count), we cannot fit a straight line directly to λ — the line could go below zero. The log link solves this: it maps the linear predictor (which can be any value) onto the log scale, where values can range freely, and then the inverse (`exp()`) maps back to always-positive predictions.
 
-The important point: the link function transforms the linear predictor, not the observed species counts. The data never change.
+> Keep in mind(!): the link function does not transform the species counts — those never change. We are only changing the *linear predictor*. This is a super common misunderstanding with GLMs and link functions.
 
 The equation for the linear predictor is:
 
@@ -318,9 +388,15 @@ $$log(\lambda_i) = \beta_0 + \beta_1 \times Biomass_i$$
 
 where $\beta_0$ is the intercept (the log expected species count when Biomass = 0) and $\beta_1$ is the slope for biomass on the log scale.
 
+### Which explanatory variables to include?
+
+Spare a moment's thought for how complex the process behind the number of plant species in a plot of land actually is. How much sunlight does each plot get? How much rainfall? What seeds were already present in the soil before data collection started? Why were *those* seeds there and not others? Why did some of them germinate in time to be counted?
+
+We have no data to explain any of that variation — yet it is all still there, and it is what we are asking the stochastic part of the model to absorb. The deterministic part we can actually study is the role of plant biomass and soil pH.
+
 ### Fitting the model
 
-We start with just `Biomass` as a predictor to keep things simple before adding `pH`. In R, a GLM is fitted with `glm()` rather than `lm()`. The `family` argument specifies both the distribution and the link function:
+As always, fitting the model is the easiest part. We start with just `Biomass` as a predictor to keep things simple before adding `pH`. In R, a GLM is fitted with `glm()` rather than `lm()`. The `family` argument specifies both the distribution and the link function:
 
 ```{r, eval=FALSE}
 species_mod <- glm(Species ~ Biomass,
@@ -393,7 +469,7 @@ par(mfrow = c(1, 1))
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>No observations exceed a Cook's distance of 1, which would be the threshold for serious concern. However, a few observations sit closer to the dashed lines than we would like. This does not invalidate the model, but it is worth noting. The bigger problem here is overdispersion, not influential observations.</p>
+<p>No observations exceed a Cook's distance of 1, which would be the threshold for serious concern. However, a few sit uncomfortably close to the boundary — we're not exactly jumping for joy with those Cook's distances. The values are fine, but it is worth noting. The bigger problem here is overdispersion, not influential observations.</p>
 </div>
 </div>
 
@@ -412,7 +488,7 @@ summary(species_mod)
 <div class="instructor-answer">
 <p>From the summary output: residual deviance ≈ 433.6 on 88 degrees of freedom.</p>
 <pre><code>433.6 / 88  # ≈ 4.9</code></pre>
-<p>A value of 4.9 is far above 1 and indicates severe overdispersion. The variation in species counts is roughly five times larger than the Poisson distribution predicts. As a consequence, the standard errors for the coefficients will be too small, making p-values lower than they should be and confidence intervals too narrow. The model as it stands should be treated with caution.</p>
+<p>We have a whopping dispersion of 4.9. My general rule of thumb is that I start getting concerned somewhere in the 1.5 to 1.8 region. 4.9 is doomsday. As a consequence, the standard errors for the coefficients will be artificially small, making p-values lower than they should be and confidence intervals too narrow. The model as it stands should be treated with serious caution.</p>
 </div>
 </div>
 
@@ -582,7 +658,7 @@ summary(species_mod2)
 
 ## Plot the model fit
 
-Use `ggeffects` to produce separate predicted relationships for each predictor:
+In the interest of ending on an easy note, let's use `ggeffects` and have it do all the annoying coding for us:
 
 ```{r, eval=FALSE}
 library(ggeffects)

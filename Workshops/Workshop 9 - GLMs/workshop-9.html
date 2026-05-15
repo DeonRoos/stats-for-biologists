@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Roos &amp; Pinard">
-<meta name="dcterms.date" content="2026-05-13">
+<meta name="dcterms.date" content="2026-05-15">
 
 <title>Workshop 9: Poisson GLMs</title>
 <style>
@@ -3093,7 +3093,7 @@ vertical-align: -.125em;
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">13 May 2026</p>
+      <p class="date">15 May 2026</p>
     </div>
   </div>
   
@@ -3117,6 +3117,12 @@ function revealAnswer(btn) {
       return;
     }
     textarea.classList.remove('missing');
+    textarea.disabled = true;
+    textarea.classList.add('ws-answer-locked');
+    var badge = document.createElement('span');
+    badge.className = 'ws-submitted-badge';
+    badge.textContent = 'Submitted';
+    textarea.insertAdjacentElement('afterend', badge);
   }
 
   var mcOptions = block.querySelector('.mc-options');
@@ -3222,6 +3228,45 @@ margin-bottom: 0.3rem;
 .glossary-zh-term { color: #00b494; font-weight: 600; font-size: 0.92rem; }
 .glossary-en-def { font-size: 0.845rem; color: #444; line-height: 1.5; margin-bottom: 0.25rem; }
 .glossary-zh-def { font-size: 0.845rem; color: #1c3a50; line-height: 1.65; }
+.ws-answer-locked {
+background: #f5f5f5 !important;
+color: #555 !important;
+cursor: not-allowed;
+}
+.ws-submitted-badge {
+display: inline-block;
+margin-top: 0.3rem;
+padding: 0.15rem 0.55rem;
+border-radius: 3px;
+font-size: 0.75rem;
+font-weight: 600;
+background: #00b494;
+color: #fff;
+}
+.ws-download-btn {
+display: inline-block;
+margin: 0.5rem 0 1rem;
+padding: 0.4rem 1rem;
+background: #0d1e2c;
+color: #fff !important;
+border-radius: 4px;
+text-decoration: none;
+font-size: 0.875rem;
+font-weight: 600;
+}
+.ws-download-btn:hover { background: #1a3348; }
+.glossary-section-header {
+padding: 0.4rem 1.25rem 0.3rem;
+font-size: 0.72rem;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.07em;
+color: #00635a;
+background: #f0faf7;
+border-top: 2px solid #e8f5f0;
+margin-top: 0.25rem;
+}
+.glossary-section-header:first-child { border-top: none; margin-top: 0; }
 </style>
 
 <button id="glossary-btn" onclick="toggleGlossary()">Glossary 词汇表</button>
@@ -3233,6 +3278,8 @@ margin-bottom: 0.3rem;
   </div>
   <div id="glossary-body">
 
+    <div class="glossary-section-header">The GLM framework</div>
+
     <div class="glossary-entry">
       <div class="glossary-terms">
         <span class="glossary-en-term">Generalised Linear Model (GLM)</span>
@@ -3241,6 +3288,8 @@ margin-bottom: 0.3rem;
       <div class="glossary-en-def">An extension of the linear model that allows the response variable to follow distributions other than Normal. A GLM has three components: a distribution family (describing how the response is generated), a link function (connecting the linear predictor to the mean of that distribution), and the linear predictor itself (the equation of predictors and coefficients).</div>
       <div class="glossary-zh-def">线性模型的扩展，允许响应变量遵循正态分布以外的分布。GLM由三个部分组成：分布族（描述响应变量如何产生）、连接函数（将线性预测子与该分布的均值相连接）以及线性预测子本身（预测变量与系数的方程）。</div>
     </div>
+
+    <div class="glossary-section-header">Distributions and link functions</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
@@ -3278,6 +3327,8 @@ margin-bottom: 0.3rem;
       <div class="glossary-zh-def">预测变量与系数的线性组合：β₀ + β₁x₁ + β₂x₂ + ...。在GLM中，连接函数将线性预测子与响应变量的期望值相连接。即使预测变量与响应变量在响应尺度上的关系不是线性的，线性预测子本身在系数上始终是线性的。</div>
     </div>
 
+    <div class="glossary-section-header">Diagnostics and interpretation</div>
+
     <div class="glossary-entry">
       <div class="glossary-terms">
         <span class="glossary-en-term">Overdispersion</span>
@@ -3309,20 +3360,54 @@ margin-bottom: 0.3rem;
 </div>
 <section id="workshop-structure" class="level1">
 <h1>Workshop structure</h1>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Learning objectives
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>By the end of this workshop you should be able to:</p>
+<ol type="1">
+<li>Explain why count data cannot be modelled with a Normal distribution and when the Poisson distribution is more appropriate.</li>
+<li>Describe the three components of a GLM: the distribution family, the link function, and the linear predictor.</li>
+<li>Fit a Poisson GLM in R using <code>glm()</code> and check for overdispersion using the dispersion statistic.</li>
+<li>Interpret model coefficients on the log scale and back-transform predictions to the response scale using <code>exp()</code>.</li>
+<li>Diagnose a Poisson GLM and explain why the normal Q-Q plot is largely uninformative for Poisson residuals.</li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Workflow
+</div>
+</div>
+<div class="callout-body-container callout-body">
 <p>As always, we work through the same seven-step workflow:</p>
 <ol type="1">
 <li>Formulate a research question.</li>
 <li>Perform exploratory data analysis (EDA).</li>
 <li>Identify any hidden assumptions.</li>
-<li>Fit an appropriate model ← main focus today.</li>
-<li>Diagnose the model and check assumptions ← main focus today.</li>
-<li>Summarise the results ← main focus today.</li>
+<li>Fit an appropriate model <strong>[Focus of today]</strong>.</li>
+<li>Diagnose the model and check assumptions <strong>[Focus of today]</strong>.</li>
+<li>Summarise the results <strong>[Focus of today]</strong>.</li>
 <li>Interpret and draw conclusions.</li>
 </ol>
+</div>
+</div>
 <p>All previous workshops used linear models with a Normal distribution for the response. Today we extend that to Generalised Linear Models (GLMs), which allow the response variable to follow a different distribution. The specific case here is count data, which calls for a Poisson GLM.</p>
 <section id="formulate-a-research-question" class="level2">
 <h2 class="anchored" data-anchor-id="formulate-a-research-question">1. Formulate a research question</h2>
-<p>The dataset for this workshop (<code>species.txt</code> on MyAberdeen) comes from a study of plant diversity across 90 plots of land. Each row is one plot. The variables are:</p>
+<p>The dataset for this workshop comes from a study of plant diversity across 90 plots of land. Download it below and save it to your <code>BI3010/data/</code> folder.</p>
+<p><a href="data:text/plain;base64,IlNwZWNpZXMiICJCaW9tYXNzIiAicEgiDQo5IDIuMiAibG93Ig0KMTAgMS42ICJsb3ciDQoxNSAxICJsb3ciDQo5IDEuNCAibG93Ig0KNyA0LjkgImxvdyINCjggMy45ICJsb3ciDQo3IDMuOSAibG93Ig0KNiA2LjUgImxvdyINCjEzIDAuMyAibG93Ig0KMTQgMS45ICJsb3ciDQoxMiAxLjcgImxvdyINCjExIDIgImxvdyINCjEyIDMuMyAibG93Ig0KMTQgMi44ICJsb3ciDQo1IDQuNSAibG93Ig0KMTEgMS4zICJsb3ciDQoxMyAzLjYgImxvdyINCjEwIDEuNiAibG93Ig0KMTUgMyAibG93Ig0KOSAwLjcgImxvdyINCjExIDMuMiAibG93Ig0KMTMgMS4yICJsb3ciDQoxNCAyICJsb3ciDQoxNCAxLjQgImxvdyINCjEyIDIuOCAibG93Ig0KMTAgMiAibG93Ig0KNSA0LjYgImxvdyINCjcgNS44ICJsb3ciDQozIDExLjEgImxvdyINCjExIDUuMyAibG93Ig0KMjggMC43ICJtaWQiDQoxOCAyLjEgIm1pZCINCjM2IDAuOSAibWlkIg0KMzEgMC44ICJtaWQiDQoyNCAxICJtaWQiDQoxNiAzLjMgIm1pZCINCjIzIDMuNCAibWlkIg0KMTcgMi4yICJtaWQiDQozMCAxLjYgIm1pZCINCjE4IDEuMyAibWlkIg0KMjEgMS45ICJtaWQiDQoyNCAxLjQgIm1pZCINCjIgMTMuNiAibWlkIg0KMzYgMS4xICJtaWQiDQoyMCAxLjEgIm1pZCINCjE5IDMuNCAibWlkIg0KNyAxMC43ICJtaWQiDQoyOCAxLjMgIm1pZCINCjMzIDEuNyAibWlkIg0KMTggMi4xICJtaWQiDQoxNiAxLjcgIm1pZCINCjE4IDIgIm1pZCINCjE4IDEgIm1pZCINCjMzIDAuNiAibWlkIg0KMjIgMy4zICJtaWQiDQoxMiA1LjEgIm1pZCINCjE1IDQuNiAibWlkIg0KMjEgMS43ICJtaWQiDQoyNyAwLjkgIm1pZCINCjE4IDIuMSAibWlkIg0KMzUgMi4yICJoaWdoIg0KMzMgMC45ICJoaWdoIg0KMzQgNC4yICJoaWdoIg0KMzIgMSAiaGlnaCINCjM2IDIuMSAiaGlnaCINCjQyIDIuMSAiaGlnaCINCjI2IDIuOSAiaGlnaCINCjI0IDEuOSAiaGlnaCINCjE4IDQgImhpZ2giDQozMyAyLjIgImhpZ2giDQozMiAyICJoaWdoIg0KMzAgMiAiaGlnaCINCjM5IDAuOSAiaGlnaCINCjQwIDEuOSAiaGlnaCINCjIzIDMuNyAiaGlnaCINCjQ5IDEuMSAiaGlnaCINCjQxIDAuNyAiaGlnaCINCjM1IDIuNSAiaGlnaCINCjQzIDEuNiAiaGlnaCINCjQ2IDEgImhpZ2giDQo0MiAxLjggImhpZ2giDQo1MiAxLjIgImhpZ2giDQozNCAxLjkgImhpZ2giDQo0MyAyLjEgImhpZ2giDQo0OCAwLjYgImhpZ2giDQozNiAyLjQgImhpZ2giDQozNiAxLjkgImhpZ2giDQozMyAyLjcgImhpZ2giDQozMSAzICJoaWdoIg0KNiAxMyAiaGlnaCINCg==" download="species.txt" class="ws-download-btn">Download species.txt</a></p>
+<p>Each row is one plot. The variables are:</p>
 <ul>
 <li><code>Species</code>: the number of plant species recorded in the plot (a count).</li>
 <li><code>Biomass</code>: the total weight of plants in the plot, in kg.</li>
@@ -3336,14 +3421,14 @@ margin-bottom: 0.3rem;
 </section>
 <section id="perform-exploratory-data-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="perform-exploratory-data-analysis">2. Perform exploratory data analysis</h2>
-<p>Spend a few minutes exploring the dataset. Check the structure, look at distributions, and plot the response against each predictor. Useful functions: <code>str()</code>, <code>summary()</code>, <code>hist()</code>, <code>table()</code>, <code>ggplot()</code>.</p>
+<p>Spend a few minutes exploring the dataset. Check the structure, look at distributions, and plot the response against each predictor. Useful functions: <code>str()</code>, <code>summary()</code>, <code>geom_histogram()</code>, <code>table()</code>, <code>ggplot()</code>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(species)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(species)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(species<span class="sc">$</span>Species)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(species<span class="sc">$</span>Biomass)</span>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(species, <span class="fu">aes</span>(<span class="at">x =</span> Species)) <span class="sc">+</span> <span class="fu">geom_histogram</span>() <span class="sc">+</span> <span class="fu">theme_minimal</span>()</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(species, <span class="fu">aes</span>(<span class="at">x =</span> Biomass)) <span class="sc">+</span> <span class="fu">geom_histogram</span>() <span class="sc">+</span> <span class="fu">theme_minimal</span>()</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(species<span class="sc">$</span>pH)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">

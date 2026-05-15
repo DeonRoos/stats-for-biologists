@@ -22,6 +22,12 @@ knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show = "show",
                       message = FALSE, warning = FALSE)
 library(ggplot2)
 library(performance)
+make_download_btn <- function(path, label = NULL) {
+  fname <- basename(path)
+  if (is.null(label)) label <- paste("Download", fname)
+  uri <- xfun::base64_uri(path)
+  sprintf('<a href="%s" download="%s" class="ws-download-btn">%s</a>', uri, fname, label)
+}
 
 rabbit <- read.table("../Workshop 5 - LM with categorical predictors/Data/rabbits.txt",
                      header = TRUE)
@@ -51,59 +57,7 @@ fake_rab$upp95 <- preds_rab$fit + 1.96 * preds_rab$se.fit
 
 ```{=html}
 <script>
-/* --- answer lock --- */
-var WS_PASS_SHA256 = '3d192e1294672d33a5a23a7a6a8e1434eff8f13be9e628f06844dc14463787b4';
-var WS_PASS_DJB2   = 'a0d7a3b0';
-var _wsUnlocked = false;
-
-function _wsDjb2(s) {
-  var h = 5381;
-  for (var i = 0; i < s.length; i++) { h = ((h << 5) + h + s.charCodeAt(i)) | 0; }
-  return (h >>> 0).toString(16).padStart(8, '0');
-}
-function wsVerifyPass() {
-  var inp = document.getElementById('ws-pass-input'); if (!inp) return;
-  var msg = document.getElementById('ws-pass-msg');
-  function finish(ok) {
-    if (ok) {
-      _wsUnlocked = true; sessionStorage.setItem('ws-unlocked', WS_PASS_SHA256);
-      document.body.classList.remove('ws-locked');
-      var b = document.getElementById('ws-lock-banner');
-      if (b) { b.style.transition = 'opacity 0.4s'; b.style.opacity = '0'; setTimeout(function () { b.remove(); }, 450); }
-    } else {
-      inp.classList.add('ws-wrong'); if (msg) msg.textContent = 'Incorrect password.';
-      setTimeout(function () { inp.classList.remove('ws-wrong'); if (msg) msg.textContent = ''; }, 2000);
-    }
-  }
-  if (window.crypto && crypto.subtle) {
-    crypto.subtle.digest('SHA-256', new TextEncoder().encode(inp.value))
-      .then(function (buf) { var hex = Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join(''); finish(hex === WS_PASS_SHA256); })
-      .catch(function () { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); });
-  } else { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); }
-}
-function wsFlashBanner() {
-  var b = document.getElementById('ws-lock-banner'); if (!b) return;
-  b.classList.remove('ws-flash'); void b.offsetWidth; b.classList.add('ws-flash');
-}
-function wsInitLock() {
-  if (sessionStorage.getItem('ws-unlocked') === WS_PASS_SHA256) { _wsUnlocked = true; return; }
-  document.body.classList.add('ws-locked');
-  var b = document.createElement('div'); b.id = 'ws-lock-banner';
-  b.innerHTML = '<span style="font-size:1.15rem;line-height:1;">🔒</span>' +
-    '<span>Answers are locked. Enter the workshop password to reveal them.</span>' +
-    '<span class="ws-unlock-form">' +
-      '<input type="password" id="ws-pass-input" placeholder="Password"' +
-      ' onkeydown="if(event.key===\'Enter\')wsVerifyPass();">' +
-      '<button id="ws-unlock-btn" onclick="wsVerifyPass()">Unlock</button>' +
-    '</span><span id="ws-pass-msg"></span>';
-  var t = document.getElementById('title-block-header');
-  if (t) t.insertAdjacentElement('afterend', b); else document.body.prepend(b);
-}
-document.addEventListener('DOMContentLoaded', wsInitLock);
-/* --- end lock --- */
-
 function revealAnswer(btn) {
-  if (!_wsUnlocked) { wsFlashBanner(); return; }
   var block = btn.closest('.question-block, .puzzle-block');
   var answerClass = block.classList.contains('puzzle-block') ? '.puzzle-answer' : '.instructor-answer';
 
@@ -116,6 +70,12 @@ function revealAnswer(btn) {
       return;
     }
     textarea.classList.remove('missing');
+    textarea.disabled = true;
+    textarea.classList.add('ws-answer-locked');
+    var badge = document.createElement('span');
+    badge.className = 'ws-submitted-badge';
+    badge.textContent = 'Submitted';
+    textarea.insertAdjacentElement('afterend', badge);
   }
 
   var mcOptions = block.querySelector('.mc-options');
@@ -226,6 +186,14 @@ function toggleGlossary() {
 .glossary-zh-term { color: #00b494; font-weight: 600; font-size: 0.92rem; }
 .glossary-en-def  { font-size: 0.845rem; color: #444; line-height: 1.5; margin-bottom: 0.25rem; }
 .glossary-zh-def  { font-size: 0.845rem; color: #1c3a50; line-height: 1.65; }
+
+/* answer locking */
+.ws-answer-locked { background: #f5f5f5 !important; color: #555 !important; cursor: not-allowed; }
+.ws-submitted-badge { display: inline-block; margin-top: 0.3rem; background: #00b494; color: #fff; font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.55rem; border-radius: 3px; }
+
+/* download button */
+.ws-download-btn { display: inline-block; margin: 0.4rem 0; padding: 0.35rem 0.9rem; background: #0d6efd; color: #fff !important; border-radius: 4px; text-decoration: none !important; font-size: 0.875rem; font-weight: 500; }
+.ws-download-btn:hover { background: #0b5ed7; }
 </style>
 
 <button id="glossary-btn" onclick="toggleGlossary()">Glossary 词汇表</button>
@@ -357,7 +325,7 @@ This workshop continues with the workflow introduced in earlier sessions:
 2. Perform exploratory data analysis.
 3. Identify any hidden assumptions.
 4. Fit an appropriate model.
-5. **Diagnose the model and check assumptions** ← focus of today.
+5. Diagnose the model and check assumptions **[Focus of today]**.
 6. Summarise the results.
 7. Interpret and provide inferences.
 
@@ -391,7 +359,7 @@ ggplot(fake_rab) +
   theme_minimal()
 ```
 
-Before presenting these results, we need to check whether the model's assumptions are adequately met.
+But, as ever, can we convince ourselves that this model is worthy of our trust before we present it to others?
 
 # Diagnosing
 
@@ -448,6 +416,8 @@ ggplot() +
 
 The intervals are the same width for both groups, even though Group A's data is much less variable. Heteroscedasticity inflates the standard error across the board. The group means themselves are estimated accurately, but the uncertainty around them is not.
 
+It is worth saying that we generally do care about estimating uncertainty accurately. We never really know if our estimates are "true" in the sense that they accurately reflect reality, so having some measure of uncertainty is generally the responsible approach to science. If you need a reminder of why, think back to the lecture where we discussed being given the option of two drugs with different probabilities of unintended mortality, and how our decision changed depending on whether uncertainty was shown or not.
+
 ## Scale-Location
 
 The Scale-Location plot gives a second view of the equal variance assumption.
@@ -456,7 +426,7 @@ The Scale-Location plot gives a second view of the equal variance assumption.
 plot(rabbit_mod, which = 3)
 ```
 
-The spread is slightly larger for the group predicted at around 270 g than for the group at 266 g, but the difference is minor and well within acceptable limits. Compare it with the same plot for the simulated data:
+The spread is slightly larger for the group predicted at around 270 g than for the group at 266 g, which is very slightly less clean than the Residuals vs Fitted plot suggested. Importantly though, this is nowhere near substantial enough to be worried about. Compare it with the same plot for the simulated data:
 
 ```{r, echo=FALSE}
 plot(m1, which = 3)
@@ -470,7 +440,7 @@ That is what a genuine violation looks like: a clear upward trend showing residu
 plot(rabbit_mod, which = 2)
 ```
 
-We are checking whether the residuals follow an approximately normal distribution. The assumption is met when points lie broadly along the diagonal dashed line. Modest deviations at the tails are normal and should not cause concern. Only very unusual patterns (a strong S-curve, for example) would signal a serious problem, potentially indicating a need for a different error distribution (a generalised linear model) or a missing predictor.
+We are checking whether the residuals follow an approximately normal distribution. The assumption is met when points lie broadly along the diagonal dashed line. We want them on the line but we do not stress out too much if it is not exactly perfect. If we ever did see utterly bizarre patterns in the points, that would imply one of two things: you need to choose a different distribution for your data-generating process and fit a generalised linear model (GLM), or your model is missing some important predictor variable.
 
 ## Residuals vs Leverage
 
@@ -478,7 +448,7 @@ We are checking whether the residuals follow an approximately normal distributio
 plot(rabbit_mod, which = 5)
 ```
 
-This plot does not check the standard assumptions. Instead, it flags observations that have a disproportionate influence on the fitted model. We look for Cook's distance contour lines: observations beyond the 1.0 contour warrant investigation. Here, those contour lines do not appear in the plot at all, so no observation is pulling the model to any worrying degree.
+This plot does not check the standard assumptions. Instead, it flags observations that have a disproportionate influence on the fitted model. We look for Cook's distance contour lines: observations beyond the 1.0 contour warrant investigation. Here, those contour lines do not appear in the plot at all. None of our points are close to 1, so we do not have any observations that are pulling the model one way or another.
 
 For an alternative view of Cook's distances without leverage on the x-axis:
 
@@ -574,6 +544,8 @@ check_model(rabbit_mod)
 # The lemurs
 
 Having diagnosed the rabbit model, move on to the lemur model from Workshop 5. If you have not fitted that model yet, do so now. Run the diagnostic plots and decide whether you are willing to trust the results.
+
+`r make_download_btn("../Workshop 5 - LM with categorical predictors/Data/lemurs.txt")`
 
 ```{r, eval=FALSE}
 lemur <- read.table("lemurs.txt", header = TRUE)

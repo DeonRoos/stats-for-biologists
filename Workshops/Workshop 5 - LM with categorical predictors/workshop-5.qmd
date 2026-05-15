@@ -21,63 +21,17 @@ format:
 knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show = "show",
                       message = FALSE, warning = FALSE)
 library(ggplot2)
+make_download_btn <- function(path, label = NULL) {
+  fname <- basename(path)
+  if (is.null(label)) label <- paste("Download", fname)
+  uri <- xfun::base64_uri(path)
+  sprintf('<a href="%s" download="%s" class="ws-download-btn">%s</a>', uri, fname, label)
+}
 ```
 
 ```{=html}
 <script>
-/* --- answer lock --- */
-var WS_PASS_SHA256 = '4e18123e0f06635b3cab7a620ecf4bbeff385a2f34cecd808dd232fb47b0e655';
-var WS_PASS_DJB2   = '7c595c0c';
-var _wsUnlocked = false;
-
-function _wsDjb2(s) {
-  var h = 5381;
-  for (var i = 0; i < s.length; i++) { h = ((h << 5) + h + s.charCodeAt(i)) | 0; }
-  return (h >>> 0).toString(16).padStart(8, '0');
-}
-function wsVerifyPass() {
-  var inp = document.getElementById('ws-pass-input'); if (!inp) return;
-  var msg = document.getElementById('ws-pass-msg');
-  function finish(ok) {
-    if (ok) {
-      _wsUnlocked = true; sessionStorage.setItem('ws-unlocked', WS_PASS_SHA256);
-      document.body.classList.remove('ws-locked');
-      var b = document.getElementById('ws-lock-banner');
-      if (b) { b.style.transition = 'opacity 0.4s'; b.style.opacity = '0'; setTimeout(function () { b.remove(); }, 450); }
-    } else {
-      inp.classList.add('ws-wrong'); if (msg) msg.textContent = 'Incorrect password.';
-      setTimeout(function () { inp.classList.remove('ws-wrong'); if (msg) msg.textContent = ''; }, 2000);
-    }
-  }
-  if (window.crypto && crypto.subtle) {
-    crypto.subtle.digest('SHA-256', new TextEncoder().encode(inp.value))
-      .then(function (buf) { var hex = Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join(''); finish(hex === WS_PASS_SHA256); })
-      .catch(function () { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); });
-  } else { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); }
-}
-function wsFlashBanner() {
-  var b = document.getElementById('ws-lock-banner'); if (!b) return;
-  b.classList.remove('ws-flash'); void b.offsetWidth; b.classList.add('ws-flash');
-}
-function wsInitLock() {
-  if (sessionStorage.getItem('ws-unlocked') === WS_PASS_SHA256) { _wsUnlocked = true; return; }
-  document.body.classList.add('ws-locked');
-  var b = document.createElement('div'); b.id = 'ws-lock-banner';
-  b.innerHTML = '<span style="font-size:1.15rem;line-height:1;">🔒</span>' +
-    '<span>Answers are locked. Enter the workshop password to reveal them.</span>' +
-    '<span class="ws-unlock-form">' +
-      '<input type="password" id="ws-pass-input" placeholder="Password"' +
-      ' onkeydown="if(event.key===\'Enter\')wsVerifyPass();">' +
-      '<button id="ws-unlock-btn" onclick="wsVerifyPass()">Unlock</button>' +
-    '</span><span id="ws-pass-msg"></span>';
-  var t = document.getElementById('title-block-header');
-  if (t) t.insertAdjacentElement('afterend', b); else document.body.prepend(b);
-}
-document.addEventListener('DOMContentLoaded', wsInitLock);
-/* --- end lock --- */
-
 function revealAnswer(btn) {
-  if (!_wsUnlocked) { wsFlashBanner(); return; }
   var block = btn.closest('.question-block, .puzzle-block');
   var answerClass = block.classList.contains('puzzle-block') ? '.puzzle-answer' : '.instructor-answer';
 
@@ -90,6 +44,12 @@ function revealAnswer(btn) {
       return;
     }
     textarea.classList.remove('missing');
+    textarea.disabled = true;
+    textarea.classList.add('ws-answer-locked');
+    var badge = document.createElement('span');
+    badge.className = 'ws-submitted-badge';
+    badge.textContent = 'Submitted';
+    textarea.insertAdjacentElement('afterend', badge);
   }
 
   var mcOptions = block.querySelector('.mc-options');
@@ -200,6 +160,22 @@ function toggleGlossary() {
 .glossary-zh-term { color: #00b494; font-weight: 600; font-size: 0.92rem; }
 .glossary-en-def  { font-size: 0.845rem; color: #444; line-height: 1.5; margin-bottom: 0.25rem; }
 .glossary-zh-def  { font-size: 0.845rem; color: #1c3a50; line-height: 1.65; }
+.ws-answer-locked { background: #f5f5f5 !important; color: #555 !important; cursor: not-allowed; }
+.ws-submitted-badge { display: inline-block; margin-top: 0.3rem; background: #00b494; color: #fff; font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.55rem; border-radius: 3px; }
+.glossary-section-header {
+  padding: 0.4rem 1.25rem 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #00635a;
+  background: #f0faf7;
+  border-top: 2px solid #e8f5f0;
+  margin-top: 0.25rem;
+}
+.glossary-section-header:first-child { border-top: none; margin-top: 0; }
+.ws-download-btn { display: inline-block; margin: 0.4rem 0; padding: 0.35rem 0.9rem; background: #0d6efd; color: #fff !important; border-radius: 4px; text-decoration: none !important; font-size: 0.875rem; font-weight: 500; }
+.ws-download-btn:hover { background: #0b5ed7; }
 </style>
 ```
 
@@ -238,6 +214,8 @@ The dataset contains two columns:
 - `weight`: weight of the Amami rabbit (grams)
 - `mongoose`: whether the rabbit was caught on the island with mongoose `Present` (Oshima) or `Absent` (Tokunoshima)
 
+`r make_download_btn("Data/rabbits.txt")`
+
 Load the data to get started:
 
 ```{r, eval=FALSE}
@@ -267,7 +245,7 @@ They ask you to resolve both issues and also check for any other possible mistak
 **Question 1.** What `mongoose` value should the rabbit in row 7 have?
 
 <textarea class="student-answer" rows="2" placeholder="Write your answer here..."></textarea>
-<button onclick="revealAnswer(this)">Show Answer</button>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 We were told it is row 7. We can inspect that row using square brackets:
 
@@ -283,7 +261,7 @@ The rabbit is currently recorded as `Absent`, but it should be `Present` (it cam
 **Question 2.** Correct the mistake from Question 1 and confirm it has worked.
 
 <textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
-<button onclick="revealAnswer(this)">Show Answer</button>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 
 ```r
@@ -303,7 +281,7 @@ Both lines do the same thing. After the correction, row 7 should show `Present`.
 **Question 3.** Which rabbit had the incorrect weight? Find it and correct the mistake at the same time.
 
 <textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
-<button onclick="revealAnswer(this)">Show Answer</button>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 A histogram reveals the outlier clearly:
 
@@ -325,7 +303,7 @@ rabbit[rabbit$weight > 350, ]
 **Question 4.** Correct the mistake from Question 3 and confirm it has worked.
 
 <textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
-<button onclick="revealAnswer(this)">Show Answer</button>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 
 ```r
@@ -344,7 +322,7 @@ ggplot(rabbit) +
 **Question 5.** Can you spot any additional data entry mistakes in the dataset?
 
 <textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
-<button onclick="revealAnswer(this)">Show Answer</button>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 Nothing else obvious. The histogram and summary look reasonable once the outlier has been corrected.
 </div>
@@ -352,7 +330,7 @@ Nothing else obvious. The histogram and summary look reasonable once the outlier
 
 # 3. Hidden assumptions
 
-Having resolved the data issues, it is time to think carefully about what assumptions we are making before fitting any model. "Hidden assumptions" refers broadly to all the assumptions underlying our analysis — some we can think through carefully, and some we can even check. What makes them "hidden" is that they are easy to overlook and are not automatically flagged by any software. Validity and representativeness deserve particular attention because there are no formal diagnostic checks for them at all; evaluating them depends entirely on domain knowledge and thinking critically about how the data were collected and what they actually measure.
+Having resolved the data issues, it is time to think carefully about what assumptions we are making before fitting any model. "Hidden assumptions" refers broadly to all the assumptions underlying our analysis: some we can think through carefully, and some we can even check. What makes them "hidden" is that they are easy to overlook and are not automatically flagged by any software. Validity and representativeness deserve particular attention because there are no formal diagnostic checks for them at all; evaluating them depends entirely on domain knowledge and thinking critically about how the data were collected and what they actually measure.
 
 ## Assumptions for the mongoose analysis
 
@@ -360,9 +338,9 @@ Having resolved the data issues, it is time to think carefully about what assump
 **Question 1.** Can you identify any hidden assumptions with this dataset?
 
 <textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
-<button onclick="revealAnswer(this)">Show Answer</button>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-The key issue is whether mongoose are truly absent from Tokunoshima. All we know is that local residents have not reported any sightings. That is not the same as confirmed absence. It is plausible that a small mongoose population exists on the island but has simply not been detected.
+The key issue is whether mongoose are truly absent from Tokunoshima. All we know is that local residents have not reported any sightings. That is not the same as confirmed absence. It is possible there is just a very small population of mongoose on an island that doesn't have enough people around to spot them.
 
 This puts us at risk of violating the assumption of validity: our `mongoose` variable may not actually measure what we think it does.
 </div>
@@ -372,14 +350,14 @@ This puts us at risk of violating the assumption of validity: our `mongoose` var
 **Question 2.** If you have identified any issues, can we do anything about them?
 
 <textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
-<button onclick="revealAnswer(this)">Show Answer</button>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-Ideally we would confirm the absence of mongoose on Tokunoshima before proceeding, but that is not feasible here. We have two options:
+Ideally we would confirm the absence of mongoose on Tokunoshima before proceeding, but that is not feasible here (we can't pay for the class to go on a trip to some tropical islands in Japan). We have two options:
 
 1. Decline to perform the analysis because of the assumption violation.
 2. Perform the analysis but include clear, prominent statements about this limitation.
 
-Both are defensible. For the purposes of this workshop (learning the method), we go with option 2. In a real project, you would want to push hard for option 1, or at minimum ensure any report makes the caveat impossible to overlook.
+Both are defensible. For the purposes of this workshop (learning the method), we go with option 2. If this were a real project, I'd push hard to confirm the absence of mongoose before doing any analysis. If that weren't possible, I'd probably pull out of the project entirely — but others would go with option 2.
 </div>
 :::
 
@@ -387,11 +365,11 @@ Both are defensible. For the purposes of this workshop (learning the method), we
 **Question 3.** If mongoose are actually present on Tokunoshima, what effect would that have on the analysis?
 
 <textarea class="student-answer" rows="5" placeholder="Write your answer here..."></textarea>
-<button onclick="revealAnswer(this)">Show Answer</button>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 If mongoose are present on both islands and they do reduce rabbit weight, then rabbit weights on both islands would be similarly suppressed. The model would find little or no difference between groups, leading us to incorrectly conclude that mongoose have no effect.
 
-The frustrating part is that finding no difference is ambiguous: it could mean mongoose are present on both islands, or that mongoose genuinely do not affect rabbit weight. We cannot tell which from the data alone.
+The annoying thing is that finding no difference is ambiguous: it could mean mongoose are present on both islands, or that mongoose genuinely do not affect rabbit weight. We cannot tell which from the data alone.
 
 This is a good example of why validity is the hardest assumption to check and the most consequential to violate.
 </div>
@@ -554,12 +532,25 @@ $$\mu_i = \beta_0 + \beta_1 \times \underline{\phantom{MongoosePresent}}_i$$
   <label><input type="radio" name="qs3-q1" data-correct="true"> <code>Present</code></label>
   <label><input type="radio" name="qs3-q1" data-correct="false"> $\beta_1$</label>
 </div>
-<button onclick="revealAnswer(this)">Show Answer</button>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 `Present` replaces the blank.
 
 If you said `mongoose`, remember that `mongoose` has two values (`"Present"` and `"Absent"`), which cannot be used directly in an equation. Instead, R takes one group and converts it to a binary dummy variable (0 or 1). R picks the group that comes first alphabetically as the reference, so `Absent` becomes the reference (0) and `Present` becomes the dummy (1). When `Present = 0`, it must be `Absent`.
 </div>
+:::
+
+::: {.callout-tip}
+## Changing the reference group with `relevel()`
+
+R picks the reference group alphabetically, which is not always what you want. If you would rather `Present` be the reference (so that $\beta_0$ is the mean weight where mongoose are present), use `relevel()` before fitting the model:
+
+```r
+rabbit$mongoose <- relevel(factor(rabbit$mongoose), ref = "Present")
+rabbit_mod      <- lm(weight ~ mongoose, data = rabbit)
+```
+
+This does not change the data or the underlying relationship; it only changes which group sits in the intercept and which appears as a coefficient. The predicted values and confidence intervals stay the same.
 :::
 
 ::: {.question-block}
@@ -571,7 +562,7 @@ If you said `mongoose`, remember that `mongoose` has two values (`"Present"` and
   <label><input type="radio" name="qs3-q2" data-correct="true"> The predicted mean weight of a rabbit where mongoose are absent (the reference group)</label>
   <label><input type="radio" name="qs3-q2" data-correct="false"> The standard deviation of the residuals</label>
 </div>
-<button onclick="revealAnswer(this)">Show Answer</button>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 $\beta_0$ is the predicted weight of rabbits in the reference group, i.e. when mongoose are `Absent` (Tokunoshima). It is the model's estimate of the mean weight where `Present = 0`.
 </div>
@@ -586,7 +577,7 @@ $\beta_0$ is the predicted weight of rabbits in the reference group, i.e. when m
   <label><input type="radio" name="qs3-q3" data-correct="false"> The slope of a continuous relationship between body weight and time</label>
   <label><input type="radio" name="qs3-q3" data-correct="false"> The intercept when mongoose are present</label>
 </div>
-<button onclick="revealAnswer(this)">Show Answer</button>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 $\beta_1$ is the *difference* in predicted weight between rabbits where mongoose are `Present` versus where they are `Absent`. It is not the predicted weight when mongoose are present; it is the change relative to $\beta_0$.
 </div>
@@ -625,7 +616,7 @@ summary(rabbit_mod)
 ```
 
 <textarea class="student-answer" rows="2" placeholder="Write the completed equation here..."></textarea>
-<button onclick="revealAnswer(this)">Show Answer</button>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 
 $$\mu_i = 269.6 + (-2.9) \times \text{Present}_i$$
@@ -643,7 +634,7 @@ The first blank is 269.566 ($\beta_0$) and the second is &minus;2.866 ($\beta_1$
   <label><input type="radio" name="qs4-q2" data-correct="true"> 266.7 g</label>
   <label><input type="radio" name="qs4-q2" data-correct="false"> 2.9 g</label>
 </div>
-<button onclick="revealAnswer(this)">Show Answer</button>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 Substitute `Present = 1`:
 
@@ -662,7 +653,7 @@ Note: I am rounding to one decimal place throughout. Rabbit weights were recorde
   <label><input type="radio" name="qs4-q3" data-correct="true"> 269.6 g</label>
   <label><input type="radio" name="qs4-q3" data-correct="false"> 0 g</label>
 </div>
-<button onclick="revealAnswer(this)">Show Answer</button>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 Substitute `Present = 0`:
 
@@ -676,7 +667,7 @@ When the dummy variable is 0, $\beta_1$ drops out completely and we are left wit
 **Question 4.** Is the presence of mongoose associated with a decline in rabbit weight, as the researchers hypothesised?
 
 <textarea class="student-answer" rows="5" placeholder="Write your answer here..."></textarea>
-<button onclick="revealAnswer(this)">Show Answer</button>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 The model suggests mongoose presence is associated with a weight reduction of about 3 g, but the standard error on that estimate is large (5.4 g). A quick 95% confidence interval:
 
@@ -691,11 +682,11 @@ The confidence interval spans zero, meaning the data are consistent with no effe
 **Question 5.** Is the association sufficient to be of biological concern?
 
 <textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
-<button onclick="revealAnswer(this)">Show Answer</button>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-A 3 g difference is negligible for a species that weighs on average around 2.7 kg. Combined with the wide uncertainty and the unresolved question of whether mongoose are even absent from Tokunoshima, it is very hard to draw any firm biological conclusion.
+3 g is pretty small for a species that weighs on average around 2.7 kg. Combined with the wide uncertainty and the unresolved question of whether mongoose are even absent from Tokunoshima, we're not really sure what we've learned here.
 
-The model produced a number, but that number tells us very little we can act on with confidence.
+We identified before running the model that the mongoose variable might not be reliable, and we now find a tiny effect. So what should we take away from this? I'm not sure myself.
 </div>
 :::
 
@@ -764,6 +755,8 @@ fake$fit <- preds$fit
 
 ### Confidence intervals
 
+If you need a reminder of what 95% CIs are: confidence intervals represent the probability that an interval will contain the true parameter value *before the model has been run*. Once the model has been run, either the interval contains the true value or it doesn't. We don't know which. If that's confusing (which is fair, 95% CIs are weird), think of the ring toss example from the lecture: if we make the hoop big, we have a 95% chance of landing on target before the throw, but once the hoop has left our hand, it either lands on target or it doesn't.
+
 The 95% confidence interval is constructed by multiplying the standard error by 1.96, then adding and subtracting from `fit`:
 
 ```{r, eval=FALSE}
@@ -785,7 +778,12 @@ ggplot(fake) +
 
 ## The full workflow
 
-Here is the complete analysis from start to finish, suitable for a clean script:
+::: {.question-block}
+**Full rabbit workflow.** Complete the analysis yourself, then compare your script with the instructor version below.
+
+<textarea class="student-answer" rows="5" placeholder="Paste or describe your script here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
 
 ```{r, eval=FALSE}
 # Analysis of Amami rabbit weight in relation to mongoose presence
@@ -831,6 +829,8 @@ ggplot(fake) +
        y = "Predicted weight of rabbits (g)") +
   theme_minimal()
 ```
+</div>
+:::
 
 ## Should we share these results?
 
@@ -838,19 +838,19 @@ ggplot(fake) +
 **Question 1.** Once you have completed this analysis (excluding diagnostics, which come on Friday), discuss in groups whether you think these results should be shared with the local government as evidence to inform mongoose eradication decisions.
 
 <textarea class="student-answer" rows="6" placeholder="Write your thoughts here..."></textarea>
-<button onclick="revealAnswer(this)">Show Answer</button>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 There is no clean answer here, and that is the point.
 
 The assumption of validity is questionable (we do not truly know mongoose are absent from Tokunoshima). The estimated effect is tiny (about 3 g in an animal weighing 2.7 kg) and the uncertainty is large enough to include zero. The effect could also reflect something mundane, such as using different scales on the two islands.
 
-The hardest part of statistics has nothing to do with equations or distributions. It is deciding whether the data are appropriate for the question. If the results of this analysis were to influence a real conservation decision, how confident would you need to be to put your name on them?
+The hardest part of statistics has nothing to do with equations or distributions. It is deciding whether the data are appropriate for the question. The thing that would keep me up at night would be if anyone were to use our model to make decisions with real-world consequences. Are we really confident enough in our model to have that rest on our conscience? I don't think I am.
 
 Personally, I would not be comfortable sharing this with the local government without first making a serious effort to confirm whether mongoose are present on Tokunoshima.
 </div>
 :::
 
-# The lemur dataset
+# A new challenger
 
 Once you have finished the Amami rabbit analysis, move on to the `lemurs.txt` dataset. This comes from researchers interested in how activity levels (hours active per day) vary across four habitat types in Madagascar.
 
@@ -858,6 +858,8 @@ The dataset contains:
 
 - `activity`: number of hours lemurs were active in a day (measured to two decimal places)
 - `habitat`: one of four habitat types; Rainforest, Dry Forest, Spiny Forest, and Mangrove
+
+`r make_download_btn("Data/lemurs.txt")`
 
 Load the data and go through the same workflow you just used for the rabbit analysis:
 
@@ -871,7 +873,7 @@ Work through each step: EDA (including checking for data issues), hidden assumpt
 **Full lemur analysis.** Work through the complete workflow. When you are done, compare your approach with the instructor solution.
 
 <textarea class="student-answer" rows="8" placeholder="Describe your approach and key findings here..."></textarea>
-<button onclick="revealAnswer(this)">Show Answer</button>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 
 ```r
@@ -957,6 +959,8 @@ plot(preds)
   </div>
   <div id="glossary-body">
 
+    <div class="glossary-section-header">Variable encoding</div>
+
     <div class="glossary-entry">
       <div class="glossary-terms">
         <span class="glossary-en-term">Categorical variable</span>
@@ -986,6 +990,17 @@ plot(preds)
 
     <div class="glossary-entry">
       <div class="glossary-terms">
+        <span class="glossary-en-term">factor()</span>
+        <span class="glossary-zh-term">factor()函数</span>
+      </div>
+      <div class="glossary-en-def">Converts a character or numeric vector to a factor in R, making group membership explicit and ensuring R treats the variable as categorical.</div>
+      <div class="glossary-zh-def">将字符或数值向量转换为R中的因子，明确组别归属，确保R将变量视为分类变量。</div>
+    </div>
+
+    <div class="glossary-section-header">Model parameters</div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
         <span class="glossary-en-term">Intercept (&beta;&#8320;)</span>
         <span class="glossary-zh-term">截距（&beta;&#8320;）</span>
       </div>
@@ -1001,6 +1016,8 @@ plot(preds)
       <div class="glossary-en-def">In a categorical model, the estimated difference in mean response between the non-reference group and the reference group.</div>
       <div class="glossary-zh-def">在分类模型中，非参照组与参照组之间均值响应的估计差异。</div>
     </div>
+
+    <div class="glossary-section-header">Inference and uncertainty</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
@@ -1022,20 +1039,31 @@ plot(preds)
 
     <div class="glossary-entry">
       <div class="glossary-terms">
-        <span class="glossary-en-term">factor()</span>
-        <span class="glossary-zh-term">factor()函数</span>
+        <span class="glossary-en-term">se.fit</span>
+        <span class="glossary-zh-term">拟合标准误</span>
       </div>
-      <div class="glossary-en-def">Converts a character or numeric vector to a factor in R, making group membership explicit and ensuring R treats the variable as categorical.</div>
-      <div class="glossary-zh-def">将字符或数值向量转换为R中的因子，明确组别归属，确保R将变量视为分类变量。</div>
+      <div class="glossary-en-def">The standard error of a fitted (predicted) value, returned by <code>predict(..., se.fit = TRUE)</code>. Used to compute confidence intervals.</div>
+      <div class="glossary-zh-def"><code>predict(..., se.fit = TRUE)</code>返回的拟合值标准误，用于计算置信区间。</div>
     </div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
-        <span class="glossary-en-term">unique()</span>
-        <span class="glossary-zh-term">unique()函数</span>
+        <span class="glossary-en-term">confint()</span>
+        <span class="glossary-zh-term">confint()函数</span>
       </div>
-      <div class="glossary-en-def">Returns all unique values in a vector. Useful for building a fake prediction dataset when a categorical variable has many levels.</div>
-      <div class="glossary-zh-def">返回向量中所有唯一值。当分类变量有多个水平时，可方便地构建预测数据集。</div>
+      <div class="glossary-en-def">Computes confidence intervals for model parameters in R. A quick alternative to calculating them manually from the standard error.</div>
+      <div class="glossary-zh-def">计算R中模型参数置信区间的函数，是手动根据标准误计算的快捷替代方法。</div>
+    </div>
+
+    <div class="glossary-section-header">R functions</div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">lm()</span>
+        <span class="glossary-zh-term">lm()函数</span>
+      </div>
+      <div class="glossary-en-def">Fits a linear model in R. The formula <code>y ~ x</code> specifies the response and predictor. Works with both continuous and categorical predictors.</div>
+      <div class="glossary-zh-def">在R中拟合线性模型。公式<code>y ~ x</code>指定响应变量和预测变量，支持连续和分类预测变量。</div>
     </div>
 
     <div class="glossary-entry">
@@ -1049,11 +1077,11 @@ plot(preds)
 
     <div class="glossary-entry">
       <div class="glossary-terms">
-        <span class="glossary-en-term">se.fit</span>
-        <span class="glossary-zh-term">拟合标准误</span>
+        <span class="glossary-en-term">unique()</span>
+        <span class="glossary-zh-term">unique()函数</span>
       </div>
-      <div class="glossary-en-def">The standard error of a fitted (predicted) value, returned by <code>predict(..., se.fit = TRUE)</code>. Used to compute confidence intervals.</div>
-      <div class="glossary-zh-def"><code>predict(..., se.fit = TRUE)</code>返回的拟合值标准误，用于计算置信区间。</div>
+      <div class="glossary-en-def">Returns all unique values in a vector. Useful for building a fake prediction dataset when a categorical variable has many levels.</div>
+      <div class="glossary-zh-def">返回向量中所有唯一值。当分类变量有多个水平时，可方便地构建预测数据集。</div>
     </div>
 
     <div class="glossary-entry">
@@ -1074,14 +1102,7 @@ plot(preds)
       <div class="glossary-zh-def">自动化模型预测和绘图的R包。<code>ggpredict()</code>返回带置信区间的预测值；<code>plot()</code>生成图形。</div>
     </div>
 
-    <div class="glossary-entry">
-      <div class="glossary-terms">
-        <span class="glossary-en-term">lm()</span>
-        <span class="glossary-zh-term">lm()函数</span>
-      </div>
-      <div class="glossary-en-def">Fits a linear model in R. The formula <code>y ~ x</code> specifies the response and predictor. Works with both continuous and categorical predictors.</div>
-      <div class="glossary-zh-def">在R中拟合线性模型。公式<code>y ~ x</code>指定响应变量和预测变量，支持连续和分类预测变量。</div>
-    </div>
+    <div class="glossary-section-header">Assumptions</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
@@ -1103,6 +1124,17 @@ plot(preds)
 
     <div class="glossary-entry">
       <div class="glossary-terms">
+        <span class="glossary-en-term">Ecological fallacy</span>
+        <span class="glossary-zh-term">生态谬误</span>
+      </div>
+      <div class="glossary-en-def">The error of drawing conclusions about individuals from group-level data, or assuming that group patterns apply to every member of that group.</div>
+      <div class="glossary-zh-def">从群体水平数据推断个体结论的错误，即假设群体规律适用于该群体每一个成员。</div>
+    </div>
+
+    <div class="glossary-section-header">Dataset terms</div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
         <span class="glossary-en-term">Invasive species</span>
         <span class="glossary-zh-term">入侵物种</span>
       </div>
@@ -1117,24 +1149,6 @@ plot(preds)
       </div>
       <div class="glossary-en-def">The natural environment in which a species lives, characterised by its physical and biological features (e.g., Rainforest, Dry Forest).</div>
       <div class="glossary-zh-def">物种生活的自然环境，以其物理和生物特征为特征（如雨林、旱林）。</div>
-    </div>
-
-    <div class="glossary-entry">
-      <div class="glossary-terms">
-        <span class="glossary-en-term">confint()</span>
-        <span class="glossary-zh-term">confint()函数</span>
-      </div>
-      <div class="glossary-en-def">Computes confidence intervals for model parameters in R. A quick alternative to calculating them manually from the standard error.</div>
-      <div class="glossary-zh-def">计算R中模型参数置信区间的函数，是手动根据标准误计算的快捷替代方法。</div>
-    </div>
-
-    <div class="glossary-entry">
-      <div class="glossary-terms">
-        <span class="glossary-en-term">Ecological fallacy</span>
-        <span class="glossary-zh-term">生态谬误</span>
-      </div>
-      <div class="glossary-en-def">The error of drawing conclusions about individuals from group-level data, or assuming that group patterns apply to every member of that group.</div>
-      <div class="glossary-zh-def">从群体水平数据推断个体结论的错误，即假设群体规律适用于该群体每一个成员。</div>
     </div>
 
   </div>

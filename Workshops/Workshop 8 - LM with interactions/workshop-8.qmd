@@ -21,6 +21,13 @@ format:
 knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show = "show",
                       message = FALSE, warning = FALSE)
 library(ggplot2)
+
+make_download_btn <- function(path, label = NULL) {
+  fname <- basename(path)
+  if (is.null(label)) label <- paste("Download", fname)
+  uri <- xfun::base64_uri(path)
+  sprintf('<a href="%s" download="%s" class="ws-download-btn">%s</a>', uri, fname, label)
+}
 ```
 
 ```{=html}
@@ -38,6 +45,12 @@ function revealAnswer(btn) {
       return;
     }
     textarea.classList.remove('missing');
+    textarea.disabled = true;
+    textarea.classList.add('ws-answer-locked');
+    var badge = document.createElement('span');
+    badge.className = 'ws-submitted-badge';
+    badge.textContent = 'Submitted';
+    textarea.insertAdjacentElement('afterend', badge);
   }
 
   var mcOptions = block.querySelector('.mc-options');
@@ -148,6 +161,12 @@ function toggleGlossary() {
 .glossary-zh-term { color: #00b494; font-weight: 600; font-size: 0.92rem; }
 .glossary-en-def  { font-size: 0.845rem; color: #444; line-height: 1.5; margin-bottom: 0.25rem; }
 .glossary-zh-def  { font-size: 0.845rem; color: #1c3a50; line-height: 1.65; }
+.ws-answer-locked { background: #f5f5f5 !important; color: #555 !important; cursor: not-allowed; }
+.ws-submitted-badge { display: inline-block; margin-top: 0.3rem; background: #00b494; color: #fff; font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.55rem; border-radius: 3px; }
+.ws-download-btn { display: inline-block; margin: 0.4rem 0; padding: 0.35rem 0.9rem; background: #0d6efd; color: #fff !important; border-radius: 4px; text-decoration: none !important; font-size: 0.875rem; font-weight: 500; }
+.ws-download-btn:hover { background: #0b5ed7; }
+.glossary-section-header { padding: 0.4rem 1.25rem 0.3rem; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #00635a; background: #f0faf7; border-top: 2px solid #e8f5f0; margin-top: 0.25rem; }
+.glossary-section-header:first-child { border-top: none; margin-top: 0; }
 </style>
 
 <button id="glossary-btn" onclick="toggleGlossary()">Glossary 词汇表</button>
@@ -158,6 +177,8 @@ function toggleGlossary() {
     <button id="glossary-close" onclick="toggleGlossary()">&#10005;</button>
   </div>
   <div id="glossary-body">
+
+    <div class="glossary-section-header">Model terms</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
@@ -186,6 +207,8 @@ function toggleGlossary() {
       <div class="glossary-zh-def">交互作用模型中的额外参数，乘以两个预测变量（β₃×x₁×x₂）。它描述了一个预测变量的斜率随另一个预测变量每增加一个单位而变化的量。正的β₃表示两个预测变量相互增强；负的β₃表示两者相互削弱各自的效应。</div>
     </div>
 
+    <div class="glossary-section-header">Assumptions</div>
+
     <div class="glossary-entry">
       <div class="glossary-terms">
         <span class="glossary-en-term">Additivity</span>
@@ -195,6 +218,8 @@ function toggleGlossary() {
       <div class="glossary-zh-def">每个预测变量对响应变量的效应与其他所有预测变量无关的假设。当可加性成立时，两个预测变量的联合效应等于各自效应之和。交互作用违反了这一假设：联合效应大于或小于各部分之和。</div>
     </div>
 
+    <div class="glossary-section-header">Research practice</div>
+
     <div class="glossary-entry">
       <div class="glossary-terms">
         <span class="glossary-en-term">HARKing</span>
@@ -203,6 +228,8 @@ function toggleGlossary() {
       <div class="glossary-en-def">Hypothesising After Results are Known. Presenting post-hoc explanations of unexpected findings as if they were the original, pre-registered hypothesis. HARKing makes exploratory findings look confirmatory, inflates apparent evidence for a hypothesis, and is widely considered a form of scientific misconduct.</div>
       <div class="glossary-zh-def">即"结果已知后再提出假设"。将意外发现的事后解释伪装成原本就有的、预先注册的假设。这种做法使探索性发现看起来像是验证性发现，夸大了对假设的表面证据，被普遍认为是一种科学不端行为。</div>
     </div>
+
+    <div class="glossary-section-header">Visualisation</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
@@ -226,23 +253,43 @@ function toggleGlossary() {
 </div>
 ```
 
+# Learning objectives
+
+::: {.callout-tip}
+## Learning objectives
+
+1. Recognise when the additivity assumption is likely to be violated and explain what an interaction means biologically.
+2. Fit a linear model with an interaction term and correctly interpret the main effect and interaction coefficients.
+3. Visualise a continuous-by-continuous interaction using a prediction grid and a heatmap.
+4. Diagnose an interaction model and evaluate whether including the interaction improved model fit.
+5. Apply the full workflow independently to a new dataset with a continuous-by-categorical interaction.
+:::
+
 # Workshop structure
 
-As always, we work through the same seven-step workflow:
+::: {.callout-note}
+## Workflow
 
 1. Formulate a research question.
 2. Perform exploratory data analysis (EDA).
 3. Identify any hidden assumptions.
-4. Fit an appropriate model ← main focus today.
+4. Fit an appropriate model **[Focus of today]**.
 5. Diagnose the model and check assumptions.
 6. Summarise the results.
 7. Interpret and draw conclusions.
+:::
 
 Today's focus is on interactions between predictors. We will first fit a model with only main effects, find a problem in the diagnostics, and then fix it by including an interaction term. We then work through visualising interactions and finish with an independent extension exercise on a second dataset.
 
 ## 1. Formulate a research question
 
-For this workshop we use a dataset from a study set in the coral reef ecosystems of the Coral Triangle, a biodiversity hotspot in the Indo-Pacific (`reef.txt` on MyAberdeen). The dataset contains three variables:
+For this workshop we use a dataset from a study set in the coral reef ecosystems of the Coral Triangle, a biodiversity hotspot in the Indo-Pacific. Download it below and save it to your `BI3010/data/` folder.
+
+```{r, echo=FALSE, results='asis'}
+cat(make_download_btn("Data/reef.txt"))
+```
+
+The dataset contains three variables:
 
 - `shark_density`: Tiger shark (*Galeocerdo cuvier*) density, estimated from underwater visual surveys along transects. Units are sharks per km².
 - `reef_complexity`: A standardised structural complexity index combining coral cover, surface rugosity, and habitat diversity. Higher values indicate more structurally complex reefs.
@@ -258,7 +305,7 @@ reef <- read.table("Data/reef.txt", header = TRUE)
 
 ## 2. Perform exploratory data analysis
 
-Spend a few minutes exploring the dataset. Check for any obvious errors or unusual values. Useful functions include `str()`, `summary()`, `hist()`, and scatter plots.
+Spend a few minutes exploring the dataset. Check for any obvious errors or unusual values. Useful functions include `str()`, `summary()`, `geom_histogram()`, and scatter plots.
 
 ```{r, eval=FALSE}
 str(reef)
@@ -266,9 +313,9 @@ summary(reef)
 ```
 
 ```{r, eval=FALSE}
-hist(reef$shark_density)
-hist(reef$reef_complexity)
-hist(reef$biomass_change)
+ggplot(reef, aes(x = shark_density)) + geom_histogram() + theme_minimal()
+ggplot(reef, aes(x = reef_complexity)) + geom_histogram() + theme_minimal()
+ggplot(reef, aes(x = biomass_change)) + geom_histogram() + theme_minimal()
 ```
 
 ```{r, eval=FALSE}
@@ -376,14 +423,313 @@ plot(preds)
 <textarea class="student-answer" rows="5" placeholder="Think carefully before checking the answer..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>Predators eating prey is one of the most well-established relationships in ecology, so a positive shark-biomass association is hard to explain biologically. You might try: trophic cascades, a landscape of fear effect reducing prey movement, compensatory breeding by prey, shifts in species composition, and so on.</p>
-<p>The problem is that you are doing this <em>after</em> seeing the result. That is HARKing: Hypothesising After Results are Known. Any sufficiently creative thinker can construct a plausible-sounding story for almost any result after the fact. The dangerous part is that these stories then get presented as if they were the original hypothesis, which makes the evidence look far stronger than it is. Any explanation you come up with after seeing the result should always be labelled as exploratory ("we did not predict this, but one possible interpretation is..."), not as confirmation of a prediction. We will see shortly that the result changes completely once we account for the interaction, making this exercise even more telling.</p>
+<p>It's kind of hard to think why adding predators would increase the number of prey. But not impossible. You might try: trophic cascades, a landscape of fear effect reducing prey movement, compensatory breeding by prey, shifts in species composition, and so on.</p>
+<p>The point is that you can always come up with <em>some</em> hypothesis to explain your results after the fact. That is HARKing: Hypothesising After Results are Known, and it is a serious problem in science. To be very clear, HARKing is a <em>highly</em> questionable research practice (i.e. uncomfortably close to fraud) where researchers try to explain their results after the model tells them the answer, while pretending that they were always testing that hypothesis. Any explanation you arrive at after seeing the result should be labelled as exploratory ("we did not predict this, but one possible interpretation is..."), not presented as confirmation of a prior prediction. We will see shortly that the result changes completely once we account for the interaction, which makes this exercise even more telling.</p>
 </div>
 </div>
 
 # Including an interaction
 
 The main-effects model treats the effects of shark density and reef complexity as independent. But think about what is ecologically plausible. In a structurally simple reef with few hiding places, more sharks should reduce fish biomass substantially. In a complex reef with many refuges, the same number of sharks might have much less impact because prey can avoid them. This means the effect of shark density on biomass is not constant: it depends on reef complexity. That is an interaction.
+
+```{=html}
+<div class="card-sort-container" id="card-sort-interaction">
+  <p class="card-sort-intro">Before working through the maths, test your intuition. Each scenario below describes a relationship between two variables. Decide whether the description implies an interaction or not.</p>
+  <p class="card-sort-hint">Click a card to select it, then click a zone to place it. Click a placed card to move it back.</p>
+
+  <div class="card-sort-layout">
+
+    <div class="card-sort-deck" id="cs-deck">
+      <div class="cs-card" id="cs-c1" data-answer="interaction"
+           data-explanation="The effect of fertiliser depends on soil nutrients: big effect in poor soil, almost none in rich soil. That dependency is an interaction.">
+        In nutrient-poor soils, fertiliser dramatically increases plant growth. In nutrient-rich soils, the same dose has almost no effect.
+      </div>
+      <div class="cs-card" id="cs-c2" data-answer="no-interaction"
+           data-explanation="The body-size–heart-rate relationship is the same in both groups. No interaction: the effect doesn't depend on taxon.">
+        Larger animals tend to have slower resting heart rates, and this relationship holds across both mammals and reptiles.
+      </div>
+      <div class="cs-card" id="cs-c3" data-answer="interaction"
+           data-explanation="The caffeine effect differs by sleep state: large when sleep-deprived, small when rested. The effect of one variable depends on the other.">
+        Caffeine improves alertness much more when you are sleep-deprived than when you are well-rested.
+      </div>
+      <div class="cs-card" id="cs-c4" data-answer="no-interaction"
+           data-explanation="The parasite's effect is the same (~20% reduction) across climates. No interaction: the effect doesn't depend on temperature.">
+        A gut parasite reduces host survival by around 20% regardless of whether the host lives in a warm or cold climate.
+      </div>
+      <div class="cs-card" id="cs-c5" data-answer="interaction"
+           data-explanation="CO₂ speeds up photosynthesis, but only in well-watered plants. The effect of CO₂ depends on water availability. That is an interaction.">
+        Elevated CO₂ speeds up photosynthesis in well-watered plants but has almost no effect in drought-stressed plants.
+      </div>
+    </div>
+
+    <div class="card-sort-zones">
+      <div class="cs-zone" id="cs-zone-interaction" data-zone="interaction">
+        <div class="cs-zone-label">Interaction</div>
+        <div class="cs-zone-cards"></div>
+      </div>
+      <div class="cs-zone" id="cs-zone-no-interaction" data-zone="no-interaction">
+        <div class="cs-zone-label">No interaction</div>
+        <div class="cs-zone-cards"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="cs-controls">
+    <button class="cs-check-btn" id="cs-check-btn" disabled onclick="csCheck()">Check answers</button>
+    <button class="cs-reset-btn" id="cs-reset-btn" onclick="csReset()">Reset</button>
+  </div>
+
+  <div class="cs-score" id="cs-score" style="display:none;"></div>
+</div>
+
+<style>
+.card-sort-container {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  margin: 1.5rem 0;
+}
+.card-sort-intro { margin: 0 0 0.4rem; font-weight: 500; }
+.card-sort-hint  { margin: 0 0 1rem; font-size: 0.88rem; color: #555; font-style: italic; }
+.card-sort-layout {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.card-sort-deck {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  flex: 0 0 auto;
+  width: 290px;
+  min-height: 60px;
+}
+.card-sort-deck:empty::after {
+  content: "All cards placed";
+  display: block;
+  text-align: center;
+  color: #aaa;
+  font-size: 0.85rem;
+  padding: 0.5rem;
+}
+.cs-card {
+  background: #fff;
+  border: 2px solid #ced4da;
+  border-radius: 6px;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  position: relative;
+  user-select: none;
+}
+.cs-card:hover { border-color: #00b494; }
+.cs-card.cs-selected {
+  border-color: #00b494;
+  box-shadow: 0 4px 12px rgba(0,180,148,0.25);
+  transform: translateY(-3px);
+  background: #f0faf7;
+}
+.cs-card.cs-correct {
+  border-color: #198754;
+  background: #d1e7dd;
+}
+.cs-card.cs-wrong {
+  border-color: #dc3545;
+  background: #f8d7da;
+}
+.cs-card-icon {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-top: 0.35rem;
+}
+.cs-card-explanation {
+  display: block;
+  font-size: 0.78rem;
+  color: #333;
+  margin-top: 0.3rem;
+  font-style: italic;
+}
+.card-sort-zones {
+  display: flex;
+  gap: 1rem;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+}
+.cs-zone {
+  flex: 1 1 180px;
+  min-height: 200px;
+  border: 2px dashed #adb5bd;
+  border-radius: 8px;
+  background: #fff;
+  padding: 0.5rem;
+  transition: border-color 0.15s, background 0.15s;
+  cursor: pointer;
+}
+.cs-zone.cs-zone-hover {
+  border-color: #00b494;
+  background: #f0faf7;
+}
+.cs-zone-label {
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #495057;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid #dee2e6;
+}
+.cs-zone-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 100px;
+}
+.cs-controls {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+.cs-check-btn {
+  background: #00b494;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 0.45rem 1.1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.cs-check-btn:disabled { background: #adb5bd; cursor: not-allowed; }
+.cs-check-btn:not(:disabled):hover { background: #009a7e; }
+.cs-reset-btn {
+  background: none;
+  border: 1px solid #adb5bd;
+  border-radius: 5px;
+  padding: 0.45rem 1.1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: #555;
+}
+.cs-reset-btn:hover { background: #f0f0f0; }
+.cs-score {
+  margin-top: 0.9rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #333;
+}
+</style>
+
+<script>
+(function () {
+  var selected = null;
+
+  function totalPlaced() {
+    return document.querySelectorAll('#card-sort-interaction .cs-zone .cs-card').length;
+  }
+
+  function updateCheckBtn() {
+    var btn = document.getElementById('cs-check-btn');
+    btn.disabled = totalPlaced() < 5;
+  }
+
+  // Card click: select or deselect
+  document.querySelectorAll('#card-sort-interaction .cs-card').forEach(function (card) {
+    card.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (card.classList.contains('cs-correct') || card.classList.contains('cs-wrong')) return;
+
+      if (selected === card) {
+        // deselect
+        card.classList.remove('cs-selected');
+        selected = null;
+        return;
+      }
+      if (selected) selected.classList.remove('cs-selected');
+      selected = card;
+      card.classList.add('cs-selected');
+    });
+  });
+
+  // Zone click: place selected card, or lift a card from the zone
+  document.querySelectorAll('#card-sort-interaction .cs-zone').forEach(function (zone) {
+    zone.addEventListener('click', function () {
+      if (selected) {
+        zone.querySelector('.cs-zone-cards').appendChild(selected);
+        selected.classList.remove('cs-selected');
+        selected = null;
+        updateCheckBtn();
+      }
+    });
+
+    zone.addEventListener('mouseenter', function () {
+      if (selected) zone.classList.add('cs-zone-hover');
+    });
+    zone.addEventListener('mouseleave', function () {
+      zone.classList.remove('cs-zone-hover');
+    });
+  });
+
+  window.csCheck = function () {
+    var correct = 0;
+    document.querySelectorAll('#card-sort-interaction .cs-card').forEach(function (card) {
+      var parent = card.closest('.cs-zone');
+      if (!parent) return;
+      var zone  = parent.dataset.zone;
+      var answer = card.dataset.answer;
+      var right  = zone === answer;
+      if (right) correct++;
+      card.classList.add(right ? 'cs-correct' : 'cs-wrong');
+
+      // Remove existing feedback if any
+      var existing = card.querySelectorAll('.cs-card-icon, .cs-card-explanation');
+      existing.forEach(function (el) { el.remove(); });
+
+      var icon = document.createElement('span');
+      icon.className = 'cs-card-icon';
+      icon.textContent = right ? '✓ Correct' : '✗ Incorrect';
+      icon.style.color = right ? '#146c43' : '#842029';
+      card.appendChild(icon);
+
+      var exp = document.createElement('span');
+      exp.className = 'cs-card-explanation';
+      exp.textContent = card.dataset.explanation;
+      card.appendChild(exp);
+
+      card.style.cursor = 'default';
+    });
+
+    var score = document.getElementById('cs-score');
+    score.style.display = 'block';
+    score.textContent = correct + ' / 5 correct' + (correct === 5 ? ' — nice work!' : correct >= 3 ? ' — nearly there.' : ' — have another look at the explanations above.');
+
+    document.getElementById('cs-check-btn').disabled = true;
+  };
+
+  window.csReset = function () {
+    var deck = document.getElementById('cs-deck');
+    document.querySelectorAll('#card-sort-interaction .cs-card').forEach(function (card) {
+      // Remove feedback
+      card.querySelectorAll('.cs-card-icon, .cs-card-explanation').forEach(function (el) { el.remove(); });
+      card.classList.remove('cs-selected', 'cs-correct', 'cs-wrong');
+      card.style.cursor = '';
+      deck.appendChild(card);
+    });
+    selected = null;
+    document.getElementById('cs-score').style.display = 'none';
+    updateCheckBtn();
+  };
+})();
+</script>
+```
 
 The statistical notation for a model with both main effects and an interaction is:
 
@@ -504,7 +850,7 @@ summary(bio_mod)
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>The shark coefficient is now negative, which is what ecology would predict: more predators, less prey. In the main-effects model, the positive coefficient was an artefact of a model that was missing the interaction term. Once the interaction is included, the model correctly captures that the shark effect is negative but varies with reef complexity. This is also why we should always diagnose before interpreting: a model with violated assumptions can produce coefficients that are not just imprecise but point in the wrong direction.</p>
+<p>No — we get something far more intuitive, requiring fewer mental gymnastics to explain. Predators eat prey. The more predators, the less prey. Just that simple. The positive coefficient from the main-effects model was an artefact of a model missing the interaction term. Once the interaction is included, the model correctly captures that the shark effect is negative but varies with reef complexity. This is also why we should always diagnose before interpreting: a model with violated assumptions can produce coefficients that are not just imprecise but point in the wrong direction entirely.</p>
 </div>
 </div>
 
@@ -567,7 +913,7 @@ ggplot(fake) +
 
 The heatmap makes the interaction visible: the highest predicted biomass occurs at high reef complexity combined with high shark density. Without the interaction in mind, high shark density alone would predict low biomass. The interaction flips that relationship at high reef complexity.
 
-The default blue palette can be hard to read. The viridis `"magma"` palette gives better contrast across the full range:
+The default blue palette can be hard to read. My preferred option is the viridis `"magma"` palette, which gives much better contrast across the full range:
 
 ```{r, eval=FALSE}
 ggplot(fake) +
@@ -579,11 +925,17 @@ ggplot(fake) +
   theme_minimal()
 ```
 
-One limitation of heatmaps is that it is hard to communicate uncertainty on them. A common workaround is to produce two additional plots: one showing predictions at the upper 95% confidence limit and one at the lower. This is imperfect because our eyes struggle to compare the same region across three separate plots, but it is better than showing no uncertainty at all.
+One limitation of heatmaps is that it is hard to communicate uncertainty on them. A common workaround is to produce two additional plots: one showing predictions at the upper 95% confidence limit and one at the lower. But this is not ideal either — it is really hard for our eyes to match up the same region across multiple heatmaps, so you never get a precise sense of the uncertainty at any specific location. If you have any bright ideas for how to effectively convey uncertainty with heatmaps (or even just maps in general), you might have a great paper on your hands. We are not aware of anyone who has found a particularly compelling solution to this yet.
 
 # A new challenger: Asian elephants
 
-If time allows, work through the following dataset on human-wildlife conflict in Asian elephant populations (`elephants.txt` on MyAberdeen). Researchers recorded elephant activity at sites varying in vegetation cover and proximity to human settlements. The research question is predictive: which combinations of vegetation cover and proximity to towns are associated with higher or lower elephant activity?
+If time allows, work through the following dataset on human-wildlife conflict in Asian elephant populations. Download it below and save it to your `BI3010/data/` folder.
+
+```{r, echo=FALSE, results='asis'}
+cat(make_download_btn("Data/elephants.txt"))
+```
+
+ Researchers recorded elephant activity at sites varying in vegetation cover and proximity to human settlements. The research question is predictive: which combinations of vegetation cover and proximity to towns are associated with higher or lower elephant activity?
 
 The dataset contains:
 
@@ -604,7 +956,6 @@ Go through the full seven-step workflow. A few things to keep in mind:
 3. Think carefully about hidden assumptions. The `activity` variable is defined relative to a "pristine" baseline. What assumptions does that involve, and are they likely to hold?
 
 ```{r, eval=FALSE}
-# Your analysis here
 ```
 
 <div class="question-block">

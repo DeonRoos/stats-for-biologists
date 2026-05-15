@@ -19,66 +19,21 @@ format:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-ali   <- read.table("Data/alligator_bite.txt", header = TRUE)
-fast  <- read.table("Data/animal_speed.txt",   header = TRUE)
-chupa <- read.table("Data/chupa.txt",          header = TRUE)
+ali   <- read.table("data/alligator_bite.txt", header = TRUE)
+fast  <- read.table("data/animal_speed.txt",   header = TRUE)
+chupa <- read.table("data/chupa.txt",          header = TRUE)
+
+make_download_btn <- function(path, label = NULL) {
+  fname <- basename(path)
+  if (is.null(label)) label <- paste("Download", fname)
+  uri <- xfun::base64_uri(path)
+  sprintf('<a href="%s" download="%s" class="ws-download-btn">%s</a>', uri, fname, label)
+}
 ```
 
 ```{=html}
 <script>
-/* --- answer lock --- */
-var WS_PASS_SHA256 = '080bc338a7350d4c37f8018a9a50ae0112a164d6098731f73c6f6ec8ee1dd8b6';
-var WS_PASS_DJB2   = '7c94b439';
-var _wsUnlocked = false;
-
-function _wsDjb2(s) {
-  var h = 5381;
-  for (var i = 0; i < s.length; i++) { h = ((h << 5) + h + s.charCodeAt(i)) | 0; }
-  return (h >>> 0).toString(16).padStart(8, '0');
-}
-function wsVerifyPass() {
-  var inp = document.getElementById('ws-pass-input'); if (!inp) return;
-  var msg = document.getElementById('ws-pass-msg');
-  function finish(ok) {
-    if (ok) {
-      _wsUnlocked = true; sessionStorage.setItem('ws-unlocked', WS_PASS_SHA256);
-      document.body.classList.remove('ws-locked');
-      var b = document.getElementById('ws-lock-banner');
-      if (b) { b.style.transition = 'opacity 0.4s'; b.style.opacity = '0'; setTimeout(function () { b.remove(); }, 450); }
-    } else {
-      inp.classList.add('ws-wrong'); if (msg) msg.textContent = 'Incorrect password.';
-      setTimeout(function () { inp.classList.remove('ws-wrong'); if (msg) msg.textContent = ''; }, 2000);
-    }
-  }
-  if (window.crypto && crypto.subtle) {
-    crypto.subtle.digest('SHA-256', new TextEncoder().encode(inp.value))
-      .then(function (buf) { var hex = Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join(''); finish(hex === WS_PASS_SHA256); })
-      .catch(function () { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); });
-  } else { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); }
-}
-function wsFlashBanner() {
-  var b = document.getElementById('ws-lock-banner'); if (!b) return;
-  b.classList.remove('ws-flash'); void b.offsetWidth; b.classList.add('ws-flash');
-}
-function wsInitLock() {
-  if (sessionStorage.getItem('ws-unlocked') === WS_PASS_SHA256) { _wsUnlocked = true; return; }
-  document.body.classList.add('ws-locked');
-  var b = document.createElement('div'); b.id = 'ws-lock-banner';
-  b.innerHTML = '<span style="font-size:1.15rem;line-height:1;">🔒</span>' +
-    '<span>Answers are locked. Enter the workshop password to reveal them.</span>' +
-    '<span class="ws-unlock-form">' +
-      '<input type="password" id="ws-pass-input" placeholder="Password"' +
-      ' onkeydown="if(event.key===\'Enter\')wsVerifyPass();">' +
-      '<button id="ws-unlock-btn" onclick="wsVerifyPass()">Unlock</button>' +
-    '</span><span id="ws-pass-msg"></span>';
-  var t = document.getElementById('title-block-header');
-  if (t) t.insertAdjacentElement('afterend', b); else document.body.prepend(b);
-}
-document.addEventListener('DOMContentLoaded', wsInitLock);
-/* --- end lock --- */
-
 function revealAnswer(btn) {
-  if (!_wsUnlocked) { wsFlashBanner(); return; }
   var block = btn.closest('.question-block, .puzzle-block');
   var answerClass = block.classList.contains('puzzle-block') ? '.puzzle-answer' : '.instructor-answer';
 
@@ -119,6 +74,16 @@ function revealAnswer(btn) {
   if (answer) answer.style.display = 'block';
   btn.textContent = 'Answer shown';
   btn.disabled = true;
+
+  // Lock the free-text response so it cannot be edited after reveal
+  if (textarea) {
+    textarea.disabled = true;
+    textarea.classList.add('ws-answer-locked');
+    var badge = document.createElement('span');
+    badge.className = 'ws-submitted-badge';
+    badge.textContent = 'Submitted';
+    textarea.insertAdjacentElement('afterend', badge);
+  }
 }
 
 function toggleGlossary() {
@@ -229,8 +194,27 @@ function toggleGlossary() {
   color: #1c3a50;
   line-height: 1.65;
 }
+
+.ws-answer-locked { background: #f5f5f5 !important; color: #555 !important; cursor: not-allowed; }
+.ws-submitted-badge { display: inline-block; margin-top: 0.3rem; background: #00b494; color: #fff; font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.55rem; border-radius: 3px; }
+.glossary-section-header {
+  padding: 0.4rem 1.25rem 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #00635a;
+  background: #f0faf7;
+  border-top: 2px solid #e8f5f0;
+  margin-top: 0.25rem;
+}
+.glossary-section-header:first-child { border-top: none; margin-top: 0; }
+.ws-download-btn { display: inline-block; margin: 0.4rem 0; padding: 0.35rem 0.9rem; background: #0d6efd; color: #fff !important; border-radius: 4px; text-decoration: none !important; font-size: 0.875rem; font-weight: 500; }
+.ws-download-btn:hover { background: #0b5ed7; }
 </style>
 ```
+
+Welcome to the first BI3010 workshop. Over the next ten workshop sessions, you will go from working with raw data to fitting complex statistical models, building up a workflow you can apply to almost any dataset you encounter, including every single one of your honour's project next year. Today's workshop focuses on getting comfortable with R and learning to spot problems in data before analysis begins, a step that sounds unglamorous but is where scientists spend 80% of their time.
 
 # Workshop Structure
 
@@ -249,7 +233,7 @@ The general workflow we'll be using can be broken down into:
 6. Summarise the results.
 7. Interpret and provide inferences.
 
-We'll skip Step 1 here for convenience, but in your own work it's the most important step. Every subsequent decision — how to collect data, which model to fit, how to interpret results — depends on having a clear question. Don't mistake its absence in these workshops for evidence that it doesn't matter.
+We'll skip Step 1 here for convenience, but in your own work it's the most important step. Every subsequent decision (how to collect data, which model to fit, how to interpret results) depends on having a clear question. Don't mistake its absence in these workshops for evidence that it doesn't matter.
 :::
 
 # Learning Objectives
@@ -263,6 +247,33 @@ We'll skip Step 1 here for convenience, but in your own work it's the most impor
 4. Begin thinking about the assumptions we make with a specific dataset even before we begin using statistics.
 
 These skills apply every time you pick up a new dataset and will come up throughout the course.
+:::
+
+# Getting Started with R
+
+::: {.callout-note collapse="true"}
+## New to RStudio? Expand here
+
+Before we begin the workshop, let's make sure that you are set up to work with `R` and RStudio. If you're working on your own machine, make sure you have `R` and RStudio installed. If you don't, you can download `R` from [CRAN](https://cran.r-project.org/) and RStudio from [RStudio's website](https://www.rstudio.com/products/rstudio/download/). On university computers, these should already be installed.
+
+Once you have `R` and RStudio set up, open RStudio. You should see a window with four main panes:
+
+- **Source:** This is where you write your scripts.
+- **Console:** This is where you can type and execute R code directly.
+- **Environment/History:** This pane shows you the objects that are currently stored in R's memory.
+- **Files/Plots/Packages/Help/Viewer:** This is a multi-tabbed pane that allows you to navigate files, view plots, manage packages, and access documentation.
+
+**Running Code**
+
+There are a few ways to run `R` code:
+
+- **Directly in the console:** You can type `R` commands directly into the Console pane and press Enter to run them. This is useful for very quick tests and calculations but avoid using this for project work (none of it is saved).
+- **From a script:** Scripts are simple text files that contain `R` code. You can write multiple lines of code in a script and run them together or one by one. This is particularly useful for more complex analyses where you want to keep a record of your code.
+
+To run code from a script, you can:
+
+- Click the "Run" button at the top of the Source pane to run the selected line or code chunk.
+- Press `Ctrl + Enter` (or `Cmd + Enter` on a Mac) to run the current line or selected code.
 :::
 
 # Instruction Orientation
@@ -319,33 +330,6 @@ LLMs (Large Language Models, or AI) have become common tools in programming and 
 Using them well is a skill in itself. Make your prompt specific: describe what you want, paste the relevant code, include any error messages, and say you're working in `R` (otherwise you'll get Python). Mention any packages you want to use, or specify base `R`.
 :::
 
-# Getting Started with R
-
-::: {.callout-note collapse="true"}
-## New to RStudio? Expand here
-
-Before we begin the workshop, let's make sure that you are set up to work with `R` and RStudio. If you're working on your own machine, make sure you have `R` and RStudio installed. If you don't, you can download `R` from [CRAN](https://cran.r-project.org/) and RStudio from [RStudio's website](https://www.rstudio.com/products/rstudio/download/). On university computers, these should already be installed.
-
-Once you have `R` and RStudio set up, open RStudio. You should see a window with four main panes:
-
-- **Source:** This is where you write your scripts.
-- **Console:** This is where you can type and execute R code directly.
-- **Environment/History:** This pane shows you the objects that are currently stored in R's memory.
-- **Files/Plots/Packages/Help/Viewer:** This is a multi-tabbed pane that allows you to navigate files, view plots, manage packages, and access documentation.
-
-**Running Code**
-
-There are a few ways to run `R` code:
-
-- **Directly in the console:** You can type `R` commands directly into the Console pane and press Enter to run them. This is useful for very quick tests and calculations but avoid using this for project work (none of it is saved).
-- **From a script:** Scripts are simple text files that contain `R` code. You can write multiple lines of code in a script and run them together or one by one. This is particularly useful for more complex analyses where you want to keep a record of your code.
-
-To run code from a script, you can:
-
-- Click the "Run" button at the top of the Source pane to run the selected line or code chunk.
-- Press `Ctrl + Enter` (or `Cmd + Enter` on a Mac) to run the current line or selected code.
-:::
-
 # Workshop Instructions
 
 In this workshop, we're going to load two datasets, starting with alligator bite strength, and carry out Exploratory Data Analysis (EDA) alongside some simple Data Quality Assurance. The aim is to find weird things in the data, things that might indicate mistakes.
@@ -354,58 +338,64 @@ Errors in data entry are more common than you'd think. Imagine entering 5,000 ne
 
 The good news: we don't need complex statistics to check for this, and the `R` coding is *relatively* straightforward.
 
-## Set working directory
+## Setting Up Your Project
 
-If you haven't already, create a folder for this course. On university computers the H drive works well: `H:\BI3010\workshop1`.
+We'll use an **R Project** to organise our work. An R Project is a folder with a small `.Rproj` file inside it. When you open that file, RStudio automatically sets the working directory to the project folder, with no manual path-setting required, and it works the same on any computer or operating system.
 
-Open RStudio and create a new R script (`File > New File > R Script` or `Ctrl + Shift + N`). To run code, press the Run button or use `Ctrl + Enter`.
+**Step 1: Create the folder structure**
 
-To set the working directory, you have two options:
+Create a folder called `BI3010` somewhere sensible:
 
-**Option 1:**
+- University computers: the H drive works well, e.g. `H:\BI3010`
+- Personal computers: anywhere in your Documents folder is fine
 
-Find the file path to your folder using File Explorer. It will look something like `H:\BI3010\workshop1`. One catch: `R` doesn't like backslashes, so swap them to forward slashes before using it (`H:/BI3010/workshop1`). Mac paths are already fine (`~/Documents/BI3010/workshop1`). Use `setwd()` to point `R` at that folder, with the path in quotation marks:
+Inside `BI3010`, create two subfolders:
 
-```{r, eval=FALSE}
-setwd("H:/BI3010/workshop1")
-# Or for Mac:
-setwd("~/Documents/BI3010/workshop1")
+- `data`: all data files for the course go here
+- `scripts`: your R scripts, one per workshop
+
+Your folder should look like this:
+
+```
+BI3010/
+├── data/
+└── scripts/
 ```
 
-**Option 2:**
+**Step 2: Create the R Project**
 
-Use the drop-down menu: `Session > Set Working Directory > Choose Directory...`
+Open RStudio and go to `File > New Project > Existing Directory`. Navigate to your `BI3010` folder and click `Create Project`. RStudio will create a `BI3010.Rproj` file inside the folder and restart with the project open.
 
-Convenient for a one-off session, but you'll need to repeat it every time you reopen the project. Option 1 is worth the extra minute.
+From now on, always open RStudio by double-clicking `BI3010.Rproj` rather than opening RStudio directly. This ensures the working directory is always set correctly.
 
-We can check if the working directory has been set correctly by asking `R` what the current directory is:
+**Step 3: Create a script for this workshop**
 
-```{r, eval=FALSE}
-getwd() # to check which directory RStudio is using
+Go to `File > New File > R Script` (or `Ctrl + Shift + N`). Save it immediately into your `scripts` folder as `workshop1.R`. To run code, press the Run button or use `Ctrl + Enter`.
+
+## Download the Data
+
+The data file for this section is embedded in this page. Click the button below to download it, then save it to your `BI3010/data/` folder before continuing.
+
+```{r, echo=FALSE, results='asis'}
+cat(make_download_btn("data/alligator_bite.txt"))
 ```
-
-## Download the File
-
-*You can download the data from MyAberdeen. Make sure to save the file to your working directory.*
-
-On MyAberdeen in the Tuesday - Workshop folder within Week 1, you'll find a file called `alligator_bite.txt`. Either click on the file to download it or, if that isn't working, use the three dots to the right of the content area that has the file name to download it.
-
-Once downloaded, make sure to move it to your `H:/BI3010/workshop1` folder (or whatever you chose to call your folders).
 
 ## Load File into RStudio
 
-Now we can load the data. The `.txt` extension tells us it's a plain text file, so we use `read.table()`. We need two arguments: the filename, and `header = TRUE` to tell `R` that the first row contains column names rather than data.
+Now we can load the data. The `.txt` extension tells us it is a plain text file, so we use `read.table()`. We need two arguments: the filename (including the `data/` subfolder path), and `header = TRUE` to tell `R` that the first row contains column names rather than data.
+
+Because the project sets the working directory to `BI3010/`, we can refer to files using paths relative to that folder, with no need to type out the full path.
 
 Tip: `?read.table` (or `?` followed by any function name) opens the help page.
 
 ```{r, eval=FALSE}
-ali <- read.table("alligator_bite.txt", header = TRUE)
+ali <- read.table("data/alligator_bite.txt", header = TRUE)
 ```
 
 The above fits on one line, but you can split it for readability:
 
 ```{r, eval=FALSE}
-ali <- read.table("alligator_bite.txt",
+ali <- read.table("data/alligator_bite.txt",
                   header = TRUE)
 ```
 
@@ -415,7 +405,7 @@ If you hit an error, don't panic. Nothing in `R` is permanent (unless you very e
 
 If you get an error loading data, common causes are:
 
-- You may have set the wrong working directory.
+- The file is not in the `data` folder inside your `BI3010` project, or you did not open RStudio via `BI3010.Rproj`.
 - You may have misspelled one of the words (including using a capital letter instead of lower case).
 - Your file may be missing a column heading.
 - The file is not in the correct format (e.g., the file saved as a `.csv` instead of a `.txt`).
@@ -430,7 +420,7 @@ To inspect the data, you have a few options. The following shows the first six r
 head(ali)
 ```
 
-Or open the full dataset in a new tab — `View()` gives a spreadsheet-like view with sorting and filtering:
+Or open the full dataset in a new tab; `View()` gives a spreadsheet-like view with sorting and filtering:
 
 ```{r, eval=FALSE}
 View(ali)
@@ -442,7 +432,7 @@ Or print everything to the console:
 ali
 ```
 
-Not recommended — it floods the console and is hard to read.
+Not recommended: it floods the console and is hard to read.
 
 ## Question Set One
 
@@ -501,7 +491,7 @@ The dataset has `r nrow(ali)` alligators from Parker Island Gator Farm, Florida.
 
 Before going further, do a quick search: what's the bite strength of a typical alligator, and how long are they? EDA means looking for things that seem *weird*, and you can only spot weird if you know what normal looks like. Note the typical values as a comment in your script.
 
-Now let's check that the data is sensibly structured — numbers stored as numbers, text as characters, and so on. A value like `2174.94BIGBITE` would cause `R` to treat the entire column as text, which breaks any numerical analysis.
+Now let's check that the data is sensibly structured: numbers stored as numbers, text as characters, and so on. A value like `2174.94BIGBITE` would cause `R` to treat the entire column as text, which breaks any numerical analysis.
 
 To do this quickly, we can use the `str()` function (short for "structure"):
 
@@ -527,7 +517,7 @@ Let's calculate some summary statistics. The average length:
 mean(ali$length)
 ```
 
-The average alligator here is `r round(mean(ali$length), digits = 1)` cm — longer than wild alligators, but farm animals often are. Compare this with what you found online. Small differences are fine; large ones are worth questioning.
+The average alligator here is `r round(mean(ali$length), digits = 1)` cm, longer than wild alligators, but farm animals often are. Compare this with what you found online. Small differences are fine; large ones are worth questioning.
 
 Now calculate the average bite strength:
 
@@ -535,7 +525,7 @@ Now calculate the average bite strength:
 mean(ali$bite)
 ```
 
-If you found alligator bite strength to be around 2,000 PSI, ours are averaging 1,500 PSI *above* that. We can't be certain there's a problem, but it warrants investigation.
+Assuming you found that alligator bite strength is roughly 2,000 PSI, our alligators appear to be biting with an extra 1,500 PSI *on average*. That seems like *a lot* more. This is something that should make us sit up and pay attention. We don't know for sure if there's a problem, but we have reason to believe there *might* be one. It's now up to us to prove that there *isn't* a problem.
 
 `summary()` gives a quick overview of the whole dataset. Run it now and see if anything stands out:
 
@@ -589,7 +579,7 @@ summary(ali&#36;length)  # summary for length only</code></pre>
 
 Hopefully you spotted at least one suspicious value. Let's track it down.
 
-We know there's an alligator recorded as `r max(ali$length)` cm long — that's `r round(max(ali$length)/100, digits = 0)` m, longer than a bus. Here's how to find it.
+We know there's an alligator recorded as `r max(ali$length)` cm long, which is `r round(max(ali$length)/100, digits = 0)` m, longer than a bus. Here's how to find it.
 
 Square brackets `[]` are R's indexing tool: they extract specific rows or columns from a dataframe using the format `dataset[row, column]`. Omit the row number and you get all rows; omit the column and you get all columns. For example, to see all columns for row 30:
 
@@ -659,13 +649,13 @@ ali[ali$length > average_length, ]
 
 More than one alligator qualifies this time. Our problem observation is still in there.
 
-Let's go one step further with `quantile()`. Look back at `summary(ali)` — the `1st Qu.` and `3rd Qu.` values are the 25th and 75th percentiles. We can retrieve them directly:
+Let's go one step further with `quantile()`. Look back at `summary(ali)`: the `1st Qu.` and `3rd Qu.` values are the 25th and 75th percentiles. We can retrieve them directly:
 
 ```{r}
 quantile(ali$length, probs = c(0.25,0.75))
 ```
 
-`probs` sets which percentiles to return. `c()` combines multiple values into a vector — needed here because we're asking for two at once. For a single percentile, write `quantile(ali$length, probs = 0.75)` without `c()`.
+`probs` sets which percentiles to return. `c()` combines multiple values into a vector; needed here because we're asking for two at once. For a single percentile, write `quantile(ali$length, probs = 0.75)` without `c()`.
 
 ## Question Set Four
 
@@ -705,11 +695,11 @@ So, we've identified a problem. What now? Do we delete the observation? Declare 
 
 But we do need to do something. Row 20 of our dataset is clearly a mistake, but correcting it is a really sensitive topic. Part of the reason for that sensitivity is because a non-trivial number of scientists have been found to actually *fake* their data in order to further their own careers and prestige (e.g. see [here](https://www.science.org/content/article/university-investigation-found-prominent-spider-biologist-fabricated-falsified-data), [here](https://www.science.org/content/article/does-ocean-acidification-alter-fish-behavior-fraud-allegations-create-sea-doubt), and most ironically [here](https://behavioralscientist.org/harvard-professor-under-scrutiny-for-alleged-data-fraud/) for examples).
 
-We want to be better than that. So before touching anything, go back to the source — not the downloaded file, but the original recorded values. Here that means contacting Parker Island Gator Farm to confirm our suspicion that row 20 is simply missing decimal points.
+We want to be better than that. So before touching anything, go back to the source: not the downloaded file, but the original recorded values. Here that means contacting Parker Island Gator Farm to confirm our suspicion that row 20 is simply missing decimal points.
 
 In the interest of time, I'll confirm that it's missing decimal points so we can move on to fixing the problem. Specifically, `bite` should have two decimal points, and `length` should have one.
 
-We have two options: edit `alligator_bite.txt` directly and reload, or fix it in `R`. Do it in `R`. If you edit the raw file, there's no record of what changed or why, and that starts to look a lot like the data manipulation we were just reading about. The correction in code is transparent; it's right there for anyone auditing your work.
+We have two options: edit `alligator_bite.txt` directly and reload, or fix it in `R`. Do it in `R`. If you edit the raw file, there's no record of what changed or why, and that starts to look a lot like the data manipulation we were just reading about. At minimum, you'd have to say: "We had this weird observation, but we've totally sorted it out. Don't worry. *Trust us.*" The correction in code is transparent; it's right there for anyone auditing your work.
 
 The fix uses the indexing skills from above. `ali$bite[20]` points to row 20 of the `bite` column specifically (no comma needed since we're already working with a single column).
 
@@ -726,6 +716,14 @@ Now we just divide, which shifts the decimal two places to the right:
 ali$bite[20] <- ali$bite[20] / 100
 ```
 
+Using a hardcoded row number like `[20]` works here, but it is fragile: if the dataset were ever re-sorted or a row added above this one, row 20 would point to the wrong observation. A safer approach uses the same conditional indexing we've already learned, targeting the value itself rather than its position:
+
+```{r, eval=FALSE}
+ali$bite[ali$bite > 100000] <- ali$bite[ali$bite > 100000] / 100
+```
+
+This reads as: "for any `bite` value greater than 100,000, divide it by 100." It will find the right row regardless of where it sits in the dataset.
+
 ## Question Set Five
 
 <div class="question-block">
@@ -733,9 +731,12 @@ ali$bite[20] <- ali$bite[20] / 100
 <textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<pre><code class="language-r"># Correcting missing decimal point
-# Confirmed by Parker Island Gator Farm on 1/1/2020
-ali&#36;length[20] <- ali&#36;length[20] / 10</code></pre>
+<pre><code class="language-r"># Correcting missing decimal point, confirmed by Parker Island Gator Farm on 1/1/2020
+# Row index approach (works here, but fragile if the dataset changes):
+ali&#36;length[20] <- ali&#36;length[20] / 10
+
+# More robust: target the value directly using a condition
+ali&#36;length[ali&#36;length > 2000] <- ali&#36;length[ali&#36;length > 2000] / 10</code></pre>
 </div>
 </div>
 
@@ -750,9 +751,15 @@ ali&#36;length[20] <- ali&#36;length[20] / 10</code></pre>
 
 # Do it for Real
 
-On MyAberdeen you'll find `animal_speed.txt`. The goal is the same: find all the data entry mistakes. This dataset is larger and the errors are harder to spot, so you'll need to be more systematic. A few hints:
+Download the data file below and save it to your `BI3010/data/` folder.
 
-1. `unique()` lists every distinct value in a column — useful for spotting typos in text columns.
+```{r, echo=FALSE, results='asis'}
+cat(make_download_btn("data/animal_speed.txt"))
+```
+
+The goal is the same as before: find all the data entry mistakes. This dataset is larger and the errors are harder to spot, so you'll need to be more systematic. A few hints:
+
+1. `unique()` lists every distinct value in a column, useful for spotting typos in text columns.
 2. `mean()` returns `NA` if any values are missing. Add `na.rm = TRUE` to ignore them: `mean(variable, na.rm = TRUE)`.
 3. There are five mistakes in total.
 
@@ -773,7 +780,7 @@ Start with an EDA as before. Can you find them all?
 :::
 
 ```{r, eval=FALSE}
-fast <- read.table("animal_speed.txt", header = TRUE)
+fast <- read.table("data/animal_speed.txt", header = TRUE)
 ```
 
 ```{r, results="hide"}
@@ -824,7 +831,12 @@ fast&#36;species <- factor(fast&#36;species)</code></pre>
 <div class="instructor-answer">
 <p>One Peregrine Falcon has a recorded speed of <strong>35,711 km/h</strong>. The fastest recorded speed for a Peregrine Falcon is around 390 km/h. Dividing by 100 gives 357.11 km/h, which is plausible, so this is another missing decimal point error. Note that the <code>NA</code> in the speed column makes <code>max()</code> tricky here.</p>
 <pre><code class="language-r">fast[fast&#36;speed == max(fast&#36;speed, na.rm = TRUE),]
-fast&#36;speed[15] <- fast&#36;speed[15] / 100</code></pre>
+
+# Row index approach (fragile: only reliable if the dataset has not changed):
+fast&#36;speed[15] <- fast&#36;speed[15] / 100
+
+# More robust: target the value directly
+fast&#36;speed[fast&#36;speed > 10000 &amp; !is.na(fast&#36;speed)] <- fast&#36;speed[fast&#36;speed > 10000 &amp; !is.na(fast&#36;speed)] / 100</code></pre>
 </div>
 </div>
 
@@ -886,10 +898,16 @@ The final dataset is `chupa.txt`. We'll work through it together in the last 30 
 
 There are data entry errors in this dataset. Find them all using EDA.
 
+Download the data file below and save it to your `BI3010/data/` folder.
+
+```{r, echo=FALSE, results='asis'}
+cat(make_download_btn("data/chupa.txt"))
+```
+
 As a group, we'll look at snippets of code and identify the errors.
 
 ```{r, eval=FALSE}
-chupa <- read.table("chupa.txt", header = TRUE)
+chupa <- read.table("data/chupa.txt", header = TRUE)
 ```
 
 ```{r, results="hide"}
@@ -997,6 +1015,8 @@ ali[ali&#36;bite > mean(ali&#36;bite, na.rm = TRUE), ]</code></pre>
   </div>
   <div id="glossary-body">
 
+    <div class="glossary-section-header">Workflow</div>
+
     <div class="glossary-entry">
       <div class="glossary-terms">
         <span class="glossary-en-term">Exploratory Data Analysis (EDA)</span>
@@ -1008,11 +1028,22 @@ ali[ali&#36;bite > mean(ali&#36;bite, na.rm = TRUE), ]</code></pre>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
-        <span class="glossary-en-term">Variable</span>
-        <span class="glossary-zh-term">变量</span>
+        <span class="glossary-en-term">Data entry error</span>
+        <span class="glossary-zh-term">数据录入错误</span>
       </div>
-      <div class="glossary-en-def">A column in a dataset. Each variable holds one type of measurement or attribute recorded for every observation.</div>
-      <div class="glossary-zh-def">数据集中的一列，记录每个观测值的某种测量或属性。</div>
+      <div class="glossary-en-def">A mistake introduced when recording or entering data (e.g. a typo, wrong units, a placeholder value left in). EDA is the main tool for catching these.</div>
+      <div class="glossary-zh-def">在记录或输入数据时引入的错误（如错别字、单位错误、遗留的占位符值）。探索性数据分析是发现此类错误的主要方法。</div>
+    </div>
+
+    <div class="glossary-section-header">Data structure</div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Data frame</span>
+        <span class="glossary-zh-term">数据框</span>
+      </div>
+      <div class="glossary-en-def">R's standard table structure: rows are observations, columns are variables. Most datasets you work with in R will be data frames.</div>
+      <div class="glossary-zh-def">R 中最常用的表格结构：行为观测值，列为变量。大多数在 R 中处理的数据集都是数据框。</div>
     </div>
 
     <div class="glossary-entry">
@@ -1026,12 +1057,14 @@ ali[ali&#36;bite > mean(ali&#36;bite, na.rm = TRUE), ]</code></pre>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
-        <span class="glossary-en-term">Data frame</span>
-        <span class="glossary-zh-term">数据框</span>
+        <span class="glossary-en-term">Variable</span>
+        <span class="glossary-zh-term">变量</span>
       </div>
-      <div class="glossary-en-def">R's standard table structure: rows are observations, columns are variables. Most datasets you work with in R will be data frames.</div>
-      <div class="glossary-zh-def">R 中最常用的表格结构：行为观测值，列为变量。大多数在 R 中处理的数据集都是数据框。</div>
+      <div class="glossary-en-def">A column in a dataset. Each variable holds one type of measurement or attribute recorded for every observation.</div>
+      <div class="glossary-zh-def">数据集中的一列，记录每个观测值的某种测量或属性。</div>
     </div>
+
+    <div class="glossary-section-header">Data types</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
@@ -1059,6 +1092,8 @@ ali[ali&#36;bite > mean(ali&#36;bite, na.rm = TRUE), ]</code></pre>
       <div class="glossary-en-def">A categorical variable with a fixed set of levels (e.g. sex: male/female). R stores factors efficiently and uses them correctly in models.</div>
       <div class="glossary-zh-def">具有固定类别水平的分类变量（如性别：雄性/雌性）。R 以因子形式高效存储并在模型中正确使用。</div>
     </div>
+
+    <div class="glossary-section-header">Summary statistics</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
@@ -1096,6 +1131,8 @@ ali[ali&#36;bite > mean(ali&#36;bite, na.rm = TRUE), ]</code></pre>
       <div class="glossary-zh-def">变量中最大值与最小值之差。可快速检查是否存在不合理的值。</div>
     </div>
 
+    <div class="glossary-section-header">Missing and unusual values</div>
+
     <div class="glossary-entry">
       <div class="glossary-terms">
         <span class="glossary-en-term">NA</span>
@@ -1114,14 +1151,7 @@ ali[ali&#36;bite > mean(ali&#36;bite, na.rm = TRUE), ]</code></pre>
       <div class="glossary-zh-def">远离其他数据点的值。可能是真实的极端观测值，也可能是数据录入错误。</div>
     </div>
 
-    <div class="glossary-entry">
-      <div class="glossary-terms">
-        <span class="glossary-en-term">Working directory</span>
-        <span class="glossary-zh-term">工作目录</span>
-      </div>
-      <div class="glossary-en-def">The folder R looks in by default when reading or writing files. Set it with <code>setwd()</code> or via the RStudio menu.</div>
-      <div class="glossary-zh-def">R 读写文件时默认查找的文件夹。可通过 <code>setwd()</code> 或 RStudio 菜单设置。</div>
-    </div>
+    <div class="glossary-section-header">R programming</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
@@ -1170,11 +1200,11 @@ ali[ali&#36;bite > mean(ali&#36;bite, na.rm = TRUE), ]</code></pre>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
-        <span class="glossary-en-term">Data entry error</span>
-        <span class="glossary-zh-term">数据录入错误</span>
+        <span class="glossary-en-term">Working directory</span>
+        <span class="glossary-zh-term">工作目录</span>
       </div>
-      <div class="glossary-en-def">A mistake introduced when recording or entering data (e.g. a typo, wrong units, a placeholder value left in). EDA is the main tool for catching these.</div>
-      <div class="glossary-zh-def">在记录或输入数据时引入的错误（如错别字、单位错误、遗留的占位符值）。探索性数据分析是发现此类错误的主要方法。</div>
+      <div class="glossary-en-def">The folder R looks in by default when reading or writing files. Set it with <code>setwd()</code> or via the RStudio menu.</div>
+      <div class="glossary-zh-def">R 读写文件时默认查找的文件夹。可通过 <code>setwd()</code> 或 RStudio 菜单设置。</div>
     </div>
 
   </div>

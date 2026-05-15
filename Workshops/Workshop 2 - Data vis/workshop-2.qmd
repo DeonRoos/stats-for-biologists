@@ -20,63 +20,20 @@ format:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show = "hide")
 library(ggplot2)
+boto <- read.table("data/boto.txt", header = TRUE)
+abdn <- read.table("data/abdn_flats.txt", header = TRUE)
+
+make_download_btn <- function(path, label = NULL) {
+  fname <- basename(path)
+  if (is.null(label)) label <- paste("Download", fname)
+  uri <- xfun::base64_uri(path)
+  sprintf('<a href="%s" download="%s" class="ws-download-btn">%s</a>', uri, fname, label)
+}
 ```
 
 ```{=html}
 <script>
-/* --- answer lock --- */
-var WS_PASS_SHA256 = '324a529408a7e7e4be5510c0fc0cbac4049a0606594beaadc7b559df76281cdb';
-var WS_PASS_DJB2   = 'ffa97e12';
-var _wsUnlocked = false;
-
-function _wsDjb2(s) {
-  var h = 5381;
-  for (var i = 0; i < s.length; i++) { h = ((h << 5) + h + s.charCodeAt(i)) | 0; }
-  return (h >>> 0).toString(16).padStart(8, '0');
-}
-function wsVerifyPass() {
-  var inp = document.getElementById('ws-pass-input'); if (!inp) return;
-  var msg = document.getElementById('ws-pass-msg');
-  function finish(ok) {
-    if (ok) {
-      _wsUnlocked = true; sessionStorage.setItem('ws-unlocked', WS_PASS_SHA256);
-      document.body.classList.remove('ws-locked');
-      var b = document.getElementById('ws-lock-banner');
-      if (b) { b.style.transition = 'opacity 0.4s'; b.style.opacity = '0'; setTimeout(function () { b.remove(); }, 450); }
-    } else {
-      inp.classList.add('ws-wrong'); if (msg) msg.textContent = 'Incorrect password.';
-      setTimeout(function () { inp.classList.remove('ws-wrong'); if (msg) msg.textContent = ''; }, 2000);
-    }
-  }
-  if (window.crypto && crypto.subtle) {
-    crypto.subtle.digest('SHA-256', new TextEncoder().encode(inp.value))
-      .then(function (buf) { var hex = Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join(''); finish(hex === WS_PASS_SHA256); })
-      .catch(function () { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); });
-  } else { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); }
-}
-function wsFlashBanner() {
-  var b = document.getElementById('ws-lock-banner'); if (!b) return;
-  b.classList.remove('ws-flash'); void b.offsetWidth; b.classList.add('ws-flash');
-}
-function wsInitLock() {
-  if (sessionStorage.getItem('ws-unlocked') === WS_PASS_SHA256) { _wsUnlocked = true; return; }
-  document.body.classList.add('ws-locked');
-  var b = document.createElement('div'); b.id = 'ws-lock-banner';
-  b.innerHTML = '<span style="font-size:1.15rem;line-height:1;">🔒</span>' +
-    '<span>Answers are locked. Enter the workshop password to reveal them.</span>' +
-    '<span class="ws-unlock-form">' +
-      '<input type="password" id="ws-pass-input" placeholder="Password"' +
-      ' onkeydown="if(event.key===\'Enter\')wsVerifyPass();">' +
-      '<button id="ws-unlock-btn" onclick="wsVerifyPass()">Unlock</button>' +
-    '</span><span id="ws-pass-msg"></span>';
-  var t = document.getElementById('title-block-header');
-  if (t) t.insertAdjacentElement('afterend', b); else document.body.prepend(b);
-}
-document.addEventListener('DOMContentLoaded', wsInitLock);
-/* --- end lock --- */
-
 function revealAnswer(btn) {
-  if (!_wsUnlocked) { wsFlashBanner(); return; }
   var block = btn.closest('.question-block, .puzzle-block');
   var answerClass = block.classList.contains('puzzle-block') ? '.puzzle-answer' : '.instructor-answer';
 
@@ -117,6 +74,16 @@ function revealAnswer(btn) {
   if (answer) answer.style.display = 'block';
   btn.textContent = 'Answer shown';
   btn.disabled = true;
+
+  // Lock the free-text response so it cannot be edited after reveal
+  if (textarea) {
+    textarea.disabled = true;
+    textarea.classList.add('ws-answer-locked');
+    var badge = document.createElement('span');
+    badge.className = 'ws-submitted-badge';
+    badge.textContent = 'Submitted';
+    textarea.insertAdjacentElement('afterend', badge);
+  }
 }
 
 function toggleGlossary() {
@@ -227,6 +194,13 @@ function toggleGlossary() {
   color: #1c3a50;
   line-height: 1.65;
 }
+
+.ws-answer-locked { background: #f5f5f5 !important; color: #555 !important; cursor: not-allowed; }
+.ws-submitted-badge { display: inline-block; margin-top: 0.3rem; background: #00b494; color: #fff; font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.55rem; border-radius: 3px; }
+.ws-download-btn { display: inline-block; margin: 0.4rem 0; padding: 0.35rem 0.9rem; background: #0d6efd; color: #fff !important; border-radius: 4px; text-decoration: none !important; font-size: 0.875rem; font-weight: 500; }
+.ws-download-btn:hover { background: #0b5ed7; }
+.glossary-section-header { padding: 0.4rem 1.25rem 0.3rem; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #00635a; background: #f0faf7; border-top: 2px solid #e8f5f0; margin-top: 0.25rem; }
+.glossary-section-header:first-child { border-top: none; margin-top: 0; }
 </style>
 ```
 
@@ -270,11 +244,14 @@ For the first part of this workshop we'll use data on the Amazon river dolphin, 
 >
 > This removes all objects in the global environment but does not delete any files. In RStudio, you can do the same from the Environment pane by clicking the broom icon.
 
-Download `boto.txt` from today's workshop folder on MyAberdeen. Open a new script, set your working directory, and load the data:
+Download the data file below and save it to your `BI3010/data/` folder. Open your `BI3010.Rproj` file to start RStudio with the working directory already set, then open a new script and load the data:
+
+```{r, echo=FALSE, results='asis'}
+cat(make_download_btn("data/boto.txt"))
+```
 
 ```{r, eval=FALSE}
-setwd("H:/BI3010/workshop2")
-boto <- read.table("boto.txt", header = TRUE)
+boto <- read.table("data/boto.txt", header = TRUE)
 ```
 
 Run a quick `summary()` and `str()` to check for anything unexpected:
@@ -296,8 +273,8 @@ library(ggplot2)
 Call `ggplot()` with no arguments, then with the dataset:
 
 ```{r, eval=FALSE}
-ggplot()     # Empty canvas — expected
-ggplot(boto) # Still empty — we haven't said what to plot or how
+ggplot()     # Empty canvas (expected)
+ggplot(boto) # Still empty: we haven't said what to plot or how
 ```
 
 The canvas stays empty because we haven't told `ggplot2` two things: (1) which form to show the data in and (2) which variables to map to which axes. Let's put `length` on the y-axis, `drought` on the x-axis, and show the data as points:
@@ -464,14 +441,14 @@ ggplot(boto) +
   geom_point(aes(y = length, x = drought, colour = sex))
 ```
 
-The default colours work but look a bit rough. Let's also increase the point size. Since we want all points the same size (not driven by a variable), `size` goes outside `aes()`:
+With that one addition the points are now coloured by sex. Already we can see some evidence for sexual dimorphism, and that drought has a negative relationship with length for both sexes. Let's also increase the point size. Since we want all points the same size (not driven by a variable), `size` goes outside `aes()`:
 
 ```{r, eval=FALSE}
 ggplot(boto) +
   geom_point(aes(y = length, x = drought, colour = sex), size = 2)
 ```
 
-Now let's apply a theme and improve the axis labels. Themes change the overall look of the figure; common options are `theme_bw()` and `theme_minimal()`. Labels are set with `labs()`:
+Now let's apply a theme and improve the axis labels. Themes control the non-data elements of a figure (background, grid lines, axis text, and so on); common options are `theme_bw()` and `theme_minimal()`. Because themes don't depend on the data, they can go anywhere in the layer stack, though by convention they go at the end. Labels are set with `labs()`:
 
 ```{r, eval=FALSE}
 ggplot(boto) +
@@ -482,7 +459,7 @@ ggplot(boto) +
   theme_bw()
 ```
 
-Facetting splits a figure into panels based on a grouping variable. Use `facet_wrap(~sex)` to create one panel per sex:
+Facetting splits a figure into multiple smaller panels based on a grouping variable. There are two options: `facet_wrap()` and `facet_grid()`. `facet_grid()` gives more precise control and is most useful when facetting by two variables at once; `facet_wrap()` automates the layout and is a good default for a single grouping variable. In both, you specify the grouping variable using `~` (called "tilde"), which you can read as "split by". So `facet_wrap(~sex)` means "create one panel per level of sex":
 
 ```{r, eval=FALSE}
 ggplot(boto) +
@@ -534,7 +511,7 @@ The figure divides the plotting area into hexagonal cells and colours each one b
 <textarea class="student-answer" rows="3" placeholder="Name the geom and describe what it shows..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="puzzle-answer">
-<p><code>geom_hex()</code>. It divides the plot area into hexagonal bins and colours each bin by how many points fall inside it. It is useful when there are so many overlapping points that a regular scatterplot becomes a smear — sometimes called "overplotting".</p>
+<p><code>geom_hex()</code>. It divides the plot area into hexagonal bins and colours each bin by how many points fall inside it. It is useful when there are so many overlapping points that a regular scatterplot becomes a smear, sometimes called "overplotting".</p>
 <pre><code class="language-r">ggplot(boto) +
   geom_hex(aes(x = drought, y = length)) +
   theme_bw()</code></pre>
@@ -600,7 +577,7 @@ This is rarely done in practice but helps clarify how the two plot types relate 
 
 # The Good and The Bad
 
-On MyAberdeen, find the dataset `abdn_flats.txt`. This contains more than 500 records of rental properties listed in Aberdeenshire on the ASPC website. The variables are:
+The second dataset for this workshop is `abdn_flats.txt`. Download it below and save it to your `BI3010/data/` folder. It contains more than 500 records of rental properties listed in Aberdeenshire on the ASPC website. The variables are:
 
 1. `Price`: monthly rent (£)
 2. `Bedrooms`: number of bedrooms
@@ -619,11 +596,36 @@ On MyAberdeen, find the dataset `abdn_flats.txt`. This contains more than 500 re
 15. `HouseType`: detached, semi-detached, terrace, or flat
 16. `Furnished`: fully furnished, part furnished, or unfurnished
 
+```{r, echo=FALSE, results='asis'}
+cat(make_download_btn("data/abdn_flats.txt"))
+```
+
 Do a quick EDA to get familiar with the data and check for anything unusual. If you spot what looks like an error, you can verify it directly using the property URL. We'll return to this dataset later in the course.
 
 ## The Good
 
 Using whichever variables you like, produce the most informative and visually appealing figure you can. Imagine you have been hired by a real estate company to help potential renters understand what drives rent prices. Your audience is the general public, not scientists, so aim for something that communicates clearly and catches the eye. Avoid the pitfalls from the lecture.
+
+::: {.callout-tip}
+## Combining multiple plots with `patchwork`
+
+Sometimes the clearest way to show several aspects of a dataset is to arrange multiple plots side by side or stacked. The `patchwork` package makes this straightforward:
+
+```r
+install.packages("patchwork")  # run once
+library(patchwork)
+
+p1 <- ggplot(abdn) + geom_histogram(aes(x = Price))
+p2 <- ggplot(abdn) + geom_point(aes(x = UniCommuteTime, y = Price))
+
+p1 + p2        # side by side
+p1 / p2        # stacked
+(p1 + p2) / p3 # two on top, one below
+```
+
+Each object (`p1`, `p2`, etc.) is just a ggplot saved to a variable. You combine them using `+` (side by side) and `/` (stacked). That is all there is to it.
+:::
+
 
 If you need help implementing an idea, the [Intro2R chapter on graphics](https://intro2r.com/graphics_r.html) has a more detailed walkthrough, or ask an LLM. If using an LLM, specify that you are using `R` and `ggplot2` and ask it not to use additional packages (extra packages add complexity and can cause conflicts while you're still building familiarity).
 
@@ -633,7 +635,7 @@ If you need help implementing an idea, the [Intro2R chapter on graphics](https:/
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 <p>There is no single right answer. Here is one approach combining several views of the data:</p>
-<pre><code class="language-r">abdn <- read.table("abdn_flats.txt", header = TRUE)
+<pre><code class="language-r">abdn <- read.table("data/abdn_flats.txt", header = TRUE)
 
 library(patchwork)  # lets you stitch ggplots together
 
@@ -696,7 +698,7 @@ Now do the opposite: produce the most visually offensive figure you can. It must
 
 Below are figures encountered in the wild. For each one, consider what works, what doesn't, and why the author made the choices they did. Also think about how you might recreate each figure in `ggplot2`.
 
-## The y-axis
+## The y-axis!
 
 This figure comes from the [Financial Times](https://www.ft.com/content/469653a1-4b6d-4ef7-ad67-af0f135e5f08) and shows bus usage inside and outside London. Pay close attention to the y-axis. (The Financial Times produces their figures in `ggplot2` and even has their own theme package, `ftplottools`.)
 
@@ -707,9 +709,9 @@ This figure comes from the [Financial Times](https://www.ft.com/content/469653a1
 <textarea class="student-answer" rows="3" placeholder="Write your thoughts..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>This figure upset a lot of people online, mainly because the y-axis runs from -50% to +100% rather than from 0. It was also log-transformed, which some argued exaggerated the differences.</p>
-<p>The choice is actually defensible. A 100% increase means doubling (5 buses to 10). A -50% decrease means halving (10 buses to 5). On a log scale, doubling and halving take up the same vertical distance, which makes the axis symmetric and honest. Without the transformation, a -50% decline would look much smaller than an equivalent +100% increase, which would be misleading.</p>
-<p>There is no universal rule that y-axes must start at zero. The question to ask is: what scale makes the comparison honest? Use your judgement rather than applying rigid rules.</p>
+<p>This figure made a lot of people angry online, mostly because the y-axis runs from -50% to +100% rather than from 0, and because the values have been log-transformed, which some argued exaggerated the differences.</p>
+<p>In truth, it's a pretty clever axis. A 100% increase means doubling (5 buses to 10). A -50% decrease means halving (10 buses to 5). On a log scale, doubling and halving take up the same vertical distance, which makes the axis symmetric and honest. Without the transformation, a -50% decline would look much smaller than an equivalent +100% increase, which would actually be misleading.</p>
+<p>People get very wound up about y-axes, especially when the bottom is not zero. Honestly, I don't think there is one correct answer. There are times when it's entirely appropriate to not start at zero, and other times when it's not. I dislike treating it as though there is a universal rule. There isn't. Think about what the best way to show your data is, and do that.</p>
 </div>
 </div>
 
@@ -724,10 +726,50 @@ This figure comes from the [World Happiness Report](https://www.worldhappiness.r
 <textarea class="student-answer" rows="3" placeholder="Write your thoughts..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>The bars show rankings, not magnitudes. Finland is ranked 1st, New Zealand is 10th. The figure is a sorted list dressed up as a bar chart; the bars add no information beyond the order.</p>
-<p>A broader point: I'm sceptical of "happiness" ratings as data. How do you assign a number to how happy you feel? Would you and a stranger give the same score to the same emotional state? The underlying data is almost certainly imprecise, which limits how much you can read into any figure built from it. Apply the validity check before treating the numbers as meaningful.</p>
+<p>The bars show rankings, not magnitudes. Finland is ranked 1st, New Zealand is 10th. The figure is just a glorified sorted list; the bars add no information beyond the order.</p>
+<p>More subtly, I'm always sceptical of "happiness" ratings as data. How do you assign a number to how happy you feel? Would you and I give the same score if we felt the same way? What if I'm just having an off day? How many people do you ask? The data underlying this figure is most likely pretty imprecise. At the very least, it doesn't pass a validity check. Apply that check before treating numbers like these as meaningful.</p>
 </div>
 </div>
+
+```{r birds-data, include=FALSE}
+library(dplyr)
+library(tidyr)
+simulate_observation_mix <- function(seed = 1) {
+  set.seed(seed)
+  month_seq <- seq(as.Date("2023-03-01"), as.Date("2024-03-01"), by = "month")
+  total_m    <- c(10, 17, 18, 20, 20, 16, 10,  9, 11, 11, 19, 29, 49)
+  share_filt <- c(0.34, 0.33, 0.35, 0.34, 0.33, 0.31, 0.30,
+                  0.30, 0.27, 0.27, 0.25, 0.22, 0.18)
+  share_resp <- c(0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02,
+                  0.02, 0.02, 0.02, 0.03, 0.04, 0.04)
+  jitter_mult <- function(x, sd = 0.06) x * rlnorm(1, 0, sd)
+  tibble(month = month_seq, total_m, share_filt, share_resp) |>
+    rowwise() |>
+    mutate(
+      total        = pmax(0.1, total_m + rnorm(1, 0, 0.4)),
+      filtered_m   = pmin(0.9 * total, total * jitter_mult(share_filt, 0.06)),
+      response_m   = pmin(0.1 * total, total * jitter_mult(share_resp, 0.10)),
+      unfiltered_m = pmax(0, total - filtered_m - response_m)
+    ) |>
+    ungroup() |>
+    transmute(
+      month,
+      `Unfiltered detections` = unfiltered_m,
+      `Filtered detections`   = filtered_m,
+      `Response variable`     = response_m
+    ) |>
+    pivot_longer(
+      cols      = -month,
+      names_to  = "category",
+      values_to = "millions"
+    ) |>
+    mutate(category = factor(
+      category,
+      levels = c("Unfiltered detections", "Filtered detections", "Response variable")
+    ))
+}
+sim_data <- simulate_observation_mix()
+```
 
 ## Birds and light
 
@@ -742,12 +784,13 @@ This figure comes from [Pease et al. (2025)](https://www.science.org/doi/10.1126
 <div class="instructor-answer">
 <p>Several problems, published in one of the most prestigious journals in science:</p>
 <ol>
-<li><strong>Stacked bars make comparisons hard.</strong> Can you tell whether "Unfiltered detections" in August 2023 differs from September 2023? It's nearly impossible. The "Response variable" slice at the bottom is barely visible.</li>
-<li><strong>The colour palette is probably not colour-blind friendly.</strong> It costs nothing to check, and there is no reason to exclude a portion of the audience.</li>
-<li><strong>The x-axis is overloaded.</strong> Printing every month label makes it cluttered and hard to read. Three labels (start, middle, end) would be cleaner.</li>
+<li><strong>Stacked bars make comparisons hard.</strong> Can you tell whether "Unfiltered detections" in August 2023 differs from September 2023? I genuinely can't. And the "Response variable" slice at the bottom is so thin it is almost invisible. That is the variable that was actually used in the model. What is the point of including it if it cannot be read?</li>
+<li><strong>The colour palette is probably not colour-blind friendly.</strong> It costs nothing to check, and there is no reason to exclude part of the audience.</li>
+<li><strong>The x-axis is overloaded.</strong> Printing every month label makes it cluttered and hard to read. Three labels (start, middle, end) would be much cleaner. This probably happened because the author stored date as a factor in R, which prints every level.</li>
 </ol>
 <p>A better approach: points for observation counts connected by a line, split into three separate panels with independent y-axes, so the trend in the "Response variable" is actually visible.</p>
-<pre><code class="language-r"># Sketch of a better version (requires data in long format)
+
+```{r birds-plot, echo=FALSE, fig.show='show', fig.height=6, message=FALSE}
 ggplot(sim_data) +
   geom_line(aes(x = month, y = millions, group = 1)) +
   geom_point(aes(x = month, y = millions, fill = category),
@@ -755,13 +798,29 @@ ggplot(sim_data) +
   theme_classic() +
   facet_wrap(~category, ncol = 1, scales = "free_y") +
   scale_fill_brewer(palette = "Accent") +
-  labs(x = "Date", y = "Millions of observations")</code></pre>
+  labs(x = "Date", y = "Millions of observations")
+```
+
 </div>
 </div>
 
-## Marmosets and ketamine
+```{r ketamine-data, include=FALSE}
+simulate_panel_g <- function(seed = 1) {
+  set.seed(seed)
+  tibble::tribble(
+    ~pretreatment, ~actuator,               ~mean, ~lwr, ~upp,
+    "Saline",      "Vehicle",                   3,   -1,    7,
+    "Saline",      "Deschloroclozapine",       -47,  -56,  -45,
+    "Ketamine",    "Vehicle",                   2,    0,    6,
+    "Ketamine",    "Deschloroclozapine",        23,   18,   29
+  )
+}
+dat <- simulate_panel_g()
+```
 
-This figure comes from [Wood et al. (2025)](https://www.science.org/doi/10.1126/science.adx4142), also published in *Science*. The paper involves monkey brains and ketamine. The details are not critical; your job is to review the figure.
+## Marmosets and ketamine (?!)
+
+The next figure comes from [Wood et al. (2025)](https://www.science.org/doi/10.1126/science.adx4142), also published in *Science*. Honestly, I don't really get this paper and I don't know how to summarise it. The authors did something to monkey brains. There was ketamine. There were vehicles. I don't know man. Anyway, here's the figure...
 
 ![](Figures/Ketamine.png){width="395"}
 
@@ -770,14 +829,17 @@ This figure comes from [Wood et al. (2025)](https://www.science.org/doi/10.1126/
 <textarea class="student-answer" rows="4" placeholder="Write your thoughts..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
+<p>A pretty miserable figure all things considered. Here are my issues with it:</p>
 <ol>
-<li><strong>The colour palette.</strong> Why are some bars darker than others? There is no apparent encoding, and the overall palette looks arbitrary.</li>
-<li><strong>Abbreviations.</strong> Do you know what "Sal/Veh" means? A good figure makes sense without needing to read the paper. This one is unclear even with context.</li>
-<li><strong>Inconsistent data point styling.</strong> Some points are filled, others empty, and the shapes vary. What do the different shapes encode? And if those are all the observations, there appear to be very few of them.</li>
-<li><strong>Bars are the wrong choice.</strong> The authors want to show specific point estimates (e.g., roughly -50 on the y-axis). A bar implies every value from 0 to -50 was observed, which is not the case. Bars are overused in biology and medicine; most of the time, points with error bars communicate estimates more honestly.</li>
+<li><strong>The colour palette.</strong> The hell is with the weird colour palette and pattern that looks like it was stolen from a 1990s bus seat? Who was like "Yeaaaaaah bruh, this looks siiiiiiick dude." Why is one bar darker than the other?</li>
+<li><strong>Abbreviations.</strong> Do you know what "Sal/Veh" means? Great figures don't need a legend or a paper for you to make sense of them; you can see amazing figures with zero context and they still make total sense. I don't know what this figure is telling me <em>even with context</em>.</li>
+<li><strong>Inconsistent data point styling.</strong> All the randomly shaped points. What do they mean? Why are some filled and others empty? Are those all the observations they had, because if so... what's that? Like 10 observations? Get outta here with that.</li>
+<li><strong>Bars are the wrong choice.</strong> The bars are completely unnecessary here and probably misleading. What the authors are trying to show are specific values (called "point estimates"). For example, the category "Sal/DCZ" is estimated at roughly -50 on the y-axis. That's the value that's important. By using a bar you're implying there was also a -49, and -48, and -47, all the way to 0. That's not the case. It's -50. Just -50. Using bars is, for some reason, super common in some fields. Medics <em>looooooove</em> them. They're overused and rarely the best choice. A lot of the time (but not always), bars should be replaced by points.</li>
 </ol>
-<p>A better version would use points for the estimates, consistent and smaller points for the raw data, and the full category name on the x-axis:</p>
-<pre><code class="language-r">ggplot(dat) +
+<p>How I'd make this figure: I'd use points for the estimated values instead of bars. I probably wouldn't add points to show the data, but if I did, I'd make those points much smaller (and be consistent). I'd write the full category name and rotate them 90 degrees so it would fit in. (I'd also get rid of the P-value "bars" and asterisks at the top of the figure, but I'll explain why later in the course.)</p>
+
+```{r ketamine-plot, echo=FALSE, fig.show='show', fig.height=4}
+ggplot(dat) +
   geom_hline(yintercept = 0, linetype = "dashed") +
   geom_errorbar(aes(x = pretreatment, ymin = lwr, ymax = upp), width = 0.05) +
   geom_point(aes(x = pretreatment, y = mean, fill = actuator),
@@ -787,7 +849,9 @@ This figure comes from [Wood et al. (2025)](https://www.science.org/doi/10.1126/
        fill = "Actuator") +
   scale_fill_brewer(palette = "Spectral") +
   theme_classic() +
-  theme(legend.position = "top")</code></pre>
+  theme(legend.position = "top")
+```
+
 </div>
 </div>
 
@@ -800,6 +864,8 @@ This figure comes from [Wood et al. (2025)](https://www.science.org/doi/10.1126/
     <button id="glossary-close" onclick="toggleGlossary()">&#x2715;</button>
   </div>
   <div id="glossary-body">
+
+    <div class="glossary-section-header">ggplot2 framework</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
@@ -864,6 +930,8 @@ This figure comes from [Wood et al. (2025)](https://www.science.org/doi/10.1126/
       <div class="glossary-zh-def">根据分类变量将一张图拆分为多个子图的方法。facet_wrap(~变量) 为变量的每个水平创建一个子图。</div>
     </div>
 
+    <div class="glossary-section-header">Plot types</div>
+
     <div class="glossary-entry">
       <div class="glossary-terms">
         <span class="glossary-en-term">Histogram</span>
@@ -927,6 +995,8 @@ This figure comes from [Wood et al. (2025)](https://www.science.org/doi/10.1126/
       <div class="glossary-zh-def">用点展示两个连续变量之间关系的图表，每个点代表一个观测值。</div>
     </div>
 
+    <div class="glossary-section-header">Plotting techniques</div>
+
     <div class="glossary-entry">
       <div class="glossary-terms">
         <span class="glossary-en-term">Jitter</span>
@@ -944,6 +1014,8 @@ This figure comes from [Wood et al. (2025)](https://www.science.org/doi/10.1126/
       <div class="glossary-en-def">When many data points overlap in a scatterplot, making the density of points hard to read. Solutions include jittering, transparency (alpha), or hexagonal bins (geom_hex).</div>
       <div class="glossary-zh-def">散点图中大量数据点重叠导致难以判断密度的问题。解决方法包括抖动、透明度（alpha）或六边形分箱（geom_hex）。</div>
     </div>
+
+    <div class="glossary-section-header">Dataset terms</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">

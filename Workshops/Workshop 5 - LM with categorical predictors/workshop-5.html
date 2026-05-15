@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Roos &amp; Pinard">
-<meta name="dcterms.date" content="2026-05-10">
+<meta name="dcterms.date" content="2026-05-14">
 
 <title>Workshop 5: Linear models with a categorical predictor</title>
 <style>
@@ -3062,7 +3062,7 @@ vertical-align: -.125em;
   <li><a href="#the-full-workflow" id="toc-the-full-workflow" class="nav-link" data-scroll-target="#the-full-workflow">The full workflow</a></li>
   <li><a href="#should-we-share-these-results" id="toc-should-we-share-these-results" class="nav-link" data-scroll-target="#should-we-share-these-results">Should we share these results?</a></li>
   </ul></li>
-  <li><a href="#the-lemur-dataset" id="toc-the-lemur-dataset" class="nav-link" data-scroll-target="#the-lemur-dataset">The lemur dataset</a></li>
+  <li><a href="#a-new-challenger" id="toc-a-new-challenger" class="nav-link" data-scroll-target="#a-new-challenger">A new challenger</a></li>
   <li><a href="#assumption-table" id="toc-assumption-table" class="nav-link" data-scroll-target="#assumption-table">Assumption table</a></li>
   </ul>
 </nav>
@@ -3091,7 +3091,7 @@ vertical-align: -.125em;
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">10 May 2026</p>
+      <p class="date">14 May 2026</p>
     </div>
   </div>
   
@@ -3102,59 +3102,7 @@ vertical-align: -.125em;
 </header>
 
 <script>
-/* --- answer lock --- */
-var WS_PASS_SHA256 = '4e18123e0f06635b3cab7a620ecf4bbeff385a2f34cecd808dd232fb47b0e655';
-var WS_PASS_DJB2   = '7c595c0c';
-var _wsUnlocked = false;
-
-function _wsDjb2(s) {
-  var h = 5381;
-  for (var i = 0; i < s.length; i++) { h = ((h << 5) + h + s.charCodeAt(i)) | 0; }
-  return (h >>> 0).toString(16).padStart(8, '0');
-}
-function wsVerifyPass() {
-  var inp = document.getElementById('ws-pass-input'); if (!inp) return;
-  var msg = document.getElementById('ws-pass-msg');
-  function finish(ok) {
-    if (ok) {
-      _wsUnlocked = true; sessionStorage.setItem('ws-unlocked', WS_PASS_SHA256);
-      document.body.classList.remove('ws-locked');
-      var b = document.getElementById('ws-lock-banner');
-      if (b) { b.style.transition = 'opacity 0.4s'; b.style.opacity = '0'; setTimeout(function () { b.remove(); }, 450); }
-    } else {
-      inp.classList.add('ws-wrong'); if (msg) msg.textContent = 'Incorrect password.';
-      setTimeout(function () { inp.classList.remove('ws-wrong'); if (msg) msg.textContent = ''; }, 2000);
-    }
-  }
-  if (window.crypto && crypto.subtle) {
-    crypto.subtle.digest('SHA-256', new TextEncoder().encode(inp.value))
-      .then(function (buf) { var hex = Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join(''); finish(hex === WS_PASS_SHA256); })
-      .catch(function () { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); });
-  } else { finish(_wsDjb2(inp.value) === WS_PASS_DJB2); }
-}
-function wsFlashBanner() {
-  var b = document.getElementById('ws-lock-banner'); if (!b) return;
-  b.classList.remove('ws-flash'); void b.offsetWidth; b.classList.add('ws-flash');
-}
-function wsInitLock() {
-  if (sessionStorage.getItem('ws-unlocked') === WS_PASS_SHA256) { _wsUnlocked = true; return; }
-  document.body.classList.add('ws-locked');
-  var b = document.createElement('div'); b.id = 'ws-lock-banner';
-  b.innerHTML = '<span style="font-size:1.15rem;line-height:1;">🔒</span>' +
-    '<span>Answers are locked. Enter the workshop password to reveal them.</span>' +
-    '<span class="ws-unlock-form">' +
-      '<input type="password" id="ws-pass-input" placeholder="Password"' +
-      ' onkeydown="if(event.key===\'Enter\')wsVerifyPass();">' +
-      '<button id="ws-unlock-btn" onclick="wsVerifyPass()">Unlock</button>' +
-    '</span><span id="ws-pass-msg"></span>';
-  var t = document.getElementById('title-block-header');
-  if (t) t.insertAdjacentElement('afterend', b); else document.body.prepend(b);
-}
-document.addEventListener('DOMContentLoaded', wsInitLock);
-/* --- end lock --- */
-
 function revealAnswer(btn) {
-  if (!_wsUnlocked) { wsFlashBanner(); return; }
   var block = btn.closest('.question-block, .puzzle-block');
   var answerClass = block.classList.contains('puzzle-block') ? '.puzzle-answer' : '.instructor-answer';
 
@@ -3167,6 +3115,12 @@ function revealAnswer(btn) {
       return;
     }
     textarea.classList.remove('missing');
+    textarea.disabled = true;
+    textarea.classList.add('ws-answer-locked');
+    var badge = document.createElement('span');
+    badge.className = 'ws-submitted-badge';
+    badge.textContent = 'Submitted';
+    textarea.insertAdjacentElement('afterend', badge);
   }
 
   var mcOptions = block.querySelector('.mc-options');
@@ -3271,6 +3225,34 @@ margin-bottom: 0.3rem;
 .glossary-zh-term { color: #00b494; font-weight: 600; font-size: 0.92rem; }
 .glossary-en-def { font-size: 0.845rem; color: #444; line-height: 1.5; margin-bottom: 0.25rem; }
 .glossary-zh-def { font-size: 0.845rem; color: #1c3a50; line-height: 1.65; }
+.ws-answer-locked { background: #f5f5f5 !important; color: #555 !important; cursor: not-allowed; }
+.ws-submitted-badge { display: inline-block; margin-top: 0.3rem; background: #00b494; color: #fff; font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.55rem; border-radius: 3px; }
+.glossary-section-header {
+padding: 0.4rem 1.25rem 0.3rem;
+font-size: 0.72rem;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.07em;
+color: #00635a;
+background: #f0faf7;
+border-top: 2px solid #e8f5f0;
+margin-top: 0.25rem;
+}
+.glossary-section-header:first-child { border-top: none; margin-top: 0; }
+.ws-download-btn {
+display: inline-block;
+margin: 0.4rem 0 0.75rem;
+padding: 0.35rem 0.9rem;
+background: #00b494;
+color: #fff;
+border-radius: 4px;
+text-decoration: none;
+font-size: 0.85rem;
+font-weight: 600;
+font-family: inherit;
+transition: background 0.15s;
+}
+.ws-download-btn:hover { background: #009478; color: #fff; }
 </style>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -3322,6 +3304,7 @@ Learning objectives
 <li><code>weight</code>: weight of the Amami rabbit (grams)</li>
 <li><code>mongoose</code>: whether the rabbit was caught on the island with mongoose <code>Present</code> (Oshima) or <code>Absent</code> (Tokunoshima)</li>
 </ul>
+<p><a href="data:text/plain;base64,Im1vbmdvb3NlIiAid2VpZ2h0Ig0KIkFic2VudCIgMjI5LjkNCiJQcmVzZW50IiAyNjMuOA0KIkFic2VudCIgMjQyLjINCiJBYnNlbnQiIDI2NC41DQoiUHJlc2VudCIgMjU1LjkNCiJBYnNlbnQiIDI5NS4xDQoiQWJzZW50IiAyNTYNCiJQcmVzZW50IiAyNzMuOA0KIkFic2VudCIgMjc3LjcNCiJQcmVzZW50IiAyNTYuMg0KIkFic2VudCIgMjU5LjYNCiJBYnNlbnQiIDI3OS42DQoiQWJzZW50IiAyNTMuNg0KIlByZXNlbnQiIDI2NS45DQoiUHJlc2VudCIgMjc1LjkNCiJBYnNlbnQiIDMxMC41DQoiUHJlc2VudCIgMjQyLjENCiJBYnNlbnQiIDI3My42DQoiUHJlc2VudCIgMjcyLjYNCiJQcmVzZW50IiAyNzkuNA0KIlByZXNlbnQiIDI3OC44DQoiUHJlc2VudCIgMzA0LjgNCiJBYnNlbnQiIDI1OS45DQoiQWJzZW50IiAyNTUuNw0KIkFic2VudCIgMjU4LjENCiJQcmVzZW50IiAyNDUuNA0KIkFic2VudCIgMjU3LjQNCiJBYnNlbnQiIDI0Mi4zDQoiUHJlc2VudCIgMjgzLjkNCiJQcmVzZW50IiAyNjEuMg0KIlByZXNlbnQiIDI4Ng0KIlByZXNlbnQiIDI2NS4zDQoiUHJlc2VudCIgMjk3LjkNCiJBYnNlbnQiIDI4OC4yDQoiQWJzZW50IiAyODEuOA0KIkFic2VudCIgMjc0LjUNCiJQcmVzZW50IiAyOTguOQ0KIkFic2VudCIgMjY4LjQNCiJQcmVzZW50IiAyMjYuMQ0KIkFic2VudCIgMjg1LjMNCiJBYnNlbnQiIDM4MC44DQoiQWJzZW50IiAyMjguNg0KIkFic2VudCIgMjkzLjYNCiJQcmVzZW50IiAyNDEuOA0KIkFic2VudCIgMjc2LjkNCiJQcmVzZW50IiAyNjcuNQ0KIlByZXNlbnQiIDI2OS45DQoiUHJlc2VudCIgMjU5LjcNCiJBYnNlbnQiIDI5OS40DQoiQWJzZW50IiAyODQuNw0KIlByZXNlbnQiIDI0NS4yDQoiQWJzZW50IiAyNzEuMw0KIlByZXNlbnQiIDI0MS4xDQoiUHJlc2VudCIgMjg1LjgNCiJBYnNlbnQiIDI4OC4zDQoiQWJzZW50IiAyMzUuOQ0K" download="rabbits.txt" class="ws-download-btn">Download rabbits.txt</a></p>
 <p>Load the data to get started:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>rabbit <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;rabbits.txt&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -3343,7 +3326,7 @@ Learning objectives
 <div class="question-block">
 <p><strong>Question 1.</strong> What <code>mongoose</code> value should the rabbit in row 7 have?</p>
 <textarea class="student-answer" rows="2" placeholder="Write your answer here..."></textarea>
-<button onclick="revealAnswer(this)">
+<button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
@@ -3355,7 +3338,7 @@ Show Answer
 <div class="question-block">
 <p><strong>Question 2.</strong> Correct the mistake from Question 1 and confirm it has worked.</p>
 <textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
-<button onclick="revealAnswer(this)">
+<button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
@@ -3371,7 +3354,7 @@ Show Answer
 <div class="question-block">
 <p><strong>Question 3.</strong> Which rabbit had the incorrect weight? Find it and correct the mistake at the same time.</p>
 <textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
-<button onclick="revealAnswer(this)">
+<button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
@@ -3386,7 +3369,7 @@ Show Answer
 <div class="question-block">
 <p><strong>Question 4.</strong> Correct the mistake from Question 3 and confirm it has worked.</p>
 <textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
-<button onclick="revealAnswer(this)">
+<button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
@@ -3402,7 +3385,7 @@ Show Answer
 <div class="question-block">
 <p><strong>Question 5.</strong> Can you spot any additional data entry mistakes in the dataset?</p>
 <textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
-<button onclick="revealAnswer(this)">
+<button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
@@ -3413,44 +3396,44 @@ Show Answer
 </section>
 <section id="hidden-assumptions" class="level1">
 <h1>3. Hidden assumptions</h1>
-<p>Having resolved the data issues, it is time to think carefully about what assumptions we are making before fitting any model. “Hidden assumptions” refers broadly to all the assumptions underlying our analysis — some we can think through carefully, and some we can even check. What makes them “hidden” is that they are easy to overlook and are not automatically flagged by any software. Validity and representativeness deserve particular attention because there are no formal diagnostic checks for them at all; evaluating them depends entirely on domain knowledge and thinking critically about how the data were collected and what they actually measure.</p>
+<p>Having resolved the data issues, it is time to think carefully about what assumptions we are making before fitting any model. “Hidden assumptions” refers broadly to all the assumptions underlying our analysis: some we can think through carefully, and some we can even check. What makes them “hidden” is that they are easy to overlook and are not automatically flagged by any software. Validity and representativeness deserve particular attention because there are no formal diagnostic checks for them at all; evaluating them depends entirely on domain knowledge and thinking critically about how the data were collected and what they actually measure.</p>
 <section id="assumptions-for-the-mongoose-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="assumptions-for-the-mongoose-analysis">Assumptions for the mongoose analysis</h2>
 <div class="question-block">
 <p><strong>Question 1.</strong> Can you identify any hidden assumptions with this dataset?</p>
 <textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
-<button onclick="revealAnswer(this)">
+<button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
-<p>The key issue is whether mongoose are truly absent from Tokunoshima. All we know is that local residents have not reported any sightings. That is not the same as confirmed absence. It is plausible that a small mongoose population exists on the island but has simply not been detected.</p>
+<p>The key issue is whether mongoose are truly absent from Tokunoshima. All we know is that local residents have not reported any sightings. That is not the same as confirmed absence. It is possible there is just a very small population of mongoose on an island that doesn’t have enough people around to spot them.</p>
 <p>This puts us at risk of violating the assumption of validity: our <code>mongoose</code> variable may not actually measure what we think it does.</p>
 </div>
 </div>
 <div class="question-block">
 <p><strong>Question 2.</strong> If you have identified any issues, can we do anything about them?</p>
 <textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
-<button onclick="revealAnswer(this)">
+<button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
-<p>Ideally we would confirm the absence of mongoose on Tokunoshima before proceeding, but that is not feasible here. We have two options:</p>
+<p>Ideally we would confirm the absence of mongoose on Tokunoshima before proceeding, but that is not feasible here (we can’t pay for the class to go on a trip to some tropical islands in Japan). We have two options:</p>
 <ol type="1">
 <li>Decline to perform the analysis because of the assumption violation.</li>
 <li>Perform the analysis but include clear, prominent statements about this limitation.</li>
 </ol>
-<p>Both are defensible. For the purposes of this workshop (learning the method), we go with option 2. In a real project, you would want to push hard for option 1, or at minimum ensure any report makes the caveat impossible to overlook.</p>
+<p>Both are defensible. For the purposes of this workshop (learning the method), we go with option 2. If this were a real project, I’d push hard to confirm the absence of mongoose before doing any analysis. If that weren’t possible, I’d probably pull out of the project entirely — but others would go with option 2.</p>
 </div>
 </div>
 <div class="question-block">
 <p><strong>Question 3.</strong> If mongoose are actually present on Tokunoshima, what effect would that have on the analysis?</p>
 <textarea class="student-answer" rows="5" placeholder="Write your answer here..."></textarea>
-<button onclick="revealAnswer(this)">
+<button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
 <p>If mongoose are present on both islands and they do reduce rabbit weight, then rabbit weights on both islands would be similarly suppressed. The model would find little or no difference between groups, leading us to incorrectly conclude that mongoose have no effect.</p>
-<p>The frustrating part is that finding no difference is ambiguous: it could mean mongoose are present on both islands, or that mongoose genuinely do not affect rabbit weight. We cannot tell which from the data alone.</p>
+<p>The annoying thing is that finding no difference is ambiguous: it could mean mongoose are present on both islands, or that mongoose genuinely do not affect rabbit weight. We cannot tell which from the data alone.</p>
 <p>This is a good example of why validity is the hardest assumption to check and the most consequential to violate.</p>
 </div>
 </div>
@@ -3598,7 +3581,7 @@ Show Answer
 <div class="mc-options">
 <p><label><input type="radio" name="qs3-q1" data-correct="false"> <code>mongoose</code></label> <label><input type="radio" name="qs3-q1" data-correct="false"> <code>Absent</code></label> <label><input type="radio" name="qs3-q1" data-correct="true"> <code>Present</code></label> <label><input type="radio" name="qs3-q1" data-correct="false"> <span class="math inline">\(\beta_1\)</span></label></p>
 </div>
-<button onclick="revealAnswer(this)">
+<button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
@@ -3606,12 +3589,28 @@ Show Answer
 <p>If you said <code>mongoose</code>, remember that <code>mongoose</code> has two values (<code>&quot;Present&quot;</code> and <code>&quot;Absent&quot;</code>), which cannot be used directly in an equation. Instead, R takes one group and converts it to a binary dummy variable (0 or 1). R picks the group that comes first alphabetically as the reference, so <code>Absent</code> becomes the reference (0) and <code>Present</code> becomes the dummy (1). When <code>Present = 0</code>, it must be <code>Absent</code>.</p>
 </div>
 </div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Changing the reference group with <code>relevel()</code>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>R picks the reference group alphabetically, which is not always what you want. If you would rather <code>Present</code> be the reference (so that <span class="math inline">\(\beta_0\)</span> is the mean weight where mongoose are present), use <code>relevel()</code> before fitting the model:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>rabbit<span class="sc">$</span>mongoose <span class="ot">&lt;-</span> <span class="fu">relevel</span>(<span class="fu">factor</span>(rabbit<span class="sc">$</span>mongoose), <span class="at">ref =</span> <span class="st">&quot;Present&quot;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>rabbit_mod      <span class="ot">&lt;-</span> <span class="fu">lm</span>(weight <span class="sc">~</span> mongoose, <span class="at">data =</span> rabbit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This does not change the data or the underlying relationship; it only changes which group sits in the intercept and which appears as a coefficient. The predicted values and confidence intervals stay the same.</p>
+</div>
+</div>
 <div class="question-block">
 <p><strong>Question 2.</strong> What does <span class="math inline">\(\beta_0\)</span> represent in this model?</p>
 <div class="mc-options">
-<p><label><input type="radio" name="qs3-q2" data-correct="false"> The slope — how much weight changes per unit change in mongoose presence</label> <label><input type="radio" name="qs3-q2" data-correct="false"> The predicted mean weight of a rabbit where mongoose are present</label> <label><input type="radio" name="qs3-q2" data-correct="true"> The predicted mean weight of a rabbit where mongoose are absent (the reference group)</label> <label><input type="radio" name="qs3-q2" data-correct="false"> The standard deviation of the residuals</label></p>
+<p><label><input type="radio" name="qs3-q2" data-correct="false"> The slope: how much weight changes per unit change in mongoose presence</label> <label><input type="radio" name="qs3-q2" data-correct="false"> The predicted mean weight of a rabbit where mongoose are present</label> <label><input type="radio" name="qs3-q2" data-correct="true"> The predicted mean weight of a rabbit where mongoose are absent (the reference group)</label> <label><input type="radio" name="qs3-q2" data-correct="false"> The standard deviation of the residuals</label></p>
 </div>
-<button onclick="revealAnswer(this)">
+<button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
@@ -3623,7 +3622,7 @@ Show Answer
 <div class="mc-options">
 <p><label><input type="radio" name="qs3-q3" data-correct="false"> The predicted mean weight of a rabbit where mongoose are present</label> <label><input type="radio" name="qs3-q3" data-correct="true"> The difference in predicted weight between rabbits where mongoose are present versus absent</label> <label><input type="radio" name="qs3-q3" data-correct="false"> The slope of a continuous relationship between body weight and time</label> <label><input type="radio" name="qs3-q3" data-correct="false"> The intercept when mongoose are present</label></p>
 </div>
-<button onclick="revealAnswer(this)">
+<button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
@@ -3635,11 +3634,11 @@ Show Answer
 <h2 class="anchored" data-anchor-id="running-the-model">Running the model</h2>
 <p>Let’s fit the model:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>rabbit_mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(weight <span class="sc">~</span> mongoose, <span class="at">data =</span> rabbit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>rabbit_mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(weight <span class="sc">~</span> mongoose, <span class="at">data =</span> rabbit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now inspect the estimated parameters:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(rabbit_mod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(rabbit_mod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="interpreting-model-output" class="level2">
@@ -3657,7 +3656,7 @@ Show Answer
   × Present<sub>i</sub>
 </p>
 <textarea class="student-answer" rows="2" placeholder="Write the completed equation here..."></textarea>
-<button onclick="revealAnswer(this)">
+<button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
@@ -3670,7 +3669,7 @@ Show Answer
 <div class="mc-options">
 <p><label><input type="radio" name="qs4-q2" data-correct="false"> 269.6 g</label> <label><input type="radio" name="qs4-q2" data-correct="false"> 272.5 g</label> <label><input type="radio" name="qs4-q2" data-correct="true"> 266.7 g</label> <label><input type="radio" name="qs4-q2" data-correct="false"> 2.9 g</label></p>
 </div>
-<button onclick="revealAnswer(this)">
+<button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
@@ -3684,7 +3683,7 @@ Show Answer
 <div class="mc-options">
 <p><label><input type="radio" name="qs4-q3" data-correct="false"> 266.7 g</label> <label><input type="radio" name="qs4-q3" data-correct="false"> 272.5 g</label> <label><input type="radio" name="qs4-q3" data-correct="true"> 269.6 g</label> <label><input type="radio" name="qs4-q3" data-correct="false"> 0 g</label></p>
 </div>
-<button onclick="revealAnswer(this)">
+<button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
@@ -3696,7 +3695,7 @@ Show Answer
 <div class="question-block">
 <p><strong>Question 4.</strong> Is the presence of mongoose associated with a decline in rabbit weight, as the researchers hypothesised?</p>
 <textarea class="student-answer" rows="5" placeholder="Write your answer here..."></textarea>
-<button onclick="revealAnswer(this)">
+<button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
@@ -3711,12 +3710,12 @@ Show Answer
 <div class="question-block">
 <p><strong>Question 5.</strong> Is the association sufficient to be of biological concern?</p>
 <textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
-<button onclick="revealAnswer(this)">
+<button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
-<p>A 3 g difference is negligible for a species that weighs on average around 2.7 kg. Combined with the wide uncertainty and the unresolved question of whether mongoose are even absent from Tokunoshima, it is very hard to draw any firm biological conclusion.</p>
-<p>The model produced a number, but that number tells us very little we can act on with confidence.</p>
+<p>3 g is pretty small for a species that weighs on average around 2.7 kg. Combined with the wide uncertainty and the unresolved question of whether mongoose are even absent from Tokunoshima, we’re not really sure what we’ve learned here.</p>
+<p>We identified before running the model that the mongoose variable might not be reliable, and we now find a tiny effect. So what should we take away from this? I’m not sure myself.</p>
 </div>
 </div>
 </section>
@@ -3732,20 +3731,20 @@ Show Answer
 <h2 class="anchored" data-anchor-id="using-ggeffects">Using <code>ggeffects</code></h2>
 <p>Make sure <code>ggeffects</code> is installed and loaded:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggeffects)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggeffects)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Ask <code>ggeffects</code> to predict rabbit weight across the two <code>mongoose</code> categories:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>preds <span class="ot">&lt;-</span> <span class="fu">ggpredict</span>(rabbit_mod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>preds <span class="ot">&lt;-</span> <span class="fu">ggpredict</span>(rabbit_mod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>When you run this, you will likely see a <code>Warning</code> (not an <code>Error</code>) telling you that <code>ggeffects</code> prefers factors over character strings. Converting is simple:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>rabbit<span class="sc">$</span>mongoose <span class="ot">&lt;-</span> <span class="fu">factor</span>(rabbit<span class="sc">$</span>mongoose)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>rabbit<span class="sc">$</span>mongoose <span class="ot">&lt;-</span> <span class="fu">factor</span>(rabbit<span class="sc">$</span>mongoose)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Then refit and rerun <code>ggpredict()</code>. In practice, I tend to convert categorical variables to factors before fitting any model, since some packages refuse to work with character strings. Whether you do so is up to you, but given how little effort it takes, it is worth the habit.</p>
 <p>Regardless of whether you convert, plot the predictions:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(preds)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(preds)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="building-the-prediction-yourself" class="level2">
@@ -3753,85 +3752,94 @@ Show Answer
 <p>We can also follow the same manual approach as last week, with small adjustments for a categorical predictor.</p>
 <p>When building the <code>fake</code> dataset, <code>mongoose</code> only needs the values that appear in the real data. The <code>unique()</code> function handles this neatly, which is especially useful when there are many groups:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fake <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">mongoose =</span> <span class="fu">unique</span>(rabbit<span class="sc">$</span>mongoose)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>fake</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>fake <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">mongoose =</span> <span class="fu">unique</span>(rabbit<span class="sc">$</span>mongoose)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>fake</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>This gives a two-row dataset, one row for <code>Absent</code> and one for <code>Present</code>.</p>
 <p>Last week we only extracted the point predictions (<code>fit</code>). This week we also want the 95% confidence intervals, so we ask <code>predict()</code> for the standard error too:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>preds <span class="ot">&lt;-</span> <span class="fu">predict</span>(rabbit_mod, <span class="at">newdata =</span> fake, <span class="at">se.fit =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>preds <span class="ot">&lt;-</span> <span class="fu">predict</span>(rabbit_mod, <span class="at">newdata =</span> fake, <span class="at">se.fit =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Extract the point predictions first:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>fit <span class="ot">&lt;-</span> preds<span class="sc">$</span>fit</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>fit <span class="ot">&lt;-</span> preds<span class="sc">$</span>fit</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="confidence-intervals" class="level3">
 <h3 class="anchored" data-anchor-id="confidence-intervals">Confidence intervals</h3>
+<p>If you need a reminder of what 95% CIs are: confidence intervals represent the probability that an interval will contain the true parameter value <em>before the model has been run</em>. Once the model has been run, either the interval contains the true value or it doesn’t. We don’t know which. If that’s confusing (which is fair, 95% CIs are weird), think of the ring toss example from the lecture: if we make the hoop big, we have a 95% chance of landing on target before the throw, but once the hoop has left our hand, it either lands on target or it doesn’t.</p>
 <p>The 95% confidence interval is constructed by multiplying the standard error by 1.96, then adding and subtracting from <code>fit</code>:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>low95 <span class="ot">&lt;-</span> preds<span class="sc">$</span>fit <span class="sc">-</span> <span class="fl">1.96</span> <span class="sc">*</span> preds<span class="sc">$</span>se.fit</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>upp95 <span class="ot">&lt;-</span> preds<span class="sc">$</span>fit <span class="sc">+</span> <span class="fl">1.96</span> <span class="sc">*</span> preds<span class="sc">$</span>se.fit</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co"># You can also use confint(rabbit_mod) to check these values.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>low95 <span class="ot">&lt;-</span> preds<span class="sc">$</span>fit <span class="sc">-</span> <span class="fl">1.96</span> <span class="sc">*</span> preds<span class="sc">$</span>se.fit</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>upp95 <span class="ot">&lt;-</span> preds<span class="sc">$</span>fit <span class="sc">+</span> <span class="fl">1.96</span> <span class="sc">*</span> preds<span class="sc">$</span>se.fit</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co"># You can also use confint(rabbit_mod) to check these values.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now plot the predictions with error bars:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(fake) <span class="sc">+</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">x =</span> mongoose, <span class="at">ymin =</span> low95, <span class="at">ymax =</span> upp95)) <span class="sc">+</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> mongoose, <span class="at">y =</span> fit)) <span class="sc">+</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Java mongoose&quot;</span>,</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Predicted weight of rabbits (g)&quot;</span>) <span class="sc">+</span></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(fake) <span class="sc">+</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">x =</span> mongoose, <span class="at">ymin =</span> low95, <span class="at">ymax =</span> upp95)) <span class="sc">+</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> mongoose, <span class="at">y =</span> fit)) <span class="sc">+</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Java mongoose&quot;</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Predicted weight of rabbits (g)&quot;</span>) <span class="sc">+</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
 <section id="the-full-workflow" class="level2">
 <h2 class="anchored" data-anchor-id="the-full-workflow">The full workflow</h2>
-<p>Here is the complete analysis from start to finish, suitable for a clean script:</p>
+<div class="question-block">
+<p><strong>Full rabbit workflow.</strong> Complete the analysis yourself, then compare your script with the instructor version below.</p>
+<textarea class="student-answer" rows="5" placeholder="Paste or describe your script here..."></textarea>
+<button class="reveal-btn" onclick="revealAnswer(this)">
+Show Answer
+</button>
+<div class="instructor-answer">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Analysis of Amami rabbit weight in relation to mongoose presence</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load data</span></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>rabbit <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;rabbits.txt&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="co"># EDA</span></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(rabbit)</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(rabbit)</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(rabbit) <span class="sc">+</span></span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> weight))</span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(rabbit) <span class="sc">+</span></span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> mongoose, <span class="at">y =</span> weight))</span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Correct two data entry errors flagged by researchers</span></span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>rabbit<span class="sc">$</span>mongoose[<span class="dv">7</span>] <span class="ot">&lt;-</span> <span class="st">&quot;Present&quot;</span></span>
-<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>rabbit<span class="sc">$</span>weight[rabbit<span class="sc">$</span>weight <span class="sc">&gt;</span> <span class="dv">350</span>] <span class="ot">&lt;-</span> rabbit<span class="sc">$</span>weight[rabbit<span class="sc">$</span>weight <span class="sc">&gt;</span> <span class="dv">350</span>] <span class="sc">-</span> <span class="dv">100</span></span>
-<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Concern prior to modelling:</span></span>
-<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a><span class="co"># It is unclear whether mongoose are genuinely absent from Tokunoshima,</span></span>
-<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a><span class="co"># or simply undetected. This caveat limits our conclusions.</span></span>
-<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit model</span></span>
-<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>rabbit_mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(weight <span class="sc">~</span> mongoose, <span class="at">data =</span> rabbit)</span>
-<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Diagnostics (covered in Workshop 6)</span></span>
-<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Inference</span></span>
-<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(rabbit_mod)</span>
-<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualise predictions with 95% CI</span></span>
-<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>fake <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">mongoose =</span> <span class="fu">unique</span>(rabbit<span class="sc">$</span>mongoose))</span>
-<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>preds <span class="ot">&lt;-</span> <span class="fu">predict</span>(rabbit_mod, <span class="at">newdata =</span> fake, <span class="at">se.fit =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>fit   <span class="ot">&lt;-</span> preds<span class="sc">$</span>fit</span>
-<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>low95 <span class="ot">&lt;-</span> preds<span class="sc">$</span>fit <span class="sc">-</span> <span class="fl">1.96</span> <span class="sc">*</span> preds<span class="sc">$</span>se.fit</span>
-<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>upp95 <span class="ot">&lt;-</span> preds<span class="sc">$</span>fit <span class="sc">+</span> <span class="fl">1.96</span> <span class="sc">*</span> preds<span class="sc">$</span>se.fit</span>
-<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(fake) <span class="sc">+</span></span>
-<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">x =</span> mongoose, <span class="at">ymin =</span> low95, <span class="at">ymax =</span> upp95)) <span class="sc">+</span></span>
-<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> mongoose, <span class="at">y =</span> fit)) <span class="sc">+</span></span>
-<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Java mongoose&quot;</span>,</span>
-<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Predicted weight of rabbits (g)&quot;</span>) <span class="sc">+</span></span>
-<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Analysis of Amami rabbit weight in relation to mongoose presence</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load data</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>rabbit <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;rabbits.txt&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co"># EDA</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(rabbit)</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(rabbit)</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(rabbit) <span class="sc">+</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> weight))</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(rabbit) <span class="sc">+</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> mongoose, <span class="at">y =</span> weight))</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Correct two data entry errors flagged by researchers</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>rabbit<span class="sc">$</span>mongoose[<span class="dv">7</span>] <span class="ot">&lt;-</span> <span class="st">&quot;Present&quot;</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>rabbit<span class="sc">$</span>weight[rabbit<span class="sc">$</span>weight <span class="sc">&gt;</span> <span class="dv">350</span>] <span class="ot">&lt;-</span> rabbit<span class="sc">$</span>weight[rabbit<span class="sc">$</span>weight <span class="sc">&gt;</span> <span class="dv">350</span>] <span class="sc">-</span> <span class="dv">100</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Concern prior to modelling:</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="co"># It is unclear whether mongoose are genuinely absent from Tokunoshima,</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a><span class="co"># or simply undetected. This caveat limits our conclusions.</span></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit model</span></span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>rabbit_mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(weight <span class="sc">~</span> mongoose, <span class="at">data =</span> rabbit)</span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Diagnostics (covered in Workshop 6)</span></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Inference</span></span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(rabbit_mod)</span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualise predictions with 95% CI</span></span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>fake <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">mongoose =</span> <span class="fu">unique</span>(rabbit<span class="sc">$</span>mongoose))</span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>preds <span class="ot">&lt;-</span> <span class="fu">predict</span>(rabbit_mod, <span class="at">newdata =</span> fake, <span class="at">se.fit =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>fit   <span class="ot">&lt;-</span> preds<span class="sc">$</span>fit</span>
+<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>low95 <span class="ot">&lt;-</span> preds<span class="sc">$</span>fit <span class="sc">-</span> <span class="fl">1.96</span> <span class="sc">*</span> preds<span class="sc">$</span>se.fit</span>
+<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>upp95 <span class="ot">&lt;-</span> preds<span class="sc">$</span>fit <span class="sc">+</span> <span class="fl">1.96</span> <span class="sc">*</span> preds<span class="sc">$</span>se.fit</span>
+<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(fake) <span class="sc">+</span></span>
+<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">x =</span> mongoose, <span class="at">ymin =</span> low95, <span class="at">ymax =</span> upp95)) <span class="sc">+</span></span>
+<span id="cb20-39"><a href="#cb20-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> mongoose, <span class="at">y =</span> fit)) <span class="sc">+</span></span>
+<span id="cb20-40"><a href="#cb20-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Java mongoose&quot;</span>,</span>
+<span id="cb20-41"><a href="#cb20-41" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Predicted weight of rabbits (g)&quot;</span>) <span class="sc">+</span></span>
+<span id="cb20-42"><a href="#cb20-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
 </div>
 </section>
 <section id="should-we-share-these-results" class="level2">
@@ -3839,94 +3847,95 @@ Show Answer
 <div class="question-block">
 <p><strong>Question 1.</strong> Once you have completed this analysis (excluding diagnostics, which come on Friday), discuss in groups whether you think these results should be shared with the local government as evidence to inform mongoose eradication decisions.</p>
 <textarea class="student-answer" rows="6" placeholder="Write your thoughts here..."></textarea>
-<button onclick="revealAnswer(this)">
+<button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
 <p>There is no clean answer here, and that is the point.</p>
 <p>The assumption of validity is questionable (we do not truly know mongoose are absent from Tokunoshima). The estimated effect is tiny (about 3 g in an animal weighing 2.7 kg) and the uncertainty is large enough to include zero. The effect could also reflect something mundane, such as using different scales on the two islands.</p>
-<p>The hardest part of statistics has nothing to do with equations or distributions. It is deciding whether the data are appropriate for the question. If the results of this analysis were to influence a real conservation decision, how confident would you need to be to put your name on them?</p>
+<p>The hardest part of statistics has nothing to do with equations or distributions. It is deciding whether the data are appropriate for the question. The thing that would keep me up at night would be if anyone were to use our model to make decisions with real-world consequences. Are we really confident enough in our model to have that rest on our conscience? I don’t think I am.</p>
 <p>Personally, I would not be comfortable sharing this with the local government without first making a serious effort to confirm whether mongoose are present on Tokunoshima.</p>
 </div>
 </div>
 </section>
 </section>
-<section id="the-lemur-dataset" class="level1">
-<h1>The lemur dataset</h1>
+<section id="a-new-challenger" class="level1">
+<h1>A new challenger</h1>
 <p>Once you have finished the Amami rabbit analysis, move on to the <code>lemurs.txt</code> dataset. This comes from researchers interested in how activity levels (hours active per day) vary across four habitat types in Madagascar.</p>
 <p>The dataset contains:</p>
 <ul>
 <li><code>activity</code>: number of hours lemurs were active in a day (measured to two decimal places)</li>
 <li><code>habitat</code>: one of four habitat types; Rainforest, Dry Forest, Spiny Forest, and Mangrove</li>
 </ul>
+<p><a href="data:text/plain;base64,ImhhYml0YXQiICJhY3Rpdml0eSINCiJSYWluZm9yZXN0IiAxMC45OA0KIlJhaW5mb3Jlc3QiIDEwLjQ3DQoiUmFpbmZvcmVzdCIgOS44OQ0KIlJhaW5mb3Jlc3QiIDkuNzkNCiJSYWluZm9yZXN0IiAxMS4xNg0KIlJhaW5mb3Jlc3QiIDExLjI5DQoiUmFpbmZvcmVzdCIgMTAuNTMNCiJSYWluZm9yZXN0IiA5Ljg3DQoiUmFpbmZvcmVzdCIgOC43OA0KIlJhaW5mb3Jlc3QiIDguODgNCiJSYWluZm9yZXN0IiA4LjMzDQoiUmFpbmZvcmVzdCIgMTAuNDcNCiJSYWluZm9yZXN0IiAxMC44Mw0KIlJhaW5mb3Jlc3QiIDEwLjI5DQoiUmFpbmZvcmVzdCIgNi43Mw0KIlJhaW5mb3Jlc3QiIDkuODUNCiJSYWluZm9yZXN0IiA5LjA3DQoiUmFpbmZvcmVzdCIgMTAuNDUNCiJSYWluZm9yZXN0IiA4LjM5DQoiUmFpbmZvcmVzdCIgNy45OQ0KIlJhaW5mb3Jlc3QiIDExLjE0DQoiUmFpbmZvcmVzdCIgMTAuMzINCiJSYWluIGZvcmVzdCIgMTEuMDQNCiJSYWluZm9yZXN0IiA5Ljc5DQoiUmFpbmZvcmVzdCIgMTAuNA0KIlJhaW5mb3Jlc3QiIDguNDYNCiJSYWluZm9yZXN0IiA5Ljg4DQoiUmFpbmZvcmVzdCIgMTAuNjgNCiJSYWluZm9yZXN0IiA3Ljk0DQoiUmFpbmZvcmVzdCIgOS44OQ0KIkRyeSBGb3Jlc3QiIDYuNTYNCiJEcnkgRm9yZXN0IiA3LjY3DQoiRHJ5IEZvcmVzdCIgNy40OQ0KIkRyeSBGb3Jlc3QiIDkuMg0KIkRyeSBGb3Jlc3QiIDcuNQ0KIkRyeSBGb3Jlc3QiIDguMzkNCiJEcnkgRm9yZXN0IiA4LjM0DQoiRHJ5IEZvcmVzdCIgNy41MQ0KIkRyeSBGb3Jlc3QiIDcuNDMNCiJEcnkgRm9yZXN0IiA4LjQzDQoiRHJ5IEZvcmVzdCIgNy4xMw0KIkRyeSBGb3Jlc3QiIDgNCiJEcnkgRm9yZXN0IiA4LjUNCiJEcnkgRm9yZXN0IiA5Ljk3DQoiRHJ5IEZvcmVzdCIgNi44DQoiRHJ5IEZvcmVzdCIgOC4xMw0KIkRyeSBGb3Jlc3QiIDguMzMNCiJEcnkgRm9yZXN0IiA4LjY3DQoiRHJ5IEZvcmVzdCIgOC42NA0KIkRyeSBGb3Jlc3QiIDkuOTQNCiJEcnkgRm9yZXN0IiA3LjQ1DQoiRHJ5IEZvcmVzdCIgNy4yMw0KIkRyeSBGb3Jlc3QiIDcuMzUNCiJEcnkgRm9yZXN0IiA2Ljk3DQoiRHJ5IEZvcmVzdCIgNy4zMg0KIkRyeSBGb3Jlc3QiIDYuNTcNCiJEcnkgRm9yZXN0IiA4LjkNCiJEcnkgRm9yZXN0IiA3Ljc2DQoiRHJ5IEZvcmVzdCIgOQ0KIkRyeSBGb3Jlc3QiIDcuOTcNCiJTcGlueSBGb3Jlc3QiIDcuNTkNCiJTcGlueSBGb3Jlc3QiIDYuODYNCiJTcGlueSBGb3Jlc3QiIDYuNTQNCiJTcGlueSBGb3Jlc3QiIDYuMTgNCiJTcGlueSBGb3Jlc3QiIDcuNjUNCiJTcGlueSBGb3Jlc3QiIDUuODcNCiJTcGlueSBGb3Jlc3QiIDQNCiJTcGlueSBGb3Jlc3QiIDYuNzENCiJTcGlueSBGb3Jlc3QiIDYuNDkNCiJTcGlueSBGb3Jlc3QiIDMuODgNCiJTcGlueSBGb3Jlc3QiIDcuMTMNCiJTcGlueSBGb3Jlc3QiIDQuNzkNCiJTcGlueSBGb3Jlc3QiIDYuMw0KIlNwaW55IEZvcmVzdCIgNi4wOA0KIlNwaW55IEZvcmVzdCIgNi4yDQoiU3BpbnkgRm9yZXN0IiA1LjY5DQoiU3BpbnkgRm9yZXN0IiA3LjQyDQoiU3BpbnkgRm9yZXN0IiA2LjY4DQoiU3BpbnkgRm9yZXN0IiA0Ljk2DQoiU3BpbnkgRm9yZXN0IiA2LjAyDQoiU3BpbnkgRm9yZXN0IiA0Ljc2DQoiU3BpbnkgRm9yZXN0IiA2Ljk5DQoiU3BpbnkgRm9yZXN0IiA2Ljg2DQoiU3BpbnkgRm9yZXN0IiA0LjI0DQoiU3BpbnkgRm9yZXN0IiA2LjE1DQoiU3BpbnkgRm9yZXN0IiA3LjExDQoiU3BpbnkgRm9yZXN0IiA1LjgyDQoiU3BpbnkgRm9yZXN0IiA1Ljc0DQoiU3BpbnkgRm9yZXN0IiA1Ljc1DQoiU3BpbnkgRm9yZXN0IiA2LjgyDQoiTWFuZ3JvdmUiIDUuNzcNCiJNYW5ncm92ZSIgNi40OA0KIk1hbmdyb3ZlIiA2LjMNCiJNYW5ncm92ZSIgNy42OQ0KIk1hbmdyb3ZlIiA3LjU1DQoiTWFuZ3JvdmUiIDQuOTMNCiJNYW5ncm92ZSIgNS44Mw0KIk1hbmdyb3ZlIiA1LjgyDQoiTWFuZ3JvdmUiIDYuOTcNCiJNYW5ncm92ZSIgOC4xNQ0KIk1hbmdyb3ZlIiA5LjIxDQoiTWFuZ3JvdmUiIDcuNDQNCiJNYW5ncm92ZSIgOC4wNA0KIk1hbmdyb3ZlIiA3LjEzDQoiTWFuZ3JvdmUiIDUuNzMNCiJNYW5ncm92ZSIgNy4zNw0KIk1hbmdyb3ZlIiA2LjgNCiJNYW5ncm92ZSIgOC4xNQ0KIk1hbmdyb3ZlIiA2LjQ0DQoiTWFuZ3JvdmUiIDUuODYNCiJNYW5ncm92ZSIgNS43MQ0KIk1hbmdyb3ZlIiA4LjEyDQoiTWFuZ3JvdmUiIDYuMw0KIk1hbmdyb3ZlIiA2Ljk3DQoiTWFuZ3JvdmUiIDYuMzgNCiJNYW5ncm92ZSIgNS4xNw0KIk1hbmdyb3ZlIiA4LjkNCiJNYW5ncm92ZSIgNy41Mw0KIk1hbmdyb3ZlIiA2Ljc0DQoiTWFuZ3JvdmUiIDcuOTENCg==" download="lemurs.txt" class="ws-download-btn">Download lemurs.txt</a></p>
 <p>Load the data and go through the same workflow you just used for the rabbit analysis:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>lemur <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;lemurs.txt&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>lemur <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;lemurs.txt&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Work through each step: EDA (including checking for data issues), hidden assumptions, model fitting, and visualising predictions. The goal is to identify which habitat type lemurs are most active in.</p>
 <div class="question-block">
 <p><strong>Full lemur analysis.</strong> Work through the complete workflow. When you are done, compare your approach with the instructor solution.</p>
 <textarea class="student-answer" rows="8" placeholder="Describe your approach and key findings here..."></textarea>
-<button onclick="revealAnswer(this)">
+<button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
-<div class="sourceCode" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Analysis of lemur activity by habitat type</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggeffects)</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>lemur <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;lemurs.txt&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="co"># EDA</span></span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(lemur)      <span class="co"># n = 120, two columns</span></span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lemur)  <span class="co"># check ranges</span></span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(lemur) <span class="sc">+</span></span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> activity), <span class="at">colour =</span> <span class="st">&quot;white&quot;</span>, <span class="at">binwidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
-<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(lemur) <span class="sc">+</span></span>
-<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> activity, <span class="at">fill =</span> habitat),</span>
-<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>                 <span class="at">colour =</span> <span class="st">&quot;white&quot;</span>, <span class="at">binwidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
-<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a><span class="co"># One habitat is recorded as &quot;Rain forest&quot; rather than &quot;Rainforest&quot;.</span></span>
-<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a><span class="co"># This is clearly a typo, so we can correct without needing confirmation.</span></span>
-<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>lemur<span class="sc">$</span>habitat[lemur<span class="sc">$</span>habitat <span class="sc">==</span> <span class="st">&quot;Rain forest&quot;</span>] <span class="ot">&lt;-</span> <span class="st">&quot;Rainforest&quot;</span></span>
-<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Confirm the correction</span></span>
-<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(lemur) <span class="sc">+</span></span>
-<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> activity, <span class="at">fill =</span> habitat),</span>
-<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>                 <span class="at">colour =</span> <span class="st">&quot;white&quot;</span>, <span class="at">binwidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
-<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Hidden assumptions</span></span>
-<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a><span class="co"># - Validity: how is activity measured? Accuracy may differ across habitats</span></span>
-<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a><span class="co">#   (e.g., tracking lemurs is easier in Dry Forest than dense Rainforest).</span></span>
-<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a><span class="co"># - Equal variance: may differ across habitat types. Worth checking diagnostics.</span></span>
-<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit model</span></span>
-<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>lem_mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(activity <span class="sc">~</span> habitat, <span class="at">data =</span> lemur)</span>
-<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Diagnostics (covered in Workshop 6)</span></span>
-<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Summarise</span></span>
-<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lem_mod)</span>
-<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a><span class="co"># Dry Forest is the reference group (first alphabetically).</span></span>
-<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Model predicts ~7.9 h in Dry Forest.</span></span>
-<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a><span class="co"># Mangrove: ~1.1 h less (so ~6.8 h total)</span></span>
-<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Rainforest: ~1.8 h more (so ~9.7 h total)</span></span>
-<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a><span class="co"># Spiny Forest: ~1.8 h less (so ~6.1 h total)</span></span>
-<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-49"><a href="#cb21-49" aria-hidden="true" tabindex="-1"></a>preds <span class="ot">&lt;-</span> <span class="fu">ggpredict</span>(lem_mod)</span>
-<span id="cb21-50"><a href="#cb21-50" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(preds)</span>
-<span id="cb21-51"><a href="#cb21-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-52"><a href="#cb21-52" aria-hidden="true" tabindex="-1"></a><span class="co"># Interpretation:</span></span>
-<span id="cb21-53"><a href="#cb21-53" aria-hidden="true" tabindex="-1"></a><span class="co"># Lemurs are most active in Rainforest and least active in Spiny Forest.</span></span>
-<span id="cb21-54"><a href="#cb21-54" aria-hidden="true" tabindex="-1"></a><span class="co"># This does not necessarily mean Rainforest is more important habitat;</span></span>
-<span id="cb21-55"><a href="#cb21-55" aria-hidden="true" tabindex="-1"></a><span class="co"># it is just where activity rates are highest.</span></span>
-<span id="cb21-56"><a href="#cb21-56" aria-hidden="true" tabindex="-1"></a><span class="co"># Measurement bias (easier tracking in open habitats) is a real concern.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Analysis of lemur activity by habitat type</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggeffects)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>lemur <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;lemurs.txt&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="co"># EDA</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(lemur)      <span class="co"># n = 120, two columns</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lemur)  <span class="co"># check ranges</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(lemur) <span class="sc">+</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> activity), <span class="at">colour =</span> <span class="st">&quot;white&quot;</span>, <span class="at">binwidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(lemur) <span class="sc">+</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> activity, <span class="at">fill =</span> habitat),</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>                 <span class="at">colour =</span> <span class="st">&quot;white&quot;</span>, <span class="at">binwidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a><span class="co"># One habitat is recorded as &quot;Rain forest&quot; rather than &quot;Rainforest&quot;.</span></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a><span class="co"># This is clearly a typo, so we can correct without needing confirmation.</span></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>lemur<span class="sc">$</span>habitat[lemur<span class="sc">$</span>habitat <span class="sc">==</span> <span class="st">&quot;Rain forest&quot;</span>] <span class="ot">&lt;-</span> <span class="st">&quot;Rainforest&quot;</span></span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Confirm the correction</span></span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(lemur) <span class="sc">+</span></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> activity, <span class="at">fill =</span> habitat),</span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>                 <span class="at">colour =</span> <span class="st">&quot;white&quot;</span>, <span class="at">binwidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Hidden assumptions</span></span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a><span class="co"># - Validity: how is activity measured? Accuracy may differ across habitats</span></span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a><span class="co">#   (e.g., tracking lemurs is easier in Dry Forest than dense Rainforest).</span></span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a><span class="co"># - Equal variance: may differ across habitat types. Worth checking diagnostics.</span></span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit model</span></span>
+<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a>lem_mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(activity <span class="sc">~</span> habitat, <span class="at">data =</span> lemur)</span>
+<span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-39"><a href="#cb22-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Diagnostics (covered in Workshop 6)</span></span>
+<span id="cb22-40"><a href="#cb22-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-41"><a href="#cb22-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Summarise</span></span>
+<span id="cb22-42"><a href="#cb22-42" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lem_mod)</span>
+<span id="cb22-43"><a href="#cb22-43" aria-hidden="true" tabindex="-1"></a><span class="co"># Dry Forest is the reference group (first alphabetically).</span></span>
+<span id="cb22-44"><a href="#cb22-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Model predicts ~7.9 h in Dry Forest.</span></span>
+<span id="cb22-45"><a href="#cb22-45" aria-hidden="true" tabindex="-1"></a><span class="co"># Mangrove: ~1.1 h less (so ~6.8 h total)</span></span>
+<span id="cb22-46"><a href="#cb22-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Rainforest: ~1.8 h more (so ~9.7 h total)</span></span>
+<span id="cb22-47"><a href="#cb22-47" aria-hidden="true" tabindex="-1"></a><span class="co"># Spiny Forest: ~1.8 h less (so ~6.1 h total)</span></span>
+<span id="cb22-48"><a href="#cb22-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-49"><a href="#cb22-49" aria-hidden="true" tabindex="-1"></a>preds <span class="ot">&lt;-</span> <span class="fu">ggpredict</span>(lem_mod)</span>
+<span id="cb22-50"><a href="#cb22-50" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(preds)</span>
+<span id="cb22-51"><a href="#cb22-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-52"><a href="#cb22-52" aria-hidden="true" tabindex="-1"></a><span class="co"># Interpretation:</span></span>
+<span id="cb22-53"><a href="#cb22-53" aria-hidden="true" tabindex="-1"></a><span class="co"># Lemurs are most active in Rainforest and least active in Spiny Forest.</span></span>
+<span id="cb22-54"><a href="#cb22-54" aria-hidden="true" tabindex="-1"></a><span class="co"># This does not necessarily mean Rainforest is more important habitat;</span></span>
+<span id="cb22-55"><a href="#cb22-55" aria-hidden="true" tabindex="-1"></a><span class="co"># it is just where activity rates are highest.</span></span>
+<span id="cb22-56"><a href="#cb22-56" aria-hidden="true" tabindex="-1"></a><span class="co"># Measurement bias (easier tracking in open habitats) is a real concern.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </section>
@@ -3992,6 +4001,8 @@ Show Answer
   </div>
   <div id="glossary-body">
 
+    <div class="glossary-section-header">Variable encoding</div>
+
     <div class="glossary-entry">
       <div class="glossary-terms">
         <span class="glossary-en-term">Categorical variable</span>
@@ -4021,6 +4032,17 @@ Show Answer
 
     <div class="glossary-entry">
       <div class="glossary-terms">
+        <span class="glossary-en-term">factor()</span>
+        <span class="glossary-zh-term">factor()函数</span>
+      </div>
+      <div class="glossary-en-def">Converts a character or numeric vector to a factor in R, making group membership explicit and ensuring R treats the variable as categorical.</div>
+      <div class="glossary-zh-def">将字符或数值向量转换为R中的因子，明确组别归属，确保R将变量视为分类变量。</div>
+    </div>
+
+    <div class="glossary-section-header">Model parameters</div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
         <span class="glossary-en-term">Intercept (β₀)</span>
         <span class="glossary-zh-term">截距（β₀）</span>
       </div>
@@ -4036,6 +4058,8 @@ Show Answer
       <div class="glossary-en-def">In a categorical model, the estimated difference in mean response between the non-reference group and the reference group.</div>
       <div class="glossary-zh-def">在分类模型中，非参照组与参照组之间均值响应的估计差异。</div>
     </div>
+
+    <div class="glossary-section-header">Inference and uncertainty</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
@@ -4057,20 +4081,31 @@ Show Answer
 
     <div class="glossary-entry">
       <div class="glossary-terms">
-        <span class="glossary-en-term">factor()</span>
-        <span class="glossary-zh-term">factor()函数</span>
+        <span class="glossary-en-term">se.fit</span>
+        <span class="glossary-zh-term">拟合标准误</span>
       </div>
-      <div class="glossary-en-def">Converts a character or numeric vector to a factor in R, making group membership explicit and ensuring R treats the variable as categorical.</div>
-      <div class="glossary-zh-def">将字符或数值向量转换为R中的因子，明确组别归属，确保R将变量视为分类变量。</div>
+      <div class="glossary-en-def">The standard error of a fitted (predicted) value, returned by <code>predict(..., se.fit = TRUE)</code>. Used to compute confidence intervals.</div>
+      <div class="glossary-zh-def"><code>predict(..., se.fit = TRUE)</code>返回的拟合值标准误，用于计算置信区间。</div>
     </div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
-        <span class="glossary-en-term">unique()</span>
-        <span class="glossary-zh-term">unique()函数</span>
+        <span class="glossary-en-term">confint()</span>
+        <span class="glossary-zh-term">confint()函数</span>
       </div>
-      <div class="glossary-en-def">Returns all unique values in a vector. Useful for building a fake prediction dataset when a categorical variable has many levels.</div>
-      <div class="glossary-zh-def">返回向量中所有唯一值。当分类变量有多个水平时，可方便地构建预测数据集。</div>
+      <div class="glossary-en-def">Computes confidence intervals for model parameters in R. A quick alternative to calculating them manually from the standard error.</div>
+      <div class="glossary-zh-def">计算R中模型参数置信区间的函数，是手动根据标准误计算的快捷替代方法。</div>
+    </div>
+
+    <div class="glossary-section-header">R functions</div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">lm()</span>
+        <span class="glossary-zh-term">lm()函数</span>
+      </div>
+      <div class="glossary-en-def">Fits a linear model in R. The formula <code>y ~ x</code> specifies the response and predictor. Works with both continuous and categorical predictors.</div>
+      <div class="glossary-zh-def">在R中拟合线性模型。公式<code>y ~ x</code>指定响应变量和预测变量，支持连续和分类预测变量。</div>
     </div>
 
     <div class="glossary-entry">
@@ -4084,11 +4119,11 @@ Show Answer
 
     <div class="glossary-entry">
       <div class="glossary-terms">
-        <span class="glossary-en-term">se.fit</span>
-        <span class="glossary-zh-term">拟合标准误</span>
+        <span class="glossary-en-term">unique()</span>
+        <span class="glossary-zh-term">unique()函数</span>
       </div>
-      <div class="glossary-en-def">The standard error of a fitted (predicted) value, returned by <code>predict(..., se.fit = TRUE)</code>. Used to compute confidence intervals.</div>
-      <div class="glossary-zh-def"><code>predict(..., se.fit = TRUE)</code>返回的拟合值标准误，用于计算置信区间。</div>
+      <div class="glossary-en-def">Returns all unique values in a vector. Useful for building a fake prediction dataset when a categorical variable has many levels.</div>
+      <div class="glossary-zh-def">返回向量中所有唯一值。当分类变量有多个水平时，可方便地构建预测数据集。</div>
     </div>
 
     <div class="glossary-entry">
@@ -4109,14 +4144,7 @@ Show Answer
       <div class="glossary-zh-def">自动化模型预测和绘图的R包。<code>ggpredict()</code>返回带置信区间的预测值；<code>plot()</code>生成图形。</div>
     </div>
 
-    <div class="glossary-entry">
-      <div class="glossary-terms">
-        <span class="glossary-en-term">lm()</span>
-        <span class="glossary-zh-term">lm()函数</span>
-      </div>
-      <div class="glossary-en-def">Fits a linear model in R. The formula <code>y ~ x</code> specifies the response and predictor. Works with both continuous and categorical predictors.</div>
-      <div class="glossary-zh-def">在R中拟合线性模型。公式<code>y ~ x</code>指定响应变量和预测变量，支持连续和分类预测变量。</div>
-    </div>
+    <div class="glossary-section-header">Assumptions</div>
 
     <div class="glossary-entry">
       <div class="glossary-terms">
@@ -4138,6 +4166,17 @@ Show Answer
 
     <div class="glossary-entry">
       <div class="glossary-terms">
+        <span class="glossary-en-term">Ecological fallacy</span>
+        <span class="glossary-zh-term">生态谬误</span>
+      </div>
+      <div class="glossary-en-def">The error of drawing conclusions about individuals from group-level data, or assuming that group patterns apply to every member of that group.</div>
+      <div class="glossary-zh-def">从群体水平数据推断个体结论的错误，即假设群体规律适用于该群体每一个成员。</div>
+    </div>
+
+    <div class="glossary-section-header">Dataset terms</div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
         <span class="glossary-en-term">Invasive species</span>
         <span class="glossary-zh-term">入侵物种</span>
       </div>
@@ -4152,24 +4191,6 @@ Show Answer
       </div>
       <div class="glossary-en-def">The natural environment in which a species lives, characterised by its physical and biological features (e.g., Rainforest, Dry Forest).</div>
       <div class="glossary-zh-def">物种生活的自然环境，以其物理和生物特征为特征（如雨林、旱林）。</div>
-    </div>
-
-    <div class="glossary-entry">
-      <div class="glossary-terms">
-        <span class="glossary-en-term">confint()</span>
-        <span class="glossary-zh-term">confint()函数</span>
-      </div>
-      <div class="glossary-en-def">Computes confidence intervals for model parameters in R. A quick alternative to calculating them manually from the standard error.</div>
-      <div class="glossary-zh-def">计算R中模型参数置信区间的函数，是手动根据标准误计算的快捷替代方法。</div>
-    </div>
-
-    <div class="glossary-entry">
-      <div class="glossary-terms">
-        <span class="glossary-en-term">Ecological fallacy</span>
-        <span class="glossary-zh-term">生态谬误</span>
-      </div>
-      <div class="glossary-en-def">The error of drawing conclusions about individuals from group-level data, or assuming that group patterns apply to every member of that group.</div>
-      <div class="glossary-zh-def">从群体水平数据推断个体结论的错误，即假设群体规律适用于该群体每一个成员。</div>
     </div>
 
   </div>

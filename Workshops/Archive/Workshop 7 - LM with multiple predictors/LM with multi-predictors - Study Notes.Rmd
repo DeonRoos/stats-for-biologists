@@ -1,0 +1,118 @@
+---
+title: "Linear models with multiple explanatories - Study Notes"
+author: "Michelle Pinard & Deon Roos"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+    reference_docx: "../sbstemplate.docx"
+---
+
+# Purpose
+
+You are able to run linear models with multiple explanatory variables. You use the same linear-model machinery (including with just one explanatory) for three broad aims: describing, predicting, and estimating a causal effect. We focussed on predicting and causation.
+
+# Core ideas
+
+A linear model with multiple explanatory variables estimates a mean response as a sum of terms, one per predictor, plus contrasts for categorical levels. 
+
+When a continuous variable is recorded categorically (e.g., EPC or Tax bands), the model gains many parameters and loses efficiency; avoid unnecessary discretisation when you can. 
+
+Parameter estimates from a multi-variable model are associations conditional on the other explanatory variables and are not automatically causal.
+
+Unless you use some sort of strategy (like Directed Acyclic Graphs, DAGs) to identify the causal model, then a model is most likely predictive (or descriptive).
+
+# Predictive modelling
+
+Goal: build a model that predicts a response (e.g. rent price) from several predictors. Adding more terms is technically simple (`y ~ x` to `y + x + z`); the practical issues are interpretability and parameter growth, especially when continuous constructs are coded as categories. 
+
+Diagnostics still rely on the four plots; influential cases can be inspected by refitting without them and comparing estimates. Coefficients from the predictive model are associations useful for prediction, not causes.
+
+# Causal modelling
+
+Goal: estimate the effect of changing one variable. Draw a DAG, apply the backdoor criterion, and fit the model implied by the adjustment set. The same `lm` output is then interpreted as a causal effect only under the stated DAG. 
+
+Beware the table-2 fallacy (reading every coefficient in a multivariable model as causal).
+
+# Confounding essentials
+
+Associations can be causal, spurious, or confounded. The lecture illustrates forking, piped, and colliding structures and shows how randomisation or appropriate adjustment closes backdoor paths. Software assistance (`check_dag`) helps identify adjustment sets for observational data.
+
+```{r, echo = FALSE, message = F, warning = F}
+library(ggplot2)
+library(grid)
+
+nodes <- rbind(
+  data.frame(diagram = "Collider", name = c("X","Z","Y"), x = c(0,1,2), y = c(0,1.5,0)),
+  data.frame(diagram = "Fork",     name = c("X","Z","Y"), x = c(0,1,2), y = c(0,1.5,0)),
+  data.frame(diagram = "Pipe",     name = c("X","Z","Y"), x = c(0,1,2), y = c(0,1.5,0))
+)
+
+edges <- rbind(
+  data.frame(diagram = "Collider", from = c("X","Y"), to = c("Z","Z")),
+  data.frame(diagram = "Fork",     from = c("Z","Z"), to = c("X","Y")),
+  data.frame(diagram = "Pipe",     from = c("X","Z"), to = c("Z","Y"))
+)
+
+edges |>
+  merge(nodes[, c("diagram","name","x","y")], by.x = c("diagram","from"), by.y = c("diagram","name")) |>
+  merge(nodes[, c("diagram","name","x","y")], by.x = c("diagram","to"),   by.y = c("diagram","name"),
+        suffixes = c("_from","_to")) |>
+  (\(e) {
+    ggplot() +
+      geom_segment(data = e, aes(x = x_from, y = y_from, xend = x_to, yend = y_to),
+                   arrow = arrow(length = unit(3, "mm"), type = "closed"), lineend = "round") +
+      geom_point(data = nodes, aes(x, y), size = 1.5) +
+      geom_text(data = nodes, aes(x, y, label = name), vjust = -1.1) +
+      facet_wrap(~ diagram, nrow = 1) +
+      coord_equal(xlim = c(-0.2, 2.2), ylim = c(-0.2, 2.2), expand = FALSE) +
+      theme_void() +
+      theme(strip.text = element_text(hjust = 0.5, size = 14, vjust = 1))
+  })()
+
+```
+
+If the aim is to estimate if $x$ has a causal effect on $y$, then:
+
+- If the confound is a collider:
+  + Never include $z$
+  
+- If the confound is a fork:
+  + Always include $z$
+  
+- If the confound is a pipe:
+  + Never include $z$ if you want to know the _total_ effects
+  + Always include $z$ if you want to know the _direct_ effects
+
+# Diagnostics and influence
+
+Same diagnostic rules apply for either modelling purpose.
+
+# Interpreting parameters from predictive versus causal
+
+- Predictive model: the FloorArea parameter is a conditional association after accounting for Rooms, EPC, and Tax.
+- Causal model: the FloorArea parameter estimates the total effect under the stated DAG, which leaves mediating paths open. 
+
+Keep your interpretation aligned with the model’s purpose; predictive = "associations", causal = "causal".
+
+# Useful code examples
+
+```{r, eval = F}
+# Model with multiple explanatories
+mod <- lm(y ~ x1 + x2 + f, data = df)
+summary(mod)
+
+# To create a dag and check which adjustments are required:
+library(performance)
+library(see)
+dag <- check_dag(
+  y ~ x1 + x2 + f, # y is caused by x1, x2 and f
+  x2 ~ x1,         # x2 is caused by x1
+  f  ~ x1,         # f is caused by x1
+  exposure = "x1", # the variable we want to estimate causal effect for
+  outcome  = "y"   # the response variable
+)
+plot(dag)
+dag
+```
+

@@ -66,23 +66,23 @@ format:
 
 <p class="ws-index-group">Foundations</p>
 <ul class="ws-index-list">
-  <li><a href="Workshop 1 - Hidden assumptions/workshop-1.html"><span class="ws-num">1</span><span class="ws-title">Getting Back into R</span></a></li>
-  <li><a href="Workshop 1 - Hidden assumptions/workshop-1.5.html"><span class="ws-num">1.5</span><span class="ws-title">Hidden Assumptions</span></a></li>
-  <li><a href="Workshop 2 - Data vis/workshop-2.html"><span class="ws-num">2</span><span class="ws-title">Data Visualisation</span></a></li>
+  <li><a href="workshop-1/workshop-1.html"><span class="ws-num">1</span><span class="ws-title">Getting Back into R</span></a></li>
+  <li><a href="workshop-1/workshop-1.5.html"><span class="ws-num">1.5</span><span class="ws-title">Hidden Assumptions</span></a></li>
+  <li><a href="workshop-2/workshop-2.html"><span class="ws-num">2</span><span class="ws-title">Data Visualisation</span></a></li>
 </ul>
 
 <p class="ws-index-group">Linear models</p>
 <ul class="ws-index-list">
-  <li><a href="Workshop 3 - LM with continuous predictor/workshop-3.html"><span class="ws-num">3</span><span class="ws-title">Linear Models with a Continuous Predictor</span></a></li>
-  <li><a href="Workshop 4 - Diagnosing LM with continuous predictors/workshop-4.html"><span class="ws-num">4</span><span class="ws-title">Diagnosing Linear Models with a Continuous Predictor</span></a></li>
-  <li><a href="Workshop 5 - LM with categorical predictors/workshop-5.html"><span class="ws-num">5</span><span class="ws-title">Linear Models with a Categorical Predictor</span></a></li>
-  <li><a href="Workshop 6 - Diagnosing LM with categorical predictors/workshop-6.html"><span class="ws-num">6</span><span class="ws-title">Diagnosing Linear Models with a Categorical Predictor</span></a></li>
-  <li><a href="Workshop 7 - LM with multiple predictors/workshop-7.html"><span class="ws-num">7</span><span class="ws-title">Linear Models with Multiple Predictors</span></a></li>
-  <li><a href="Workshop 8 - LM with interactions/workshop-8.html"><span class="ws-num">8</span><span class="ws-title">Linear Models with Interactions</span></a></li>
+  <li><a href="workshop-3/workshop-3.html"><span class="ws-num">3</span><span class="ws-title">Linear Models with a Continuous Predictor</span></a></li>
+  <li><a href="workshop-4/workshop-4.html"><span class="ws-num">4</span><span class="ws-title">Diagnosing Linear Models with a Continuous Predictor</span></a></li>
+  <li><a href="workshop-5/workshop-5.html"><span class="ws-num">5</span><span class="ws-title">Linear Models with a Categorical Predictor</span></a></li>
+  <li><a href="workshop-6/workshop-6.html"><span class="ws-num">6</span><span class="ws-title">Diagnosing Linear Models with a Categorical Predictor</span></a></li>
+  <li><a href="workshop-7/workshop-7.html"><span class="ws-num">7</span><span class="ws-title">Linear Models with Multiple Predictors</span></a></li>
+  <li><a href="workshop-8/workshop-8.html"><span class="ws-num">8</span><span class="ws-title">Linear Models with Interactions</span></a></li>
 </ul>
 
 <p class="ws-index-group">Generalised linear models</p>
 <ul class="ws-index-list">
-  <li><a href="Workshop 9 - GLMs/workshop-9.html"><span class="ws-num">9</span><span class="ws-title">Poisson GLMs</span></a></li>
-  <li><a href="Workshop 10 - Bernoulli GLMs/workshop-10.html"><span class="ws-num">10</span><span class="ws-title">Bernoulli GLMs</span></a></li>
+  <li><a href="workshop-9/workshop-9.html"><span class="ws-num">9</span><span class="ws-title">Poisson GLMs</span></a></li>
+  <li><a href="workshop-10/workshop-10.html"><span class="ws-num">10</span><span class="ws-title">Bernoulli GLMs</span></a></li>
 </ul>

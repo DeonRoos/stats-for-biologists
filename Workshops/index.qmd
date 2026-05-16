@@ -1,0 +1,88 @@
+---
+title: "BI3010 Statistics for Biologists"
+subtitle: "Workshop index"
+author: "Roos & Pinard"
+date: last-modified
+date-format: "D MMMM YYYY"
+format:
+  html:
+    toc: false
+    theme: [cosmo, custom.scss]
+    highlight-style: github
+    embed-resources: true
+    code-tools: false
+---
+
+```{=html}
+<style>
+.ws-index-group {
+  margin: 2rem 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #00635a;
+  border-bottom: 2px solid #e8f5f0;
+  padding-bottom: 0.3rem;
+}
+.ws-index-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+}
+.ws-index-list li {
+  border-bottom: 1px solid #f0f0f0;
+}
+.ws-index-list li:last-child {
+  border-bottom: none;
+}
+.ws-index-list a {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.65rem 0.25rem;
+  text-decoration: none;
+  color: #0d1e2c;
+  transition: background 0.12s;
+  border-radius: 4px;
+}
+.ws-index-list a:hover {
+  background: #f0faf7;
+  color: #00635a;
+  padding-left: 0.75rem;
+}
+.ws-num {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #00b494;
+  min-width: 2.5rem;
+  flex-shrink: 0;
+}
+.ws-title {
+  font-size: 0.95rem;
+}
+</style>
+```
+
+<p class="ws-index-group">Foundations</p>
+<ul class="ws-index-list">
+  <li><a href="Workshop 1 - Hidden assumptions/workshop-1.html"><span class="ws-num">1</span><span class="ws-title">Getting Back into R</span></a></li>
+  <li><a href="Workshop 1 - Hidden assumptions/workshop-1.5.html"><span class="ws-num">1.5</span><span class="ws-title">Hidden Assumptions</span></a></li>
+  <li><a href="Workshop 2 - Data vis/workshop-2.html"><span class="ws-num">2</span><span class="ws-title">Data Visualisation</span></a></li>
+</ul>
+
+<p class="ws-index-group">Linear models</p>
+<ul class="ws-index-list">
+  <li><a href="Workshop 3 - LM with continuous predictor/workshop-3.html"><span class="ws-num">3</span><span class="ws-title">Linear Models with a Continuous Predictor</span></a></li>
+  <li><a href="Workshop 4 - Diagnosing LM with continuous predictors/workshop-4.html"><span class="ws-num">4</span><span class="ws-title">Diagnosing Linear Models with a Continuous Predictor</span></a></li>
+  <li><a href="Workshop 5 - LM with categorical predictors/workshop-5.html"><span class="ws-num">5</span><span class="ws-title">Linear Models with a Categorical Predictor</span></a></li>
+  <li><a href="Workshop 6 - Diagnosing LM with categorical predictors/workshop-6.html"><span class="ws-num">6</span><span class="ws-title">Diagnosing Linear Models with a Categorical Predictor</span></a></li>
+  <li><a href="Workshop 7 - LM with multiple predictors/workshop-7.html"><span class="ws-num">7</span><span class="ws-title">Linear Models with Multiple Predictors</span></a></li>
+  <li><a href="Workshop 8 - LM with interactions/workshop-8.html"><span class="ws-num">8</span><span class="ws-title">Linear Models with Interactions</span></a></li>
+</ul>
+
+<p class="ws-index-group">Generalised linear models</p>
+<ul class="ws-index-list">
+  <li><a href="Workshop 9 - GLMs/workshop-9.html"><span class="ws-num">9</span><span class="ws-title">Poisson GLMs</span></a></li>
+  <li><a href="Workshop 10 - Bernoulli GLMs/workshop-10.html"><span class="ws-num">10</span><span class="ws-title">Bernoulli GLMs</span></a></li>
+</ul>

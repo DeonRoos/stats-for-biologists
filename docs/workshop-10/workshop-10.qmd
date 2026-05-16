@@ -712,9 +712,9 @@ Go through the full seven-step workflow. A few things to keep in mind:
 
 That's a wrap. This is the last workshop of the course, so you're free to go.
 
-A few final requests from me (Deon):
+Two final requests from me (Deon):
 
-* I don't care if you forget the details and technical side of this course. What I do want you to try and hold onto is this: data and models aren't magic boxes that unravel the Truth or reveal the secrets of the universe. A model is just a bunch of code and equations. Don't be taken in by people throwing data and results at you, whether that's on the internet, in the news, or in peer-reviewed papers. Ask what assumptions were made. Ask whether the data can actually answer the question being claimed. Be sceptical.
+* I know from past years that the majority of you will forget the details of the course and methods a few months after the course. That's fine. What I do want you to try and hold onto is this: data and models (statistical, machine learning or AI) aren't magic boxes that unravel the Truth or reveal the secrets of the universe. A model is just a bunch of code and equations. Don't be taken in by people throwing data and results at you, whether that's on the internet, in the news, or in peer-reviewed papers. Ask what assumptions were made. Ask whether the data can actually answer the question being claimed. Be sceptical.
 
 * If you found any typos, confusing sections, or parts of the workshops or lectures that just didn't land: please tell me. I genuinely think this material matters, and if I'm not communicating it well, I want to know. Feel free to email or message however you prefer. I'd really appreciate any feedback (just please don't be needlessly cruel about it).
 

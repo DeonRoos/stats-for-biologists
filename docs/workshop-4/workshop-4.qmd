@@ -55,6 +55,12 @@ function revealAnswer(btn) {
       return;
     }
     textarea.classList.remove('missing');
+    textarea.disabled = true;
+    textarea.classList.add('ws-answer-locked');
+    var badge = document.createElement('span');
+    badge.className = 'ws-submitted-badge';
+    badge.textContent = 'Submitted';
+    textarea.insertAdjacentElement('afterend', badge);
   }
 
   var mcOptions = block.querySelector('.mc-options');
@@ -81,15 +87,6 @@ function revealAnswer(btn) {
   if (answer) answer.style.display = 'block';
   btn.textContent = 'Answer shown';
   btn.disabled = true;
-
-  if (textarea) {
-    textarea.disabled = true;
-    textarea.classList.add('ws-answer-locked');
-    var badge = document.createElement('span');
-    badge.className = 'ws-submitted-badge';
-    badge.textContent = 'Submitted';
-    textarea.insertAdjacentElement('afterend', badge);
-  }
 }
 
 function toggleGlossary() {
@@ -194,8 +191,19 @@ function toggleGlossary() {
 </style>
 ```
 
+# Learning Objectives
+
+::: {.callout-tip}
+## Learning objectives
+
+1. Understand what residuals are and how they are used in model diagnosis.
+2. Interpret the four standard diagnostic plots produced by `plot(model)`.
+3. Identify which assumptions each plot is designed to check.
+4. Recognise when a diagnostic plot signals a genuine problem and when it doesn't.
+:::
+
 ::: {.callout-note}
-## Workshop structure
+## The Analytical Workflow
 
 Today we work with the models from Workshop 3 and apply the full diagnostic workflow. The focus is step 5.
 
@@ -208,15 +216,6 @@ Today we work with the models from Workshop 3 and apply the full diagnostic work
 7. Interpret and provide inferences.
 
 To keep the workload manageable, start by copying your workflow from Workshop 3 into a new script, or continue in the same script. If you didn't finish Workshop 3, complete it now before continuing here.
-:::
-
-::: {.callout-tip}
-## Learning objectives
-
-1. Understand what residuals are and how they are used in model diagnosis.
-2. Interpret the four standard diagnostic plots produced by `plot(model)`.
-3. Identify which assumptions each plot is designed to check.
-4. Recognise when a diagnostic plot signals a genuine problem and when it doesn't.
 :::
 
 # Why diagnostics matter
@@ -817,11 +816,11 @@ par(mfrow = c(1, 1))</code></pre>
 | 7. Normality of errors | Residuals are approximately normally distributed. | Modelling income, where a small number of extremely wealthy individuals produce a heavily skewed residual distribution. |
 
 ```{=html}
-<button id="glossary-btn" onclick="toggleGlossary()">词典 / Glossary</button>
+<button id="glossary-btn" onclick="toggleGlossary()">Glossary / 词汇表</button>
 
 <div id="glossary-panel">
   <div id="glossary-header">
-    <span>Glossary / 词典</span>
+    <span>Glossary / 词汇表</span>
     <button id="glossary-close" onclick="toggleGlossary()">&#x2715;</button>
   </div>
   <div id="glossary-body">

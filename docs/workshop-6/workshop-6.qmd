@@ -196,7 +196,7 @@ function toggleGlossary() {
 .ws-download-btn:hover { background: #0b5ed7; }
 </style>
 
-<button id="glossary-btn" onclick="toggleGlossary()">Glossary 词汇表</button>
+<button id="glossary-btn" onclick="toggleGlossary()">Glossary / 词汇表</button>
 
 <div id="glossary-panel">
   <div id="glossary-header">
@@ -317,21 +317,35 @@ function toggleGlossary() {
 </div>
 ```
 
-# Workshop structure
-
-This workshop continues with the workflow introduced in earlier sessions:
-
-1. Formulate a research question.
-2. Perform exploratory data analysis.
-3. Identify any hidden assumptions.
-4. Fit an appropriate model.
-5. Diagnose the model and check assumptions **[Focus of today]**.
-6. Summarise the results.
-7. Interpret and provide inferences.
-
 We pick up where Workshop 5 left off, returning to step 5 to check whether the rabbit model is worthy of our trust.
 
 If you didn't finish Workshop 5, do so before continuing.
+
+# Learning Objectives
+
+::: {.callout-tip}
+## Learning objectives
+
+By the end of this workshop you'll be able to:
+
+- Produce and interpret the four standard diagnostic plots for a linear model with a categorical predictor
+- Identify violations of linearity, equal variance, normality, and independence from residual plots
+- Assess leverage and influence using Cook's distances
+- Decide whether a model is trustworthy enough to interpret
+- Apply the full diagnostic workflow to a novel dataset
+:::
+
+::: {.callout-note}
+## The Analytical Workflow
+
+1. Formulate a research question
+2. Perform exploratory data analysis
+3. Identify hidden assumptions
+4. Fit a model
+5. Diagnose the model **[Focus of today]**
+6. Summarise the results
+7. Interpret and draw conclusions
+:::
 
 # A reminder of the model
 

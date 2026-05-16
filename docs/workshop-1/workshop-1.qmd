@@ -37,7 +37,6 @@ function revealAnswer(btn) {
   var block = btn.closest('.question-block, .puzzle-block');
   var answerClass = block.classList.contains('puzzle-block') ? '.puzzle-answer' : '.instructor-answer';
 
-  // Free-text gate
   var textarea = block.querySelector('.student-answer');
   if (textarea) {
     if (textarea.value.trim() === '') {
@@ -47,9 +46,14 @@ function revealAnswer(btn) {
       return;
     }
     textarea.classList.remove('missing');
+    textarea.disabled = true;
+    textarea.classList.add('ws-answer-locked');
+    var badge = document.createElement('span');
+    badge.className = 'ws-submitted-badge';
+    badge.textContent = 'Submitted';
+    textarea.insertAdjacentElement('afterend', badge);
   }
 
-  // Multiple-choice gate
   var mcOptions = block.querySelector('.mc-options');
   if (mcOptions) {
     var radios = mcOptions.querySelectorAll('input[type=radio]');
@@ -74,16 +78,6 @@ function revealAnswer(btn) {
   if (answer) answer.style.display = 'block';
   btn.textContent = 'Answer shown';
   btn.disabled = true;
-
-  // Lock the free-text response so it cannot be edited after reveal
-  if (textarea) {
-    textarea.disabled = true;
-    textarea.classList.add('ws-answer-locked');
-    var badge = document.createElement('span');
-    badge.className = 'ws-submitted-badge';
-    badge.textContent = 'Submitted';
-    textarea.insertAdjacentElement('afterend', badge);
-  }
 }
 
 function toggleGlossary() {
@@ -216,7 +210,18 @@ function toggleGlossary() {
 
 Welcome to the first BI3010 workshop. Over the next ten workshop sessions, you'll go from working with raw data to fitting complex statistical models, building up a workflow you can apply to almost any dataset you encounter, including every single one of your honour's project next year. Today's workshop focuses on getting comfortable with R and learning to spot problems in data before analysis begins, a step that sounds unglamorous but is where scientists spend 80% of their time.
 
-# Workshop Structure
+# Learning Objectives
+
+::: {.callout-tip}
+## By the end of this workshop you will be able to:
+
+1. (Re)familiarise yourself with the basics of `R`;
+2. Use `R` to perform simple descriptive summaries of data and data processing;
+3. Use the results of the EDA (Exploratory Data Analysis) to identify any issues in the data;
+4. Begin thinking about the assumptions we make with a specific dataset even before we begin using statistics.
+
+These skills apply every time you pick up a new dataset and will come up throughout the course.
+:::
 
 ::: {.callout-note}
 ## The Analytical Workflow
@@ -234,19 +239,6 @@ The general workflow we'll be using can be broken down into:
 7. Interpret and provide inferences.
 
 We'll skip Step 1 here for convenience, but in your own work it's the most important step. Every subsequent decision (how to collect data, which model to fit, how to interpret results) depends on having a clear question. Don't mistake its absence in these workshops for evidence that it doesn't matter.
-:::
-
-# Learning Objectives
-
-::: {.callout-tip}
-## By the end of this workshop you will be able to:
-
-1. (Re)familiarise yourself with the basics of `R`;
-2. Use `R` to perform simple descriptive summaries of data and data processing;
-3. Use the results of the EDA (Exploratory Data Analysis) to identify any issues in the data;
-4. Begin thinking about the assumptions we make with a specific dataset even before we begin using statistics.
-
-These skills apply every time you pick up a new dataset and will come up throughout the course.
 :::
 
 # Getting Started with R
@@ -1006,11 +998,11 @@ ali[ali&#36;bite > mean(ali&#36;bite, na.rm = TRUE), ]</code></pre>
 </div>
 
 ```{=html}
-<button id="glossary-btn" onclick="toggleGlossary()">词典 / Glossary</button>
+<button id="glossary-btn" onclick="toggleGlossary()">Glossary / 词汇表</button>
 
 <div id="glossary-panel">
   <div id="glossary-header">
-    <span>Glossary / 词典</span>
+    <span>Glossary / 词汇表</span>
     <button id="glossary-close" onclick="toggleGlossary()">&#x2715;</button>
   </div>
   <div id="glossary-body">

@@ -179,8 +179,20 @@ function toggleGlossary() {
 </style>
 ```
 
+# Learning Objectives
+
+::: {.callout-tip}
+## Learning objectives
+
+1. Understand how a categorical predictor is encoded as a dummy variable in a linear model.
+2. Identify the reference group and interpret $\beta_0$ and $\beta_1$ in a categorical model.
+3. Fit a linear model with a categorical predictor using `lm()`.
+4. Generate model predictions with 95% confidence intervals and visualise them.
+5. Reflect critically on hidden assumptions that formal diagnostics can't detect.
+:::
+
 ::: {.callout-note}
-## Workshop structure
+## The Analytical Workflow
 
 As always, we're using the workflow below to structure the workshops:
 
@@ -191,16 +203,6 @@ As always, we're using the workflow below to structure the workshops:
 5. Diagnose the model and check assumptions.
 6. Summarise the results.
 7. Interpret and provide inferences.
-:::
-
-::: {.callout-tip}
-## Learning objectives
-
-1. Understand how a categorical predictor is encoded as a dummy variable in a linear model.
-2. Identify the reference group and interpret $\beta_0$ and $\beta_1$ in a categorical model.
-3. Fit a linear model with a categorical predictor using `lm()`.
-4. Generate model predictions with 95% confidence intervals and visualise them.
-5. Reflect critically on hidden assumptions that formal diagnostics can't detect.
 :::
 
 # 1. Formulating a research question
@@ -950,7 +952,7 @@ plot(preds)
 | 7. Normality of errors | Residuals follow a Normal distribution. | Modelling income, where a few extremely wealthy individuals create extreme residuals. |
 
 ```{=html}
-<button id="glossary-btn" onclick="toggleGlossary()">Glossary 词汇表</button>
+<button id="glossary-btn" onclick="toggleGlossary()">Glossary / 词汇表</button>
 
 <div id="glossary-panel">
   <div id="glossary-header">

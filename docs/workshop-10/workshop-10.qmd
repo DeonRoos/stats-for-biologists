@@ -230,7 +230,7 @@ function toggleGlossary() {
 .glossary-section-header:first-child { border-top: none; margin-top: 0; }
 </style>
 
-<button id="glossary-btn" onclick="toggleGlossary()">Glossary 词汇表</button>
+<button id="glossary-btn" onclick="toggleGlossary()">Glossary / 词汇表</button>
 
 <div id="glossary-panel">
   <div id="glossary-header">
@@ -312,7 +312,7 @@ function toggleGlossary() {
 </div>
 ```
 
-# Workshop structure
+# Learning Objectives
 
 ::: {.callout-tip}
 ## Learning objectives
@@ -326,7 +326,7 @@ By the end of this workshop you should be able to:
 :::
 
 ::: {.callout-note}
-## Workflow
+## The Analytical Workflow
 As always, we work through the same seven-step workflow:
 
 1. Formulate a research question.
@@ -733,7 +733,7 @@ One-liner for applications:
 
 Logistic regression is worth mentioning specifically. It's everywhere outside academia: customer churn, clinical outcomes, loan defaults, election forecasting. You can now run them.
 
-You don't need every detail memorised. You can always come back to this material for the details. You've fitted the models, read the diagnostics, and interpreted results in context. A good chunk of people applying for these jobs likely haven't done that.
+You don't need every detail memorised. You can always come back to this material for the details. You've fitted the models, read the diagnostics, and interpreted results in context.
 
 # Fin
 

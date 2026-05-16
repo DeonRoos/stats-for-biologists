@@ -46,6 +46,12 @@ function revealAnswer(btn) {
       return;
     }
     textarea.classList.remove('missing');
+    textarea.disabled = true;
+    textarea.classList.add('ws-answer-locked');
+    var badge = document.createElement('span');
+    badge.className = 'ws-submitted-badge';
+    badge.textContent = 'Submitted';
+    textarea.insertAdjacentElement('afterend', badge);
   }
 
   var mcOptions = block.querySelector('.mc-options');
@@ -72,15 +78,6 @@ function revealAnswer(btn) {
   if (answer) answer.style.display = 'block';
   btn.textContent = 'Answer shown';
   btn.disabled = true;
-
-  if (textarea) {
-    textarea.disabled = true;
-    textarea.classList.add('ws-answer-locked');
-    var badge = document.createElement('span');
-    badge.className = 'ws-submitted-badge';
-    badge.textContent = 'Submitted';
-    textarea.insertAdjacentElement('afterend', badge);
-  }
 }
 
 function toggleGlossary() {
@@ -210,8 +207,19 @@ function toggleGlossary() {
 </style>
 ```
 
+# Learning Objectives
+
+::: {.callout-tip}
+## Learning objectives
+
+1. Decide whether a Normal distribution is a reasonable assumption for a response variable.
+2. Fit a linear model in R using `lm()`.
+3. Interpret the intercept and slope from model output.
+4. Produce a figure of the fitted relationship using `ggeffects` or manual predictions.
+:::
+
 ::: {.callout-note}
-## Workshop structure
+## The Analytical Workflow
 
 Starting this week, we apply the full analytical workflow to a single dataset before working through an independent one. Today's focus is step 4.
 
@@ -222,15 +230,6 @@ Starting this week, we apply the full analytical workflow to a single dataset be
 5. Diagnose the model and check assumptions.
 6. Summarise the results.
 7. Interpret and provide inferences.
-:::
-
-::: {.callout-tip}
-## Learning objectives
-
-1. Decide whether a Normal distribution is a reasonable assumption for a response variable.
-2. Fit a linear model in R using `lm()`.
-3. Interpret the intercept and slope from model output.
-4. Produce a figure of the fitted relationship using `ggeffects` or manual predictions.
 :::
 
 # Formulate a research question
@@ -951,11 +950,11 @@ plot(preds, add.data = TRUE)
 | 7. Normality of errors | Residuals are approximately normally distributed. | Modelling income, where a small number of extremely wealthy individuals create a heavily skewed residual distribution. |
 
 ```{=html}
-<button id="glossary-btn" onclick="toggleGlossary()">词典 / Glossary</button>
+<button id="glossary-btn" onclick="toggleGlossary()">Glossary / 词汇表</button>
 
 <div id="glossary-panel">
   <div id="glossary-header">
-    <span>Glossary / 词典</span>
+    <span>Glossary / 词汇表</span>
     <button id="glossary-close" onclick="toggleGlossary()">&#x2715;</button>
   </div>
   <div id="glossary-body">

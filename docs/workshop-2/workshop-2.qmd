@@ -37,7 +37,6 @@ function revealAnswer(btn) {
   var block = btn.closest('.question-block, .puzzle-block');
   var answerClass = block.classList.contains('puzzle-block') ? '.puzzle-answer' : '.instructor-answer';
 
-  // Free-text gate
   var textarea = block.querySelector('.student-answer');
   if (textarea) {
     if (textarea.value.trim() === '') {
@@ -47,9 +46,14 @@ function revealAnswer(btn) {
       return;
     }
     textarea.classList.remove('missing');
+    textarea.disabled = true;
+    textarea.classList.add('ws-answer-locked');
+    var badge = document.createElement('span');
+    badge.className = 'ws-submitted-badge';
+    badge.textContent = 'Submitted';
+    textarea.insertAdjacentElement('afterend', badge);
   }
 
-  // Multiple-choice gate
   var mcOptions = block.querySelector('.mc-options');
   if (mcOptions) {
     var radios = mcOptions.querySelectorAll('input[type=radio]');
@@ -74,16 +78,6 @@ function revealAnswer(btn) {
   if (answer) answer.style.display = 'block';
   btn.textContent = 'Answer shown';
   btn.disabled = true;
-
-  // Lock the free-text response so it cannot be edited after reveal
-  if (textarea) {
-    textarea.disabled = true;
-    textarea.classList.add('ws-answer-locked');
-    var badge = document.createElement('span');
-    badge.className = 'ws-submitted-badge';
-    badge.textContent = 'Submitted';
-    textarea.insertAdjacentElement('afterend', badge);
-  }
 }
 
 function toggleGlossary() {
@@ -204,8 +198,20 @@ function toggleGlossary() {
 </style>
 ```
 
+# Learning Objectives
+
+::: {.callout-tip}
+## Learning objectives
+
+1. Use the `R` package `ggplot2` to produce data visualisations.
+2. Distinguish effective visualisations from ineffective ones.
+3. Apply some techniques to make figures more visually appealing.
+
+These skills come up throughout the course and beyond.
+:::
+
 ::: {.callout-note}
-## Workshop structure
+## The Analytical Workflow
 
 These workshops follow an analytical workflow. Today we focus on steps 2 and 3, expanding the toolkit you built in Workshop 1 using data visualisation.
 
@@ -216,16 +222,6 @@ These workshops follow an analytical workflow. Today we focus on steps 2 and 3, 
 5. Diagnose the model and check assumptions.
 6. Summarise the results.
 7. Interpret and provide inferences.
-:::
-
-::: {.callout-tip}
-## Learning objectives
-
-1. Use the `R` package `ggplot2` to produce data visualisations.
-2. Distinguish effective visualisations from ineffective ones.
-3. Apply some techniques to make figures more visually appealing.
-
-These skills come up throughout the course and beyond.
 :::
 
 # Introduction to `ggplot2`
@@ -856,11 +852,11 @@ ggplot(dat) +
 </div>
 
 ```{=html}
-<button id="glossary-btn" onclick="toggleGlossary()">词典 / Glossary</button>
+<button id="glossary-btn" onclick="toggleGlossary()">Glossary / 词汇表</button>
 
 <div id="glossary-panel">
   <div id="glossary-header">
-    <span>Glossary / 词典</span>
+    <span>Glossary / 词汇表</span>
     <button id="glossary-close" onclick="toggleGlossary()">&#x2715;</button>
   </div>
   <div id="glossary-body">

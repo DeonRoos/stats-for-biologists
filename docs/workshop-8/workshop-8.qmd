@@ -169,7 +169,7 @@ function toggleGlossary() {
 .glossary-section-header:first-child { border-top: none; margin-top: 0; }
 </style>
 
-<button id="glossary-btn" onclick="toggleGlossary()">Glossary 词汇表</button>
+<button id="glossary-btn" onclick="toggleGlossary()">Glossary / 词汇表</button>
 
 <div id="glossary-panel">
   <div id="glossary-header">
@@ -253,7 +253,7 @@ function toggleGlossary() {
 </div>
 ```
 
-# Learning objectives
+# Learning Objectives
 
 ::: {.callout-tip}
 ## Learning objectives
@@ -268,7 +268,7 @@ function toggleGlossary() {
 # Workshop structure
 
 ::: {.callout-note}
-## Workflow
+## The Analytical Workflow
 
 1. Formulate a research question.
 2. Perform exploratory data analysis (EDA).

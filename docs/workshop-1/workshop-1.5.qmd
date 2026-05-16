@@ -36,6 +36,12 @@ function revealAnswer(btn) {
       return;
     }
     textarea.classList.remove('missing');
+    textarea.disabled = true;
+    textarea.classList.add('ws-answer-locked');
+    var badge = document.createElement('span');
+    badge.className = 'ws-submitted-badge';
+    badge.textContent = 'Submitted';
+    textarea.insertAdjacentElement('afterend', badge);
   }
 
   var mcOptions = block.querySelector('.mc-options');
@@ -62,16 +68,6 @@ function revealAnswer(btn) {
   if (answer) answer.style.display = 'block';
   btn.textContent = 'Answer shown';
   btn.disabled = true;
-
-  // Lock the free-text response so it cannot be edited after reveal
-  if (textarea) {
-    textarea.disabled = true;
-    textarea.classList.add('ws-answer-locked');
-    var badge = document.createElement('span');
-    badge.className = 'ws-submitted-badge';
-    badge.textContent = 'Submitted';
-    textarea.insertAdjacentElement('afterend', badge);
-  }
 }
 
 function toggleGlossary() {
@@ -190,7 +186,17 @@ function toggleGlossary() {
 </style>
 ```
 
-# Workshop Structure
+# Learning Objectives
+
+::: {.callout-tip}
+## By the end of this workshop you will be able to:
+
+1. Learn to identify potential issues (or "hidden assumptions") without seeing the data.
+2. Identify potential hidden assumptions in a real world dataset.
+3. Use `R` to perform simple descriptive summaries of the data to assist in this.
+
+These skills will be used throughout the course.
+:::
 
 ::: {.callout-note}
 ## The Analytical Workflow
@@ -204,18 +210,6 @@ As always, we're using the workflow below to structure the workshops:
 5. Diagnose the model and check assumptions.
 6. Summarise the results.
 7. Interpret and provide inferences.
-:::
-
-# Learning Objectives
-
-::: {.callout-tip}
-## By the end of this workshop you will be able to:
-
-1. Learn to identify potential issues (or "hidden assumptions") without seeing the data.
-2. Identify potential hidden assumptions in a real world dataset.
-3. Use `R` to perform simple descriptive summaries of the data to assist in this.
-
-These skills will be used throughout the course.
 :::
 
 # The Seven Assumptions
@@ -447,11 +441,11 @@ Return to the `alligator_bite.txt` dataset from the first workshop. We didn't gi
 </div>
 
 ```{=html}
-<button id="glossary-btn" onclick="toggleGlossary()">词典 / Glossary</button>
+<button id="glossary-btn" onclick="toggleGlossary()">Glossary / 词汇表</button>
 
 <div id="glossary-panel">
   <div id="glossary-header">
-    <span>Glossary / 词典</span>
+    <span>Glossary / 词汇表</span>
     <button id="glossary-close" onclick="toggleGlossary()">&#x2715;</button>
   </div>
   <div id="glossary-body">

@@ -521,7 +521,7 @@ summary(success_mod)
 
 The coefficient table gives estimates on the log-odds scale. From the output, the fitted equation is approximately:
 
-$$logit(\hat{p}_i) = -3.0 + 0.5 \times quality_i$$
+$$logit(\hat{p}_i) = -2.14 + 0.44 \times quality_i$$
 
 ### Predictions on the log-odds scale
 
@@ -532,9 +532,9 @@ Substitute a value of `territory_quality` directly into the equation to get the 
 <textarea class="student-answer" rows="4" placeholder="Show your working for both values..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<pre><code>-3.0 + 0.5 * 4   # = -1.0  (quality = 4)
--3.0 + 0.5 * 8   # =  1.0  (quality = 8)</code></pre>
-<p>A log-odds of −1.0 is below zero, so the probability of success is below 0.5. A log-odds of +1.0 is above zero, so the probability is above 0.5. To get exact probabilities, back-transform with <code>plogis()</code>.</p>
+<pre><code>-2.14 + 0.44 * 4   # = -0.38  (quality = 4)
+-2.14 + 0.44 * 8   # =  1.38  (quality = 8)</code></pre>
+<p>A log-odds of −0.38 is below zero, so the probability of success is below 0.5. A log-odds of +1.38 is above zero, so the probability is above 0.5. To get exact probabilities, back-transform with <code>plogis()</code>.</p>
 </div>
 </div>
 
@@ -547,12 +547,12 @@ To convert log-odds to a probability, use `plogis()`. You can also work it out f
 <textarea class="student-answer" rows="5" placeholder="Back-transform both log-odds values and solve for the 50% threshold..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<pre><code>plogis(-1.0)   # ≈ 0.27  (quality = 4: 27% chance of success)
-plogis( 1.0)   # ≈ 0.73  (quality = 8: 73% chance of success)</code></pre>
+<pre><code>plogis(-0.38)   # ≈ 0.41  (quality = 4: 41% chance of success)
+plogis( 1.38)   # ≈ 0.80  (quality = 8: 80% chance of success)</code></pre>
 <p>For a 50% chance of success, we need the log-odds to equal 0:</p>
-<pre><code>-3.0 + 0.5 * quality = 0
-quality = 3.0 / 0.5 = 6</code></pre>
-<p>The model predicts that territory quality of 6 gives a 50% probability of success for a first-time breeding pair. Below quality 6 the odds favour failure; above quality 6 they favour success.</p>
+<pre><code>-2.14 + 0.44 * quality = 0
+quality = 2.14 / 0.44 ≈ 4.9</code></pre>
+<p>The model predicts that a territory quality of around 4.9 gives a 50% probability of success. Below that the odds favour failure; above it they favour success.</p>
 </div>
 </div>
 
@@ -594,7 +594,7 @@ fake$upp    <- plogis(preds$fit + 1.96 * preds$se.fit)
 
 ## 7. Interpret and draw conclusions
 
-The model predicts that breeding success increases with territory quality. The positive slope means that each additional unit of territory quality increases the log-odds of success by approximately 0.5. On the probability scale, the relationship isn't linear: an increase from quality 2 to quality 3 has a smaller effect than an increase from quality 5 to quality 6 (where the curve is steepest).
+The model predicts that breeding success increases with territory quality. The positive slope means that each additional unit of territory quality increases the log-odds of success by approximately 0.44. On the probability scale, the relationship isn't linear: an increase from quality 2 to quality 3 has a smaller effect than an increase from quality 5 to quality 6 (where the curve is steepest).
 
 # Adding breeding experience
 

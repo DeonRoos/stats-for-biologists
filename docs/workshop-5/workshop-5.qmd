@@ -191,6 +191,8 @@ function toggleGlossary() {
 5. Reflect critically on hidden assumptions that formal diagnostics can't detect.
 :::
 
+# Workshop structure
+
 ::: {.callout-note}
 ## The Analytical Workflow
 

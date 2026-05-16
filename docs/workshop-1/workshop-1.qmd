@@ -223,6 +223,8 @@ Welcome to the first BI3010 workshop. Over the next ten workshop sessions, you'l
 These skills apply every time you pick up a new dataset and will come up throughout the course.
 :::
 
+# Workshop structure
+
 ::: {.callout-note}
 ## The Analytical Workflow
 

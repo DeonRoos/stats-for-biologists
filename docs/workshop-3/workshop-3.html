@@ -3036,7 +3036,8 @@ vertical-align: -.125em;
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#formulate-a-research-question" id="toc-formulate-a-research-question" class="nav-link active" data-scroll-target="#formulate-a-research-question">Formulate a research question</a>
+  <li><a href="#learning-objectives" id="toc-learning-objectives" class="nav-link active" data-scroll-target="#learning-objectives">Learning Objectives</a></li>
+  <li><a href="#formulate-a-research-question" id="toc-formulate-a-research-question" class="nav-link" data-scroll-target="#formulate-a-research-question">Formulate a research question</a>
   <ul class="collapse">
   <li><a href="#is-a-normal-distribution-appropriate" id="toc-is-a-normal-distribution-appropriate" class="nav-link" data-scroll-target="#is-a-normal-distribution-appropriate">Is a Normal distribution appropriate?</a></li>
   <li><a href="#the-normal-distribution-in-practice" id="toc-the-normal-distribution-in-practice" class="nav-link" data-scroll-target="#the-normal-distribution-in-practice">The Normal distribution in practice</a></li>
@@ -3112,6 +3113,12 @@ function revealAnswer(btn) {
       return;
     }
     textarea.classList.remove('missing');
+    textarea.disabled = true;
+    textarea.classList.add('ws-answer-locked');
+    var badge = document.createElement('span');
+    badge.className = 'ws-submitted-badge';
+    badge.textContent = 'Submitted';
+    textarea.insertAdjacentElement('afterend', badge);
   }
 
   var mcOptions = block.querySelector('.mc-options');
@@ -3138,15 +3145,6 @@ function revealAnswer(btn) {
   if (answer) answer.style.display = 'block';
   btn.textContent = 'Answer shown';
   btn.disabled = true;
-
-  if (textarea) {
-    textarea.disabled = true;
-    textarea.classList.add('ws-answer-locked');
-    var badge = document.createElement('span');
-    badge.className = 'ws-submitted-badge';
-    badge.textContent = 'Submitted';
-    textarea.insertAdjacentElement('afterend', badge);
-  }
 }
 
 function toggleGlossary() {
@@ -3266,28 +3264,8 @@ margin-top: 0.25rem;
 }
 .glossary-section-header:first-child { border-top: none; margin-top: 0; }
 </style>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Workshop structure
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Starting this week, we apply the full analytical workflow to a single dataset before working through an independent one. Today’s focus is step 4.</p>
-<ol type="1">
-<li>Formulate a research question.</li>
-<li>Perform exploratory data analysis.</li>
-<li>Identify any hidden assumptions.</li>
-<li>Fit an appropriate model <strong>[Focus of today]</strong>.</li>
-<li>Diagnose the model and check assumptions.</li>
-<li>Summarise the results.</li>
-<li>Interpret and provide inferences.</li>
-</ol>
-</div>
-</div>
+<section id="learning-objectives" class="level1">
+<h1>Learning Objectives</h1>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -3306,6 +3284,29 @@ Learning objectives
 </ol>
 </div>
 </div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+The Analytical Workflow
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Starting this week, we apply the full analytical workflow to a single dataset before working through an independent one. Today’s focus is step 4.</p>
+<ol type="1">
+<li>Formulate a research question.</li>
+<li>Perform exploratory data analysis.</li>
+<li>Identify any hidden assumptions.</li>
+<li>Fit an appropriate model <strong>[Focus of today]</strong>.</li>
+<li>Diagnose the model and check assumptions.</li>
+<li>Summarise the results.</li>
+<li>Interpret and provide inferences.</li>
+</ol>
+</div>
+</div>
+</section>
 <section id="formulate-a-research-question" class="level1">
 <h1>Formulate a research question</h1>
 <p>For this first workshop on linear models, we return to a familiar dataset: <code>boto.txt</code> from Workshop 2. As a reminder, it contains:</p>
@@ -4043,11 +4044,11 @@ plot(preds, add.data = TRUE)
 </tr>
 </tbody>
 </table>
-<button id="glossary-btn" onclick="toggleGlossary()">词典 / Glossary</button>
+<button id="glossary-btn" onclick="toggleGlossary()">Glossary / 词汇表</button>
 
 <div id="glossary-panel">
   <div id="glossary-header">
-    <span>Glossary / 词典</span>
+    <span>Glossary / 词汇表</span>
     <button id="glossary-close" onclick="toggleGlossary()">✕</button>
   </div>
   <div id="glossary-body">

@@ -198,6 +198,8 @@ function toggleGlossary() {
 These skills will be used throughout the course.
 :::
 
+# Workshop structure
+
 ::: {.callout-note}
 ## The Analytical Workflow
 

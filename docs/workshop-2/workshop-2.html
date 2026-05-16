@@ -3026,7 +3026,8 @@ vertical-align: -.125em;
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#introduction-to-ggplot2" id="toc-introduction-to-ggplot2" class="nav-link active" data-scroll-target="#introduction-to-ggplot2">Introduction to <code>ggplot2</code></a>
+  <li><a href="#learning-objectives" id="toc-learning-objectives" class="nav-link active" data-scroll-target="#learning-objectives">Learning Objectives</a></li>
+  <li><a href="#introduction-to-ggplot2" id="toc-introduction-to-ggplot2" class="nav-link" data-scroll-target="#introduction-to-ggplot2">Introduction to <code>ggplot2</code></a>
   <ul class="collapse">
   <li><a href="#load-the-data" id="toc-load-the-data" class="nav-link" data-scroll-target="#load-the-data">Load the data</a></li>
   <li><a href="#building-a-first-plot" id="toc-building-a-first-plot" class="nav-link" data-scroll-target="#building-a-first-plot">Building a first plot</a></li>
@@ -3100,7 +3101,6 @@ function revealAnswer(btn) {
   var block = btn.closest('.question-block, .puzzle-block');
   var answerClass = block.classList.contains('puzzle-block') ? '.puzzle-answer' : '.instructor-answer';
 
-  // Free-text gate
   var textarea = block.querySelector('.student-answer');
   if (textarea) {
     if (textarea.value.trim() === '') {
@@ -3110,9 +3110,14 @@ function revealAnswer(btn) {
       return;
     }
     textarea.classList.remove('missing');
+    textarea.disabled = true;
+    textarea.classList.add('ws-answer-locked');
+    var badge = document.createElement('span');
+    badge.className = 'ws-submitted-badge';
+    badge.textContent = 'Submitted';
+    textarea.insertAdjacentElement('afterend', badge);
   }
 
-  // Multiple-choice gate
   var mcOptions = block.querySelector('.mc-options');
   if (mcOptions) {
     var radios = mcOptions.querySelectorAll('input[type=radio]');
@@ -3137,16 +3142,6 @@ function revealAnswer(btn) {
   if (answer) answer.style.display = 'block';
   btn.textContent = 'Answer shown';
   btn.disabled = true;
-
-  // Lock the free-text response so it cannot be edited after reveal
-  if (textarea) {
-    textarea.disabled = true;
-    textarea.classList.add('ws-answer-locked');
-    var badge = document.createElement('span');
-    badge.className = 'ws-submitted-badge';
-    badge.textContent = 'Submitted';
-    textarea.insertAdjacentElement('afterend', badge);
-  }
 }
 
 function toggleGlossary() {
@@ -3256,28 +3251,8 @@ line-height: 1.65;
 .glossary-section-header { padding: 0.4rem 1.25rem 0.3rem; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #00635a; background: #f0faf7; border-top: 2px solid #e8f5f0; margin-top: 0.25rem; }
 .glossary-section-header:first-child { border-top: none; margin-top: 0; }
 </style>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Workshop structure
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>These workshops follow an analytical workflow. Today we focus on steps 2 and 3, expanding the toolkit you built in Workshop 1 using data visualisation.</p>
-<ol type="1">
-<li>Formulate a research question.</li>
-<li>Perform exploratory data analysis <strong>[Focus of today]</strong>.</li>
-<li>Identify any hidden assumptions <strong>[Focus of today]</strong>.</li>
-<li>Fit an appropriate model.</li>
-<li>Diagnose the model and check assumptions.</li>
-<li>Summarise the results.</li>
-<li>Interpret and provide inferences.</li>
-</ol>
-</div>
-</div>
+<section id="learning-objectives" class="level1">
+<h1>Learning Objectives</h1>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -3296,6 +3271,29 @@ Learning objectives
 <p>These skills come up throughout the course and beyond.</p>
 </div>
 </div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+The Analytical Workflow
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>These workshops follow an analytical workflow. Today we focus on steps 2 and 3, expanding the toolkit you built in Workshop 1 using data visualisation.</p>
+<ol type="1">
+<li>Formulate a research question.</li>
+<li>Perform exploratory data analysis <strong>[Focus of today]</strong>.</li>
+<li>Identify any hidden assumptions <strong>[Focus of today]</strong>.</li>
+<li>Fit an appropriate model.</li>
+<li>Diagnose the model and check assumptions.</li>
+<li>Summarise the results.</li>
+<li>Interpret and provide inferences.</li>
+</ol>
+</div>
+</div>
+</section>
 <section id="introduction-to-ggplot2" class="level1">
 <h1>Introduction to <code>ggplot2</code></h1>
 <p><code>ggplot2</code> implements the “Grammar of Graphics”: a framework for building plots layer by layer. You start with a dataset, map variables to visual properties (called aesthetics) using <code>aes()</code>, then add one or more geometry functions that determine the form of the plot (points, lines, bars, and so on). Scales, labels, and themes refine the result. The approach is flexible enough to produce sophisticated figures with surprisingly little code. Familiarity with <code>ggplot2</code> is increasingly expected by employers; Spotify has listed it as an essential criterion in job adverts.</p>
@@ -3936,11 +3934,11 @@ How I’d make this figure: I’d use points for the estimated values instead of
 </div>
 </div>
 </div>
-<button id="glossary-btn" onclick="toggleGlossary()">词典 / Glossary</button>
+<button id="glossary-btn" onclick="toggleGlossary()">Glossary / 词汇表</button>
 
 <div id="glossary-panel">
   <div id="glossary-header">
-    <span>Glossary / 词典</span>
+    <span>Glossary / 词汇表</span>
     <button id="glossary-close" onclick="toggleGlossary()">✕</button>
   </div>
   <div id="glossary-body">

@@ -3026,8 +3026,7 @@ vertical-align: -.125em;
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#workshop-structure" id="toc-workshop-structure" class="nav-link active" data-scroll-target="#workshop-structure">Workshop Structure</a></li>
-  <li><a href="#learning-objectives" id="toc-learning-objectives" class="nav-link" data-scroll-target="#learning-objectives">Learning Objectives</a></li>
+  <li><a href="#learning-objectives" id="toc-learning-objectives" class="nav-link active" data-scroll-target="#learning-objectives">Learning Objectives</a></li>
   <li><a href="#the-seven-assumptions" id="toc-the-seven-assumptions" class="nav-link" data-scroll-target="#the-seven-assumptions">The Seven Assumptions</a>
   <ul class="collapse">
   <li><a href="#check-your-understanding" id="toc-check-your-understanding" class="nav-link" data-scroll-target="#check-your-understanding">Check Your Understanding</a></li>
@@ -3092,6 +3091,12 @@ function revealAnswer(btn) {
       return;
     }
     textarea.classList.remove('missing');
+    textarea.disabled = true;
+    textarea.classList.add('ws-answer-locked');
+    var badge = document.createElement('span');
+    badge.className = 'ws-submitted-badge';
+    badge.textContent = 'Submitted';
+    textarea.insertAdjacentElement('afterend', badge);
   }
 
   var mcOptions = block.querySelector('.mc-options');
@@ -3118,16 +3123,6 @@ function revealAnswer(btn) {
   if (answer) answer.style.display = 'block';
   btn.textContent = 'Answer shown';
   btn.disabled = true;
-
-  // Lock the free-text response so it cannot be edited after reveal
-  if (textarea) {
-    textarea.disabled = true;
-    textarea.classList.add('ws-answer-locked');
-    var badge = document.createElement('span');
-    badge.className = 'ws-submitted-badge';
-    badge.textContent = 'Submitted';
-    textarea.insertAdjacentElement('afterend', badge);
-  }
 }
 
 function toggleGlossary() {
@@ -3235,8 +3230,26 @@ line-height: 1.65;
 .glossary-section-header { padding: 0.4rem 1.25rem 0.3rem; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #00635a; background: #f0faf7; border-top: 2px solid #e8f5f0; margin-top: 0.25rem; }
 .glossary-section-header:first-child { border-top: none; margin-top: 0; }
 </style>
-<section id="workshop-structure" class="level1">
-<h1>Workshop Structure</h1>
+<section id="learning-objectives" class="level1">
+<h1>Learning Objectives</h1>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+By the end of this workshop you will be able to:
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li>Learn to identify potential issues (or “hidden assumptions”) without seeing the data.</li>
+<li>Identify potential hidden assumptions in a real world dataset.</li>
+<li>Use <code>R</code> to perform simple descriptive summaries of the data to assist in this.</li>
+</ol>
+<p>These skills will be used throughout the course.</p>
+</div>
+</div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -3257,27 +3270,6 @@ The Analytical Workflow
 <li>Summarise the results.</li>
 <li>Interpret and provide inferences.</li>
 </ol>
-</div>
-</div>
-</section>
-<section id="learning-objectives" class="level1">
-<h1>Learning Objectives</h1>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-By the end of this workshop you will be able to:
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<ol type="1">
-<li>Learn to identify potential issues (or “hidden assumptions”) without seeing the data.</li>
-<li>Identify potential hidden assumptions in a real world dataset.</li>
-<li>Use <code>R</code> to perform simple descriptive summaries of the data to assist in this.</li>
-</ol>
-<p>These skills will be used throughout the course.</p>
 </div>
 </div>
 </section>
@@ -3596,11 +3588,11 @@ The broader point with this example is that sometimes you can’t improve a data
 </p>
 </div>
 </div>
-<button id="glossary-btn" onclick="toggleGlossary()">词典 / Glossary</button>
+<button id="glossary-btn" onclick="toggleGlossary()">Glossary / 词汇表</button>
 
 <div id="glossary-panel">
   <div id="glossary-header">
-    <span>Glossary / 词典</span>
+    <span>Glossary / 词汇表</span>
     <button id="glossary-close" onclick="toggleGlossary()">✕</button>
   </div>
   <div id="glossary-body">

@@ -335,6 +335,8 @@ By the end of this workshop you'll be able to:
 - Apply the full diagnostic workflow to a novel dataset
 :::
 
+# Workshop structure
+
 ::: {.callout-note}
 ## The Analytical Workflow
 

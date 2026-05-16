@@ -3553,7 +3553,7 @@ Overdispersion is a concern for Poisson GLMs but not for Bernoulli. Once you kno
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(success_mod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The coefficient table gives estimates on the log-odds scale. From the output, the fitted equation is approximately:</p>
-<p><span class="math display">\[logit(\hat{p}_i) = -3.0 + 0.5 \times quality_i\]</span></p>
+<p><span class="math display">\[logit(\hat{p}_i) = -2.14 + 0.44 \times quality_i\]</span></p>
 <section id="predictions-on-the-log-odds-scale" class="level3">
 <h3 class="anchored" data-anchor-id="predictions-on-the-log-odds-scale">Predictions on the log-odds scale</h3>
 <p>Substitute a value of <code>territory_quality</code> directly into the equation to get the predicted log-odds.</p>
@@ -3566,10 +3566,10 @@ Overdispersion is a concern for Poisson GLMs but not for Bernoulli. Once you kno
 Show Answer
 </button>
 <div class="instructor-answer">
-<pre><code>-3.0 + 0.5 * 4   # = -1.0  (quality = 4)
--3.0 + 0.5 * 8   # =  1.0  (quality = 8)</code></pre>
+<pre><code>-2.14 + 0.44 * 4   # = -0.38  (quality = 4)
+-2.14 + 0.44 * 8   # =  1.38  (quality = 8)</code></pre>
 <p>
-A log-odds of −1.0 is below zero, so the probability of success is below 0.5. A log-odds of +1.0 is above zero, so the probability is above 0.5. To get exact probabilities, back-transform with <code>plogis()</code>.
+A log-odds of −0.38 is below zero, so the probability of success is below 0.5. A log-odds of +1.38 is above zero, so the probability is above 0.5. To get exact probabilities, back-transform with <code>plogis()</code>.
 </p>
 </div>
 </div>
@@ -3586,15 +3586,15 @@ A log-odds of −1.0 is below zero, so the probability of success is below 0.5. 
 Show Answer
 </button>
 <div class="instructor-answer">
-<pre><code>plogis(-1.0)   # ≈ 0.27  (quality = 4: 27% chance of success)
-plogis( 1.0)   # ≈ 0.73  (quality = 8: 73% chance of success)</code></pre>
+<pre><code>plogis(-0.38)   # ≈ 0.41  (quality = 4: 41% chance of success)
+plogis( 1.38)   # ≈ 0.80  (quality = 8: 80% chance of success)</code></pre>
 <p>
 For a 50% chance of success, we need the log-odds to equal 0:
 </p>
-<pre><code>-3.0 + 0.5 * quality = 0
-quality = 3.0 / 0.5 = 6</code></pre>
+<pre><code>-2.14 + 0.44 * quality = 0
+quality = 2.14 / 0.44 ≈ 4.9</code></pre>
 <p>
-The model predicts that territory quality of 6 gives a 50% probability of success for a first-time breeding pair. Below quality 6 the odds favour failure; above quality 6 they favour success.
+The model predicts that a territory quality of around 4.9 gives a 50% probability of success. Below that the odds favour failure; above it they favour success.
 </p>
 </div>
 </div>
@@ -3642,7 +3642,7 @@ The result is an S-shaped (logistic) curve: probability rises steeply across the
 </section>
 <section id="interpret-and-draw-conclusions" class="level2">
 <h2 class="anchored" data-anchor-id="interpret-and-draw-conclusions">7. Interpret and draw conclusions</h2>
-<p>The model predicts that breeding success increases with territory quality. The positive slope means that each additional unit of territory quality increases the log-odds of success by approximately 0.5. On the probability scale, the relationship isn’t linear: an increase from quality 2 to quality 3 has a smaller effect than an increase from quality 5 to quality 6 (where the curve is steepest).</p>
+<p>The model predicts that breeding success increases with territory quality. The positive slope means that each additional unit of territory quality increases the log-odds of success by approximately 0.44. On the probability scale, the relationship isn’t linear: an increase from quality 2 to quality 3 has a smaller effect than an increase from quality 5 to quality 6 (where the curve is steepest).</p>
 </section>
 </section>
 <section id="adding-breeding-experience" class="level1">
@@ -3669,17 +3669,17 @@ The result is an S-shaped (logistic) curve: probability rises steeply across the
 </div>
 <div class="question-block">
 <p>
-<strong>Question 9.</strong> The <code>experienceExperienced</code> coefficient is approximately +1.5. What does this mean?
+<strong>Question 9.</strong> The <code>experienceExperienced</code> coefficient is approximately +2.0. What does this mean?
 </p>
 <div class="mc-options">
-<p><label><input type="radio" name="w10-q9" data-correct="false"> Experienced breeders have a 1.5 percentage point higher success rate than first-time breeders.</label> <label><input type="radio" name="w10-q9" data-correct="false"> Experienced breeders succeed on 1.5 more occasions per season than first-time breeders.</label> <label><input type="radio" name="w10-q9" data-correct="true"> Holding territory quality constant, experienced breeders have a log-odds of success that is 1.5 higher than first-time breeders. This corresponds to multiplying the odds of success by exp(1.5) ≈ 4.5: experienced breeders have roughly 4.5 times the odds of success compared to first-time breeders at the same territory quality.</label> <label><input type="radio" name="w10-q9" data-correct="false"> The effect of territory quality on success is 1.5 times stronger for experienced breeders than for first-time breeders.</label></p>
+<p><label><input type="radio" name="w10-q9" data-correct="false"> Experienced breeders have a 2.0 percentage point higher success rate than first-time breeders.</label> <label><input type="radio" name="w10-q9" data-correct="false"> Experienced breeders succeed on 2.0 more occasions per season than first-time breeders.</label> <label><input type="radio" name="w10-q9" data-correct="true"> Holding territory quality constant, experienced breeders have a log-odds of success that is 2.0 higher than first-time breeders. This corresponds to multiplying the odds of success by exp(2.0) ≈ 7.4: experienced breeders have roughly 7.4 times the odds of success compared to first-time breeders at the same territory quality.</label> <label><input type="radio" name="w10-q9" data-correct="false"> The effect of territory quality on success is 2.0 times stronger for experienced breeders than for first-time breeders.</label></p>
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-On the log-odds scale, the coefficient is the difference in log-odds between the two groups, holding all other predictors constant. To make this more intuitive, exponentiate it: exp(1.5) ≈ 4.5. Experienced breeders have roughly 4.5 times the <em>odds</em> of success compared to first-time breeders on the same territory. This doesn’t mean they are 4.5 times more likely to succeed. Odds and probability aren’t the same thing. People confuse them constantly, including in peer-reviewed papers. Don’t be one of them.
+On the log-odds scale, the coefficient is the difference in log-odds between the two groups, holding all other predictors constant. To make this more intuitive, exponentiate it: exp(2.0) ≈ 7.4. Experienced breeders have roughly 7.4 times the <em>odds</em> of success compared to first-time breeders on the same territory. This doesn’t mean they are 7.4 times more likely to succeed. Odds and probability aren’t the same thing. People confuse them constantly, including in peer-reviewed papers. Don’t be one of them.
 </p>
 </div>
 </div>
@@ -3693,17 +3693,17 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-With approximate coefficients: intercept ≈ −3.0, territory_quality ≈ 0.5, experienceExperienced ≈ 1.5.
+With approximate coefficients: intercept ≈ −3.5, territory_quality ≈ 0.5, experienceExperienced ≈ 2.0.
 </p>
 <pre><code># First-time breeder, quality = 5
-log_odds_first &lt;- -3.0 + 0.5 * 5 + 0
-plogis(log_odds_first)   # plogis(-0.5) ≈ 0.38
+log_odds_first &lt;- -3.5 + 0.5 * 5 + 0
+plogis(log_odds_first)   # plogis(-1.0) ≈ 0.27
 
 # Experienced breeder, quality = 5
-log_odds_exp &lt;- -3.0 + 0.5 * 5 + 1.5
+log_odds_exp &lt;- -3.5 + 0.5 * 5 + 2.0
 plogis(log_odds_exp)     # plogis(1.0) ≈ 0.73</code></pre>
 <p>
-At the same territory quality of 5, first-time breeders have a predicted success probability of about 38%, while experienced breeders have about 73%. The difference is large in probability terms even though the log-odds difference is the fixed value of 1.5 regardless of quality.
+At the same territory quality of 5, first-time breeders have a predicted success probability of about 27%, while experienced breeders have about 73%. The difference is large in probability terms even though the log-odds difference is the fixed value of 2.0 regardless of quality.
 </p>
 </div>
 </div>

@@ -318,7 +318,7 @@ All previous workshops used linear models with a Normal distribution for the res
 The dataset for this workshop comes from a study of plant diversity across 90 plots of land. Download it below and save it to your `BI3010/data/` folder.
 
 ```{r, echo=FALSE, results='asis'}
-cat(make_download_btn("../Workshop 10 - GLMs/Data/species.txt"))
+cat(make_download_btn("Data/species.txt"))
 ```
 
 Each row is one plot. The variables are:

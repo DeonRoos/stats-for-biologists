@@ -218,6 +218,8 @@ function toggleGlossary() {
 4. Produce a figure of the fitted relationship using `ggeffects` or manual predictions.
 :::
 
+# Workshop structure
+
 ::: {.callout-note}
 ## The Analytical Workflow
 

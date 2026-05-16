@@ -3036,7 +3036,7 @@ vertical-align: -.125em;
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#workshop-structure" id="toc-workshop-structure" class="nav-link active" data-scroll-target="#workshop-structure">Workshop structure</a></li>
+  <li><a href="#learning-objectives" id="toc-learning-objectives" class="nav-link active" data-scroll-target="#learning-objectives">Learning Objectives</a></li>
   <li><a href="#a-reminder-of-the-model" id="toc-a-reminder-of-the-model" class="nav-link" data-scroll-target="#a-reminder-of-the-model">A reminder of the model</a></li>
   <li><a href="#diagnosing" id="toc-diagnosing" class="nav-link" data-scroll-target="#diagnosing">Diagnosing</a>
   <ul class="collapse">
@@ -3222,7 +3222,7 @@ margin-bottom: 0.3rem;
 .ws-download-btn:hover { background: #0b5ed7; }
 </style>
 
-<button id="glossary-btn" onclick="toggleGlossary()">Glossary 词汇表</button>
+<button id="glossary-btn" onclick="toggleGlossary()">Glossary / 词汇表</button>
 
 <div id="glossary-panel">
   <div id="glossary-header">
@@ -3341,20 +3341,51 @@ margin-bottom: 0.3rem;
 
   </div>
 </div>
-<section id="workshop-structure" class="level1">
-<h1>Workshop structure</h1>
-<p>This workshop continues with the workflow introduced in earlier sessions:</p>
-<ol type="1">
-<li>Formulate a research question.</li>
-<li>Perform exploratory data analysis.</li>
-<li>Identify any hidden assumptions.</li>
-<li>Fit an appropriate model.</li>
-<li>Diagnose the model and check assumptions <strong>[Focus of today]</strong>.</li>
-<li>Summarise the results.</li>
-<li>Interpret and provide inferences.</li>
-</ol>
 <p>We pick up where Workshop 5 left off, returning to step 5 to check whether the rabbit model is worthy of our trust.</p>
 <p>If you didn’t finish Workshop 5, do so before continuing.</p>
+<section id="learning-objectives" class="level1">
+<h1>Learning Objectives</h1>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Learning objectives
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>By the end of this workshop you’ll be able to:</p>
+<ul>
+<li>Produce and interpret the four standard diagnostic plots for a linear model with a categorical predictor</li>
+<li>Identify violations of linearity, equal variance, normality, and independence from residual plots</li>
+<li>Assess leverage and influence using Cook’s distances</li>
+<li>Decide whether a model is trustworthy enough to interpret</li>
+<li>Apply the full diagnostic workflow to a novel dataset</li>
+</ul>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+The Analytical Workflow
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li>Formulate a research question</li>
+<li>Perform exploratory data analysis</li>
+<li>Identify hidden assumptions</li>
+<li>Fit a model</li>
+<li>Diagnose the model <strong>[Focus of today]</strong></li>
+<li>Summarise the results</li>
+<li>Interpret and draw conclusions</li>
+</ol>
+</div>
+</div>
 </section>
 <section id="a-reminder-of-the-model" class="level1">
 <h1>A reminder of the model</h1>

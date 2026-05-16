@@ -3036,7 +3036,8 @@ vertical-align: -.125em;
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#why-diagnostics-matter" id="toc-why-diagnostics-matter" class="nav-link active" data-scroll-target="#why-diagnostics-matter">Why diagnostics matter</a></li>
+  <li><a href="#learning-objectives" id="toc-learning-objectives" class="nav-link active" data-scroll-target="#learning-objectives">Learning Objectives</a></li>
+  <li><a href="#why-diagnostics-matter" id="toc-why-diagnostics-matter" class="nav-link" data-scroll-target="#why-diagnostics-matter">Why diagnostics matter</a></li>
   <li><a href="#diagnosing-the-four-horsemen" id="toc-diagnosing-the-four-horsemen" class="nav-link" data-scroll-target="#diagnosing-the-four-horsemen">Diagnosing the four horsemen</a>
   <ul class="collapse">
   <li><a href="#residuals-vs-fitted" id="toc-residuals-vs-fitted" class="nav-link" data-scroll-target="#residuals-vs-fitted">Residuals vs Fitted</a>
@@ -3107,6 +3108,12 @@ function revealAnswer(btn) {
       return;
     }
     textarea.classList.remove('missing');
+    textarea.disabled = true;
+    textarea.classList.add('ws-answer-locked');
+    var badge = document.createElement('span');
+    badge.className = 'ws-submitted-badge';
+    badge.textContent = 'Submitted';
+    textarea.insertAdjacentElement('afterend', badge);
   }
 
   var mcOptions = block.querySelector('.mc-options');
@@ -3133,15 +3140,6 @@ function revealAnswer(btn) {
   if (answer) answer.style.display = 'block';
   btn.textContent = 'Answer shown';
   btn.disabled = true;
-
-  if (textarea) {
-    textarea.disabled = true;
-    textarea.classList.add('ws-answer-locked');
-    var badge = document.createElement('span');
-    badge.className = 'ws-submitted-badge';
-    badge.textContent = 'Submitted';
-    textarea.insertAdjacentElement('afterend', badge);
-  }
 }
 
 function toggleGlossary() {
@@ -3238,29 +3236,8 @@ margin-top: 0.25rem;
 }
 .glossary-section-header:first-child { border-top: none; margin-top: 0; }
 </style>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Workshop structure
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Today we work with the models from Workshop 3 and apply the full diagnostic workflow. The focus is step 5.</p>
-<ol type="1">
-<li>Formulate a research question.</li>
-<li>Perform exploratory data analysis.</li>
-<li>Identify any hidden assumptions.</li>
-<li>Fit an appropriate model.</li>
-<li>Diagnose the model and check assumptions <strong>[Focus of today]</strong>.</li>
-<li>Summarise the results.</li>
-<li>Interpret and provide inferences.</li>
-</ol>
-<p>To keep the workload manageable, start by copying your workflow from Workshop 3 into a new script, or continue in the same script. If you didn’t finish Workshop 3, complete it now before continuing here.</p>
-</div>
-</div>
+<section id="learning-objectives" class="level1">
+<h1>Learning Objectives</h1>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -3279,6 +3256,30 @@ Learning objectives
 </ol>
 </div>
 </div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+The Analytical Workflow
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Today we work with the models from Workshop 3 and apply the full diagnostic workflow. The focus is step 5.</p>
+<ol type="1">
+<li>Formulate a research question.</li>
+<li>Perform exploratory data analysis.</li>
+<li>Identify any hidden assumptions.</li>
+<li>Fit an appropriate model.</li>
+<li>Diagnose the model and check assumptions <strong>[Focus of today]</strong>.</li>
+<li>Summarise the results.</li>
+<li>Interpret and provide inferences.</li>
+</ol>
+<p>To keep the workload manageable, start by copying your workflow from Workshop 3 into a new script, or continue in the same script. If you didn’t finish Workshop 3, complete it now before continuing here.</p>
+</div>
+</div>
+</section>
 <section id="why-diagnostics-matter" class="level1">
 <h1>Why diagnostics matter</h1>
 <p>Starting with the boto dolphin model from Workshop 3, we have the equation with estimated parameters:</p>
@@ -3912,11 +3913,11 @@ Show Answer
 </tr>
 </tbody>
 </table>
-<button id="glossary-btn" onclick="toggleGlossary()">词典 / Glossary</button>
+<button id="glossary-btn" onclick="toggleGlossary()">Glossary / 词汇表</button>
 
 <div id="glossary-panel">
   <div id="glossary-header">
-    <span>Glossary / 词典</span>
+    <span>Glossary / 词汇表</span>
     <button id="glossary-close" onclick="toggleGlossary()">✕</button>
   </div>
   <div id="glossary-body">

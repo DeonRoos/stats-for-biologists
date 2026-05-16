@@ -298,6 +298,8 @@ By the end of this workshop you should be able to:
 5. Diagnose a Poisson GLM and explain why the normal Q-Q plot is largely uninformative for Poisson residuals.
 :::
 
+# Workshop structure
+
 ::: {.callout-note}
 ## The Analytical Workflow
 As always, we work through the same seven-step workflow:

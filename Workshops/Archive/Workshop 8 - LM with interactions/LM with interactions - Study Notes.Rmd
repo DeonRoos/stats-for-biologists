@@ -1,0 +1,75 @@
+---
+title: "Linear models with interactions - Study Notes"
+author: "Michelle Pinard & Deon Roos"
+date: 'Last updated: `r Sys.Date()`'
+output:
+  word_document:
+    toc: yes
+    reference_docx: "../sbstemplate.docx"
+---
+
+# Why interactions
+
+Some effects depend on each other. If the impact of one explanatory variable varies with the level of another, include that dependence with an interaction rather than separate main effects. Examples used were include shark density with reef complexity for fish biomass change, and animal density by species for crop yield. Including an interaction resolves any breaks in assumptions of additivity.
+
+# Model forms
+
+Two equivalent R formulas: `y ~ x1 + x2 + x1:x2` and `y ~ x1 * x2`. 
+Use the latter for brevity. `y ~ x1 + x2 + x1:x2` is generally only used when greater control is needed.
+Both translate into:
+
+$y_i \sim Normal(\mu_i, \sigma)$
+
+$\mu_i = \beta_0 + \beta_1 \times x1_i + \beta_2 \times x2_i + \beta_3 \times x1_i \times x2_i$
+
+# Interpreting parameters from a model with an interaction
+
+$\beta_1$ and $\beta_2$ are simple slopes when the other predictor equals zero. To understand the full effect of either $x1$ or $x2$ requires using the full equation. A positive $\beta_3$ means the $x1$ effect becomes more positive as $x2$ increases (and vice versa).
+
+# Diagnosing the model
+
+Use the standard four plots. 
+
+- Residuals vs fitted; patterns can suggest non-additivity (or non-linearity). 
+- Scale–location;  patterns can suggest non-additivity (or non-linearity).
+
+# Visualising an interaction (continuous × continuous)
+
+Create a prediction grid over the observed ranges with `seq(...)` and `expand.grid(...)`, then obtain fitted values with `predict(...)` and display a heatmap with geom_tile, mapping fill to the predicted mean. Colour choice matters for readability. Communicating uncertainty on heatmaps is difficult. A common (but imperfect) approach is to show separate figures for upper and lower 95% CI surfaces or standard error.
+
+Be aware that other options exist to show interacting relationships. `ggeffects` uses one such alternative.
+
+# Broader examples and limits
+
+Interactions can be between categorical and continuous variables, two categorical variables, or two continuous variables, and higher-order interactions (e.g. `y ~ x1 * x2 * x3`) are possible. They add parameters quickly and can demand much larger samples. Diagnostic plots become especially useful for keeping models with lots of variables and parameters interpretable.
+
+# Useful code examples
+
+```{r, eval = F}
+# main effects
+bio_mod <- lm(biomass_change ~ shark_density + reef_complexity, data = reef)
+
+# interaction (two equivalent forms)
+bio_mod <- lm(biomass_change ~ shark_density * reef_complexity, data = reef)
+# or
+bio_mod <- lm(biomass_change ~ shark_density + reef_complexity + shark_density:reef_complexity, data = reef)
+
+# Prediction data
+shark_density_seq <- seq(min(reef$shark_density), max(reef$shark_density), length.out = 20)
+reef_complexity_seq <- seq(min(reef$reef_complexity), max(reef$reef_complexity), length.out = 20)
+
+fake <- expand.grid(
+  shark_density = shark_density_seq,
+  reef_complexity = reef_complexity_seq
+)
+
+fake$fit <- predict(bio_mod, newdata = fake)
+
+# Plotting prediction of interaction
+ggplot(fake) +
+  geom_tile(aes(x = shark_density, y = reef_complexity, fill = fit)) +
+  labs(x = "Shark Density",
+       y = "Reef Complexity",
+       fill = "Predicted Biomass Change") +
+  theme_minimal()
+```

@@ -365,7 +365,7 @@ Today we work through the same dataset twice: once to build a predictive model a
 The dataset is the Aberdeen rental flats data from Workshop 2. If you no longer have it, download it below and save it to your `BI3010/data/` folder.
 
 ```{r, echo=FALSE, results='asis'}
-cat(make_download_btn("../Workshop 2 - Data vis/data/abdn_flats.txt"))
+cat(make_download_btn("../workshop-2/Data/abdn_flats.txt"))
 ```
 
 ```{r, eval=FALSE}

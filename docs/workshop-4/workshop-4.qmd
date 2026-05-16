@@ -22,12 +22,12 @@ knitr::opts_chunk$set(echo = FALSE, results = "hide", fig.show = "show",
                       message = FALSE, warning = FALSE)
 library(ggplot2)
 
-boto  <- read.table("../Workshop 2 - Data vis/Data/boto.txt", header = TRUE)
+boto  <- read.table("../workshop-2/Data/boto.txt", header = TRUE)
 boto_model <- lm(length ~ drought, data = boto)
 boto$predicted <- predict(boto_model)
 boto$residual  <- boto$length - boto$predicted
 
-beetles  <- read.table("../Workshop 3 - LM with continuous predictor/Data/beetles.txt",
+beetles  <- read.table("../workshop-3/Data/beetles.txt",
                        header = TRUE)
 beet_mod <- lm(offspring ~ temperature, data = beetles)
 

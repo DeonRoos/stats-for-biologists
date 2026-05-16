@@ -207,7 +207,7 @@ As always, we're using the workflow below to structure the workshops:
 
 1. Formulate a research question.
 2. Perform exploratory data analysis.
-3. **Identify any hidden assumptions [Focus of today].**
+3. Identify any hidden assumptions **[Focus of today]**.
 4. Fit an appropriate model.
 5. Diagnose the model and check assumptions.
 6. Summarise the results.

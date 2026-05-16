@@ -279,7 +279,7 @@ function toggleGlossary() {
 7. Interpret and draw conclusions.
 :::
 
-Today's focus is on interactions between predictors. We will first fit a model with only main effects, find a problem in the diagnostics, and then fix it by including an interaction term. We then work through visualising interactions and finish with an independent extension exercise on a second dataset.
+Today's focus is on interactions between predictors. We'll first fit a model with only main effects, find a problem in the diagnostics, and then fix it by including an interaction term. We then work through visualising interactions and finish with an independent extension exercise on a second dataset.
 
 ## 1. Formulate a research question
 
@@ -404,7 +404,7 @@ summary(bio_mod)
 <p>Using the approximate coefficients from the model:</p>
 <pre><code>-27.21 + 3.22 * 5  + 7.12 * 0.1  # ≈ -10.4 kg/m²
 -27.21 + 3.22 * 10 + 7.12 * 0.1  # ≈  +5.7 kg/m²</code></pre>
-<p>Going from 5 to 10 sharks increases predicted biomass by about 16 kg/m² (the difference is simply 5 × β₁ ≈ 5 × 3.22). In a main-effects model this difference is the same regardless of reef complexity, because the additivity assumption forces the shark slope to be constant. You will see later why that assumption is wrong here.</p>
+<p>Going from 5 to 10 sharks increases predicted biomass by about 16 kg/m² (the difference is simply 5 × β₁ ≈ 5 × 3.22). In a main-effects model this difference is the same regardless of reef complexity, because the additivity assumption forces the shark slope to be constant. You'll see later why that assumption is wrong here.</p>
 </div>
 </div>
 
@@ -424,13 +424,13 @@ plot(preds)
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 <p>It's kind of hard to think why adding predators would increase the number of prey. But not impossible. You might try: trophic cascades, a landscape of fear effect reducing prey movement, compensatory breeding by prey, shifts in species composition, and so on.</p>
-<p>The point is that you can always come up with <em>some</em> hypothesis to explain your results after the fact. That is HARKing: Hypothesising After Results are Known, and it is a serious problem in science. To be very clear, HARKing is a <em>highly</em> questionable research practice (i.e. uncomfortably close to fraud) where researchers try to explain their results after the model tells them the answer, while pretending that they were always testing that hypothesis. Any explanation you arrive at after seeing the result should be labelled as exploratory ("we did not predict this, but one possible interpretation is..."), not presented as confirmation of a prior prediction. We will see shortly that the result changes completely once we account for the interaction, which makes this exercise even more telling.</p>
+<p>The point is that you can always come up with <em>some</em> hypothesis to explain your results after the fact. That's HARKing: Hypothesising After Results are Known, and it's a serious problem in science. To be very clear, HARKing is a <em>highly</em> questionable research practice (i.e. uncomfortably close to fraud) where researchers try to explain their results after the model tells them the answer, while pretending they were always testing that hypothesis. Any explanation you arrive at after seeing the result should be labelled as exploratory ("we did not predict this, but one possible interpretation is..."), not presented as confirmation of a prior prediction. We'll see shortly that the result changes completely once we account for the interaction, which makes this exercise even more telling.</p>
 </div>
 </div>
 
 # Including an interaction
 
-The main-effects model treats the effects of shark density and reef complexity as independent. But think about what is ecologically plausible. In a structurally simple reef with few hiding places, more sharks should reduce fish biomass substantially. In a complex reef with many refuges, the same number of sharks might have much less impact because prey can avoid them. This means the effect of shark density on biomass is not constant: it depends on reef complexity. That is an interaction.
+The main-effects model treats the effects of shark density and reef complexity as independent. But think about what is ecologically plausible. In a structurally simple reef with few hiding places, more sharks should reduce fish biomass substantially. In a complex reef with many refuges, the same number of sharks might have much less impact because prey can avoid them. This means the effect of shark density on biomass isn't constant: it depends on reef complexity. That's an interaction.
 
 ```{=html}
 <div class="card-sort-container" id="card-sort-interaction">
@@ -758,7 +758,7 @@ The `*` notation is shorthand and preferred for readability.
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>The interaction term multiplies both predictors together: $\beta_3 \times shark_i \times reef_i$. The main effects ($\beta_1 \times shark_i$ and $\beta_2 \times reef_i$) remain in the model alongside the interaction; removing them would change the meaning of the other parameters entirely. The brackets around the interaction term are not required by R but help readers identify it visually.</p>
+<p>The interaction term multiplies both predictors together: $\beta_3 \times shark_i \times reef_i$. The main effects ($\beta_1 \times shark_i$ and $\beta_2 \times reef_i$) remain in the model alongside the interaction; removing them would change the meaning of the other parameters entirely. The brackets around the interaction term aren't required by R but help readers identify it visually.</p>
 </div>
 </div>
 
@@ -788,7 +788,7 @@ par(mfrow = c(1, 1))
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>Yes, the curved pattern in the residuals vs fitted plot disappears. This is not just a mechanical effect of adding a parameter: it is evidence that the original model was missing the interaction. The interaction term captures the combined effect that the main-effects model could not, and once it is included, the residuals no longer show a pattern.</p>
+<p>Yes, the curved pattern in the residuals vs fitted plot disappears. This isn't just a mechanical effect of adding a parameter: it's evidence that the original model was missing the interaction. The interaction term captures the combined effect that the main-effects model could not, and once it's included, the residuals no longer show a pattern.</p>
 </div>
 </div>
 
@@ -822,7 +822,7 @@ summary(bio_mod)
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>The intercept is the predicted value when all predictors are zero, and that definition does not change when an interaction is added. In this case, zero sharks and zero reef complexity is an unlikely combination in reality, so the intercept has limited direct biological meaning. Its value will also differ from the main-effects model because the interaction changes how the other parameters are estimated.</p>
+<p>The intercept is the predicted value when all predictors are zero, and that definition doesn't change when an interaction is added. In this case, zero sharks and zero reef complexity is an unlikely combination in reality, so the intercept has limited direct biological meaning. Its value will also differ from the main-effects model because the interaction changes how the other parameters are estimated.</p>
 </div>
 </div>
 
@@ -850,7 +850,7 @@ summary(bio_mod)
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>No — we get something far more intuitive, requiring fewer mental gymnastics to explain. Predators eat prey. The more predators, the less prey. Just that simple. The positive coefficient from the main-effects model was an artefact of a model missing the interaction term. Once the interaction is included, the model correctly captures that the shark effect is negative but varies with reef complexity. This is also why we should always diagnose before interpreting: a model with violated assumptions can produce coefficients that are not just imprecise but point in the wrong direction entirely.</p>
+<p>No — we get something far more intuitive, requiring fewer mental gymnastics to explain. Predators eat prey. The more predators, the less prey. Just that simple. The positive coefficient from the main-effects model was an artefact of a model missing the interaction term. Once the interaction is included, the model correctly captures that the shark effect is negative but varies with reef complexity. This is also why we should always diagnose before interpreting: a model with violated assumptions can produce coefficients that aren't just imprecise but point in the wrong direction entirely.</p>
 </div>
 </div>
 
@@ -925,7 +925,7 @@ ggplot(fake) +
   theme_minimal()
 ```
 
-One limitation of heatmaps is that it is hard to communicate uncertainty on them. A common workaround is to produce two additional plots: one showing predictions at the upper 95% confidence limit and one at the lower. But this is not ideal either — it is really hard for our eyes to match up the same region across multiple heatmaps, so you never get a precise sense of the uncertainty at any specific location. If you have any bright ideas for how to effectively convey uncertainty with heatmaps (or even just maps in general), you might have a great paper on your hands. We are not aware of anyone who has found a particularly compelling solution to this yet.
+One limitation of heatmaps is that it's hard to communicate uncertainty on them. A common workaround is to produce two additional plots: one showing predictions at the upper 95% confidence limit and one at the lower. But this isn't ideal either — it's really hard for our eyes to match up the same region across multiple heatmaps, so you never get a precise sense of the uncertainty at any specific location. If you have any bright ideas for how to effectively convey uncertainty with heatmaps (or even just maps in general), you might have a great paper on your hands. We're not aware of anyone who has found a particularly compelling solution to this yet.
 
 # A new challenger: Asian elephants
 
@@ -951,7 +951,7 @@ Go through the full seven-step workflow. A few things to keep in mind:
 
 1. The interaction here is between a continuous variable (`veg_cover`) and a categorical variable (`prox_town`), not two continuous variables. R handles this automatically when you use `*` in the formula, but the interpretation changes: instead of a single $\beta_3$, you get a separate interaction coefficient for each category of `prox_town` other than the baseline category.
 
-2. For a continuous × categorical interaction, a heatmap is not appropriate. Use `ggpredict()` from `ggeffects` with both terms to produce separate regression lines per proximity level.
+2. For a continuous × categorical interaction, a heatmap isn't appropriate. Use `ggpredict()` from `ggeffects` with both terms to produce separate regression lines per proximity level.
 
 3. Think carefully about hidden assumptions. The `activity` variable is defined relative to a "pristine" baseline. What assumptions does that involve, and are they likely to hold?
 
@@ -963,7 +963,7 @@ Go through the full seven-step workflow. A few things to keep in mind:
 <textarea class="student-answer" rows="6" placeholder="Describe the direction and pattern of the interaction in plain language..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>When elephant herds are far from towns, activity increases with vegetation cover: denser vegetation is associated with more normal activity, which makes biological sense as undisturbed habitat. When herds are near or very near to towns, the relationship reverses: higher vegetation cover is associated with reduced activity. One interpretation is that elephants near human settlements use dense vegetation to hide and reduce movement rather than to forage, effectively avoiding contact with people. The interaction means you cannot summarise the vegetation effect with a single slope; its direction depends on proximity to towns.</p>
+<p>When elephant herds are far from towns, activity increases with vegetation cover: denser vegetation is associated with more normal activity, which makes biological sense as undisturbed habitat. When herds are near or very near to towns, the relationship reverses: higher vegetation cover is associated with reduced activity. One interpretation is that elephants near human settlements use dense vegetation to hide and reduce movement rather than to forage, effectively avoiding contact with people. The interaction means you can't summarise the vegetation effect with a single slope; its direction depends on proximity to towns.</p>
 <p>The hidden assumptions worth flagging: the "baseline" activity level is measured in a separate group of elephants in pristine habitat, so the activity variable assumes those elephants are comparable to the study animals. The validity of the activity index as a measure of genuine ecological behaviour (rather than observer bias or measurement artefact) is also worth questioning.</p>
 </div>
 </div>

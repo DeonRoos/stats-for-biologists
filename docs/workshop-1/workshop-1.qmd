@@ -214,7 +214,7 @@ function toggleGlossary() {
 </style>
 ```
 
-Welcome to the first BI3010 workshop. Over the next ten workshop sessions, you will go from working with raw data to fitting complex statistical models, building up a workflow you can apply to almost any dataset you encounter, including every single one of your honour's project next year. Today's workshop focuses on getting comfortable with R and learning to spot problems in data before analysis begins, a step that sounds unglamorous but is where scientists spend 80% of their time.
+Welcome to the first BI3010 workshop. Over the next ten workshop sessions, you'll go from working with raw data to fitting complex statistical models, building up a workflow you can apply to almost any dataset you encounter, including every single one of your honour's project next year. Today's workshop focuses on getting comfortable with R and learning to spot problems in data before analysis begins, a step that sounds unglamorous but is where scientists spend 80% of their time.
 
 # Workshop Structure
 
@@ -254,7 +254,7 @@ These skills apply every time you pick up a new dataset and will come up through
 ::: {.callout-note collapse="true"}
 ## New to RStudio? Expand here
 
-Before we begin the workshop, let's make sure that you are set up to work with `R` and RStudio. If you're working on your own machine, make sure you have `R` and RStudio installed. If you don't, you can download `R` from [CRAN](https://cran.r-project.org/) and RStudio from [RStudio's website](https://www.rstudio.com/products/rstudio/download/). On university computers, these should already be installed.
+Before we begin the workshop, let's make sure that you're set up to work with `R` and RStudio. If you're working on your own machine, make sure you have `R` and RStudio installed. If you don't, you can download `R` from [CRAN](https://cran.r-project.org/) and RStudio from [RStudio's website](https://www.rstudio.com/products/rstudio/download/). On university computers, these should already be installed.
 
 Once you have `R` and RStudio set up, open RStudio. You should see a window with four main panes:
 
@@ -267,7 +267,7 @@ Once you have `R` and RStudio set up, open RStudio. You should see a window with
 
 There are a few ways to run `R` code:
 
-- **Directly in the console:** You can type `R` commands directly into the Console pane and press Enter to run them. This is useful for very quick tests and calculations but avoid using this for project work (none of it is saved).
+- **Directly in the console:** You can type `R` commands directly into the Console pane and press Enter to run them. This is useful for very quick tests and calculations but avoid using this for project work (none of it's saved).
 - **From a script:** Scripts are simple text files that contain `R` code. You can write multiple lines of code in a script and run them together or one by one. This is particularly useful for more complex analyses where you want to keep a record of your code.
 
 To run code from a script, you can:
@@ -325,7 +325,7 @@ Reading those comments is more work than reading the code itself. Think of comme
 ::: {.callout-caution}
 ## On using LLMs
 
-LLMs (Large Language Models, or AI) have become common tools in programming and data analysis: good for boring or fiddly tasks, one-off problems, and tidying code (see [here](https://nicholas.carlini.com/writing/2024/how-i-use-ai.html) for a pragmatic take on this). The catch is that you need to know enough to tell when the output is correct and when it's plausible-sounding nonsense. That line blurs fast as the code gets more complex. For analysis, without a sound theoretical understanding, they tend to get it wrong **60%** of the time if the user cannot specify their data and question properly (see [here](https://doi.org/10.1111/2041-210x.70267)). To make sure that doesn't happen to you, you need to understand statistical theory and assumptions.
+LLMs (Large Language Models, or AI) have become common tools in programming and data analysis: good for boring or fiddly tasks, one-off problems, and tidying code (see [here](https://nicholas.carlini.com/writing/2024/how-i-use-ai.html) for a pragmatic take on this). The catch is that you need to know enough to tell when the output is correct and when it's plausible-sounding nonsense. That line blurs fast as the code gets more complex. For analysis, without a sound theoretical understanding, they tend to get it wrong **60%** of the time if the user can't specify their data and question properly (see [here](https://doi.org/10.1111/2041-210x.70267)). To make sure that doesn't happen to you, you need to understand statistical theory and assumptions.
 
 Using them well is a skill in itself. Make your prompt specific: describe what you want, paste the relevant code, include any error messages, and say you're working in `R` (otherwise you'll get Python). Mention any packages you want to use, or specify base `R`.
 :::
@@ -382,7 +382,7 @@ cat(make_download_btn("data/alligator_bite.txt"))
 
 ## Load File into RStudio
 
-Now we can load the data. The `.txt` extension tells us it is a plain text file, so we use `read.table()`. We need two arguments: the filename (including the `data/` subfolder path), and `header = TRUE` to tell `R` that the first row contains column names rather than data.
+Now we can load the data. The `.txt` extension tells us it's a plain text file, so we use `read.table()`. We need two arguments: the filename (including the `data/` subfolder path), and `header = TRUE` to tell `R` that the first row contains column names rather than data.
 
 Because the project sets the working directory to `BI3010/`, we can refer to files using paths relative to that folder, with no need to type out the full path.
 
@@ -401,14 +401,14 @@ ali <- read.table("data/alligator_bite.txt",
 
 ## Checking It Worked
 
-If you hit an error, don't panic. Nothing in `R` is permanent (unless you very explicitly make it so). Run the code again, fix the issue, move on. The only thing that is permanent is your script and original data, so save your script often and comment as you go. Not sure whether removing something will break things? Comment it out with `#` first rather than deleting it.
+If you hit an error, don't panic. Nothing in `R` is permanent (unless you very explicitly make it so). Run the code again, fix the issue, move on. The only thing that's permanent is your script and original data, so save your script often and comment as you go. Not sure whether removing something will break things? Comment it out with `#` first rather than deleting it.
 
 If you get an error loading data, common causes are:
 
-- The file is not in the `data` folder inside your `BI3010` project, or you did not open RStudio via `BI3010.Rproj`.
+- The file isn't in the `data` folder inside your `BI3010` project, or you didn't open RStudio via `BI3010.Rproj`.
 - You may have misspelled one of the words (including using a capital letter instead of lower case).
 - Your file may be missing a column heading.
-- The file is not in the correct format (e.g., the file saved as a `.csv` instead of a `.txt`).
+- The file isn't in the correct format (e.g., the file saved as a `.csv` instead of a `.txt`).
 - The quotation marks are in the wrong location.
 - You may have missed the final bracket `)` in the `read.table()` function.
 
@@ -680,7 +680,7 @@ quantile(ali$length, probs = c(0.25,0.75))
 <div class="question-block">
 <p><strong>Question 3.</strong> Using the tools from above, can you identify any other possible data entry mistakes caused by missing decimal points?</p>
 <div class="mc-options">
-  <label><input type="radio" name="q4_q3"> Yes, there is at least one more observation with missing decimal points</label>
+  <label><input type="radio" name="q4_q3"> Yes, there's at least one more observation with missing decimal points</label>
   <label><input type="radio" name="q4_q3" data-correct="true"> No, row 20 appears to be the only case</label>
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
@@ -716,7 +716,7 @@ Now we just divide, which shifts the decimal two places to the right:
 ali$bite[20] <- ali$bite[20] / 100
 ```
 
-Using a hardcoded row number like `[20]` works here, but it is fragile: if the dataset were ever re-sorted or a row added above this one, row 20 would point to the wrong observation. A safer approach uses the same conditional indexing we've already learned, targeting the value itself rather than its position:
+Using a hardcoded row number like `[20]` works here, but it's fragile: if the dataset were ever re-sorted or a row added above this one, row 20 would point to the wrong observation. A safer approach uses the same conditional indexing we've already learned, targeting the value itself rather than its position:
 
 ```{r, eval=FALSE}
 ali$bite[ali$bite > 100000] <- ali$bite[ali$bite > 100000] / 100
@@ -741,7 +741,7 @@ ali&#36;length[ali&#36;length > 2000] <- ali&#36;length[ali&#36;length > 2000] /
 </div>
 
 <div class="question-block">
-<p><strong>Question 2.</strong> Having made any changes to your data, it's always worthwhile checking it again to make sure you did not create a new mistake. Do so now using any techniques you feel are appropriate.</p>
+<p><strong>Question 2.</strong> Having made any changes to your data, it's always worthwhile checking it again to make sure you didn't create a new mistake. Do so now using any techniques you feel are appropriate.</p>
 <textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
@@ -774,8 +774,8 @@ Start with an EDA as before. Can you find them all?
 | `weight` | Body weight in grams |
 | `speed` | Speed over a 50 m distance, in km/h |
 
-- A total of 500 individuals were measured, but these were not equally divided between the three species.
-- Multiple people participated in data entry, and it is believed that not all were confident in how to do this.
+- A total of 500 individuals were measured, but these weren't equally divided between the three species.
+- Multiple people participated in data entry, and it's believed that not all were confident in how to do this.
 - Physical copies of the data are available should any data need to be verified (contact one of the teaching staff if you need a data entry confirmed).
 :::
 
@@ -802,7 +802,7 @@ fast&#36;weight[fast&#36;weight == 0] <- 45514</code></pre>
 </div>
 
 <div class="question-block">
-<p><strong>Mistake 2.</strong> There is a second unusual weight in this dataset. Find it, identify which row it is in, and write the code to correct it.</p>
+<p><strong>Mistake 2.</strong> There's a second unusual weight in this dataset. Find it, identify which row it is in, and write the code to correct it.</p>
 <textarea class="student-answer" rows="3" placeholder="Describe the error and write your correction code here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
@@ -841,11 +841,11 @@ fast&#36;speed[fast&#36;speed > 10000 &amp; !is.na(fast&#36;speed)] <- fast&#36;
 </div>
 
 <div class="question-block">
-<p><strong>Mistake 5.</strong> There is one remaining issue in the dataset. What is it, where is it, and how should it be handled?</p>
+<p><strong>Mistake 5.</strong> There's one remaining issue in the dataset. What is it, where is it, and how should it be handled?</p>
 <textarea class="student-answer" rows="3" placeholder="Describe the issue and explain your reasoning..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>One observation has a missing value (<code>NA</code>) in the speed column. <code>NA</code> means "not available" and is R's standard way to represent missing data. The data provider cannot confirm what the true value should be, so the only honest option is to leave it as <code>NA</code>. Functions like <code>mean()</code> will return <code>NA</code> when any value is missing unless you add <code>na.rm = TRUE</code>.</p>
+<p>One observation has a missing value (<code>NA</code>) in the speed column. <code>NA</code> means "not available" and is R's standard way to represent missing data. The data provider can't confirm what the true value should be, so the only honest option is to leave it as <code>NA</code>. Functions like <code>mean()</code> will return <code>NA</code> when any value is missing unless you add <code>na.rm = TRUE</code>.</p>
 <p>After all corrections, run a final check:</p>
 <pre><code class="language-r">summary(fast)</code></pre>
 </div>
@@ -930,7 +930,7 @@ One row has the city entered as "amarillo" (lower case a) while all other rows u
 The <code>ufo</code> column contains one value of 9999, which appears to be a placeholder for missing data rather than a real count. A histogram of <code>ufo</code> makes this obvious. This value should be replaced with <code>NA</code>.</p>
 
 <p><strong>Error 3 - Negative value in alc</strong><br>
-Alcohol consumption cannot be negative. There is one observation with a value of -5 in the <code>alc</code> column. A histogram will reveal it as a clear outlier on the left. The correct value is 5. Note: negative values in the <code>chupa</code> column are fine and expected, since it is a growth rate.</p>
+Alcohol consumption can't be negative. There's one observation with a value of -5 in the <code>alc</code> column. A histogram will reveal it as a clear outlier on the left. The correct value is 5. Note: negative values in the <code>chupa</code> column are fine and expected, since it's a growth rate.</p>
 </div>
 </div>
 

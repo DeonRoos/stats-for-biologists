@@ -331,7 +331,7 @@ This workshop continues with the workflow introduced in earlier sessions:
 
 We pick up where Workshop 5 left off, returning to step 5 to check whether the rabbit model is worthy of our trust.
 
-If you did not finish Workshop 5, do so before continuing.
+If you didn't finish Workshop 5, do so before continuing.
 
 # A reminder of the model
 
@@ -381,7 +381,7 @@ The y-axis shows residual errors (the difference between each observed weight an
 
 ### Linearity
 
-With a continuous predictor, we use this plot to check whether the relationship is approximately linear. With a categorical predictor there is no line to draw between the groups, so there is no linearity assumption to check here. One less thing to worry about.
+With a continuous predictor, we use this plot to check whether the relationship is approximately linear. With a categorical predictor there's no line to draw between the groups, so there's no linearity assumption to check here. One less thing to worry about.
 
 ### Equal variance of errors
 
@@ -416,7 +416,7 @@ ggplot() +
 
 The intervals are the same width for both groups, even though Group A's data is much less variable. Heteroscedasticity inflates the standard error across the board. The group means themselves are estimated accurately, but the uncertainty around them is not.
 
-It is worth saying that we generally do care about estimating uncertainty accurately. We never really know if our estimates are "true" in the sense that they accurately reflect reality, so having some measure of uncertainty is generally the responsible approach to science. If you need a reminder of why, think back to the lecture where we discussed being given the option of two drugs with different probabilities of unintended mortality, and how our decision changed depending on whether uncertainty was shown or not.
+It's worth saying that we generally do care about estimating uncertainty accurately. We never really know if our estimates are "true" in the sense that they accurately reflect reality, so having some measure of uncertainty is generally the responsible approach to science. If you need a reminder of why, think back to the lecture where we discussed being given the option of two drugs with different probabilities of unintended mortality, and how our decision changed depending on whether uncertainty was shown or not.
 
 ## Scale-Location
 
@@ -440,7 +440,7 @@ That is what a genuine violation looks like: a clear upward trend showing residu
 plot(rabbit_mod, which = 2)
 ```
 
-We are checking whether the residuals follow an approximately normal distribution. The assumption is met when points lie broadly along the diagonal dashed line. We want them on the line but we do not stress out too much if it is not exactly perfect. If we ever did see utterly bizarre patterns in the points, that would imply one of two things: you need to choose a different distribution for your data-generating process and fit a generalised linear model (GLM), or your model is missing some important predictor variable.
+We are checking whether the residuals follow an approximately normal distribution. The assumption is met when points lie broadly along the diagonal dashed line. We want them on the line but we don't stress out too much if it's not exactly perfect. If we ever did see utterly bizarre patterns in the points, that would imply one of two things: you need to choose a different distribution for your data-generating process and fit a generalised linear model (GLM), or your model is missing some important predictor variable.
 
 ## Residuals vs Leverage
 
@@ -448,7 +448,7 @@ We are checking whether the residuals follow an approximately normal distributio
 plot(rabbit_mod, which = 5)
 ```
 
-This plot does not check the standard assumptions. Instead, it flags observations that have a disproportionate influence on the fitted model. We look for Cook's distance contour lines: observations beyond the 1.0 contour warrant investigation. Here, those contour lines do not appear in the plot at all. None of our points are close to 1, so we do not have any observations that are pulling the model one way or another.
+This plot does not check the standard assumptions. Instead, it flags observations that have a disproportionate influence on the fitted model. We look for Cook's distance contour lines: observations beyond the 1.0 contour warrant investigation. Here, those contour lines don't appear in the plot at all. None of our points are close to 1, so we don't have any observations that are pulling the model one way or another.
 
 For an alternative view of Cook's distances without leverage on the x-axis:
 
@@ -468,7 +468,7 @@ plot(rabbit_mod, which = 4)
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>Equal variance of errors only. With a categorical predictor there is no linear trend to assess, so linearity drops out. We are only asking whether the residual spread is similar across groups.</p>
+<p>Equal variance of errors only. With a categorical predictor there's no linear trend to assess, so linearity drops out. We're only asking whether the residual spread is similar across groups.</p>
 </div>
 </div>
 
@@ -505,7 +505,7 @@ plot(rabbit_mod, which = 4)
 <textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>Less critical than the linearity assumption. Heteroscedasticity does not bias the parameter estimates (group means) themselves, but it inflates standard errors, which in turn makes confidence intervals wider or narrower than they should be. If you only need an accurate point estimate of the group mean, the impact is limited. For reliable inference, which usually requires trustworthy uncertainty estimates, meeting this assumption matters more.</p>
+<p>Less critical than the linearity assumption. Heteroscedasticity doesn't bias the parameter estimates (group means) themselves, but it inflates standard errors, which in turn makes confidence intervals wider or narrower than they should be. If you only need an accurate point estimate of the group mean, the impact is limited. For reliable inference, which usually requires trustworthy uncertainty estimates, meeting this assumption matters more.</p>
 </div>
 </div>
 
@@ -528,13 +528,13 @@ plot(rabbit_mod, which = 4)
 <textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>No. Passing the diagnostics only means we have not found evidence of specific statistical assumption violations. The more fundamental concern for this model was raised before fitting: we cannot be certain that mongoose are genuinely absent from Tokunoshima. No diagnostic plot can check that. The diagnostics address a subset of assumptions; domain knowledge and critical thinking about the data generating process are needed for the rest.</p>
+<p>No. Passing the diagnostics only means we haven't found evidence of specific statistical assumption violations. The more fundamental concern for this model was raised before fitting: we can't be certain that mongoose are genuinely absent from Tokunoshima. No diagnostic plot can check that. The diagnostics address a subset of assumptions; domain knowledge and critical thinking about the data generating process are needed for the rest.</p>
 </div>
 </div>
 
 # A more visually appealing alternative
 
-The `performance` package produces the same diagnostics in a more informative layout. Note that for this particular model it does not work especially well; it tries to draw a smooth line between the two groups, which looks wiggly, but that is an artefact of the two-point structure and does not indicate a problem.
+The `performance` package produces the same diagnostics in a more informative layout. Note that for this particular model it does not work especially well; it tries to draw a smooth line between the two groups, which looks wiggly, but that's an artefact of the two-point structure and doesn't indicate a problem.
 
 ```{r, eval=FALSE}
 library(performance)
@@ -543,7 +543,7 @@ check_model(rabbit_mod)
 
 # The lemurs
 
-Having diagnosed the rabbit model, move on to the lemur model from Workshop 5. If you have not fitted that model yet, do so now. Run the diagnostic plots and decide whether you are willing to trust the results.
+Having diagnosed the rabbit model, move on to the lemur model from Workshop 5. If you haven't fitted that model yet, do so now. Run the diagnostic plots and decide whether you're willing to trust the results.
 
 `r make_download_btn("../Workshop 5 - LM with categorical predictors/Data/lemurs.txt")`
 

@@ -254,7 +254,7 @@ From the question we can identify:
 - **Response variable:** `length`
 - **Predictor variable:** `drought`
 
-Before fitting any model, we need to decide whether a Normal distribution is a reasonable description of the data-generating process for boto length. Formally, we are asking whether the following is plausible:
+Before fitting any model, we need to decide whether a Normal distribution is a reasonable description of the data-generating process for boto length. Formally, we're asking whether the following is plausible:
 
 $$length_i \sim \text{Normal}(\mu_i, \sigma)$$
 
@@ -262,7 +262,7 @@ Here, $length_i$ is the length of dolphin $i$, assumed to follow a Normal distri
 
 ## Is a Normal distribution appropriate?
 
-The first question is whether `length` is continuous or discrete. A discrete variable can only take integer values (1 cm, 2 cm, etc.). A continuous variable can in principle take any value within a range. Although the researchers rounded lengths to the nearest centimetre, actual dolphin length is not constrained to whole-centimetre increments. `length` is inherently continuous, and the Normal distribution generates continuous values. To see this, run:
+The first question is whether `length` is continuous or discrete. A discrete variable can only take integer values (1 cm, 2 cm, etc.). A continuous variable can in principle take any value within a range. Although the researchers rounded lengths to the nearest centimetre, actual dolphin length isn't constrained to whole-centimetre increments. `length` is inherently continuous, and the Normal distribution generates continuous values. To see this, run:
 
 ```{r, eval=FALSE}
 rnorm(n = 10, mean = 200, sd = 10)
@@ -270,7 +270,7 @@ rnorm(n = 10, mean = 200, sd = 10)
 
 The generated values look much like the lengths in the boto dataset, which is reassuring. The only visible difference is that the researchers rounded their measurements.
 
-The next question is whether there are natural bounds that might cause problems. Boto length cannot be zero or negative, and the Normal distribution can technically produce such values. However, the minimum observed length is well above zero, so the risk of the model predicting physically impossible values is low. A Normal distribution is a reasonable choice here, though we should verify this after fitting by checking that the model does not produce implausible predictions. If it did, we would switch to a different distribution using a Generalised Linear Model (GLM), which we cover later in the course.
+The next question is whether there are natural bounds that might cause problems. Boto length cannot be zero or negative, and the Normal distribution can technically produce such values. However, the minimum observed length is well above zero, so the risk of the model predicting physically impossible values is low. A Normal distribution is a reasonable choice here, though we should verify this after fitting by checking that the model doesn't produce implausible predictions. If it did, we'd switch to a different distribution using a Generalised Linear Model (GLM), which we cover later in the course.
 
 ::: {.callout-warning}
 ## An important distinction
@@ -334,7 +334,7 @@ Before fitting the model, consider which assumptions are most likely to be viola
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 <p><strong>Additivity</strong> is a likely concern. In Workshop 2 we saw that drought appears to affect male and female dolphins differently (different slopes on the faceted plot). Where predictors overlap in their effects, additivity is probably broken.</p>
-<p><strong>Independence of errors</strong> is also plausible. Dolphins from the same region may be related: if a parent is shorter than predicted (for unknown reasons), its offspring may also be shorter for the same reasons. This shared unexplained variation would violate independence: misunderstanding one observation should not make us more likely to misunderstand another.</p>
+<p><strong>Independence of errors</strong> is also plausible. Dolphins from the same region may be related: if a parent is shorter than predicted (for unknown reasons), its offspring may also be shorter for the same reasons. This shared unexplained variation would violate independence: misunderstanding one observation shouldn't make us more likely to misunderstand another.</p>
 </div>
 </div>
 
@@ -412,9 +412,9 @@ ggplot(fake_diag) +
        y = "Predicted length of boto (cm)")
 ```
 
-Nobody talks much about $\sigma$, but it is doing important stuff in the model. $\beta_0$ and $\beta_1$ describe the line; $\sigma$ describes the cloud of points around it. Two dolphins with the same drought history will not be the same length. One is older, one had a better feeding season, one was awkward to measure. None of that is drought, and all of it ends up in $\sigma$.
+Nobody talks much about $\sigma$, but it's doing important stuff in the model. $\beta_0$ and $\beta_1$ describe the line; $\sigma$ describes the cloud of points around it. Two dolphins with the same drought history won't be the same length. One is older, one had a better feeding season, one was awkward to measure. None of that is drought, and all of it ends up in $\sigma$.
 
-In the output, $\sigma$ is called the **Residual standard error**. For a Normal distribution, about two thirds of observations fall within one $\sigma$ of the fitted line. Friday's session is where we actually dig into what that number is telling us. For now, just know it exists and that it matters.
+In the output, $\sigma$ is called the **Residual standard error**. For a Normal distribution, about two thirds of observations fall within one $\sigma$ of the fitted line. Friday's session is where we actually dig into what that number is telling us. For now, just know it exists and matters.
 
 ## Predictions from the equation
 
@@ -541,7 +541,7 @@ preds <- ggpredict(boto_model)
 plot(preds)
 ```
 
-This produces the fitted line with a 95% confidence interval (we'll cover confidence intervals next week). It is quick but gives you limited control over the appearance.
+This produces the fitted line with a 95% confidence interval (we'll cover confidence intervals next week). It's quick but gives you limited control over the appearance.
 
 ## Option 2: manual predictions
 
@@ -826,7 +826,7 @@ ggplot(fake) +
   theme_minimal()
 ```
 
-Here is the full workflow from loading the data to the final figure, as you might write it in a script:
+Here's the full workflow from loading the data to the final figure, as you might write it in a script:
 
 ```{r, eval=FALSE}
 # Deon Roos
@@ -869,7 +869,7 @@ ggplot(fake) +
   theme_minimal()
 ```
 
-The entire analysis is about 40 lines including comments. It is reproducible and shareable. As a tip: don't confuse script length with complexity. A long script is often a sign of uncertainty, not sophistication. Less is usually more.
+The entire analysis is about 40 lines including comments. It's reproducible and shareable. As a tip: don't confuse script length with complexity. A long script is often a sign of uncertainty, not sophistication. Less is usually more.
 
 # Burying beetles: independent analysis
 

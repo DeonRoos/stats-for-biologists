@@ -182,7 +182,7 @@ function toggleGlossary() {
 ::: {.callout-note}
 ## Workshop structure
 
-As always, we are using the workflow below to structure the workshops:
+As always, we're using the workflow below to structure the workshops:
 
 1. Formulate a research question.
 2. Perform exploratory data analysis.
@@ -200,7 +200,7 @@ As always, we are using the workflow below to structure the workshops:
 2. Identify the reference group and interpret $\beta_0$ and $\beta_1$ in a categorical model.
 3. Fit a linear model with a categorical predictor using `lm()`.
 4. Generate model predictions with 95% confidence intervals and visualise them.
-5. Reflect critically on hidden assumptions that formal diagnostics cannot detect.
+5. Reflect critically on hidden assumptions that formal diagnostics can't detect.
 :::
 
 # 1. Formulating a research question
@@ -247,7 +247,7 @@ They ask you to resolve both issues and also check for any other possible mistak
 <textarea class="student-answer" rows="2" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-We were told it is row 7. We can inspect that row using square brackets:
+We were told it's row 7. We can inspect that row using square brackets:
 
 ```r
 rabbit[7, ]
@@ -330,7 +330,7 @@ Nothing else obvious. The histogram and summary look reasonable once the outlier
 
 # 3. Hidden assumptions
 
-Having resolved the data issues, it is time to think carefully about what assumptions we are making before fitting any model. "Hidden assumptions" refers broadly to all the assumptions underlying our analysis: some we can think through carefully, and some we can even check. What makes them "hidden" is that they are easy to overlook and are not automatically flagged by any software. Validity and representativeness deserve particular attention because there are no formal diagnostic checks for them at all; evaluating them depends entirely on domain knowledge and thinking critically about how the data were collected and what they actually measure.
+Having resolved the data issues, it's time to think carefully about what assumptions we're making before fitting any model. "Hidden assumptions" refers broadly to all the assumptions underlying our analysis: some we can think through carefully, and some we can even check. What makes them "hidden" is that they're easy to overlook and aren't automatically flagged by any software. Validity and representativeness deserve particular attention because there aren't any formal diagnostic checks for them at all; evaluating them depends entirely on domain knowledge and thinking critically about how the data were collected and what they actually measure.
 
 ## Assumptions for the mongoose analysis
 
@@ -340,7 +340,7 @@ Having resolved the data issues, it is time to think carefully about what assump
 <textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-The key issue is whether mongoose are truly absent from Tokunoshima. All we know is that local residents have not reported any sightings. That is not the same as confirmed absence. It is possible there is just a very small population of mongoose on an island that doesn't have enough people around to spot them.
+The key issue is whether mongoose are truly absent from Tokunoshima. All we know is that local residents have not reported any sightings. That's not the same as confirmed absence. It's possible there's just a very small population of mongoose on an island that doesn't have enough people around to spot them.
 
 This puts us at risk of violating the assumption of validity: our `mongoose` variable may not actually measure what we think it does.
 </div>
@@ -352,7 +352,7 @@ This puts us at risk of violating the assumption of validity: our `mongoose` var
 <textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-Ideally we would confirm the absence of mongoose on Tokunoshima before proceeding, but that is not feasible here (we can't pay for the class to go on a trip to some tropical islands in Japan). We have two options:
+Ideally we'd confirm the absence of mongoose on Tokunoshima before proceeding, but that's not feasible here (we can't pay for the class to go on a trip to some tropical islands in Japan). We have two options:
 
 1. Decline to perform the analysis because of the assumption violation.
 2. Perform the analysis but include clear, prominent statements about this limitation.
@@ -369,7 +369,7 @@ Both are defensible. For the purposes of this workshop (learning the method), we
 <div class="instructor-answer">
 If mongoose are present on both islands and they do reduce rabbit weight, then rabbit weights on both islands would be similarly suppressed. The model would find little or no difference between groups, leading us to incorrectly conclude that mongoose have no effect.
 
-The annoying thing is that finding no difference is ambiguous: it could mean mongoose are present on both islands, or that mongoose genuinely do not affect rabbit weight. We cannot tell which from the data alone.
+The annoying thing is that finding no difference is ambiguous: it could mean mongoose are present on both islands, or that mongoose genuinely don't affect rabbit weight. We can't tell which from the data alone.
 
 This is a good example of why validity is the hardest assumption to check and the most consequential to violate.
 </div>
@@ -377,7 +377,7 @@ This is a good example of why validity is the hardest assumption to check and th
 
 # 4. Fitting the model
 
-Assuming we are comfortable proceeding, the model looks like this:
+Assuming we're comfortable proceeding, the model looks like this:
 
 $$weight_i \sim \text{Normal}(\mu_i, \sigma)$$
 
@@ -519,7 +519,7 @@ The table below shows how R converts a categorical variable into dummy variables
 
 ## Understanding the model equation
 
-If you are finding the questions below difficult, skip ahead and run the model, then return and use the `summary()` output to help.
+If you're finding the questions below difficult, skip ahead and run the model, then return and use the `summary()` output to help.
 
 ::: {.question-block}
 **Question 1.** What replaces the blank in the equation below?
@@ -536,21 +536,21 @@ $$\mu_i = \beta_0 + \beta_1 \times \underline{\phantom{MongoosePresent}}_i$$
 <div class="instructor-answer">
 `Present` replaces the blank.
 
-If you said `mongoose`, remember that `mongoose` has two values (`"Present"` and `"Absent"`), which cannot be used directly in an equation. Instead, R takes one group and converts it to a binary dummy variable (0 or 1). R picks the group that comes first alphabetically as the reference, so `Absent` becomes the reference (0) and `Present` becomes the dummy (1). When `Present = 0`, it must be `Absent`.
+If you said `mongoose`, remember that `mongoose` has two values (`"Present"` and `"Absent"`), which can't be used directly in an equation. Instead, R takes one group and converts it to a binary dummy variable (0 or 1). R picks the group that comes first alphabetically as the reference, so `Absent` becomes the reference (0) and `Present` becomes the dummy (1). When `Present = 0`, it must be `Absent`.
 </div>
 :::
 
 ::: {.callout-tip}
 ## Changing the reference group with `relevel()`
 
-R picks the reference group alphabetically, which is not always what you want. If you would rather `Present` be the reference (so that $\beta_0$ is the mean weight where mongoose are present), use `relevel()` before fitting the model:
+R picks the reference group alphabetically, which isn't always what you want. If you'd rather `Present` be the reference (so that $\beta_0$ is the mean weight where mongoose are present), use `relevel()` before fitting the model:
 
 ```r
 rabbit$mongoose <- relevel(factor(rabbit$mongoose), ref = "Present")
 rabbit_mod      <- lm(weight ~ mongoose, data = rabbit)
 ```
 
-This does not change the data or the underlying relationship; it only changes which group sits in the intercept and which appears as a coefficient. The predicted values and confidence intervals stay the same.
+This doesn't change the data or the underlying relationship; it only changes which group sits in the intercept and which appears as a coefficient. The predicted values and confidence intervals stay the same.
 :::
 
 ::: {.question-block}
@@ -579,7 +579,7 @@ $\beta_0$ is the predicted weight of rabbits in the reference group, i.e. when m
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-$\beta_1$ is the *difference* in predicted weight between rabbits where mongoose are `Present` versus where they are `Absent`. It is not the predicted weight when mongoose are present; it is the change relative to $\beta_0$.
+$\beta_1$ is the *difference* in predicted weight between rabbits where mongoose are `Present` versus where they are `Absent`. It's not the predicted weight when mongoose are present; it's the change relative to $\beta_0$.
 </div>
 :::
 
@@ -712,13 +712,13 @@ Ask `ggeffects` to predict rabbit weight across the two `mongoose` categories:
 preds <- ggpredict(rabbit_mod)
 ```
 
-When you run this, you will likely see a `Warning` (not an `Error`) telling you that `ggeffects` prefers factors over character strings. Converting is simple:
+When you run this, you'll likely see a `Warning` (not an `Error`) telling you that `ggeffects` prefers factors over character strings. Converting is simple:
 
 ```{r, eval=FALSE}
 rabbit$mongoose <- factor(rabbit$mongoose)
 ```
 
-Then refit and rerun `ggpredict()`. In practice, I tend to convert categorical variables to factors before fitting any model, since some packages refuse to work with character strings. Whether you do so is up to you, but given how little effort it takes, it is worth the habit.
+Then refit and rerun `ggpredict()`. In practice, I tend to convert categorical variables to factors before fitting any model, since some packages refuse to work with character strings. Whether you do so is up to you, but given how little effort it takes, it's worth the habit.
 
 Regardless of whether you convert, plot the predictions:
 
@@ -840,13 +840,13 @@ ggplot(fake) +
 <textarea class="student-answer" rows="6" placeholder="Write your thoughts here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-There is no clean answer here, and that is the point.
+There's no clean answer here, and that's the point.
 
-The assumption of validity is questionable (we do not truly know mongoose are absent from Tokunoshima). The estimated effect is tiny (about 3 g in an animal weighing 2.7 kg) and the uncertainty is large enough to include zero. The effect could also reflect something mundane, such as using different scales on the two islands.
+The assumption of validity is questionable (we don't truly know mongoose are absent from Tokunoshima). The estimated effect is tiny (about 3 g in an animal weighing 2.7 kg) and the uncertainty is large enough to include zero. The effect could also reflect something mundane, such as using different scales on the two islands.
 
-The hardest part of statistics has nothing to do with equations or distributions. It is deciding whether the data are appropriate for the question. The thing that would keep me up at night would be if anyone were to use our model to make decisions with real-world consequences. Are we really confident enough in our model to have that rest on our conscience? I don't think I am.
+The hardest part of statistics has nothing to do with equations or distributions. It's deciding whether the data are appropriate for the question. The thing that would keep me up at night would be if anyone were to use our model to make decisions with real-world consequences. Are we really confident enough in our model to have that rest on our conscience? I don't think I am.
 
-Personally, I would not be comfortable sharing this with the local government without first making a serious effort to confirm whether mongoose are present on Tokunoshima.
+Personally, I wouldn't be comfortable sharing this with the local government without first making a serious effort to confirm whether mongoose are present on Tokunoshima.
 </div>
 :::
 
@@ -870,7 +870,7 @@ lemur <- read.table("lemurs.txt", header = TRUE)
 Work through each step: EDA (including checking for data issues), hidden assumptions, model fitting, and visualising predictions. The goal is to identify which habitat type lemurs are most active in.
 
 ::: {.question-block}
-**Full lemur analysis.** Work through the complete workflow. When you are done, compare your approach with the instructor solution.
+**Full lemur analysis.** Work through the complete workflow. When you're done, compare your approach with the instructor solution.
 
 <textarea class="student-answer" rows="8" placeholder="Describe your approach and key findings here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>

@@ -232,7 +232,7 @@ These skills come up throughout the course and beyond.
 
 `ggplot2` implements the "Grammar of Graphics": a framework for building plots layer by layer. You start with a dataset, map variables to visual properties (called aesthetics) using `aes()`, then add one or more geometry functions that determine the form of the plot (points, lines, bars, and so on). Scales, labels, and themes refine the result. The approach is flexible enough to produce sophisticated figures with surprisingly little code. Familiarity with `ggplot2` is increasingly expected by employers; Spotify has listed it as an essential criterion in job adverts.
 
-That said, `ggplot2` is not the only option. Base R can produce similar plots, and many of the figures in this course could be recreated that way. We use `ggplot2` because we find it more intuitive, and nearly every figure you see on this course was produced with it.
+That said, `ggplot2` isn't the only option. Base R can produce similar plots, and many of the figures in this course could be recreated that way. We use `ggplot2` because we find it more intuitive, and nearly every figure you see on this course was produced with it.
 
 ## Load the data
 
@@ -242,7 +242,7 @@ For the first part of this workshop we'll use data on the Amazon river dolphin, 
 >
 > `rm(list = ls())`
 >
-> This removes all objects in the global environment but does not delete any files. In RStudio, you can do the same from the Environment pane by clicking the broom icon.
+> This removes all objects in the global environment but doesn't delete any files. In RStudio, you can do the same from the Environment pane by clicking the broom icon.
 
 Download the data file below and save it to your `BI3010/data/` folder. Open your `BI3010.Rproj` file to start RStudio with the working directory already set, then open a new script and load the data:
 
@@ -487,7 +487,7 @@ ggplot(boto) +
 <textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>Yes, this raises a potential violation of <strong>additivity</strong>. If drought affects males more strongly than females, the two predictors are not acting independently; their combined effect matters. If the slopes were identical for both sexes, the additivity assumption would hold.</p>
+<p>Yes, this raises a potential violation of <strong>additivity</strong>. If drought affects males more strongly than females, the two predictors aren't acting independently; their combined effect matters. If the slopes were identical for both sexes, the additivity assumption would hold.</p>
 </div>
 </div>
 
@@ -623,18 +623,18 @@ p1 / p2        # stacked
 (p1 + p2) / p3 # two on top, one below
 ```
 
-Each object (`p1`, `p2`, etc.) is just a ggplot saved to a variable. You combine them using `+` (side by side) and `/` (stacked). That is all there is to it.
+Each object (`p1`, `p2`, etc.) is just a ggplot saved to a variable. You combine them using `+` (side by side) and `/` (stacked). That's all there is to it.
 :::
 
 
-If you need help implementing an idea, the [Intro2R chapter on graphics](https://intro2r.com/graphics_r.html) has a more detailed walkthrough, or ask an LLM. If using an LLM, specify that you are using `R` and `ggplot2` and ask it not to use additional packages (extra packages add complexity and can cause conflicts while you're still building familiarity).
+If you need help implementing an idea, the [Intro2R chapter on graphics](https://intro2r.com/graphics_r.html) has a more detailed walkthrough, or ask an LLM. If using an LLM, specify that you're using `R` and `ggplot2` and ask it not to use additional packages (extra packages add complexity and can cause conflicts while you're still building familiarity).
 
 <div class="question-block">
 <p><strong>Your figure.</strong> Produce your best figure. Describe what you think makes it effective.</p>
 <textarea class="student-answer" rows="4" placeholder="Describe your figure and what makes it work..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>There is no single right answer. Here is one approach combining several views of the data:</p>
+<p>There's no single right answer. Here's one approach combining several views of the data:</p>
 <pre><code class="language-r">abdn <- read.table("data/abdn_flats.txt", header = TRUE)
 
 library(patchwork)  # lets you stitch ggplots together
@@ -711,7 +711,7 @@ This figure comes from the [Financial Times](https://www.ft.com/content/469653a1
 <div class="instructor-answer">
 <p>This figure made a lot of people angry online, mostly because the y-axis runs from -50% to +100% rather than from 0, and because the values have been log-transformed, which some argued exaggerated the differences.</p>
 <p>In truth, it's a pretty clever axis. A 100% increase means doubling (5 buses to 10). A -50% decrease means halving (10 buses to 5). On a log scale, doubling and halving take up the same vertical distance, which makes the axis symmetric and honest. Without the transformation, a -50% decline would look much smaller than an equivalent +100% increase, which would actually be misleading.</p>
-<p>People get very wound up about y-axes, especially when the bottom is not zero. Honestly, I don't think there is one correct answer. There are times when it's entirely appropriate to not start at zero, and other times when it's not. I dislike treating it as though there is a universal rule. There isn't. Think about what the best way to show your data is, and do that.</p>
+<p>People get very wound up about y-axes, especially when the bottom is not zero. Honestly, I don't think there's one correct answer. There are times when it's entirely appropriate to not start at zero, and other times when it's not. I dislike treating it as though there's a universal rule. There isn't. Think about what the best way to show your data is, and do that.</p>
 </div>
 </div>
 
@@ -784,8 +784,8 @@ This figure comes from [Pease et al. (2025)](https://www.science.org/doi/10.1126
 <div class="instructor-answer">
 <p>Several problems, published in one of the most prestigious journals in science:</p>
 <ol>
-<li><strong>Stacked bars make comparisons hard.</strong> Can you tell whether "Unfiltered detections" in August 2023 differs from September 2023? I genuinely can't. And the "Response variable" slice at the bottom is so thin it is almost invisible. That is the variable that was actually used in the model. What is the point of including it if it cannot be read?</li>
-<li><strong>The colour palette is probably not colour-blind friendly.</strong> It costs nothing to check, and there is no reason to exclude part of the audience.</li>
+<li><strong>Stacked bars make comparisons hard.</strong> Can you tell whether "Unfiltered detections" in August 2023 differs from September 2023? I genuinely can't. And the "Response variable" slice at the bottom is so thin it's almost invisible. That's the variable that was actually used in the model. What's the point of including it if it can't be read?</li>
+<li><strong>The colour palette is probably not colour-blind friendly.</strong> It costs nothing to check, and there's no reason to exclude part of the audience.</li>
 <li><strong>The x-axis is overloaded.</strong> Printing every month label makes it cluttered and hard to read. Three labels (start, middle, end) would be much cleaner. This probably happened because the author stored date as a factor in R, which prints every level.</li>
 </ol>
 <p>A better approach: points for observation counts connected by a line, split into three separate panels with independent y-axes, so the trend in the "Response variable" is actually visible.</p>
@@ -833,10 +833,10 @@ The next figure comes from [Wood et al. (2025)](https://www.science.org/doi/10.1
 <ol>
 <li><strong>The colour palette.</strong> The hell is with the weird colour palette and pattern that looks like it was stolen from a 1990s bus seat? Who was like "Yeaaaaaah bruh, this looks siiiiiiick dude." Why is one bar darker than the other?</li>
 <li><strong>Abbreviations.</strong> Do you know what "Sal/Veh" means? Great figures don't need a legend or a paper for you to make sense of them; you can see amazing figures with zero context and they still make total sense. I don't know what this figure is telling me <em>even with context</em>.</li>
-<li><strong>Inconsistent data point styling.</strong> All the randomly shaped points. What do they mean? Why are some filled and others empty? Are those all the observations they had, because if so... what's that? Like 10 observations? Get outta here with that.</li>
+<li><strong>Inconsistent data point styling.</strong> All the randomly shaped points. What do they mean? Why are some filled and others empty? Are those all the observations they had, because if so — what's that? Like 10 observations? Get outta here with that.</li>
 <li><strong>Bars are the wrong choice.</strong> The bars are completely unnecessary here and probably misleading. What the authors are trying to show are specific values (called "point estimates"). For example, the category "Sal/DCZ" is estimated at roughly -50 on the y-axis. That's the value that's important. By using a bar you're implying there was also a -49, and -48, and -47, all the way to 0. That's not the case. It's -50. Just -50. Using bars is, for some reason, super common in some fields. Medics <em>looooooove</em> them. They're overused and rarely the best choice. A lot of the time (but not always), bars should be replaced by points.</li>
 </ol>
-<p>How I'd make this figure: I'd use points for the estimated values instead of bars. I probably wouldn't add points to show the data, but if I did, I'd make those points much smaller (and be consistent). I'd write the full category name and rotate them 90 degrees so it would fit in. (I'd also get rid of the P-value "bars" and asterisks at the top of the figure, but I'll explain why later in the course.)</p>
+<p>How I'd make this figure: I'd use points for the estimated values instead of bars. I probably wouldn't add points to show the data, but if I did, I'd make those points much smaller (and be consistent). I'd write the full category name and rotate them 90 degrees so it'd fit. (I'd also get rid of the P-value "bars" and asterisks at the top of the figure, but I'll explain why later in the course.)</p>
 
 ```{r ketamine-plot, echo=FALSE, fig.show='show', fig.height=4}
 ggplot(dat) +

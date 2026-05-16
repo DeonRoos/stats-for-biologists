@@ -374,17 +374,17 @@ abdn <- read.table("abdn_flats.txt", header = TRUE)
 
 # Predictive modelling
 
-Predictive models are a natural starting point for multiple-predictor models because the inclusion criteria are simple: add variables that improve predictions. We do not need to worry about causal assumptions here (don't tell the Machine Learning folks I said that!); we just want the model to guess the rent accurately.
+Predictive models are a natural starting point for multiple-predictor models because the inclusion criteria are simple: add variables that improve predictions. We don't need to worry about causal assumptions here (don't tell the Machine Learning folks I said that!); we just want the model to guess the rent accurately.
 
 ## 1. Formulate a research question
 
-The question is: can we predict the monthly rent of a listed property? We will use floor area (m²), total number of rooms, energy efficiency band (EPC), and council tax band as predictors.
+The question is: can we predict the monthly rent of a listed property? We'll use floor area (m²), total number of rooms, energy efficiency band (EPC), and council tax band as predictors.
 
 ## 2. Perform exploratory data analysis
 
 Spend a few minutes exploring the dataset. Check for odd values. The dataset includes a URL for each property, so you can check unusual entries directly, a rare luxury in science!
 
-One thing to be aware of: some properties may have had their listed price changed since the data were collected. For example, there is one property that when I first added it to the dataset was listed at a whopping £3,200 a month but a year later, that price had dropped to £2,900 (because no one was willing to pay £3.2k in rent). You will need to decide for yourself how to handle these. Your options are: (1) keep the original price, (2) update to the current price, or (3) create a new row for the "new" listing. Option 3 violates an assumption. Can you identify which one?
+One thing to be aware of: some properties may have had their listed price changed since the data were collected. For example, there's one property that when I first added it to the dataset was listed at a whopping £3,200 a month but a year later, that price had dropped to £2,900 (because no one was willing to pay £3.2k in rent). You'll need to decide for yourself how to handle these. Your options are: (1) keep the original price, (2) update to the current price, or (3) create a new row for the "new" listing. Option 3 violates an assumption. Can you identify which one?
 
 ## 3. Identify any hidden assumptions
 
@@ -420,7 +420,7 @@ In predictive modelling, we can include all sensible explanatory variables witho
 | `HouseType` | Detached, semi-detached, terrace, or flat |
 | `Furnished` | Fully furnished, part furnished, or unfurnished |
 
-We will keep it to four predictors: `FloorArea`, `Rooms`, `EPC`, and `Tax`.
+We'll keep it to four predictors: `FloorArea`, `Rooms`, `EPC`, and `Tax`.
 
 For some reason, the value of a property in 1991 is how the council tax band is decided. I don't get why 1991 is special (I doubt it actually is) but that's what they do. It's dumb. C'est la vie.
 
@@ -438,7 +438,7 @@ $$\begin{align}
 
 where $\beta_0$ is the predicted rent for a property with zero floor area, zero rooms, EPC band A, and tax band A; $\beta_1$ is the change per additional m²; $\beta_2$ is the change per additional room; and $\beta_3$ through $\beta_8$ and $\beta_9$ through $\beta_{14}$ are the differences between each band and the reference (band A in each case).
 
-As you can see, `EPC` and `Tax` being recorded as categories has made our model stupidly and crazily more complicated than it would otherwise be. That is 14 parameters, compared to just 4 if they had been kept as continuous scores. Discretising continuous variables into categories creates a lot of extra work and often loses information in the process. Avoid it where you can.
+As you can see, `EPC` and `Tax` being recorded as categories has made our model stupidly and crazily more complicated than it would otherwise be. That's 14 parameters, compared to just 4 if they had been kept as continuous scores. Discretising continuous variables into categories creates a lot of extra work and often loses information in the process. Avoid it where you can.
 
 Despite the notation complexity, fitting the model in R is straightforward:
 
@@ -469,7 +469,7 @@ par(mfrow = c(1, 1))
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>Yes: residual spread tends to increase with fitted values, a sign of heteroscedasticity (unequal variance of errors). This is not surprising given that the dataset mixes houses and flats of very different price ranges.</p>
+<p>Yes: residual spread tends to increase with fitted values, a sign of heteroscedasticity (unequal variance of errors). This isn't surprising given that the dataset mixes houses and flats of very different price ranges.</p>
 </div>
 </div>
 
@@ -483,7 +483,7 @@ par(mfrow = c(1, 1))
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>Heteroscedasticity inflates standard errors, so confidence intervals become either too wide or too narrow. The parameter estimates (predicted means) remain unbiased, but uncertainty estimates are not reliable.</p>
+<p>Heteroscedasticity inflates standard errors, so confidence intervals become either too wide or too narrow. The parameter estimates (predicted means) remain unbiased, but uncertainty estimates aren't reliable.</p>
 </div>
 </div>
 
@@ -492,7 +492,7 @@ par(mfrow = c(1, 1))
 <textarea class="student-answer" rows="3" placeholder="Describe what you see..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>The residuals are not perfectly normally distributed. A small number of properties deviate notably from the diagonal line, either cheaper or more expensive than the model expects given their characteristics. The departure is not extreme, but it is present. Minor deviations of this kind are expected in real data and are not grounds for rejecting the model outright.</p>
+<p>The residuals aren't perfectly normally distributed. A small number of properties deviate notably from the diagonal line, either cheaper or more expensive than the model expects given their characteristics. The departure isn't extreme, but it's present. Minor deviations of this kind are expected in real data and aren't grounds for rejecting the model outright.</p>
 </div>
 </div>
 
@@ -518,7 +518,7 @@ par(mfrow = c(1, 1))
 <p>You have three options, in increasing order of rigour:</p>
 <ol>
 <li><strong>Collect more data.</strong> Influential observations are most damaging in small datasets. More data dilutes their effect. Not practical here, but the right long-term solution.</li>
-<li><strong>Remove and rerun.</strong> Many papers do this, but only if they also report the original results and clearly explain why they removed observations. Silently dropping data is not acceptable.</li>
+<li><strong>Remove and rerun.</strong> Many papers do this, but only if they also report the original results and clearly explain why they removed observations. Silently dropping data isn't acceptable.</li>
 <li><strong>Fit both models and compare.</strong> Run the model with and without the influential observations, then compare the parameter estimates side by side. If removing them barely changes the estimates, keep the original model and note that you checked. If the estimates shift substantially, report both models and discuss which you think is more reliable.</li>
 </ol>
 <pre><code class="language-r"># Example: remove rows 324 and 534 and compare
@@ -582,7 +582,7 @@ ggplot(fake) +
   theme_minimal()
 ```
 
-Pay attention to the `Estimate` for `FloorArea`. The model is predicting that adding an extra square metre to a property only increases rent by a few pounds. Seems a bit low, right? Do we really think that the difference in price between a 50 m² flat and a 100 m² flat will only be a small amount extra per month? We'll come back to this after we run the causal version of this model.
+Pay attention to the `Estimate` for `FloorArea`. The model is predicting that adding an extra square metre to a property only increases rent by a few pounds. Seems a bit low, right? Do we really think the difference in price between a 50 m² flat and a 100 m² flat will only be a small amount extra per month? We'll come back to this after we run the causal version of this model.
 
 ### Question set 2
 
@@ -596,7 +596,7 @@ Pay attention to the `Estimate` for `FloorArea`. The model is predicting that ad
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>No. The predictive model includes variables to improve predictive accuracy, not because a causal analysis told us to. When all of <code>FloorArea</code>, <code>Rooms</code>, <code>EPC</code>, and <code>Tax</code> are in the model, each coefficient represents the association with price after adjusting for the others, but "adjusting for" is not the same as "identifying the causal effect of." The causal model section below shows how the goal changes the analysis.</p>
+<p>No. The predictive model includes variables to improve predictive accuracy, not because a causal analysis told us to. When all of <code>FloorArea</code>, <code>Rooms</code>, <code>EPC</code>, and <code>Tax</code> are in the model, each coefficient represents the association with price after adjusting for the others, but "adjusting for" isn't the same as "identifying the causal effect of." The causal model section below shows how the goal changes the analysis.</p>
 </div>
 </div>
 
@@ -1033,7 +1033,7 @@ Within this data: `EPC` ← `FloorArea` → `Price`. Larger properties tend to h
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p><code>FloorArea</code> is a fork (confounder). Larger properties tend to have better energy efficiency ratings because there is more scope for insulation (FloorArea → EPC), and larger properties also command higher rents (FloorArea → Price). Without adjusting for <code>FloorArea</code>, any apparent EPC–Price association partly reflects this shared driver rather than a genuine effect of energy efficiency on rent.</p>
+<p><code>FloorArea</code> is a fork (confounder). Larger properties tend to have better energy efficiency ratings because there's more scope for insulation (FloorArea → EPC), and larger properties also command higher rents (FloorArea → Price). Without adjusting for <code>FloorArea</code>, any apparent EPC–Price association partly reflects this shared driver rather than a genuine effect of energy efficiency on rent.</p>
 </div>
 </div>
 
@@ -1057,7 +1057,7 @@ In a collider, both X and Y independently cause Z: the structure is X → Z ← 
 
 A concrete example: imagine both floor area and property condition independently influence how quickly a property lets. If you restrict your analysis to only recently let properties (conditioning on letting speed), you introduce a spurious negative correlation between floor area and condition, because among fast-letting properties, a small floor area must be "compensated for" by good condition, and vice versa.
 
-The collider structure does not appear in the current flats DAG, but it is the hardest mistake to spot. "Controlling for more variables" sounds rigorous, but adding a collider makes the model *worse*, not better. Click Z to see the effect.
+The collider structure doesn't appear in the current flats DAG, but it's the hardest mistake to spot. "Controlling for more variables" sounds rigorous, but adding a collider makes the model *worse*, not better. Click Z to see the effect.
 
 ```{ojs}
 //| echo: false
@@ -1223,7 +1223,7 @@ coll_interactive = {
 ```
 
 <div class="question-block">
-<p><strong>Question 5.</strong> A colleague adds a variable Z to their causal model because "it is associated with both X and Y, so it must be important to control for." Z is in fact caused by both X and Y. What is wrong with this reasoning?</p>
+<p><strong>Question 5.</strong> A colleague adds a variable Z to their causal model because "it's associated with both X and Y, so it must be important to control for." Z is in fact caused by both X and Y. What is wrong with this reasoning?</p>
 <div class="mc-options">
   <label><input type="radio" name="conf-q5" data-correct="false"> Nothing: variables associated with both predictor and response should always be included</label>
   <label><input type="radio" name="conf-q5" data-correct="false"> The model will fail to converge because Z is perfectly collinear with X and Y</label>
@@ -1232,13 +1232,13 @@ coll_interactive = {
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>Z is a collider. Because both X and Y cause Z, conditioning on Z (including it in the model) opens a path between X and Y that was previously closed. The result is a spurious association between X and Y: bias that the model introduces rather than removes. Being associated with both predictor and response is a description of a confounder, a pipe, <em>and</em> a collider: the association alone does not tell you which structure applies. Only the arrows in the DAG do that.</p>
+<p>Z is a collider. Because both X and Y cause Z, conditioning on Z (including it in the model) opens a path between X and Y that was previously closed. The result is a spurious association between X and Y: bias that the model introduces rather than removes. Being associated with both predictor and response is a description of a confounder, a pipe, <em>and</em> a collider: the association alone doesn't tell you which structure applies. Only the arrows in the DAG do that.</p>
 </div>
 </div>
 
 ---
 
-Start by reloading the data cleanly so that any changes made for the predictive model do not carry over:
+Start by reloading the data cleanly so that any changes made for the predictive model don't carry over:
 
 ```{r, eval=FALSE}
 abdn <- read.table("abdn_flats.txt", header = TRUE)
@@ -1294,7 +1294,7 @@ This confirms: to estimate the **total causal effect** of `FloorArea` on `Price`
 lm(Price ~ FloorArea, data = abdn)
 ```
 
-> This will not always be the case. Most of the time, estimating a causal effect requires including specific adjustment variables to close non-causal (backdoor) paths. It is a coincidence of this particular DAG that no adjustment is needed here.
+> This will not always be the case. Most of the time, estimating a causal effect requires including specific adjustment variables to close non-causal (backdoor) paths. It's a coincidence of this particular DAG that no adjustment is needed here.
 
 ## 4. Fit an appropriate model
 
@@ -1312,7 +1312,7 @@ par(mfrow = c(1, 1))
 
 Two issues commonly appear:
 
-**Heteroscedasticity.** Residual spread tends to increase with fitted values. There are two reasons for this. First, landlords tend to round rents to the nearest £25 to £50 for cheaper properties and to the nearest £50 to £100 for more expensive ones, which creates measurement "noise" that scales with price. Second, it is easier to pin down the right rent for a cheaper property (the difference between £500 and £750 is proportionally large) whereas for expensive properties a £250 difference is relatively small, so estimates naturally vary more.
+**Heteroscedasticity.** Residual spread tends to increase with fitted values. There are two reasons for this. First, landlords tend to round rents to the nearest £25 to £50 for cheaper properties and to the nearest £50 to £100 for more expensive ones, which creates measurement "noise" that scales with price. Second, it's easier to pin down the right rent for a cheaper property (the difference between £500 and £750 is proportionally large) whereas for expensive properties a £250 difference is relatively small, so estimates naturally vary more.
 
 **Influential observations.** One or more expensive properties may appear beyond the Cook's distance contour lines. Confirm whether the recorded price is correct using the `PropertyURL`. If the price is correct, you have two options: ignore the problem and note it when reporting, or remove the observation.
 

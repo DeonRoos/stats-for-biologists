@@ -29,7 +29,7 @@ make_download_btn <- function(path, label = NULL) {
   sprintf('<a href="%s" download="%s" class="ws-download-btn">%s</a>', uri, fname, label)
 }
 
-rabbit <- read.table("../Workshop 5 - LM with categorical predictors/Data/rabbits.txt",
+rabbit <- read.table("../workshop-5/Data/rabbits.txt",
                      header = TRUE)
 rabbit$mongoose[7] <- "Present"
 rabbit$weight[rabbit$weight > 350] <- rabbit$weight[rabbit$weight > 350] - 100
@@ -545,7 +545,7 @@ check_model(rabbit_mod)
 
 Having diagnosed the rabbit model, move on to the lemur model from Workshop 5. If you haven't fitted that model yet, do so now. Run the diagnostic plots and decide whether you're willing to trust the results.
 
-`r make_download_btn("../Workshop 5 - LM with categorical predictors/Data/lemurs.txt")`
+`r make_download_btn("../workshop-5/Data/lemurs.txt")`
 
 ```{r, eval=FALSE}
 lemur <- read.table("lemurs.txt", header = TRUE)

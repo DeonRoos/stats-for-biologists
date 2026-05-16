@@ -21,7 +21,7 @@ format:
 knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show = "show")
 library(ggplot2)
 library(dplyr)
-boto <- read.table("../Workshop 2 - Data vis/Data/boto.txt", header = TRUE)
+boto <- read.table("../workshop-2/Data/boto.txt", header = TRUE)
 boto_model <- lm(length ~ drought, data = boto)
 make_download_btn <- function(path, label = NULL) {
   fname <- basename(path)
@@ -246,7 +246,7 @@ The research question is whether the number of droughts in the past 20 years aff
 If you no longer have `boto.txt` from Workshop 2, download it here and place it in your `data/` folder:
 
 ```{r, echo=FALSE, results='asis'}
-cat(make_download_btn("../Workshop 2 - Data vis/Data/boto.txt"))
+cat(make_download_btn("../workshop-2/Data/boto.txt"))
 ```
 
 From the question we can identify:

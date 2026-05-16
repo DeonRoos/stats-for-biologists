@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Roos &amp; Pinard">
-<meta name="dcterms.date" content="2026-05-14">
+<meta name="dcterms.date" content="2026-05-16">
 
 <title>Workshop 5: Linear models with a categorical predictor</title>
 <style>
@@ -3091,7 +3091,7 @@ vertical-align: -.125em;
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">14 May 2026</p>
+      <p class="date">16 May 2026</p>
     </div>
   </div>
   
@@ -3239,20 +3239,8 @@ border-top: 2px solid #e8f5f0;
 margin-top: 0.25rem;
 }
 .glossary-section-header:first-child { border-top: none; margin-top: 0; }
-.ws-download-btn {
-display: inline-block;
-margin: 0.4rem 0 0.75rem;
-padding: 0.35rem 0.9rem;
-background: #00b494;
-color: #fff;
-border-radius: 4px;
-text-decoration: none;
-font-size: 0.85rem;
-font-weight: 600;
-font-family: inherit;
-transition: background 0.15s;
-}
-.ws-download-btn:hover { background: #009478; color: #fff; }
+.ws-download-btn { display: inline-block; margin: 0.4rem 0; padding: 0.35rem 0.9rem; background: #0d6efd; color: #fff !important; border-radius: 4px; text-decoration: none !important; font-size: 0.875rem; font-weight: 500; }
+.ws-download-btn:hover { background: #0b5ed7; }
 </style>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -3264,7 +3252,7 @@ Workshop structure
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>As always, we are using the workflow below to structure the workshops:</p>
+<p>As always, we’re using the workflow below to structure the workshops:</p>
 <ol type="1">
 <li>Formulate a research question.</li>
 <li>Perform exploratory data analysis.</li>
@@ -3291,7 +3279,7 @@ Learning objectives
 <li>Identify the reference group and interpret <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> in a categorical model.</li>
 <li>Fit a linear model with a categorical predictor using <code>lm()</code>.</li>
 <li>Generate model predictions with 95% confidence intervals and visualise them.</li>
-<li>Reflect critically on hidden assumptions that formal diagnostics cannot detect.</li>
+<li>Reflect critically on hidden assumptions that formal diagnostics can’t detect.</li>
 </ol>
 </div>
 </div>
@@ -3330,7 +3318,7 @@ Learning objectives
 Show Answer
 </button>
 <div class="instructor-answer">
-<p>We were told it is row 7. We can inspect that row using square brackets:</p>
+<p>We were told it’s row 7. We can inspect that row using square brackets:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>rabbit[<span class="dv">7</span>, ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The rabbit is currently recorded as <code>Absent</code>, but it should be <code>Present</code> (it came from Oshima).</p>
 </div>
@@ -3396,7 +3384,7 @@ Show Answer
 </section>
 <section id="hidden-assumptions" class="level1">
 <h1>3. Hidden assumptions</h1>
-<p>Having resolved the data issues, it is time to think carefully about what assumptions we are making before fitting any model. “Hidden assumptions” refers broadly to all the assumptions underlying our analysis: some we can think through carefully, and some we can even check. What makes them “hidden” is that they are easy to overlook and are not automatically flagged by any software. Validity and representativeness deserve particular attention because there are no formal diagnostic checks for them at all; evaluating them depends entirely on domain knowledge and thinking critically about how the data were collected and what they actually measure.</p>
+<p>Having resolved the data issues, it’s time to think carefully about what assumptions we’re making before fitting any model. “Hidden assumptions” refers broadly to all the assumptions underlying our analysis: some we can think through carefully, and some we can even check. What makes them “hidden” is that they’re easy to overlook and aren’t automatically flagged by any software. Validity and representativeness deserve particular attention because there aren’t any formal diagnostic checks for them at all; evaluating them depends entirely on domain knowledge and thinking critically about how the data were collected and what they actually measure.</p>
 <section id="assumptions-for-the-mongoose-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="assumptions-for-the-mongoose-analysis">Assumptions for the mongoose analysis</h2>
 <div class="question-block">
@@ -3406,7 +3394,7 @@ Show Answer
 Show Answer
 </button>
 <div class="instructor-answer">
-<p>The key issue is whether mongoose are truly absent from Tokunoshima. All we know is that local residents have not reported any sightings. That is not the same as confirmed absence. It is possible there is just a very small population of mongoose on an island that doesn’t have enough people around to spot them.</p>
+<p>The key issue is whether mongoose are truly absent from Tokunoshima. All we know is that local residents have not reported any sightings. That’s not the same as confirmed absence. It’s possible there’s just a very small population of mongoose on an island that doesn’t have enough people around to spot them.</p>
 <p>This puts us at risk of violating the assumption of validity: our <code>mongoose</code> variable may not actually measure what we think it does.</p>
 </div>
 </div>
@@ -3417,7 +3405,7 @@ Show Answer
 Show Answer
 </button>
 <div class="instructor-answer">
-<p>Ideally we would confirm the absence of mongoose on Tokunoshima before proceeding, but that is not feasible here (we can’t pay for the class to go on a trip to some tropical islands in Japan). We have two options:</p>
+<p>Ideally we’d confirm the absence of mongoose on Tokunoshima before proceeding, but that’s not feasible here (we can’t pay for the class to go on a trip to some tropical islands in Japan). We have two options:</p>
 <ol type="1">
 <li>Decline to perform the analysis because of the assumption violation.</li>
 <li>Perform the analysis but include clear, prominent statements about this limitation.</li>
@@ -3433,7 +3421,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>If mongoose are present on both islands and they do reduce rabbit weight, then rabbit weights on both islands would be similarly suppressed. The model would find little or no difference between groups, leading us to incorrectly conclude that mongoose have no effect.</p>
-<p>The annoying thing is that finding no difference is ambiguous: it could mean mongoose are present on both islands, or that mongoose genuinely do not affect rabbit weight. We cannot tell which from the data alone.</p>
+<p>The annoying thing is that finding no difference is ambiguous: it could mean mongoose are present on both islands, or that mongoose genuinely don’t affect rabbit weight. We can’t tell which from the data alone.</p>
 <p>This is a good example of why validity is the hardest assumption to check and the most consequential to violate.</p>
 </div>
 </div>
@@ -3441,7 +3429,7 @@ Show Answer
 </section>
 <section id="fitting-the-model" class="level1">
 <h1>4. Fitting the model</h1>
-<p>Assuming we are comfortable proceeding, the model looks like this:</p>
+<p>Assuming we’re comfortable proceeding, the model looks like this:</p>
 <p><span class="math display">\[weight_i \sim \text{Normal}(\mu_i, \sigma)\]</span></p>
 <p><span class="math display">\[\mu_i = \beta_0 + \beta_1 \times \underline{\phantom{Present}}_i\]</span></p>
 <p>Where:</p>
@@ -3574,7 +3562,7 @@ Show Answer
 </script>
 <section id="understanding-the-model-equation" class="level2">
 <h2 class="anchored" data-anchor-id="understanding-the-model-equation">Understanding the model equation</h2>
-<p>If you are finding the questions below difficult, skip ahead and run the model, then return and use the <code>summary()</code> output to help.</p>
+<p>If you’re finding the questions below difficult, skip ahead and run the model, then return and use the <code>summary()</code> output to help.</p>
 <div class="question-block">
 <p><strong>Question 1.</strong> What replaces the blank in the equation below?</p>
 <p><span class="math display">\[\mu_i = \beta_0 + \beta_1 \times \underline{\phantom{MongoosePresent}}_i\]</span></p>
@@ -3586,7 +3574,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p><code>Present</code> replaces the blank.</p>
-<p>If you said <code>mongoose</code>, remember that <code>mongoose</code> has two values (<code>&quot;Present&quot;</code> and <code>&quot;Absent&quot;</code>), which cannot be used directly in an equation. Instead, R takes one group and converts it to a binary dummy variable (0 or 1). R picks the group that comes first alphabetically as the reference, so <code>Absent</code> becomes the reference (0) and <code>Present</code> becomes the dummy (1). When <code>Present = 0</code>, it must be <code>Absent</code>.</p>
+<p>If you said <code>mongoose</code>, remember that <code>mongoose</code> has two values (<code>&quot;Present&quot;</code> and <code>&quot;Absent&quot;</code>), which can’t be used directly in an equation. Instead, R takes one group and converts it to a binary dummy variable (0 or 1). R picks the group that comes first alphabetically as the reference, so <code>Absent</code> becomes the reference (0) and <code>Present</code> becomes the dummy (1). When <code>Present = 0</code>, it must be <code>Absent</code>.</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled">
@@ -3599,10 +3587,10 @@ Changing the reference group with <code>relevel()</code>
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>R picks the reference group alphabetically, which is not always what you want. If you would rather <code>Present</code> be the reference (so that <span class="math inline">\(\beta_0\)</span> is the mean weight where mongoose are present), use <code>relevel()</code> before fitting the model:</p>
+<p>R picks the reference group alphabetically, which isn’t always what you want. If you’d rather <code>Present</code> be the reference (so that <span class="math inline">\(\beta_0\)</span> is the mean weight where mongoose are present), use <code>relevel()</code> before fitting the model:</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>rabbit<span class="sc">$</span>mongoose <span class="ot">&lt;-</span> <span class="fu">relevel</span>(<span class="fu">factor</span>(rabbit<span class="sc">$</span>mongoose), <span class="at">ref =</span> <span class="st">&quot;Present&quot;</span>)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>rabbit_mod      <span class="ot">&lt;-</span> <span class="fu">lm</span>(weight <span class="sc">~</span> mongoose, <span class="at">data =</span> rabbit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>This does not change the data or the underlying relationship; it only changes which group sits in the intercept and which appears as a coefficient. The predicted values and confidence intervals stay the same.</p>
+<p>This doesn’t change the data or the underlying relationship; it only changes which group sits in the intercept and which appears as a coefficient. The predicted values and confidence intervals stay the same.</p>
 </div>
 </div>
 <div class="question-block">
@@ -3626,7 +3614,7 @@ Show Answer
 Show Answer
 </button>
 <div class="instructor-answer">
-<p><span class="math inline">\(\beta_1\)</span> is the <em>difference</em> in predicted weight between rabbits where mongoose are <code>Present</code> versus where they are <code>Absent</code>. It is not the predicted weight when mongoose are present; it is the change relative to <span class="math inline">\(\beta_0\)</span>.</p>
+<p><span class="math inline">\(\beta_1\)</span> is the <em>difference</em> in predicted weight between rabbits where mongoose are <code>Present</code> versus where they are <code>Absent</code>. It’s not the predicted weight when mongoose are present; it’s the change relative to <span class="math inline">\(\beta_0\)</span>.</p>
 </div>
 </div>
 </section>
@@ -3737,11 +3725,11 @@ Show Answer
 <div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>preds <span class="ot">&lt;-</span> <span class="fu">ggpredict</span>(rabbit_mod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>When you run this, you will likely see a <code>Warning</code> (not an <code>Error</code>) telling you that <code>ggeffects</code> prefers factors over character strings. Converting is simple:</p>
+<p>When you run this, you’ll likely see a <code>Warning</code> (not an <code>Error</code>) telling you that <code>ggeffects</code> prefers factors over character strings. Converting is simple:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>rabbit<span class="sc">$</span>mongoose <span class="ot">&lt;-</span> <span class="fu">factor</span>(rabbit<span class="sc">$</span>mongoose)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Then refit and rerun <code>ggpredict()</code>. In practice, I tend to convert categorical variables to factors before fitting any model, since some packages refuse to work with character strings. Whether you do so is up to you, but given how little effort it takes, it is worth the habit.</p>
+<p>Then refit and rerun <code>ggpredict()</code>. In practice, I tend to convert categorical variables to factors before fitting any model, since some packages refuse to work with character strings. Whether you do so is up to you, but given how little effort it takes, it’s worth the habit.</p>
 <p>Regardless of whether you convert, plot the predictions:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(preds)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -3851,10 +3839,10 @@ Show Answer
 Show Answer
 </button>
 <div class="instructor-answer">
-<p>There is no clean answer here, and that is the point.</p>
-<p>The assumption of validity is questionable (we do not truly know mongoose are absent from Tokunoshima). The estimated effect is tiny (about 3 g in an animal weighing 2.7 kg) and the uncertainty is large enough to include zero. The effect could also reflect something mundane, such as using different scales on the two islands.</p>
-<p>The hardest part of statistics has nothing to do with equations or distributions. It is deciding whether the data are appropriate for the question. The thing that would keep me up at night would be if anyone were to use our model to make decisions with real-world consequences. Are we really confident enough in our model to have that rest on our conscience? I don’t think I am.</p>
-<p>Personally, I would not be comfortable sharing this with the local government without first making a serious effort to confirm whether mongoose are present on Tokunoshima.</p>
+<p>There’s no clean answer here, and that’s the point.</p>
+<p>The assumption of validity is questionable (we don’t truly know mongoose are absent from Tokunoshima). The estimated effect is tiny (about 3 g in an animal weighing 2.7 kg) and the uncertainty is large enough to include zero. The effect could also reflect something mundane, such as using different scales on the two islands.</p>
+<p>The hardest part of statistics has nothing to do with equations or distributions. It’s deciding whether the data are appropriate for the question. The thing that would keep me up at night would be if anyone were to use our model to make decisions with real-world consequences. Are we really confident enough in our model to have that rest on our conscience? I don’t think I am.</p>
+<p>Personally, I wouldn’t be comfortable sharing this with the local government without first making a serious effort to confirm whether mongoose are present on Tokunoshima.</p>
 </div>
 </div>
 </section>
@@ -3874,7 +3862,7 @@ Show Answer
 </div>
 <p>Work through each step: EDA (including checking for data issues), hidden assumptions, model fitting, and visualising predictions. The goal is to identify which habitat type lemurs are most active in.</p>
 <div class="question-block">
-<p><strong>Full lemur analysis.</strong> Work through the complete workflow. When you are done, compare your approach with the instructor solution.</p>
+<p><strong>Full lemur analysis.</strong> Work through the complete workflow. When you’re done, compare your approach with the instructor solution.</p>
 <textarea class="student-answer" rows="8" placeholder="Describe your approach and key findings here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer

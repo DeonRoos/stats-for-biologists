@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Roos &amp; Pinard">
-<meta name="dcterms.date" content="2026-05-15">
+<meta name="dcterms.date" content="2026-05-16">
 
 <title>Workshop 10: Bernoulli GLMs</title>
 <style>
@@ -3092,7 +3092,7 @@ vertical-align: -.125em;
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">15 May 2026</p>
+      <p class="date">16 May 2026</p>
     </div>
   </div>
   
@@ -3382,7 +3382,7 @@ Workflow
 </ol>
 </div>
 </div>
-<p>In Workshop 9 we went from Normal linear models to Poisson GLMs for count data. Today we take one more step. The response variable is not a count but a binary outcome: each observation is either a 0 or a 1. You cannot model that with a Normal distribution without all kinds of ugly consequences, which we will get to shortly. The appropriate distribution is the Bernoulli, the appropriate link is the logit, and the whole thing is more commonly known as logistic regression.</p>
+<p>In Workshop 9 we went from Normal linear models to Poisson GLMs for count data. Today we take one more step. The response variable is not a count but a binary outcome: each observation is either a 0 or a 1. You can’t model that with a Normal distribution without all kinds of ugly consequences, which we’ll get to shortly. The appropriate distribution is the Bernoulli, the appropriate link is the logit, and the whole thing is more commonly known as logistic regression.</p>
 <section id="formulate-a-research-question" class="level2">
 <h2 class="anchored" data-anchor-id="formulate-a-research-question">1. Formulate a research question</h2>
 <p>The dataset for this workshop comes from a long-term study of Eurasian oystercatcher (<em>Haematopus ostralegus</em>) breeding at a coastal site. Download it below and save it to your <code>BI3010/data/</code> folder.</p>
@@ -3431,13 +3431,13 @@ Workflow
 <section id="identify-hidden-assumptions" class="level2">
 <h2 class="anchored" data-anchor-id="identify-hidden-assumptions">3. Identify hidden assumptions</h2>
 <p>The usual hidden assumptions apply: validity (does <code>success</code> capture what we mean by breeding success?), representativeness (does this population generalise to oystercatchers elsewhere?), and independence (each pair must be a separate, independent observation; pairs sharing a territory or the same individual appearing across years would violate this).</p>
-<p>Dispersion is not a concern for Bernoulli GLMs. The variance of a Bernoulli outcome is p(1 − p), which is completely determined by p, the probability of success. There is no free dispersion parameter to estimate or check.</p>
+<p>Dispersion isn’t a concern for Bernoulli GLMs. The variance of a Bernoulli outcome is p(1 − p), which is completely determined by p, the probability of success. There’s no free dispersion parameter to estimate or check.</p>
 </section>
 <section id="fit-an-appropriate-model" class="level2">
 <h2 class="anchored" data-anchor-id="fit-an-appropriate-model">4. Fit an appropriate model</h2>
 <section id="why-not-use-a-linear-model" class="level3">
 <h3 class="anchored" data-anchor-id="why-not-use-a-linear-model">Why not use a linear model?</h3>
-<p>The response variable <code>success</code> can only be 0 or 1. A Normal linear model fitted to binary data has two problems. First, it will happily predict values below 0 and above 1, and you cannot have a probability of −0.2 or 1.3. Second, the spread of 0/1 residuals is largest when p ≈ 0.5 and shrinks near 0 or 1, so the equal variance of errors assumption is violated by design. The linear model will run without complaint. It is just wrong.</p>
+<p>The response variable <code>success</code> can only be 0 or 1. A Normal linear model fitted to binary data has two problems. First, it will happily predict values below 0 and above 1, and you can’t have a probability of −0.2 or 1.3. Second, the spread of 0/1 residuals is largest when p ≈ 0.5 and shrinks near 0 or 1, so the equal variance of errors assumption is violated by design. The linear model will run without complaint. It’s just wrong.</p>
 <div class="question-block">
 <p>
 <strong>Question 1.</strong> If you fitted <code>lm(success ~ territory_quality, data = oystercatcher)</code>, which of the following would be a problem?
@@ -3450,7 +3450,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-The linear model will run without error and produce coefficient estimates, but its predictions for territory quality at the extremes of the range will fall outside [0, 1]. For example, a predicted success probability of 1.3 or −0.2 has no meaning. The model also assumes equal spread of errors at all fitted values, but for a binary response the spread depends on the probability itself: it is largest when p ≈ 0.5 and smallest near p = 0 or p = 1. Both problems disappear when we use a GLM with the logit link.
+The linear model will run without error and produce coefficient estimates, but its predictions for territory quality at the extremes of the range will fall outside [0, 1]. For example, a predicted success probability of 1.3 or −0.2 has no meaning. The model also assumes equal spread of errors at all fitted values, but for a binary response the spread depends on the probability itself: it’s largest when p ≈ 0.5 and smallest near p = 0 or p = 1. Both problems disappear when we use a GLM with the logit link.
 </p>
 </div>
 </div>
@@ -3497,7 +3497,7 @@ Log-odds of 0 means the odds are exp(0) = 1, which means success and failure are
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(success_mod)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>The residual plots for a Bernoulli GLM look different from those of a linear model or Poisson GLM. Because each observation is either 0 or 1, the raw residuals cluster into two distinct bands in the residuals vs fitted plot: one band for observations where <code>success = 1</code> and one for where <code>success = 0</code>. This two-banded appearance is expected and does not indicate a problem.</p>
+<p>The residual plots for a Bernoulli GLM look different from those of a linear model or Poisson GLM. Because each observation is either 0 or 1, the raw residuals cluster into two distinct bands in the residuals vs fitted plot: one band for observations where <code>success = 1</code> and one for where <code>success = 0</code>. This two-banded appearance is expected and doesn’t indicate a problem.</p>
 <div class="question-block">
 <p>
 <strong>Question 3.</strong> You notice the residuals vs fitted plot shows two distinct bands of points rather than a single cloud. What does this mean?
@@ -3510,7 +3510,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-Think of it this way: every observation is exactly 0 or 1. There is nowhere else for the points to go. The two bands are the residuals from the successes (1s) and failures (0s), not a sign of trouble, just an unavoidable consequence of a binary response. What you are looking for is a systematic trend <em>within</em> each band. A curve or funnel inside the bands is a concern. Two flat parallel bands with no internal pattern is fine.
+Think of it this way: every observation is exactly 0 or 1. There’s nowhere else for the points to go. The two bands are the residuals from the successes (1s) and failures (0s), not a sign of trouble, just an unavoidable consequence of a binary response. What you’re looking for is a systematic trend <em>within</em> each band. A curve or funnel inside the bands is a concern. Two flat parallel bands with no internal pattern is fine.
 </p>
 </div>
 </div>
@@ -3526,7 +3526,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-As with the Poisson GLM in Workshop 9, the Q-Q plot is largely uninformative here. Normality of residuals is an assumption of the Normal linear model, not of GLMs. A Bernoulli GLM assumes residuals follow the Bernoulli distribution, and the Q-Q plot does not check that. Focus your diagnostic attention on the residuals vs fitted and scale-location plots, and on the residuals vs leverage plot for influential observations.
+As with the Poisson GLM in Workshop 9, the Q-Q plot is largely uninformative here. Normality of residuals is an assumption of the Normal linear model, not of GLMs. A Bernoulli GLM assumes residuals follow the Bernoulli distribution, and the Q-Q plot doesn’t check that. Focus your diagnostic attention on the residuals vs fitted and scale-location plots, and on the residuals vs leverage plot for influential observations.
 </p>
 </div>
 </div>
@@ -3542,7 +3542,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-Overdispersion is a concern for Poisson GLMs but not for Bernoulli. Once you know p, the variance is exactly p(1 − p): there is no free dispersion parameter to worry about. Honestly, after the doomsday dispersion values we saw in Workshop 9, it is a relief. The residual deviance / degrees of freedom check does not apply here.
+Overdispersion is a concern for Poisson GLMs but not for Bernoulli. Once you know p, the variance is exactly p(1 − p): there’s no free dispersion parameter to worry about. Honestly, after the doomsday dispersion values we saw in Workshop 9, it’s a relief. The residual deviance / degrees of freedom check doesn’t apply here.
 </p>
 </div>
 </div>
@@ -3642,7 +3642,7 @@ The result is an S-shaped (logistic) curve: probability rises steeply across the
 </section>
 <section id="interpret-and-draw-conclusions" class="level2">
 <h2 class="anchored" data-anchor-id="interpret-and-draw-conclusions">7. Interpret and draw conclusions</h2>
-<p>The model predicts that breeding success increases with territory quality. The positive slope means that each additional unit of territory quality increases the log-odds of success by approximately 0.5. On the probability scale, the relationship is not linear: an increase from quality 2 to quality 3 has a smaller effect than an increase from quality 5 to quality 6 (where the curve is steepest).</p>
+<p>The model predicts that breeding success increases with territory quality. The positive slope means that each additional unit of territory quality increases the log-odds of success by approximately 0.5. On the probability scale, the relationship isn’t linear: an increase from quality 2 to quality 3 has a smaller effect than an increase from quality 5 to quality 6 (where the curve is steepest).</p>
 </section>
 </section>
 <section id="adding-breeding-experience" class="level1">
@@ -3679,7 +3679,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-On the log-odds scale, the coefficient is the difference in log-odds between the two groups, holding all other predictors constant. To make this more intuitive, exponentiate it: exp(1.5) ≈ 4.5. Experienced breeders have roughly 4.5 times the <em>odds</em> of success compared to first-time breeders on the same territory. This does not mean they are 4.5 times more likely to succeed. Odds and probability are not the same thing. People confuse them constantly, including in peer-reviewed papers. Don’t be one of them.
+On the log-odds scale, the coefficient is the difference in log-odds between the two groups, holding all other predictors constant. To make this more intuitive, exponentiate it: exp(1.5) ≈ 4.5. Experienced breeders have roughly 4.5 times the <em>odds</em> of success compared to first-time breeders on the same territory. This doesn’t mean they are 4.5 times more likely to succeed. Odds and probability aren’t the same thing. People confuse them constantly, including in peer-reviewed papers. Don’t be one of them.
 </p>
 </div>
 </div>
@@ -3722,7 +3722,7 @@ At the same territory quality of 5, first-time breeders have a predicted success
 </section>
 <section id="a-new-challenger-antimicrobial-peptides" class="level1">
 <h1>A new challenger: antimicrobial peptides</h1>
-<p>If time allows, work through the following dataset. It comes from an in vitro study testing whether a novel antimicrobial peptide (AMP) can clear <em>Staphylococcus aureus</em> infections in a cell-culture model. AMPs are short proteins produced by the immune system that disrupt bacterial membranes — there is a lot of interest in them as alternatives to conventional antibiotics, partly because bacteria evolve resistance to them more slowly. Download the data below and save it to your <code>BI3010/data/</code> folder.</p>
+<p>If time allows, work through the following dataset. It comes from an in vitro study testing whether a novel antimicrobial peptide (AMP) can clear <em>Staphylococcus aureus</em> infections in a cell-culture model. AMPs are short proteins produced by the immune system that disrupt bacterial membranes. There is a lot of interest in them as alternatives to conventional antibiotics, partly because bacteria evolve resistance to them more slowly. Download the data below and save it to your <code>BI3010/data/</code> folder.</p>
 <p><a href="data:text/plain;base64,ImNsZWFyZWQiICJwZXB0aWRlX2NvbmMiICJzdHJhaW4iDQoxIDE0LjkgIlN1c2NlcHRpYmxlIg0KMSAxMCAiU3VzY2VwdGlibGUiDQoxIDEwLjggIlJlc2lzdGFudCINCjAgMTAuNSAiUmVzaXN0YW50Ig0KMSAxNS44ICJSZXNpc3RhbnQiDQoxIDEwLjYgIlJlc2lzdGFudCINCjEgMTguMSAiU3VzY2VwdGlibGUiDQoxIDMuNCAiU3VzY2VwdGlibGUiDQoxIDEzLjIgIlN1c2NlcHRpYmxlIg0KMCAxMS44ICJSZXNpc3RhbnQiDQowIDkuMyAiU3VzY2VwdGlibGUiDQoxIDE5LjEgIlJlc2lzdGFudCINCjEgMTMuNCAiU3VzY2VwdGlibGUiDQowIDEuNSAiUmVzaXN0YW50Ig0KMCA5LjkgIlJlc2lzdGFudCINCjEgMTcuMyAiU3VzY2VwdGlibGUiDQowIDcuOSAiUmVzaXN0YW50Ig0KMSA3LjkgIlJlc2lzdGFudCINCjEgMTUuNCAiU3VzY2VwdGlibGUiDQowIDMgIlJlc2lzdGFudCINCjAgNy42ICJSZXNpc3RhbnQiDQowIDE2LjUgIlJlc2lzdGFudCINCjAgMS44ICJTdXNjZXB0aWJsZSINCjEgMTQuNiAiU3VzY2VwdGlibGUiDQowIDcuNCAiUmVzaXN0YW50Ig0KMSAxOC40ICJTdXNjZXB0aWJsZSINCjAgMTUuOCAiUmVzaXN0YW50Ig0KMCA0LjggIlN1c2NlcHRpYmxlIg0KMCAxNy4zICJTdXNjZXB0aWJsZSINCjAgNS45ICJSZXNpc3RhbnQiDQoxIDkgIlN1c2NlcHRpYmxlIg0KMCAzLjcgIlJlc2lzdGFudCINCjEgMTAuMSAiU3VzY2VwdGlibGUiDQoxIDExLjQgIlJlc2lzdGFudCINCjEgMTMuNiAiUmVzaXN0YW50Ig0KMCAzLjIgIlN1c2NlcHRpYmxlIg0KMCAyLjggIlJlc2lzdGFudCINCjAgNC40ICJTdXNjZXB0aWJsZSINCjEgMTkuOSAiU3VzY2VwdGlibGUiDQoxIDE4LjIgIlJlc2lzdGFudCINCjEgOC43ICJTdXNjZXB0aWJsZSINCjEgMTguNyAiU3VzY2VwdGlibGUiDQowIDE1LjYgIlJlc2lzdGFudCINCjEgMTYuNSAiU3VzY2VwdGlibGUiDQowIDIwICJSZXNpc3RhbnQiDQoxIDE2LjUgIlJlc2lzdGFudCINCjAgMTUuMiAiUmVzaXN0YW50Ig0KMCAzLjUgIlJlc2lzdGFudCINCjAgOS42ICJSZXNpc3RhbnQiDQoxIDExLjMgIlN1c2NlcHRpYmxlIg0KMCAyLjggIlN1c2NlcHRpYmxlIg0KMCAxNSAiUmVzaXN0YW50Ig0KMCA0LjQgIlJlc2lzdGFudCINCjAgMy41ICJSZXNpc3RhbnQiDQowIDEwLjkgIlJlc2lzdGFudCINCjEgNy44ICJTdXNjZXB0aWJsZSINCjAgNy43ICJSZXNpc3RhbnQiDQowIDEyLjIgIlN1c2NlcHRpYmxlIg0KMSAxNS41ICJTdXNjZXB0aWJsZSINCjEgMTIuNCAiUmVzaXN0YW50Ig0KMCAzLjkgIlN1c2NlcHRpYmxlIg0KMCAxNS4xICJSZXNpc3RhbnQiDQoxIDE5LjMgIlN1c2NlcHRpYmxlIg0KMCA1LjEgIlN1c2NlcHRpYmxlIg0KMCAyLjkgIlN1c2NlcHRpYmxlIg0KMCAxNS42ICJSZXNpc3RhbnQiDQoxIDE0LjcgIlJlc2lzdGFudCINCjAgNy4zICJSZXNpc3RhbnQiDQowIDYgIlJlc2lzdGFudCINCjAgNC41ICJSZXNpc3RhbnQiDQowIDMgIlJlc2lzdGFudCINCjEgMTkuOSAiUmVzaXN0YW50Ig0KMSAxMi42ICJSZXNpc3RhbnQiDQoxIDkuMiAiUmVzaXN0YW50Ig0KMCAyLjMgIlJlc2lzdGFudCINCjEgMTAuNCAiU3VzY2VwdGlibGUiDQoxIDE2LjYgIlN1c2NlcHRpYmxlIg0KMCAxMi41ICJSZXNpc3RhbnQiDQoxIDE2LjkgIlJlc2lzdGFudCINCjEgMTIuMiAiU3VzY2VwdGlibGUiDQoxIDE4LjEgIlN1c2NlcHRpYmxlIg0KMCA1LjEgIlJlc2lzdGFudCINCjEgMTguNiAiUmVzaXN0YW50Ig0KMCAyLjYgIlJlc2lzdGFudCINCjAgNi4xICJSZXNpc3RhbnQiDQowIDcuNiAiU3VzY2VwdGlibGUiDQowIDcuOCAiUmVzaXN0YW50Ig0KMCA0LjcgIlJlc2lzdGFudCINCjAgMi4yICJSZXNpc3RhbnQiDQowIDEwLjggIlJlc2lzdGFudCINCjEgMTcuNiAiUmVzaXN0YW50Ig0KMSAxOSAiU3VzY2VwdGlibGUiDQowIDcuMyAiUmVzaXN0YW50Ig0KMSAxOC4yICJSZXNpc3RhbnQiDQowIDExLjUgIlN1c2NlcHRpYmxlIg0KMCAxMy42ICJSZXNpc3RhbnQiDQoxIDE2LjQgIlJlc2lzdGFudCINCjEgMTYuMSAiUmVzaXN0YW50Ig0KMSAxNC4yICJTdXNjZXB0aWJsZSINCjEgNi4xICJTdXNjZXB0aWJsZSINCjEgMTMuMiAiUmVzaXN0YW50Ig0KMSAxOS4zICJSZXNpc3RhbnQiDQowIDMuMSAiUmVzaXN0YW50Ig0KMSAxNi40ICJTdXNjZXB0aWJsZSINCjEgOS4zICJTdXNjZXB0aWJsZSINCjEgMTYuMyAiUmVzaXN0YW50Ig0KMSAxNy40ICJTdXNjZXB0aWJsZSINCjAgOS4yICJSZXNpc3RhbnQiDQowIDEzLjIgIlJlc2lzdGFudCINCjEgMTguNyAiU3VzY2VwdGlibGUiDQowIDE3LjMgIlJlc2lzdGFudCINCjAgMy42ICJTdXNjZXB0aWJsZSINCjEgMTUgIlJlc2lzdGFudCINCjEgMTYuMyAiU3VzY2VwdGlibGUiDQowIDQuOSAiU3VzY2VwdGlibGUiDQowIDMuMyAiUmVzaXN0YW50Ig0KMCA1LjYgIlJlc2lzdGFudCINCjEgMTQuNiAiU3VzY2VwdGlibGUiDQowIDEwLjIgIlJlc2lzdGFudCINCjAgNC4yICJTdXNjZXB0aWJsZSINCjEgMTQuOCAiU3VzY2VwdGlibGUiDQowIDEzLjYgIlJlc2lzdGFudCINCjEgMTUgIlN1c2NlcHRpYmxlIg0KMCAxMS41ICJSZXNpc3RhbnQiDQoxIDE0ICJTdXNjZXB0aWJsZSINCjEgMTQuNiAiUmVzaXN0YW50Ig0KMSAxOC40ICJSZXNpc3RhbnQiDQoxIDE4LjEgIlN1c2NlcHRpYmxlIg0KMCAzLjQgIlJlc2lzdGFudCINCjAgMTQuNyAiUmVzaXN0YW50Ig0KMCAxLjEgIlJlc2lzdGFudCINCjAgMTMuNyAiU3VzY2VwdGlibGUiDQowIDQuNSAiUmVzaXN0YW50Ig0KMSA5LjMgIlN1c2NlcHRpYmxlIg0KMCA3LjYgIlN1c2NlcHRpYmxlIg0KMCAxMi42ICJSZXNpc3RhbnQiDQoxIDE5LjIgIlN1c2NlcHRpYmxlIg0KMCAzLjUgIlN1c2NlcHRpYmxlIg0KMCA3LjUgIlJlc2lzdGFudCINCjAgMTQuNyAiU3VzY2VwdGlibGUiDQowIDkuOCAiUmVzaXN0YW50Ig0KMSAxOC40ICJSZXNpc3RhbnQiDQowIDUuMyAiU3VzY2VwdGlibGUiDQoxIDE5LjIgIlN1c2NlcHRpYmxlIg0KMCA0LjkgIlN1c2NlcHRpYmxlIg0KMCAxMy45ICJSZXNpc3RhbnQiDQowIDEuMiAiUmVzaXN0YW50Ig0KMCA3LjQgIlN1c2NlcHRpYmxlIg0KMCA2LjYgIlN1c2NlcHRpYmxlIg0KMSAxNSAiUmVzaXN0YW50Ig0KMSAxNyAiU3VzY2VwdGlibGUiDQoxIDE3LjcgIlN1c2NlcHRpYmxlIg0KMCA2LjYgIlJlc2lzdGFudCINCjEgMTcuMiAiU3VzY2VwdGlibGUiDQoxIDE4LjggIlN1c2NlcHRpYmxlIg0KMCA4LjcgIlN1c2NlcHRpYmxlIg0KMCA1LjMgIlN1c2NlcHRpYmxlIg0KMCAxLjIgIlJlc2lzdGFudCINCjAgNS44ICJSZXNpc3RhbnQiDQoxIDE2LjkgIlN1c2NlcHRpYmxlIg0K" download="amp.txt" class="ws-download-btn">Download amp.txt</a></p>
 <p>The dataset contains 160 experimental replicates. Each row is one replicate, with the following variables:</p>
 <ul>
@@ -3738,7 +3738,7 @@ At the same territory quality of 5, first-time breeders have a predicted success
 <p>Go through the full seven-step workflow. A few things to keep in mind:</p>
 <ol type="1">
 <li><p>The response is binary, so use jitter plots rather than raw scatter plots to visualise it. <code>mean(amp$cleared)</code> gives the overall clearance rate; <code>tapply(amp$cleared, amp$strain, mean)</code> gives it separately by strain.</p></li>
-<li><p>Think carefully about hidden assumptions. The <code>cleared</code> variable is a binary endpoint measured at 24 hours — what does that assume about the clearance process? Are there any representativeness concerns about using a cell-culture model to draw conclusions about clinical use?</p></li>
+<li><p>Think carefully about hidden assumptions. The <code>cleared</code> variable is a binary endpoint measured at 24 hours: what does that assume about the clearance process? Are there any representativeness concerns about using a cell-culture model to draw conclusions about clinical use?</p></li>
 <li><p>Use <code>plogis()</code> to back-transform any predictions from the log-odds scale to the probability scale.</p></li>
 </ol>
 <div class="question-block">
@@ -3761,11 +3761,11 @@ Key hidden assumptions worth flagging: “cleared within 24 hours” is an arbit
 </section>
 <section id="fin" class="level1">
 <h1>Fin</h1>
-<p>That is a wrap. This is the last workshop of the course, so you are free to go.</p>
+<p>That’s a wrap. This is the last workshop of the course, so you’re free to go.</p>
 <p>A few final requests from me (Deon):</p>
 <ul>
-<li><p>I do not care if you forget the details and technical side of this course. What I do want you to try and hold onto is this: data and models are not magic boxes that unravel the Truth or reveal the secrets of the universe. A model is just a bunch of code and equations. Don’t be taken in by people throwing data and results at you, whether that is on the internet, in the news, or in peer-reviewed papers. Ask what assumptions were made. Ask whether the data can actually answer the question being claimed. Be sceptical.</p></li>
-<li><p>If you found any typos, confusing sections, or parts of the workshops or lectures that just didn’t land: please tell me. I genuinely think this material matters, and if I am not communicating it well, I want to know. Feel free to email or message however you prefer. I’d really appreciate any feedback (just please don’t be needlessly cruel about it).</p></li>
+<li><p>I don’t care if you forget the details and technical side of this course. What I do want you to try and hold onto is this: data and models aren’t magic boxes that unravel the Truth or reveal the secrets of the universe. A model is just a bunch of code and equations. Don’t be taken in by people throwing data and results at you, whether that’s on the internet, in the news, or in peer-reviewed papers. Ask what assumptions were made. Ask whether the data can actually answer the question being claimed. Be sceptical.</p></li>
+<li><p>If you found any typos, confusing sections, or parts of the workshops or lectures that just didn’t land: please tell me. I genuinely think this material matters, and if I’m not communicating it well, I want to know. Feel free to email or message however you prefer. I’d really appreciate any feedback (just please don’t be needlessly cruel about it).</p></li>
 </ul>
 <hr>
 </section>

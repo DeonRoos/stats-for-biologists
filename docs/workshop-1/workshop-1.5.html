@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Roos &amp; Pinard">
-<meta name="dcterms.date" content="2026-05-15">
+<meta name="dcterms.date" content="2026-05-16">
 
 <title>Workshop 1.5: Hidden Assumptions</title>
 <style>
@@ -3068,7 +3068,7 @@ vertical-align: -.125em;
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">15 May 2026</p>
+      <p class="date">16 May 2026</p>
     </div>
   </div>
   
@@ -3247,7 +3247,7 @@ The Analytical Workflow
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>As always, we are using the workflow below to structure the workshops:</p>
+<p>As always, we’re using the workflow below to structure the workshops:</p>
 <ol type="1">
 <li>Formulate a research question.</li>
 <li>Perform exploratory data analysis.</li>
@@ -3283,7 +3283,7 @@ By the end of this workshop you will be able to:
 </section>
 <section id="the-seven-assumptions" class="level1">
 <h1>The Seven Assumptions</h1>
-<p>In this workshop, you will come up with some examples of various datasets that are likely to violate a hidden assumption. Some of these are related to residual error, which we will cover in more detail next week. For now, understand residual error as the difference between what a model predicts and the actual observation. For example, if a model predicts a flat costs £850 to rent each month, but the actual rent was £800, then the residual error is observed minus predicted (Residual = y − ŷ). For the flat example, the residual error would be 800 − 850 = −50, or £-50 difference.</p>
+<p>In this workshop, you’ll come up with some examples of various datasets that are likely to violate a hidden assumption. Some of these are related to residual error, which we’ll cover in more detail next week. For now, understand residual error as the difference between what a model predicts and the actual observation. For example, if a model predicts a flat costs £850 to rent each month, but the actual rent was £800, then the residual error is observed minus predicted (Residual = y − ŷ). For the flat example, the residual error would be 800 − 850 = −50, or £-50 difference.</p>
 <p>These assumptions (with some simple examples) are:</p>
 <table class="table">
 <colgroup>
@@ -3327,7 +3327,7 @@ By the end of this workshop you will be able to:
 <tr class="even">
 <td>6. <strong>Equal variance of errors</strong></td>
 <td>Residuals have constant variance across all levels of predictors (“homoscedasticity”).</td>
-<td>If modelling income, variability in salaries is not the same across all levels of a company’s hierarchy.</td>
+<td>If modelling income, variability in salaries isn’t the same across all levels of a company’s hierarchy.</td>
 </tr>
 <tr class="odd">
 <td>7. <strong>Normality of errors</strong></td>
@@ -3354,7 +3354,7 @@ By the end of this workshop you will be able to:
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># replace = FALSE means once a number is selected, it cannot be selected again</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>, <span class="at">size =</span> <span class="dv">7</span>, <span class="at">replace =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>If you are unsure what to do, please ask a member of staff, and also discuss your ideas with them during this first task.</p>
+<p>If you’re unsure what to do, please ask a member of staff, and also discuss your ideas with them during this first task.</p>
 <section id="check-your-understanding" class="level2">
 <h2 class="anchored" data-anchor-id="check-your-understanding">Check Your Understanding</h2>
 <p>For each assumption below, select the scenario that best illustrates it being violated.</p>
@@ -3370,7 +3370,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-Track counts and population size are not the same thing. Track density depends on substrate, weather, species behaviour, and observer skill, not just how many animals are present. The data cannot directly answer the question it is being used for.
+Track counts and population size aren’t the same thing. Track density depends on substrate, weather, species behaviour, and observer skill, not just how many animals are present. The data can’t directly answer the question it’s being used for.
 </p>
 </div>
 </div>
@@ -3386,7 +3386,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-Accessible riverbanks are not representative of the whole river system. Deeper water, faster currents, and remote stretches may hold very different fish communities. Sampling only what is convenient and generalising to the whole introduces systematic bias.
+Accessible riverbanks aren’t representative of the whole river system. Deeper water, faster currents, and remote stretches may hold very different fish communities. Sampling only what’s convenient and generalising to the whole introduces systematic bias.
 </p>
 </div>
 </div>
@@ -3402,7 +3402,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-The drug and alcohol interact: the combined effect is not simply the sum of each alone. Additivity assumes that predictors work independently, and this is a clear violation. The other examples describe situations where effects are independent and additive.
+The drug and alcohol interact: the combined effect isn’t simply the sum of each alone. Additivity assumes that predictors work independently, and this is a clear violation. The other examples describe situations where effects are independent and additive.
 </p>
 </div>
 </div>
@@ -3487,13 +3487,13 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-<strong>Validity.</strong> A data point only appears when a deer was present, seen, and reported by an observer. We cannot guarantee that every observer spots a deer even when one is there, and skill levels will vary considerably. There is also the question of identification: what if it was a roe deer, a dog, or even Bigfoot?
+<strong>Validity.</strong> A data point only appears when a deer was present, seen, and reported by an observer. We can’t guarantee that every observer spots a deer even when one is there, and skill levels will vary considerably. There’s also the question of identification: what if it was a roe deer, a dog, or even Bigfoot?
 </p>
 <p>
 <strong>Representativeness.</strong> The dataset only records successful sightings, not failed searches. Every blank area on the map has two possible meanings: someone looked and found no deer, or no one looked at all. These are very different situations but look identical in the data. Survey effort is also not uniform across the UK. Someone near Fort William is fairly accustomed to red deer, whereas someone spotting one in London would find it much more exciting and be far more likely to report it. That reporting bias makes the dataset unreliable as a picture of where deer actually are.
 </p>
 <p>
-In short, what the data captures is: <em>observations where a deer was present, seen, and reported</em>. What we want it to represent is: <em>observations where deer are either present or absent</em>. Those are not the same thing.
+In short, what the data captures is: <em>observations where a deer was present, seen, and reported</em>. What we want it to represent is: <em>observations where deer are either present or absent</em>. Those aren’t the same thing.
 </p>
 </div>
 </div>
@@ -3511,7 +3511,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-The core of the range is likely reliable, but the range edge is likely highly unreliable, with some areas probably overestimated and others underestimated. As we approach a species’ range edge, we might find: 1) the species are less common so are not seen as often, 2) they are relatively “new” at the range edge so are not reported as often, 3) they might colonise an area but quickly go locally extinct (meaning we might have false positive “detections”), and 4) there are lots of additional little things that all contribute to detections being highly unreliable, especially at range edges.
+The core of the range is likely reliable, but the range edge is likely highly unreliable, with some areas probably overestimated and others underestimated. As we approach a species’ range edge, we might find: 1) the species are less common so aren’t seen as often, 2) they are relatively “new” at the range edge so aren’t reported as often, 3) they might colonise an area but quickly go locally extinct (meaning we might have false positive “detections”), and 4) there are lots of additional little things that all contribute to detections being highly unreliable, especially at range edges.
 </p>
 </div>
 </div>
@@ -3531,7 +3531,7 @@ Probably less so. The UK public tends to be engaged with wildlife reporting, par
 </div>
 <div class="question-block">
 <p>
-<strong>Question 3.</strong> Do you think there is any value in the IUCN geographic range for decision making?
+<strong>Question 3.</strong> Do you think there’s any value in the IUCN geographic range for decision making?
 </p>
 <textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">
@@ -3539,7 +3539,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-There is, but in a limited capacity. It’s useful for very broad decisions (“red deer are present in country X”) but is very likely to be detrimental for any fine-scale decisions (“red deer are expanding into neighbourhood Y of city X”). That’s often the case in science: results may still be useful for broad-level understanding even when the underlying data are of limited quality, but if we want to make more precise and accurate decisions, the data really do need to be “top quality”.
+There is some value, but in a limited capacity. It’s useful for very broad decisions (“red deer are present in country X”) but is very likely to be detrimental for any fine-scale decisions (“red deer are expanding into neighbourhood Y of city X”). That’s often the case in science: results may still be useful for broad-level understanding even when the underlying data are of limited quality, but if we want to make more precise and accurate decisions, the data really do need to be top quality.
 </p>
 </div>
 </div>
@@ -3547,7 +3547,7 @@ There is, but in a limited capacity. It’s useful for very broad decisions (“
 </section>
 <section id="revisiting-the-alligator-data" class="level1">
 <h1>Revisiting the Alligator Data</h1>
-<p>Return to the <code>alligator_bite.txt</code> dataset from the first workshop. We did not give you any information as to <em>how</em> the data were collected, so gauging how likely it was to meet or violate assumptions is difficult (but not impossible). To allow you to do so now, here is a description of data collection:</p>
+<p>Return to the <code>alligator_bite.txt</code> dataset from the first workshop. We didn’t give you any information as to <em>how</em> the data were collected, so gauging how likely it was to meet or violate assumptions is difficult (but not impossible). To allow you to do so now, here’s a description of data collection:</p>
 <blockquote class="blockquote">
 <p>Each alligator was retrieved from a communal pond containing 100 alligators. Although the alligators were not individually tagged, farm staff were able to identify each one, ensuring that observations were independent. After retrieval, the alligator was blindfolded and moved to a safe and secure location. Once secured, the alligator was restrained by up to three technicians while its length was measured. To measure the length, two additional technicians used a tape measure from the tip of the nose to the tip of the tail. The tape was passed under the restraining technicians when possible to ensure accurate measurements. Lengths were recorded in centimetres, with one decimal point.</p>
 </blockquote>
@@ -3566,7 +3566,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-<strong>Independence of errors.</strong> Alligators are returned to the communal pond after measurement before the next one is retrieved. Despite staff assurances that individuals can be identified, it seems plausible that the same alligator could be captured twice. If so, some “observations” are repeated measurements of the same animal, a direct violation of independence.
+<strong>Independence of errors.</strong> Alligators are returned to the communal pond after measurement before the next one is retrieved. Despite staff assurances that individuals can be identified, it seems plausible that the same alligator could be captured twice. If so, some “observations” are repeated measurements of the same animal — a direct violation of independence.
 </p>
 <p>
 <strong>Validity (bite force).</strong> It sounds like actually getting alligators to bite the device might have been a bit hard. Did each animal bite as hard as it could, or just hard enough for the staff to feel like they had a measurement? If the latter, recorded values may not reflect true maximum bite strength.
@@ -3589,7 +3589,7 @@ Show Answer
 The easiest option may be to have some method to identify which alligators had already been measured. Something like a non-toxic paint mark on their head. That would remove the chance that a previously measured alligator was repeatedly measured.
 </p>
 <p>
-In terms of getting more accurate measurements, it’s a bit harder. Measuring an alligator’s length and bite strength will probably always be difficult and the way they do it seems pretty sensible from the little I know about measuring alligator bite strength (which isn’t much). Personally, I can’t think of a way to resolve this issue, so I would likely look to resolve the measurement error in the model (note, we don’t teach you how to do this).
+In terms of getting more accurate measurements, it’s a bit harder. Measuring an alligator’s length and bite strength will probably always be difficult and the way they do it seems pretty sensible from the little I know about measuring alligator bite strength (which isn’t much). Personally, I can’t think of a way to resolve this issue, so I’d likely look to resolve the measurement error in the model (note, we don’t teach you how to do this).
 </p>
 <p>
 The broader point with this example is that sometimes you can’t improve a dataset. In such cases, the important thing is to identify what impact the limitations will have on the results, which we’ll return to as the course progresses.

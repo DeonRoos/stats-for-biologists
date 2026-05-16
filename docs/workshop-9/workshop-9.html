@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Roos &amp; Pinard">
-<meta name="dcterms.date" content="2026-05-15">
+<meta name="dcterms.date" content="2026-05-16">
 
 <title>Workshop 9: Poisson GLMs</title>
 <style>
@@ -3045,6 +3045,7 @@ vertical-align: -.125em;
   <ul class="collapse">
   <li><a href="#choosing-a-distribution" id="toc-choosing-a-distribution" class="nav-link" data-scroll-target="#choosing-a-distribution">Choosing a distribution</a></li>
   <li><a href="#choosing-a-link-function" id="toc-choosing-a-link-function" class="nav-link" data-scroll-target="#choosing-a-link-function">Choosing a link function</a></li>
+  <li><a href="#which-explanatory-variables-to-include" id="toc-which-explanatory-variables-to-include" class="nav-link" data-scroll-target="#which-explanatory-variables-to-include">Which explanatory variables to include?</a></li>
   <li><a href="#fitting-the-model" id="toc-fitting-the-model" class="nav-link" data-scroll-target="#fitting-the-model">Fitting the model</a></li>
   </ul></li>
   <li><a href="#diagnose-the-model-and-check-assumptions" id="toc-diagnose-the-model-and-check-assumptions" class="nav-link" data-scroll-target="#diagnose-the-model-and-check-assumptions">5. Diagnose the model and check assumptions</a>
@@ -3093,7 +3094,7 @@ vertical-align: -.125em;
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">15 May 2026</p>
+      <p class="date">16 May 2026</p>
     </div>
   </div>
   
@@ -3243,18 +3244,8 @@ font-weight: 600;
 background: #00b494;
 color: #fff;
 }
-.ws-download-btn {
-display: inline-block;
-margin: 0.5rem 0 1rem;
-padding: 0.4rem 1rem;
-background: #0d1e2c;
-color: #fff !important;
-border-radius: 4px;
-text-decoration: none;
-font-size: 0.875rem;
-font-weight: 600;
-}
-.ws-download-btn:hover { background: #1a3348; }
+.ws-download-btn { display: inline-block; margin: 0.4rem 0; padding: 0.35rem 0.9rem; background: #0d6efd; color: #fff !important; border-radius: 4px; text-decoration: none !important; font-size: 0.875rem; font-weight: 500; }
+.ws-download-btn:hover { background: #0b5ed7; }
 .glossary-section-header {
 padding: 0.4rem 1.25rem 0.3rem;
 font-size: 0.72rem;
@@ -3443,28 +3434,35 @@ Workflow
 </section>
 <section id="identify-hidden-assumptions" class="level2">
 <h2 class="anchored" data-anchor-id="identify-hidden-assumptions">3. Identify hidden assumptions</h2>
-<p>Before fitting any model, think about the hidden assumptions. The standard ones apply: validity, representativeness, additivity, and linearity. But there is also a new one specific to Poisson GLMs: dispersion. We will return to this after fitting.</p>
+<p>Before fitting any model, think about the hidden assumptions. The standard ones apply: validity, representativeness, additivity, and linearity. But there’s also a new one specific to Poisson GLMs: dispersion. We’ll return to this after fitting.</p>
 </section>
 <section id="fit-an-appropriate-model" class="level2">
 <h2 class="anchored" data-anchor-id="fit-an-appropriate-model">4. Fit an appropriate model</h2>
 <section id="choosing-a-distribution" class="level3">
 <h3 class="anchored" data-anchor-id="choosing-a-distribution">Choosing a distribution</h3>
-<p>The response variable <code>Species</code> is a count: it can only take non-negative integer values (0, 1, 2, …). A Normal distribution generates continuous values and allows negatives, so it is a poor fit for count data. The Poisson distribution is designed for counts. It is described by a single parameter λ (lambda), which is both the mean and the expected count.</p>
+<p>The response variable <code>Species</code> is a count: it can only take non-negative integer values (0, 1, 2, …). From this alone we can already deduce the appropriate distribution (the fact that this workshop is called Poisson GLMs may also offer a rather cryptic hint). A Normal distribution generates continuous values and allows negatives, so it’s a poor fit for count data. The Poisson distribution is designed for counts. It is described by a single parameter λ (lambda), which is both the mean and the expected count.</p>
 <p>The distributional assumption for this model is:</p>
 <p><span class="math display">\[Species_i \sim Poisson(\lambda_i)\]</span></p>
 <p>where <span class="math inline">\(Species_i\)</span> is the count of species in plot <span class="math inline">\(i\)</span>, modelled as coming from a Poisson distribution with mean <span class="math inline">\(\lambda_i\)</span>.</p>
 </section>
 <section id="choosing-a-link-function" class="level3">
 <h3 class="anchored" data-anchor-id="choosing-a-link-function">Choosing a link function</h3>
-<p>Because λ must always be positive (you cannot have a negative expected count), we cannot fit a straight line directly to λ — the line could go below zero. The log link solves this: it maps the linear predictor (which can be any value) onto the log scale, where values can range freely, and then the inverse (<code>exp()</code>) maps back to always-positive predictions.</p>
-<p>The important point: the link function transforms the linear predictor, not the observed species counts. The data never change.</p>
+<p>Because λ must always be positive (you can’t have a negative expected count), we can’t fit a straight line directly to λ — the line could go below zero. The log link solves this: it maps the linear predictor (which can be any value) onto the log scale, where values can range freely, and then the inverse (<code>exp()</code>) maps back to always-positive predictions.</p>
+<blockquote class="blockquote">
+<p>Keep in mind(!): the link function doesn’t transform the species counts — those never change. We’re only changing the <em>linear predictor</em>. This is a super common misunderstanding with GLMs and link functions.</p>
+</blockquote>
 <p>The equation for the linear predictor is:</p>
 <p><span class="math display">\[log(\lambda_i) = \beta_0 + \beta_1 \times Biomass_i\]</span></p>
 <p>where <span class="math inline">\(\beta_0\)</span> is the intercept (the log expected species count when Biomass = 0) and <span class="math inline">\(\beta_1\)</span> is the slope for biomass on the log scale.</p>
 </section>
+<section id="which-explanatory-variables-to-include" class="level3">
+<h3 class="anchored" data-anchor-id="which-explanatory-variables-to-include">Which explanatory variables to include?</h3>
+<p>Spare a moment’s thought for how complex the process behind the number of plant species in a plot of land actually is. How much sunlight does each plot get? How much rainfall? What seeds were already present in the soil before data collection started? Why were <em>those</em> seeds there and not others? Why did some of them germinate in time to be counted?</p>
+<p>We have no data to explain any of that variation — yet it’s all still there, and it’s what we’re asking the stochastic part of the model to absorb. The deterministic part we can actually study is the role of plant biomass and soil pH.</p>
+</section>
 <section id="fitting-the-model" class="level3">
 <h3 class="anchored" data-anchor-id="fitting-the-model">Fitting the model</h3>
-<p>We start with just <code>Biomass</code> as a predictor to keep things simple before adding <code>pH</code>. In R, a GLM is fitted with <code>glm()</code> rather than <code>lm()</code>. The <code>family</code> argument specifies both the distribution and the link function:</p>
+<p>As always, fitting the model is the easiest part. We start with just <code>Biomass</code> as a predictor to keep things simple before adding <code>pH</code>. In R, a GLM is fitted with <code>glm()</code> rather than <code>lm()</code>. The <code>family</code> argument specifies both the distribution and the link function:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>species_mod <span class="ot">&lt;-</span> <span class="fu">glm</span>(Species <span class="sc">~</span> Biomass,</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                   <span class="at">family =</span> <span class="fu">poisson</span>(<span class="at">link =</span> <span class="st">&quot;log&quot;</span>),</span>
@@ -3476,7 +3474,7 @@ Workflow
 <h2 class="anchored" data-anchor-id="diagnose-the-model-and-check-assumptions">5. Diagnose the model and check assumptions</h2>
 <p>The same four diagnostic plots apply. However, the interpretation of two of them changes for a Poisson GLM:</p>
 <ul>
-<li>The normal Q-Q plot: for a linear model we check whether residuals are approximately Normal. A Poisson GLM does not assume Normal residuals, so this plot has very limited use here and can mostly be ignored.</li>
+<li>The normal Q-Q plot: for a linear model we check whether residuals are approximately Normal. A Poisson GLM doesn’t assume Normal residuals, so this plot has very limited use here and can mostly be ignored.</li>
 <li>The residuals vs fitted and scale-location plots: these still check for patterns in the residuals, but they also pick up overdispersion, which is a Poisson-specific concern.</li>
 </ul>
 <div class="cell">
@@ -3512,7 +3510,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-The normality of errors assumption belongs to linear models, not Poisson GLMs. A Poisson GLM assumes counts follow a Poisson distribution, not that residuals are Normal. The Q-Q plot here checks something we never assumed in the first place, so it tells us very little. Focus on the residuals vs fitted and scale-location plots instead.
+The normality of errors assumption belongs to linear models, not Poisson GLMs. A Poisson GLM assumes counts follow a Poisson distribution, not that residuals are Normal. The Q-Q plot here checks something we never assumed in the first place, so it doesn’t tell us much. Focus on the residuals vs fitted and scale-location plots instead.
 </p>
 </div>
 </div>
@@ -3544,7 +3542,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-No observations exceed a Cook’s distance of 1, which would be the threshold for serious concern. However, a few observations sit closer to the dashed lines than we would like. This does not invalidate the model, but it is worth noting. The bigger problem here is overdispersion, not influential observations.
+No observations exceed a Cook’s distance of 1, which would be the threshold for serious concern. However, a few sit uncomfortably close to the boundary — we’re not exactly jumping for joy with those Cook’s distances. The values are fine, but it’s worth noting. The bigger problem here is overdispersion, not influential observations.
 </p>
 </div>
 </div>
@@ -3568,7 +3566,7 @@ From the summary output: residual deviance ≈ 433.6 on 88 degrees of freedom.
 </p>
 <pre><code>433.6 / 88  # ≈ 4.9</code></pre>
 <p>
-A value of 4.9 is far above 1 and indicates severe overdispersion. The variation in species counts is roughly five times larger than the Poisson distribution predicts. As a consequence, the standard errors for the coefficients will be too small, making p-values lower than they should be and confidence intervals too narrow. The model as it stands should be treated with caution.
+We have a whopping dispersion of 4.9. My general rule of thumb is that I start getting concerned somewhere in the 1.5 to 1.8 region. 4.9 is doomsday. As a consequence, the standard errors for the coefficients will be artificially small, making p-values lower than they should be and confidence intervals too narrow. The model as it stands should be treated with serious caution.
 </p>
 </div>
 </div>
@@ -3576,7 +3574,7 @@ A value of 4.9 is far above 1 and indicates severe overdispersion. The variation
 </section>
 <section id="summarise-the-results" class="level2">
 <h2 class="anchored" data-anchor-id="summarise-the-results">6. Summarise the results</h2>
-<p>Despite the overdispersion, we will use this model to practise making predictions on the link scale and on the response scale. We will fix the overdispersion in the next section.</p>
+<p>Despite the overdispersion, we’ll use this model to practise making predictions on the link scale and on the response scale. We’ll fix the overdispersion in the next section.</p>
 <p>From <code>summary(species_mod)</code>, the fitted equation on the log scale is approximately:</p>
 <p><span class="math display">\[log(\hat{\lambda}_i) = 3.55 + (-0.20) \times Biomass_i\]</span></p>
 <section id="predictions-on-the-link-scale" class="level3">
@@ -3594,7 +3592,7 @@ Show Answer
 <pre><code>3.55 + (-0.20) * 0   # = 3.55  (at 0 kg biomass)
 3.55 + (-0.20) * 5   # = 2.55  (at 5 kg biomass)</code></pre>
 <p>
-These predictions are on the log scale. A value of 3.55 does not mean 3.55 species; it means log(expected species) = 3.55. To get the actual expected species count, we need to back-transform.
+These predictions are on the log scale. A value of 3.55 doesn’t mean 3.55 species; it means log(expected species) = 3.55. To get the actual expected species count, we need to back-transform.
 </p>
 </div>
 </div>
@@ -3615,7 +3613,7 @@ Show Answer
 exp(3.55 + (-0.20) * 5)   # ≈ 12.8 species at 5 kg
 exp(3.55 + (-0.20) * 10)  # ≈  4.7 species at 10 kg</code></pre>
 <p>
-According to this model, expected species count drops from roughly 35 at zero biomass to roughly 5 at 10 kg. The relationship is not linear on the response scale: equal increases in biomass produce proportionally smaller reductions in species count as biomass grows. This is a direct consequence of the log link.
+According to this model, expected species count drops from roughly 35 at zero biomass to roughly 5 at 10 kg. The relationship isn’t linear on the response scale: equal increases in biomass produce proportionally smaller reductions in species count as biomass grows. This is a direct consequence of the log link.
 </p>
 </div>
 </div>
@@ -3650,7 +3648,7 @@ Show Answer
        y = &quot;Expected species count&quot;) +
   theme_minimal()</code></pre>
 <p>
-The curve is not a straight line on the response scale because of the log link. The confidence band widens at higher biomass values, partly because there are fewer observations there and partly because the overdispersion means the model is less certain than it should be.
+The curve isn’t a straight line on the response scale because of the log link. The confidence band widens at higher biomass values, partly because there are fewer observations there and partly because the overdispersion means the model is less certain than it should be.
 </p>
 </div>
 </div>
@@ -3658,7 +3656,7 @@ The curve is not a straight line on the response scale because of the log link. 
 </section>
 <section id="interpret-and-draw-conclusions" class="level2">
 <h2 class="anchored" data-anchor-id="interpret-and-draw-conclusions">7. Interpret and draw conclusions</h2>
-<p>Based on this model, biomass has a negative association with species count: plots with more plant biomass tend to have fewer plant species. However, the severe overdispersion (dispersion ≈ 4.9) means we should not place much confidence in the specific p-values or the width of the confidence intervals. The model as fitted is not well calibrated.</p>
+<p>Based on this model, biomass has a negative association with species count: plots with more plant biomass tend to have fewer plant species. However, the severe overdispersion (dispersion ≈ 4.9) means we shouldn’t place much confidence in the specific p-values or the width of the confidence intervals. The model as fitted isn’t well calibrated.</p>
 </section>
 </section>
 <section id="resolving-the-violations" class="level1">
@@ -3718,7 +3716,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-R sets the reference category to the first level alphabetically unless you specify otherwise. Here that is “High”. Because “High” is the reference, there is no separate <code>pHhigh</code> coefficient: its effect is part of the intercept. The <code>pHlow</code> and <code>pHmid</code> coefficients are the estimated differences from “High” on the log scale.
+R sets the reference category to the first level alphabetically unless you specify otherwise. Here that is “High”. Because “High” is the reference, there’s no separate <code>pHhigh</code> coefficient: its effect is part of the intercept. The <code>pHlow</code> and <code>pHmid</code> coefficients are the estimated differences from “High” on the log scale.
 </p>
 </div>
 </div>
@@ -3757,7 +3755,7 @@ The <code>pHlow</code> coefficient is a difference on the log scale between low-
 </section>
 <section id="plot-the-model-fit" class="level2">
 <h2 class="anchored" data-anchor-id="plot-the-model-fit">Plot the model fit</h2>
-<p>Use <code>ggeffects</code> to produce separate predicted relationships for each predictor:</p>
+<p>In the interest of ending on an easy note, let’s use <code>ggeffects</code> and have it do all the annoying coding for us:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggeffects)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>

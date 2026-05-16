@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Roos &amp; Pinard">
-<meta name="dcterms.date" content="2026-05-15">
+<meta name="dcterms.date" content="2026-05-16">
 
 <title>Workshop 8: Linear models with interactions</title>
 <style>
@@ -3086,7 +3086,7 @@ vertical-align: -.125em;
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">15 May 2026</p>
+      <p class="date">16 May 2026</p>
     </div>
   </div>
   
@@ -3355,7 +3355,7 @@ Workflow
 </ol>
 </div>
 </div>
-<p>Today’s focus is on interactions between predictors. We will first fit a model with only main effects, find a problem in the diagnostics, and then fix it by including an interaction term. We then work through visualising interactions and finish with an independent extension exercise on a second dataset.</p>
+<p>Today’s focus is on interactions between predictors. We’ll first fit a model with only main effects, find a problem in the diagnostics, and then fix it by including an interaction term. We then work through visualising interactions and finish with an independent extension exercise on a second dataset.</p>
 <section id="formulate-a-research-question" class="level2">
 <h2 class="anchored" data-anchor-id="formulate-a-research-question">1. Formulate a research question</h2>
 <p>For this workshop we use a dataset from a study set in the coral reef ecosystems of the Coral Triangle, a biodiversity hotspot in the Indo-Pacific. Download it below and save it to your <code>BI3010/data/</code> folder.</p>
@@ -3482,7 +3482,7 @@ Using the approximate coefficients from the model:
 <pre><code>-27.21 + 3.22 * 5  + 7.12 * 0.1  # ≈ -10.4 kg/m²
 -27.21 + 3.22 * 10 + 7.12 * 0.1  # ≈  +5.7 kg/m²</code></pre>
 <p>
-Going from 5 to 10 sharks increases predicted biomass by about 16 kg/m² (the difference is simply 5 × β₁ ≈ 5 × 3.22). In a main-effects model this difference is the same regardless of reef complexity, because the additivity assumption forces the shark slope to be constant. You will see later why that assumption is wrong here.
+Going from 5 to 10 sharks increases predicted biomass by about 16 kg/m² (the difference is simply 5 × β₁ ≈ 5 × 3.22). In a main-effects model this difference is the same regardless of reef complexity, because the additivity assumption forces the shark slope to be constant. You’ll see later why that assumption is wrong here.
 </p>
 </div>
 </div>
@@ -3505,10 +3505,10 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-Predators eating prey is one of the most well-established relationships in ecology, so a positive shark-biomass association is hard to explain biologically. You might try: trophic cascades, a landscape of fear effect reducing prey movement, compensatory breeding by prey, shifts in species composition, and so on.
+It’s kind of hard to think why adding predators would increase the number of prey. But not impossible. You might try: trophic cascades, a landscape of fear effect reducing prey movement, compensatory breeding by prey, shifts in species composition, and so on.
 </p>
 <p>
-The problem is that you are doing this <em>after</em> seeing the result. That is HARKing: Hypothesising After Results are Known. Any sufficiently creative thinker can construct a plausible-sounding story for almost any result after the fact. The dangerous part is that these stories then get presented as if they were the original hypothesis, which makes the evidence look far stronger than it is. Any explanation you come up with after seeing the result should always be labelled as exploratory (“we did not predict this, but one possible interpretation is…”), not as confirmation of a prediction. We will see shortly that the result changes completely once we account for the interaction, making this exercise even more telling.
+The point is that you can always come up with <em>some</em> hypothesis to explain your results after the fact. That’s HARKing: Hypothesising After Results are Known, and it’s a serious problem in science. To be very clear, HARKing is a <em>highly</em> questionable research practice (i.e. uncomfortably close to fraud) where researchers try to explain their results after the model tells them the answer, while pretending they were always testing that hypothesis. Any explanation you arrive at after seeing the result should be labelled as exploratory (“we did not predict this, but one possible interpretation is…”), not presented as confirmation of a prior prediction. We’ll see shortly that the result changes completely once we account for the interaction, which makes this exercise even more telling.
 </p>
 </div>
 </div>
@@ -3516,7 +3516,7 @@ The problem is that you are doing this <em>after</em> seeing the result. That is
 </section>
 <section id="including-an-interaction" class="level1">
 <h1>Including an interaction</h1>
-<p>The main-effects model treats the effects of shark density and reef complexity as independent. But think about what is ecologically plausible. In a structurally simple reef with few hiding places, more sharks should reduce fish biomass substantially. In a complex reef with many refuges, the same number of sharks might have much less impact because prey can avoid them. This means the effect of shark density on biomass is not constant: it depends on reef complexity. That is an interaction.</p>
+<p>The main-effects model treats the effects of shark density and reef complexity as independent. But think about what is ecologically plausible. In a structurally simple reef with few hiding places, more sharks should reduce fish biomass substantially. In a complex reef with many refuges, the same number of sharks might have much less impact because prey can avoid them. This means the effect of shark density on biomass isn’t constant: it depends on reef complexity. That’s an interaction.</p>
 <div class="card-sort-container" id="card-sort-interaction">
   <p class="card-sort-intro">Before working through the maths, test your intuition. Each scenario below describes a relationship between two variables. Decide whether the description implies an interaction or not.</p>
   <p class="card-sort-hint">Click a card to select it, then click a zone to place it. Click a placed card to move it back.</p>
@@ -3524,19 +3524,19 @@ The problem is that you are doing this <em>after</em> seeing the result. That is
   <div class="card-sort-layout">
 
     <div class="card-sort-deck" id="cs-deck">
-      <div class="cs-card" id="cs-c1" data-answer="interaction" data-explanation="The effect of fertiliser depends on soil nutrients — big effect in poor soil, almost none in rich soil. That dependency is an interaction.">
+      <div class="cs-card" id="cs-c1" data-answer="interaction" data-explanation="The effect of fertiliser depends on soil nutrients: big effect in poor soil, almost none in rich soil. That dependency is an interaction.">
         In nutrient-poor soils, fertiliser dramatically increases plant growth. In nutrient-rich soils, the same dose has almost no effect.
       </div>
-      <div class="cs-card" id="cs-c2" data-answer="no-interaction" data-explanation="The body-size–heart-rate relationship is the same in both groups. No interaction — the effect doesn&#39;t depend on taxon.">
+      <div class="cs-card" id="cs-c2" data-answer="no-interaction" data-explanation="The body-size–heart-rate relationship is the same in both groups. No interaction: the effect doesn&#39;t depend on taxon.">
         Larger animals tend to have slower resting heart rates, and this relationship holds across both mammals and reptiles.
       </div>
-      <div class="cs-card" id="cs-c3" data-answer="interaction" data-explanation="The caffeine effect differs by sleep state — large when sleep-deprived, small when rested. The effect of one variable depends on the other.">
+      <div class="cs-card" id="cs-c3" data-answer="interaction" data-explanation="The caffeine effect differs by sleep state: large when sleep-deprived, small when rested. The effect of one variable depends on the other.">
         Caffeine improves alertness much more when you are sleep-deprived than when you are well-rested.
       </div>
-      <div class="cs-card" id="cs-c4" data-answer="no-interaction" data-explanation="The parasite&#39;s effect is the same (~20% reduction) across climates. No interaction — the effect doesn&#39;t depend on temperature.">
+      <div class="cs-card" id="cs-c4" data-answer="no-interaction" data-explanation="The parasite&#39;s effect is the same (~20% reduction) across climates. No interaction: the effect doesn&#39;t depend on temperature.">
         A gut parasite reduces host survival by around 20% regardless of whether the host lives in a warm or cold climate.
       </div>
-      <div class="cs-card" id="cs-c5" data-answer="interaction" data-explanation="CO₂ speeds up photosynthesis — but only in well-watered plants. The effect of CO₂ depends on water availability. That is an interaction.">
+      <div class="cs-card" id="cs-c5" data-answer="interaction" data-explanation="CO₂ speeds up photosynthesis, but only in well-watered plants. The effect of CO₂ depends on water availability. That is an interaction.">
         Elevated CO₂ speeds up photosynthesis in well-watered plants but has almost no effect in drought-stressed plants.
       </div>
     </div>
@@ -3828,7 +3828,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-The interaction term multiplies both predictors together: <span class="math inline">\(\beta_3 \times shark_i \times reef_i\)</span>. The main effects (<span class="math inline">\(\beta_1 \times shark_i\)</span> and <span class="math inline">\(\beta_2 \times reef_i\)</span>) remain in the model alongside the interaction; removing them would change the meaning of the other parameters entirely. The brackets around the interaction term are not required by R but help readers identify it visually.
+The interaction term multiplies both predictors together: <span class="math inline">\(\beta_3 \times shark_i \times reef_i\)</span>. The main effects (<span class="math inline">\(\beta_1 \times shark_i\)</span> and <span class="math inline">\(\beta_2 \times reef_i\)</span>) remain in the model alongside the interaction; removing them would change the meaning of the other parameters entirely. The brackets around the interaction term aren’t required by R but help readers identify it visually.
 </p>
 </div>
 </div>
@@ -3856,7 +3856,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-Yes, the curved pattern in the residuals vs fitted plot disappears. This is not just a mechanical effect of adding a parameter: it is evidence that the original model was missing the interaction. The interaction term captures the combined effect that the main-effects model could not, and once it is included, the residuals no longer show a pattern.
+Yes, the curved pattern in the residuals vs fitted plot disappears. This isn’t just a mechanical effect of adding a parameter: it’s evidence that the original model was missing the interaction. The interaction term captures the combined effect that the main-effects model could not, and once it’s included, the residuals no longer show a pattern.
 </p>
 </div>
 </div>
@@ -3894,7 +3894,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-The intercept is the predicted value when all predictors are zero, and that definition does not change when an interaction is added. In this case, zero sharks and zero reef complexity is an unlikely combination in reality, so the intercept has limited direct biological meaning. Its value will also differ from the main-effects model because the interaction changes how the other parameters are estimated.
+The intercept is the predicted value when all predictors are zero, and that definition doesn’t change when an interaction is added. In this case, zero sharks and zero reef complexity is an unlikely combination in reality, so the intercept has limited direct biological meaning. Its value will also differ from the main-effects model because the interaction changes how the other parameters are estimated.
 </p>
 </div>
 </div>
@@ -3926,7 +3926,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-The shark coefficient is now negative, which is what ecology would predict: more predators, less prey. In the main-effects model, the positive coefficient was an artefact of a model that was missing the interaction term. Once the interaction is included, the model correctly captures that the shark effect is negative but varies with reef complexity. This is also why we should always diagnose before interpreting: a model with violated assumptions can produce coefficients that are not just imprecise but point in the wrong direction.
+No — we get something far more intuitive, requiring fewer mental gymnastics to explain. Predators eat prey. The more predators, the less prey. Just that simple. The positive coefficient from the main-effects model was an artefact of a model missing the interaction term. Once the interaction is included, the model correctly captures that the shark effect is negative but varies with reef complexity. This is also why we should always diagnose before interpreting: a model with violated assumptions can produce coefficients that aren’t just imprecise but point in the wrong direction entirely.
 </p>
 </div>
 </div>
@@ -3988,7 +3988,7 @@ Note that interpreting this as a causal claim requires additional causal reasoni
 <span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The heatmap makes the interaction visible: the highest predicted biomass occurs at high reef complexity combined with high shark density. Without the interaction in mind, high shark density alone would predict low biomass. The interaction flips that relationship at high reef complexity.</p>
-<p>The default blue palette can be hard to read. The viridis <code>&quot;magma&quot;</code> palette gives better contrast across the full range:</p>
+<p>The default blue palette can be hard to read. My preferred option is the viridis <code>&quot;magma&quot;</code> palette, which gives much better contrast across the full range:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(fake) <span class="sc">+</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(<span class="at">x =</span> shark_density, <span class="at">y =</span> reef_complexity, <span class="at">fill =</span> fit)) <span class="sc">+</span></span>
@@ -3998,7 +3998,7 @@ Note that interpreting this as a causal claim requires additional causal reasoni
 <span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">&quot;Predicted biomass change&quot;</span>) <span class="sc">+</span></span>
 <span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>One limitation of heatmaps is that it is hard to communicate uncertainty on them. A common workaround is to produce two additional plots: one showing predictions at the upper 95% confidence limit and one at the lower. This is imperfect because our eyes struggle to compare the same region across three separate plots, but it is better than showing no uncertainty at all.</p>
+<p>One limitation of heatmaps is that it’s hard to communicate uncertainty on them. A common workaround is to produce two additional plots: one showing predictions at the upper 95% confidence limit and one at the lower. But this isn’t ideal either — it’s really hard for our eyes to match up the same region across multiple heatmaps, so you never get a precise sense of the uncertainty at any specific location. If you have any bright ideas for how to effectively convey uncertainty with heatmaps (or even just maps in general), you might have a great paper on your hands. We’re not aware of anyone who has found a particularly compelling solution to this yet.</p>
 </section>
 </section>
 <section id="a-new-challenger-asian-elephants" class="level1">
@@ -4018,12 +4018,9 @@ Note that interpreting this as a causal claim requires additional causal reasoni
 <p>Go through the full seven-step workflow. A few things to keep in mind:</p>
 <ol type="1">
 <li><p>The interaction here is between a continuous variable (<code>veg_cover</code>) and a categorical variable (<code>prox_town</code>), not two continuous variables. R handles this automatically when you use <code>*</code> in the formula, but the interpretation changes: instead of a single <span class="math inline">\(\beta_3\)</span>, you get a separate interaction coefficient for each category of <code>prox_town</code> other than the baseline category.</p></li>
-<li><p>For a continuous × categorical interaction, a heatmap is not appropriate. Use <code>ggpredict()</code> from <code>ggeffects</code> with both terms to produce separate regression lines per proximity level.</p></li>
+<li><p>For a continuous × categorical interaction, a heatmap isn’t appropriate. Use <code>ggpredict()</code> from <code>ggeffects</code> with both terms to produce separate regression lines per proximity level.</p></li>
 <li><p>Think carefully about hidden assumptions. The <code>activity</code> variable is defined relative to a “pristine” baseline. What assumptions does that involve, and are they likely to hold?</p></li>
 </ol>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Your analysis here</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
 <div class="question-block">
 <p>
 <strong>Question 13.</strong> After completing your elephant analysis, summarise your main finding. Does the effect of vegetation cover on elephant activity differ by proximity to towns, and if so, how?
@@ -4034,7 +4031,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-When elephant herds are far from towns, activity increases with vegetation cover: denser vegetation is associated with more normal activity, which makes biological sense as undisturbed habitat. When herds are near or very near to towns, the relationship reverses: higher vegetation cover is associated with reduced activity. One interpretation is that elephants near human settlements use dense vegetation to hide and reduce movement rather than to forage, effectively avoiding contact with people. The interaction means you cannot summarise the vegetation effect with a single slope; its direction depends on proximity to towns.
+When elephant herds are far from towns, activity increases with vegetation cover: denser vegetation is associated with more normal activity, which makes biological sense as undisturbed habitat. When herds are near or very near to towns, the relationship reverses: higher vegetation cover is associated with reduced activity. One interpretation is that elephants near human settlements use dense vegetation to hide and reduce movement rather than to forage, effectively avoiding contact with people. The interaction means you can’t summarise the vegetation effect with a single slope; its direction depends on proximity to towns.
 </p>
 <p>
 The hidden assumptions worth flagging: the “baseline” activity level is measured in a separate group of elephants in pristine habitat, so the activity variable assumes those elephants are comparable to the study animals. The validity of the activity index as a measure of genuine ecological behaviour (rather than observer bias or measurement artefact) is also worth questioning.

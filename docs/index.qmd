@@ -8,7 +8,7 @@ format:
   html:
     toc: false
     theme: [cosmo, custom.scss]
-    highlight-style: github
+    highlight-style: monokai
     embed-resources: true
     code-tools: false
 ---

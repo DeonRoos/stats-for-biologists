@@ -10,7 +10,7 @@ format:
     toc-depth: 3
     toc-location: left
     theme: [cosmo, ../custom.scss]
-    highlight-style: github
+    highlight-style: monokai
     embed-resources: true
     code-copy: true
     code-tools: false

@@ -178,11 +178,15 @@ code {
 }
 
 // inline code
+// NB: Quarto emits `p code:not(.sourceCode){background:#2e3440}` (a dark bg)
+// at higher specificity than a bare `p code`, which left dark text on a dark
+// box. Force the light letterpress inline-code style with !important so it
+// always wins and stays readable.
 p code, li code, td code, h1 code, h2 code, h3 code, a code,
 .callout-body code, .instructor-answer code {
-  background: $inline-bg;
-  color: $ink;
-  padding: 0.05em 0.35em;
+  background: $inline-bg !important;
+  color: $ink !important;
+  padding: 0.05em 0.35em !important;
   font-size: 0.82em;
   border-radius: 0;
 }
@@ -269,6 +273,24 @@ pre code { background: none !important; padding: 0 !important; }
 .callout-warning .callout-title-container::before { content: "WARNING · "; }
 .callout-important .callout-title-container::before { content: "IMPORTANT · "; }
 .callout-caution .callout-title-container::before { content: "CAUTION · "; }
+
+// collapsible callouts: fold the expand/collapse chevron into the solid tab.
+// Quarto's toggle button is transparent with a dark SVG chevron, so the box's
+// top border showed through it and the chevron was invisible on the ink tab.
+.callout.callout-style-default .callout-btn-toggle {
+  background: $ink;
+  display: flex;
+  align-items: center;
+  line-height: 1;
+  // Bootstrap's py-1/pe-0 utilities are !important, so match them. Zero the
+  // vertical padding + line-height so the toggle is the same height as the
+  // Space-Mono title tab (otherwise the serif line-height made it taller).
+  padding: 0 0.5rem 0 0.3rem !important;
+}
+.callout.callout-style-default .callout-toggle::before {
+  // recolour the baked-in dark chevron SVG to the light tab ink
+  filter: brightness(0) invert(1);
+}
 
 .callout.callout-style-default > .callout-body-container {
   padding: 1.15rem 1.25rem 0.9rem;

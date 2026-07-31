@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Roos &amp; Pinard">
-<meta name="dcterms.date" content="2026-07-18">
+<meta name="dcterms.date" content="2026-07-31">
 
 <title>Workshop 10: Bernoulli GLMs</title>
 <style>
@@ -2258,7 +2258,10 @@ window.Quarto = {
   <li><a href="#the-bernoulli-distribution-and-logit-link" id="toc-the-bernoulli-distribution-and-logit-link" class="nav-link" data-scroll-target="#the-bernoulli-distribution-and-logit-link">The Bernoulli distribution and logit link</a></li>
   <li><a href="#fitting-the-model" id="toc-fitting-the-model" class="nav-link" data-scroll-target="#fitting-the-model">Fitting the model</a></li>
   </ul></li>
-  <li><a href="#diagnose-the-model-and-check-assumptions" id="toc-diagnose-the-model-and-check-assumptions" class="nav-link" data-scroll-target="#diagnose-the-model-and-check-assumptions">5. Diagnose the model and check assumptions</a></li>
+  <li><a href="#diagnose-the-model-and-check-assumptions" id="toc-diagnose-the-model-and-check-assumptions" class="nav-link" data-scroll-target="#diagnose-the-model-and-check-assumptions">5. Diagnose the model and check assumptions</a>
+  <ul class="collapse">
+  <li><a href="#better-diagnostics-with-performance" id="toc-better-diagnostics-with-performance" class="nav-link" data-scroll-target="#better-diagnostics-with-performance">Better diagnostics with <code>performance</code></a></li>
+  </ul></li>
   <li><a href="#summarise-the-results" id="toc-summarise-the-results" class="nav-link" data-scroll-target="#summarise-the-results">6. Summarise the results</a>
   <ul class="collapse">
   <li><a href="#predictions-on-the-log-odds-scale" id="toc-predictions-on-the-log-odds-scale" class="nav-link" data-scroll-target="#predictions-on-the-log-odds-scale">Predictions on the log-odds scale</a></li>
@@ -2267,13 +2270,13 @@ window.Quarto = {
   </ul></li>
   <li><a href="#interpret-and-draw-conclusions" id="toc-interpret-and-draw-conclusions" class="nav-link" data-scroll-target="#interpret-and-draw-conclusions">7. Interpret and draw conclusions</a></li>
   </ul></li>
-  <li><a href="#adding-breeding-experience" id="toc-adding-breeding-experience" class="nav-link" data-scroll-target="#adding-breeding-experience">Adding breeding experience</a>
+  <li><a href="#adding-genotype-and-stratification" id="toc-adding-genotype-and-stratification" class="nav-link" data-scroll-target="#adding-genotype-and-stratification">Adding genotype and stratification</a>
   <ul class="collapse">
   <li><a href="#diagnose-the-new-model" id="toc-diagnose-the-new-model" class="nav-link" data-scroll-target="#diagnose-the-new-model">Diagnose the new model</a></li>
   <li><a href="#summarise-and-interpret" id="toc-summarise-and-interpret" class="nav-link" data-scroll-target="#summarise-and-interpret">Summarise and interpret</a></li>
   <li><a href="#plot-the-model-fit" id="toc-plot-the-model-fit" class="nav-link" data-scroll-target="#plot-the-model-fit">Plot the model fit</a></li>
   </ul></li>
-  <li><a href="#a-new-challenger-antimicrobial-peptides" id="toc-a-new-challenger-antimicrobial-peptides" class="nav-link" data-scroll-target="#a-new-challenger-antimicrobial-peptides">A new challenger: antimicrobial peptides</a></li>
+  <li><a href="#a-new-challenger-amphibian-chytrid-infection" id="toc-a-new-challenger-amphibian-chytrid-infection" class="nav-link" data-scroll-target="#a-new-challenger-amphibian-chytrid-infection">A new challenger: amphibian chytrid infection</a></li>
   <li><a href="#what-you-can-take-away-from-this-course" id="toc-what-you-can-take-away-from-this-course" class="nav-link" data-scroll-target="#what-you-can-take-away-from-this-course">What you can take away from this course</a></li>
   <li><a href="#fin" id="toc-fin" class="nav-link" data-scroll-target="#fin">Fin</a></li>
   <li><a href="#assumption-table" id="toc-assumption-table" class="nav-link" data-scroll-target="#assumption-table">Assumption table</a></li>
@@ -2304,7 +2307,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">18 July 2026</p>
+      <p class="date">31 July 2026</p>
     </div>
   </div>
   
@@ -2549,6 +2552,44 @@ margin-top: 0.25rem;
       <div class="glossary-zh-def">将对数几率转换为概率的R函数。<code>plogis(0)</code> = 0.5，<code>plogis(2)</code> ≈ 0.88，<code>plogis(-2)</code> ≈ 0.12。它是<code>qlogis()</code>（将概率转换为对数几率）的逆函数。每当需要将伯努利GLM的预测值或置信区间上下限进行反变换时，使用此函数。</div>
     </div>
 
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">check_model() / performance</span>
+        <span class="glossary-zh-term">check_model() / performance 包</span>
+      </div>
+      <div class="glossary-en-def">A function from the <code>performance</code> package (first met in Workshop 4) that produces model-appropriate diagnostic plots. For a Bernoulli GLM it automatically switches to diagnostics suited to binary data, including a Posterior Predictive Check and a Binned Residuals plot, and prints guidance text on each panel describing what a passing plot looks like.</div>
+      <div class="glossary-zh-def">来自 <code>performance</code> 包（第4次研讨课首次介绍）的函数，可生成与模型类型相匹配的诊断图。对于伯努利GLM，它会自动切换到适合二元数据的诊断图，包括后验预测检验和分箱残差图，并在每张图上打印说明文字，描述通过的图应有的样子。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Binned residuals</span>
+        <span class="glossary-zh-term">分箱残差</span>
+      </div>
+      <div class="glossary-en-def">A residual plot designed for binary responses. Instead of plotting all the individual 0/1 residuals (which fall into two uninformative bands), observations are sorted by their fitted probability, grouped into bins, and the <em>average</em> residual of each bin is plotted against the average fitted value. Averaging cancels the 0/1 noise, so a systematic trend becomes visible. Most points should fall within the shaded error bounds and scatter around zero with no slope. This is the panel to focus on when checking a Bernoulli GLM.</div>
+      <div class="glossary-zh-def">专为二元响应设计的残差图。它不绘制所有单个的0/1残差（那样会形成两条毫无信息的带状），而是将观测值按其拟合概率排序、分组到各个区间（箱），并将每个箱的<em>平均</em>残差对平均拟合值作图。取平均消除了0/1噪声，从而使系统性趋势变得可见。大多数点应落在阴影误差范围内，围绕零散布且没有斜率。这是检查伯努利GLM时应重点关注的面板。</div>
+    </div>
+
+    <div class="glossary-section-header">Interactions</div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Interaction</span>
+        <span class="glossary-zh-term">交互作用</span>
+      </div>
+      <div class="glossary-en-def">When the effect of one predictor depends on the value of another. Fitted in R with <code>*</code> (e.g. <code>genotype * stratification</code>), which adds the two main effects plus their interaction term. On the log-odds scale the interaction coefficient is the difference between the two groups in how much the second predictor changes the log-odds. Here, cold stratification raises germination far more in wild-type seeds than in the dormancy mutant: the effect of cold <em>depends on</em> genotype.</div>
+      <div class="glossary-zh-def">当一个预测变量的效应取决于另一个预测变量的取值时，即存在交互作用。在R中用 <code>*</code> 拟合（例如 <code>genotype * stratification</code>），它会加入两个主效应以及它们的交互项。在对数几率尺度上，交互系数表示第二个预测变量改变对数几率的幅度在两组之间的差异。此处，冷层积对野生型种子萌发的提升远大于对休眠突变体的提升：冷处理的效应<em>取决于</em>基因型。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Gene × environment (G×E)</span>
+        <span class="glossary-zh-term">基因型 × 环境（G×E）</span>
+      </div>
+      <div class="glossary-en-def">A specific kind of interaction in which the effect of an environmental treatment differs between genotypes (or vice versa). A genotype that responds strongly to a treatment while another barely responds is the signature of G×E. In this workshop, wild-type germination is highly sensitive to cold stratification whereas the <code>dog1</code> dormancy mutant germinates readily regardless of temperature.</div>
+      <div class="glossary-zh-def">一种特定的交互作用，即环境处理的效应在不同基因型之间存在差异（反之亦然）。一个基因型对处理反应强烈而另一个几乎无反应，正是 G×E 的标志。在本次研讨课中，野生型的萌发对冷层积高度敏感，而 <code>dog1</code> 休眠突变体无论温度如何都能顺利萌发。</div>
+    </div>
+
   </div>
 </div>
 <section id="learning-objectives" class="level1">
@@ -2568,8 +2609,8 @@ margin-top: 0.25rem;
 <li>Explain why binary response data cannot be modelled with a Normal linear model and why a Bernoulli GLM is appropriate.</li>
 <li>Describe how the logit link function connects probabilities to log-odds, and convert between the two using <code>plogis()</code>.</li>
 <li>Fit a Bernoulli GLM in R using <code>glm()</code> with <code>family = binomial(link = &quot;logit&quot;)</code>.</li>
-<li>Interpret the two-banded pattern in Bernoulli GLM residual plots and explain why overdispersion is not a concern.</li>
-<li>Interpret model coefficients on the log-odds scale and calculate predicted probabilities for specific combinations of predictor values.</li>
+<li>Diagnose a Bernoulli GLM using both the base residual plots and the binned residuals plot from <code>check_model()</code>, and explain why overdispersion is not a concern.</li>
+<li>Interpret model coefficients on the log-odds scale — including an interaction between two categorical predictors alongside a separate continuous effect — and calculate predicted probabilities for specific combinations of predictor values.</li>
 </ol>
 </div>
 </div>
@@ -2601,62 +2642,69 @@ margin-top: 0.25rem;
 <p>In Workshop 9 we went from Normal linear models to Poisson GLMs for count data. Today we take one more step. The response variable is not a count but a binary outcome: each observation is either a 0 or a 1. You can’t model that with a Normal distribution without all kinds of ugly consequences, which we’ll get to shortly. The appropriate distribution is the Bernoulli, the appropriate link is the logit, and the whole thing is more commonly known as logistic regression.</p>
 <section id="formulate-a-research-question" class="level2">
 <h2 class="anchored" data-anchor-id="formulate-a-research-question">1. Formulate a research question</h2>
-<p>The dataset for this workshop comes from a long-term study of Eurasian oystercatcher (<em>Haematopus ostralegus</em>) breeding at a coastal site. Download it below and save it to your <code>BI3010/data/</code> folder.</p>
-<p><a href="data:text/plain;base64,InN1Y2Nlc3MiICJ0ZXJyaXRvcnlfcXVhbGl0eSIgImV4cGVyaWVuY2UiDQoxIDguNSAiRXhwZXJpZW5jZWQiDQowIDMuOSAiRmlyc3QiDQoxIDcuMSAiRXhwZXJpZW5jZWQiDQowIDcuMyAiRmlyc3QiDQowIDUuMSAiRXhwZXJpZW5jZWQiDQowIDcuMyAiRmlyc3QiDQowIDQuNyAiRmlyc3QiDQowIDMuNyAiRmlyc3QiDQoxIDguOSAiRmlyc3QiDQoxIDIuMSAiRXhwZXJpZW5jZWQiDQoxIDkuMSAiRXhwZXJpZW5jZWQiDQoxIDkuNiAiRXhwZXJpZW5jZWQiDQoxIDcuMyAiRXhwZXJpZW5jZWQiDQoxIDUuNiAiRXhwZXJpZW5jZWQiDQoxIDUgIkV4cGVyaWVuY2VkIg0KMSA4LjYgIkV4cGVyaWVuY2VkIg0KMCAyICJFeHBlcmllbmNlZCINCjEgOC44ICJFeHBlcmllbmNlZCINCjAgMi4yICJGaXJzdCINCjAgMy43ICJGaXJzdCINCjAgMS40ICJGaXJzdCINCjAgMiAiRXhwZXJpZW5jZWQiDQoxIDcuMSAiRmlyc3QiDQoxIDguNiAiRXhwZXJpZW5jZWQiDQoxIDguMiAiRmlyc3QiDQoxIDMuNiAiRXhwZXJpZW5jZWQiDQowIDYuNSAiRXhwZXJpZW5jZWQiDQoxIDguMyAiRXhwZXJpZW5jZWQiDQoxIDEgIkV4cGVyaWVuY2VkIg0KMCAxLjIgIkZpcnN0Ig0KMSA1ICJGaXJzdCINCjAgMy42ICJGaXJzdCINCjEgMi42ICJFeHBlcmllbmNlZCINCjEgOS44ICJFeHBlcmllbmNlZCINCjAgNy4xICJGaXJzdCINCjEgNy4xICJFeHBlcmllbmNlZCINCjEgMS41ICJFeHBlcmllbmNlZCINCjAgOS43ICJGaXJzdCINCjAgMS4yICJFeHBlcmllbmNlZCINCjEgNi44ICJFeHBlcmllbmNlZCINCjEgOC45ICJFeHBlcmllbmNlZCINCjEgOS4yICJFeHBlcmllbmNlZCINCjAgNi42ICJGaXJzdCINCjAgNC41ICJFeHBlcmllbmNlZCINCjEgOC43ICJFeHBlcmllbmNlZCINCjAgNSAiRmlyc3QiDQoxIDQuNyAiRXhwZXJpZW5jZWQiDQowIDMuNSAiRmlyc3QiDQoxIDYuOSAiRXhwZXJpZW5jZWQiDQoxIDYuOSAiRXhwZXJpZW5jZWQiDQowIDEuNiAiRXhwZXJpZW5jZWQiDQoxIDcuNyAiRXhwZXJpZW5jZWQiDQowIDUuMSAiRmlyc3QiDQoxIDUuNCAiRXhwZXJpZW5jZWQiDQoxIDcuOCAiRmlyc3QiDQowIDcuNCAiRmlyc3QiDQoxIDEuMiAiRXhwZXJpZW5jZWQiDQowIDIuNyAiRXhwZXJpZW5jZWQiDQoxIDUuMSAiRmlyc3QiDQowIDMuNSAiRmlyc3QiDQowIDEuNyAiRXhwZXJpZW5jZWQiDQowIDQuOCAiRXhwZXJpZW5jZWQiDQowIDQuNCAiRXhwZXJpZW5jZWQiDQoxIDYuOCAiRXhwZXJpZW5jZWQiDQoxIDMuOCAiRXhwZXJpZW5jZWQiDQowIDguMyAiRXhwZXJpZW5jZWQiDQoxIDkgIkV4cGVyaWVuY2VkIg0KMSA3LjUgIkZpcnN0Ig0KMCAzLjggIkV4cGVyaWVuY2VkIg0KMSAzLjYgIkZpcnN0Ig0KMSA2LjkgIkV4cGVyaWVuY2VkIg0KMCAyLjggIkV4cGVyaWVuY2VkIg0KMSA2LjcgIkV4cGVyaWVuY2VkIg0KMSA1ICJFeHBlcmllbmNlZCINCjAgMy44ICJFeHBlcmllbmNlZCINCjAgNy40ICJFeHBlcmllbmNlZCINCjEgMy42ICJFeHBlcmllbmNlZCINCjEgMS4zICJFeHBlcmllbmNlZCINCjAgNyAiRmlyc3QiDQoxIDMgIkV4cGVyaWVuY2VkIg0KMCAyLjcgIkV4cGVyaWVuY2VkIg0KMSAzLjIgIkV4cGVyaWVuY2VkIg0KMCA1LjUgIkV4cGVyaWVuY2VkIg0KMCAxLjIgIkZpcnN0Ig0KMSA3LjIgIkV4cGVyaWVuY2VkIg0KMCA1LjMgIkV4cGVyaWVuY2VkIg0KMSA5LjggIkV4cGVyaWVuY2VkIg0KMSAzLjggIkV4cGVyaWVuY2VkIg0KMCAyICJGaXJzdCINCjEgOC43ICJGaXJzdCINCjEgNiAiRXhwZXJpZW5jZWQiDQoxIDkuMiAiRXhwZXJpZW5jZWQiDQoxIDYuNyAiRXhwZXJpZW5jZWQiDQowIDEuNCAiRXhwZXJpZW5jZWQiDQoxIDcuNyAiRmlyc3QiDQowIDIuNiAiRXhwZXJpZW5jZWQiDQoxIDcuNiAiRmlyc3QiDQoxIDUuNiAiRXhwZXJpZW5jZWQiDQoxIDkuOCAiRXhwZXJpZW5jZWQiDQowIDYuMSAiRmlyc3QiDQoxIDMuNiAiRmlyc3QiDQoxIDcgIkV4cGVyaWVuY2VkIg0KMSAzICJFeHBlcmllbmNlZCINCjEgNS44ICJFeHBlcmllbmNlZCINCjEgMy4zICJFeHBlcmllbmNlZCINCjEgOC40ICJFeHBlcmllbmNlZCINCjAgMi40ICJGaXJzdCINCjAgMS42ICJGaXJzdCINCjAgMy4yICJGaXJzdCINCjEgOC4yICJFeHBlcmllbmNlZCINCjAgMS43ICJGaXJzdCINCjEgNi42ICJGaXJzdCINCjEgOC4zICJGaXJzdCINCjAgMS44ICJGaXJzdCINCjEgNC42ICJFeHBlcmllbmNlZCINCjEgOS4xICJFeHBlcmllbmNlZCINCjEgOC42ICJGaXJzdCINCjAgMi41ICJGaXJzdCINCjAgNS40ICJGaXJzdCINCjAgMy4zICJFeHBlcmllbmNlZCINCjEgOS41ICJFeHBlcmllbmNlZCINCjAgMS42ICJGaXJzdCINCjEgOC4yICJFeHBlcmllbmNlZCINCjAgMi4xICJGaXJzdCINCjAgNy4zICJGaXJzdCINCjAgMS4xICJFeHBlcmllbmNlZCINCjAgNi4xICJGaXJzdCINCjEgOC4zICJGaXJzdCINCjEgOS42ICJFeHBlcmllbmNlZCINCjEgMTAgIkZpcnN0Ig0KMCA1ICJFeHBlcmllbmNlZCINCjEgMS4xICJFeHBlcmllbmNlZCINCjAgMS4yICJGaXJzdCINCjAgNSAiRXhwZXJpZW5jZWQiDQoxIDcuOSAiRXhwZXJpZW5jZWQiDQoxIDcuMSAiRXhwZXJpZW5jZWQiDQoxIDcuMiAiRXhwZXJpZW5jZWQiDQowIDEuOCAiRmlyc3QiDQowIDEuMiAiRmlyc3QiDQoxIDYuNCAiRXhwZXJpZW5jZWQiDQowIDguOCAiRmlyc3QiDQowIDQuMiAiRmlyc3QiDQowIDIgIkV4cGVyaWVuY2VkIg0KMCA1LjIgIkZpcnN0Ig0KMSA2LjUgIkV4cGVyaWVuY2VkIg0KMSAxMCAiRXhwZXJpZW5jZWQiDQowIDUuOCAiRmlyc3QiDQowIDMuMyAiRmlyc3QiDQoxIDYuMiAiRXhwZXJpZW5jZWQiDQowIDQuNCAiRXhwZXJpZW5jZWQiDQoxIDQuNCAiRXhwZXJpZW5jZWQiDQowIDUgIkZpcnN0Ig0KMSA5LjMgIkV4cGVyaWVuY2VkIg0KMCAyLjYgIkZpcnN0Ig0KMSA3LjggIkV4cGVyaWVuY2VkIg0KMSA0LjkgIkV4cGVyaWVuY2VkIg0KMCAyLjMgIkZpcnN0Ig0KMCAxLjEgIkZpcnN0Ig0KMCA1LjYgIkZpcnN0Ig0KMSAyLjUgIkZpcnN0Ig0KMCAyICJFeHBlcmllbmNlZCINCjAgNy45ICJGaXJzdCINCjEgOC42ICJGaXJzdCINCjEgMi41ICJGaXJzdCINCjEgOC4zICJFeHBlcmllbmNlZCINCjEgOC4yICJFeHBlcmllbmNlZCINCjAgMS40ICJFeHBlcmllbmNlZCINCjEgNi42ICJFeHBlcmllbmNlZCINCjAgNiAiRmlyc3QiDQoxIDQuNSAiRXhwZXJpZW5jZWQiDQoxIDguOCAiRmlyc3QiDQoxIDcuNCAiRXhwZXJpZW5jZWQiDQowIDQuOCAiRmlyc3QiDQoxIDguMyAiRmlyc3QiDQowIDQuNiAiRXhwZXJpZW5jZWQiDQoxIDYuNyAiRXhwZXJpZW5jZWQiDQoxIDQuNiAiRmlyc3QiDQowIDEuMSAiRmlyc3QiDQoxIDguMSAiRXhwZXJpZW5jZWQiDQowIDYuMiAiRmlyc3QiDQo=" download="oystercatcher.txt" class="ws-download-btn">Download oystercatcher.txt</a></p>
-<p>Each row is one breeding pair in one season. The variables are:</p>
+<p>The dataset for this workshop comes from a seed-germination experiment in the model plant <em>Arabidopsis thaliana</em>. Freshly harvested seeds are often <strong>dormant</strong>: they will not germinate even in good conditions until dormancy is broken, usually by a spell of cold (winter). The gene <em>DOG1</em> (<em>DELAY OF GERMINATION 1</em>) is a key regulator of this dormancy. The experiment compares wild-type seeds (<code>WT</code>) with a <code>dog1</code> loss-of-function mutant, each given either a warm or a cold pre-treatment, to ask how genotype and cold interact to control germination. Download the data below and save it to your <code>BI3010/data/</code> folder.</p>
+<p><a href="data:text/plain;base64,Imdlcm1pbmF0ZWQiICJzZWVkX21hc3MiICJnZW5vdHlwZSIgInN0cmF0aWZpY2F0aW9uIg0KMSAzMS43ICJXVCIgIldhcm0iDQowIDIxLjQgImRvZzEiICJXYXJtIg0KMCAyOC42ICJXVCIgIldhcm0iDQoxIDI5ICJkb2cxIiAiV2FybSINCjEgMjQuMSAiV1QiICJDb2xkIg0KMSAyOSAiZG9nMSIgIkNvbGQiDQowIDIzLjMgIldUIiAiV2FybSINCjEgMjEuMSAiZG9nMSIgIldhcm0iDQowIDMyLjUgImRvZzEiICJXYXJtIg0KMCAxNy40ICJXVCIgIldhcm0iDQoxIDMzICJXVCIgIkNvbGQiDQoxIDM0LjEgIldUIiAiQ29sZCINCjEgMjkuMSAiZG9nMSIgIkNvbGQiDQoxIDI1LjMgImRvZzEiICJDb2xkIg0KMCAyNCAiV1QiICJXYXJtIg0KMCAzMS44ICJkb2cxIiAiV2FybSINCjEgMTcuMiAiZG9nMSIgIldhcm0iDQoxIDMyLjMgIldUIiAiQ29sZCINCjAgMTcuNiAiZG9nMSIgIldhcm0iDQoxIDIwLjkgImRvZzEiICJDb2xkIg0KMSAxNS45ICJkb2cxIiAiQ29sZCINCjAgMTcuMiAiV1QiICJXYXJtIg0KMCAyOC42ICJXVCIgIldhcm0iDQoxIDMyICJkb2cxIiAiV2FybSINCjEgMzAuOSAiZG9nMSIgIkNvbGQiDQowIDIwLjggIldUIiAiV2FybSINCjEgMjcuMyAiZG9nMSIgIkNvbGQiDQoxIDMxLjMgIldUIiAiQ29sZCINCjAgMTUgImRvZzEiICJXYXJtIg0KMSAxNS40ICJkb2cxIiAiV2FybSINCjEgMjMuOCAiZG9nMSIgIldhcm0iDQowIDIwLjggImRvZzEiICJDb2xkIg0KMCAxOC41ICJXVCIgIldhcm0iDQoxIDM0LjUgImRvZzEiICJXYXJtIg0KMCAyOC41ICJXVCIgIldhcm0iDQoxIDI4LjYgIldUIiAiV2FybSINCjAgMTYuMSAiZG9nMSIgIkNvbGQiDQoxIDM0LjMgImRvZzEiICJXYXJtIg0KMCAxNS40ICJXVCIgIldhcm0iDQowIDI3LjkgIldUIiAiV2FybSINCjEgMzIuNSAiZG9nMSIgIkNvbGQiDQoxIDMzLjIgImRvZzEiICJDb2xkIg0KMSAyNy41ICJkb2cxIiAiV2FybSINCjEgMjIuOCAiZG9nMSIgIkNvbGQiDQoxIDMyICJkb2cxIiAiV2FybSINCjEgMjQgImRvZzEiICJXYXJtIg0KMSAyMy4zICJkb2cxIiAiQ29sZCINCjEgMjAuNiAiV1QiICJDb2xkIg0KMCAyOC4xICJkb2cxIiAiV2FybSINCjEgMjggIldUIiAiQ29sZCINCjAgMTYuMiAiV1QiICJXYXJtIg0KMSAyOS44ICJkb2cxIiAiV2FybSINCjEgMjQuMSAiZG9nMSIgIkNvbGQiDQoxIDI0LjggIldUIiAiQ29sZCINCjEgMzAuMSAiZG9nMSIgIldhcm0iDQoxIDI5LjMgImRvZzEiICJDb2xkIg0KMSAxNS40ICJkb2cxIiAiQ29sZCINCjAgMTguOCAiZG9nMSIgIldhcm0iDQowIDI0LjEgIldUIiAiV2FybSINCjAgMjAuNiAiZG9nMSIgIldhcm0iDQoxIDE2LjUgImRvZzEiICJXYXJtIg0KMSAyMy41ICJkb2cxIiAiQ29sZCINCjAgMjIuNCAiV1QiICJXYXJtIg0KMSAyNy44ICJXVCIgIkNvbGQiDQowIDIxLjEgImRvZzEiICJDb2xkIg0KMSAzMS4zICJXVCIgIkNvbGQiDQoxIDMyLjcgIldUIiAiQ29sZCINCjEgMjkuNCAiZG9nMSIgIldhcm0iDQowIDIxLjIgIldUIiAiQ29sZCINCjEgMjAuNyAiV1QiICJDb2xkIg0KMSAyOCAiZG9nMSIgIldhcm0iDQoxIDE5ICJkb2cxIiAiQ29sZCINCjEgMjcuNiAiZG9nMSIgIkNvbGQiDQoxIDIzLjkgImRvZzEiICJDb2xkIg0KMSAyMS4yICJXVCIgIkNvbGQiDQoxIDI5LjIgImRvZzEiICJDb2xkIg0KMCAyMC43ICJXVCIgIldhcm0iDQoxIDE1LjcgImRvZzEiICJXYXJtIg0KMSAyOC4zICJkb2cxIiAiQ29sZCINCjAgMTkuNCAiV1QiICJXYXJtIg0KMCAxOC44ICJXVCIgIldhcm0iDQowIDE5LjkgIldUIiAiV2FybSINCjEgMjUgImRvZzEiICJXYXJtIg0KMSAxNS40ICJXVCIgIkNvbGQiDQoxIDI4LjggImRvZzEiICJXYXJtIg0KMSAyNC43ICJkb2cxIiAiQ29sZCINCjAgMzQuNSAiV1QiICJXYXJtIg0KMSAyMS4yICJXVCIgIkNvbGQiDQowIDE3LjMgIldUIiAiQ29sZCINCjEgMzIuMiAiZG9nMSIgIkNvbGQiDQoxIDI2ICJXVCIgIldhcm0iDQowIDMzLjIgIldUIiAiV2FybSINCjEgMjcuNiAiV1QiICJDb2xkIg0KMCAxNS44ICJXVCIgIldhcm0iDQowIDMwICJXVCIgIldhcm0iDQoxIDE4LjcgImRvZzEiICJXYXJtIg0KMSAyOS44ICJXVCIgIkNvbGQiDQoxIDI1LjEgIldUIiAiV2FybSINCjEgMzQuNSAiV1QiICJXYXJtIg0KMSAyNi40ICJkb2cxIiAiV2FybSINCjEgMjAuOCAiZG9nMSIgIldhcm0iDQoxIDI4LjQgIldUIiAiQ29sZCINCjAgMTkuNCAiZG9nMSIgIldhcm0iDQoxIDI1LjYgIldUIiAiQ29sZCINCjAgMjAuMiAiV1QiICJXYXJtIg0KMSAzMS41ICJkb2cxIiAiQ29sZCINCjEgMTggIldUIiAiQ29sZCINCjEgMTYuMyAiV1QiICJDb2xkIg0KMSAyMCAiZG9nMSIgIldhcm0iDQowIDMxLjEgIldUIiAiV2FybSINCjEgMTYuNSAiZG9nMSIgIkNvbGQiDQoxIDI3LjQgImRvZzEiICJDb2xkIg0KMSAzMS4zICJXVCIgIldhcm0iDQoxIDE2LjggImRvZzEiICJXYXJtIg0KMSAyMy4xICJkb2cxIiAiQ29sZCINCjEgMzMuMSAiZG9nMSIgIkNvbGQiDQoxIDMxLjggImRvZzEiICJXYXJtIg0KMSAxOC40ICJXVCIgIkNvbGQiDQoxIDI0LjcgIldUIiAiQ29sZCINCjAgMjAuMiAiZG9nMSIgIldhcm0iDQoxIDMzLjkgIldUIiAiQ29sZCINCjAgMTYuMyAiV1QiICJXYXJtIg0KMSAzMS4xICJkb2cxIiAiQ29sZCINCjEgMTcuNCAiV1QiICJXYXJtIg0KMSAyOS4xICJkb2cxIiAiV2FybSINCjEgMTUuMyAiZG9nMSIgIldhcm0iDQoxIDI2LjQgIldUIiAiQ29sZCINCjEgMzEuMiAiV1QiICJXYXJtIg0KMSAzNCAiZG9nMSIgIkNvbGQiDQoxIDM0LjkgImRvZzEiICJDb2xkIg0KMSAyNCAiZG9nMSIgIldhcm0iDQowIDE1LjMgIldUIiAiV2FybSINCjEgMTUuNSAiV1QiICJDb2xkIg0KMCAyMy45ICJXVCIgIldhcm0iDQoxIDMwLjMgImRvZzEiICJXYXJtIg0KMSAyOC42ICJXVCIgIkNvbGQiDQowIDI4LjggIldUIiAiV2FybSINCjEgMTYuOCAiV1QiICJDb2xkIg0KMCAxNS4zICJXVCIgIldhcm0iDQowIDI3ICJXVCIgIldhcm0iDQowIDMyLjQgImRvZzEiICJXYXJtIg0KMCAyMiAiV1QiICJXYXJtIg0KMSAxNy4zICJXVCIgIkNvbGQiDQowIDI0LjMgIldUIiAiV2FybSINCjEgMjcuMyAiZG9nMSIgIkNvbGQiDQoxIDM0LjkgImRvZzEiICJXYXJtIg0KMSAyNS42ICJXVCIgIkNvbGQiDQoxIDIwLjIgImRvZzEiICJDb2xkIg0KMCAyNi42ICJXVCIgIldhcm0iDQowIDIyLjYgIldUIiAiV2FybSINCjAgMjIuNSAiV1QiICJXYXJtIg0KMCAyMy45ICJXVCIgIldhcm0iDQoxIDMzLjQgIldUIiAiQ29sZCINCjAgMTguNiAiV1QiICJXYXJtIg0KMSAzMC4xICJXVCIgIkNvbGQiDQoxIDIzLjcgImRvZzEiICJXYXJtIg0KMCAxOCAiV1QiICJDb2xkIg0KMCAxNS4zICJXVCIgIldhcm0iDQoxIDI1LjEgImRvZzEiICJDb2xkIg0KMCAxOC4zICJXVCIgIldhcm0iDQowIDE3LjEgIldUIiAiV2FybSINCjEgMzAuMyAiZG9nMSIgIldhcm0iDQowIDMxLjggIldUIiAiV2FybSINCjAgMTguNCAiV1QiICJXYXJtIg0KMCAzMS4xICJXVCIgIldhcm0iDQowIDMxICJXVCIgIkNvbGQiDQoxIDE1LjggImRvZzEiICJXYXJtIg0KMSAyNy40ICJXVCIgIkNvbGQiDQowIDI2LjIgImRvZzEiICJXYXJtIg0KMCAyMi44ICJXVCIgIldhcm0iDQoxIDMyLjMgIldUIiAiQ29sZCINCjAgMjkuMyAiV1QiICJXYXJtIg0KMSAyMy41ICJXVCIgIkNvbGQiDQoxIDMxLjMgImRvZzEiICJDb2xkIg0KMCAyMyAiZG9nMSIgIldhcm0iDQoxIDI3LjcgIldUIiAiQ29sZCINCjEgMjMgImRvZzEiICJXYXJtIg0KMSAxNS4yICJkb2cxIiAiQ29sZCINCjEgMzAuOSAiV1QiICJXYXJtIg0KMCAyNi42ICJkb2cxIiAiV2FybSINCjEgMTcuMiAiZG9nMSIgIkNvbGQiDQoxIDMzLjYgImRvZzEiICJDb2xkIg0KMCAyMSAiZG9nMSIgIldhcm0iDQoxIDI5LjkgIldUIiAiQ29sZCINCjAgMTkuOCAiV1QiICJXYXJtIg0KMSAzNC45ICJkb2cxIiAiV2FybSINCjEgMzAuMSAiV1QiICJDb2xkIg0KMCAyOS45ICJXVCIgIldhcm0iDQoxIDI5LjIgIldUIiAiV2FybSINCjEgMTcuNSAiZG9nMSIgIldhcm0iDQowIDE1LjQgIldUIiAiV2FybSINCjEgMTUuNSAiZG9nMSIgIkNvbGQiDQowIDE3LjQgIldUIiAiV2FybSINCjEgMTYuNiAiZG9nMSIgIldhcm0iDQoxIDE3LjQgIldUIiAiQ29sZCINCjAgMTUuOSAiV1QiICJXYXJtIg0KMSAyNC44ICJXVCIgIkNvbGQiDQowIDI0LjYgIldUIiAiV2FybSINCjEgMzIuNSAiZG9nMSIgIldhcm0iDQowIDMzLjMgIldUIiAiV2FybSINCg==" download="germination.txt" class="ws-download-btn">Download germination.txt</a></p>
+<p>Each row is one seed. The variables are:</p>
 <ul>
-<li><code>success</code>: whether the pair fledged at least one chick that season (1 = yes, 0 = no).</li>
-<li><code>territory_quality</code>: a continuous index of territory quality, scored from 1 (poor) to 10 (excellent) based on food availability and nest-site safety.</li>
-<li><code>experience</code>: whether the pair were first-time breeders (<code>&quot;First&quot;</code>) or had bred at least once before (<code>&quot;Experienced&quot;</code>).</li>
+<li><code>germinated</code>: whether the seed germinated within the test window (1 = yes, 0 = no).</li>
+<li><code>seed_mass</code>: the mass of the seed in micrograms (µg), a continuous measure of seed provisioning; heavier seeds tend to germinate more readily.</li>
+<li><code>genotype</code>: whether the seed was wild-type (<code>&quot;WT&quot;</code>) or the dormancy mutant (<code>&quot;dog1&quot;</code>).</li>
+<li><code>stratification</code>: whether the seed received a warm pre-treatment (<code>&quot;Warm&quot;</code>) or a cold, dormancy-breaking pre-treatment (<code>&quot;Cold&quot;</code>).</li>
 </ul>
-<p>The research question is predictive: which combinations of territory quality and breeding experience are associated with higher or lower probability of breeding success?</p>
+<p>The research question is predictive: how do seed mass, genotype, and cold stratification combine to determine the probability that a seed germinates — and does the effect of cold differ between the two genotypes?</p>
 <p>Load the data:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>oystercatcher <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;Data/oystercatcher.txt&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>oystercatcher<span class="sc">$</span>experience <span class="ot">&lt;-</span> <span class="fu">factor</span>(oystercatcher<span class="sc">$</span>experience,</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;First&quot;</span>, <span class="st">&quot;Experienced&quot;</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>germination <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;Data/germination.txt&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>germination<span class="sc">$</span>genotype <span class="ot">&lt;-</span> <span class="fu">factor</span>(germination<span class="sc">$</span>genotype,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>                               <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;WT&quot;</span>, <span class="st">&quot;dog1&quot;</span>))</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>germination<span class="sc">$</span>stratification <span class="ot">&lt;-</span> <span class="fu">factor</span>(germination<span class="sc">$</span>stratification,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;Warm&quot;</span>, <span class="st">&quot;Cold&quot;</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>The second line sets the factor levels explicitly so that <code>&quot;First&quot;</code> is the reference (baseline) category in the model. This means the intercept will represent first-time breeders, and any <code>experience</code> coefficient will represent the difference for experienced breeders relative to first-time breeders.</p>
+<p>The last two lines set the factor levels explicitly so that <code>&quot;WT&quot;</code> and <code>&quot;Warm&quot;</code> are the reference (baseline) categories. This means the intercept will represent a warm-treated wild-type seed, the <code>genotype</code> coefficient will represent the difference for the <code>dog1</code> mutant, and the <code>stratification</code> coefficient will represent the difference for cold treatment, each relative to that baseline.</p>
 </section>
 <section id="perform-exploratory-data-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="perform-exploratory-data-analysis">2. Perform exploratory data analysis</h2>
-<p>The response variable is binary, so some of the usual EDA tools behave a bit differently. <code>geom_histogram()</code> on a 0/1 variable produces a two-bar chart (not very illuminating, but fine for checking the split between successes and failures). <code>table()</code> gives counts; <code>mean()</code> gives the proportion of successes.</p>
+<p>The response variable is binary, so some of the usual EDA tools behave a bit differently. <code>geom_histogram()</code> on a 0/1 variable produces a two-bar chart (not very illuminating, but fine for checking the split between germinated and not). <code>table()</code> gives counts; <code>mean()</code> gives the proportion that germinated.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(oystercatcher)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(oystercatcher)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(oystercatcher<span class="sc">$</span>success)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(oystercatcher<span class="sc">$</span>success)   <span class="co"># overall success rate</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(germination)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(germination)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(germination<span class="sc">$</span>germinated)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(germination<span class="sc">$</span>germinated)   <span class="co"># overall germination rate</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(oystercatcher<span class="sc">$</span>experience, oystercatcher<span class="sc">$</span>success)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(germination<span class="sc">$</span>genotype, germination<span class="sc">$</span>germinated)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(germination<span class="sc">$</span>stratification, germination<span class="sc">$</span>germinated)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>A raw scatter plot of 0s and 1s is deeply unhelpful: every point sits on one of two horizontal lines and you get no sense of how the data are distributed. Adding a small amount of vertical jitter helps enormously:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(oystercatcher, <span class="fu">aes</span>(<span class="at">x =</span> territory_quality, <span class="at">y =</span> success)) <span class="sc">+</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(germination, <span class="fu">aes</span>(<span class="at">x =</span> seed_mass, <span class="at">y =</span> germinated)) <span class="sc">+</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">height =</span> <span class="fl">0.05</span>, <span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Territory quality&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Breeding success (0/1)&quot;</span>) <span class="sc">+</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Seed mass (µg)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Germinated (0/1)&quot;</span>) <span class="sc">+</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<p>Because the research question is really about how cold interacts with genotype, the most useful EDA plot shows the germination rate for each genotype under each treatment. If the effect of cold is larger for one genotype than the other, the two lines won’t be parallel — that non-parallelism is the visual signature of an interaction:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(oystercatcher, <span class="fu">aes</span>(<span class="at">x =</span> experience, <span class="at">y =</span> success)) <span class="sc">+</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">&quot;summary&quot;</span>, <span class="at">fun =</span> <span class="st">&quot;mean&quot;</span>) <span class="sc">+</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Breeding experience&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Proportion successful&quot;</span>) <span class="sc">+</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(germination, <span class="fu">aes</span>(<span class="at">x =</span> stratification, <span class="at">y =</span> germinated,</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                        <span class="at">colour =</span> genotype, <span class="at">group =</span> genotype)) <span class="sc">+</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">stat =</span> <span class="st">&quot;summary&quot;</span>, <span class="at">fun =</span> <span class="st">&quot;mean&quot;</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">stat =</span> <span class="st">&quot;summary&quot;</span>, <span class="at">fun =</span> <span class="st">&quot;mean&quot;</span>) <span class="sc">+</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Stratification&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Proportion germinated&quot;</span>, <span class="at">colour =</span> <span class="st">&quot;Genotype&quot;</span>) <span class="sc">+</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="identify-hidden-assumptions" class="level2">
 <h2 class="anchored" data-anchor-id="identify-hidden-assumptions">3. Identify hidden assumptions</h2>
-<p>The usual hidden assumptions apply: validity (does <code>success</code> capture what we mean by breeding success?), representativeness (does this population generalise to oystercatchers elsewhere?), and independence (each pair must be a separate, independent observation; pairs sharing a territory or the same individual appearing across years would violate this).</p>
-<p>Dispersion isn’t a concern for Bernoulli GLMs. The variance of a Bernoulli outcome is p(1 − p), which is completely determined by p, the probability of success. There’s no free dispersion parameter to estimate or check.</p>
+<p>The usual hidden assumptions apply: validity (does <code>germinated</code> capture what we mean — a seed that produces a viable seedling, not just a burst seed coat?), representativeness (do these lab-grown seeds generalise to field conditions?), and independence (each seed must be a separate, independent observation; seeds from the same maternal plant or the same Petri dish may be more alike than independent seeds, which would violate this).</p>
+<p>Dispersion isn’t a concern for Bernoulli GLMs. The variance of a Bernoulli outcome is p(1 − p), which is completely determined by p, the probability of germination. There’s no free dispersion parameter to estimate or check.</p>
 </section>
 <section id="fit-an-appropriate-model" class="level2">
 <h2 class="anchored" data-anchor-id="fit-an-appropriate-model">4. Fit an appropriate model</h2>
 <section id="why-not-use-a-linear-model" class="level3">
 <h3 class="anchored" data-anchor-id="why-not-use-a-linear-model">Why not use a linear model?</h3>
-<p>The response variable <code>success</code> can only be 0 or 1. A Normal linear model fitted to binary data has two problems. First, it will happily predict values below 0 and above 1, and you can’t have a probability of −0.2 or 1.3. Second, the spread of 0/1 residuals is largest when p ≈ 0.5 and shrinks near 0 or 1, so the equal variance of errors assumption is violated by design. The linear model will run without complaint. It’s just wrong.</p>
+<p>The response variable <code>germinated</code> can only be 0 or 1. A Normal linear model fitted to binary data has two problems. First, it will happily predict values below 0 and above 1, and you can’t have a probability of −0.2 or 1.3. Second, the spread of 0/1 residuals is largest when p ≈ 0.5 and shrinks near 0 or 1, so the equal variance of errors assumption is violated by design. The linear model will run without complaint. It’s just wrong.</p>
 <div class="question-block">
 <p>
-<strong>Question 1.</strong> If you fitted <code>lm(success ~ territory_quality, data = oystercatcher)</code>, which of the following would be a problem?
+<strong>Question 1.</strong> If you fitted <code>lm(germinated ~ seed_mass, data = germination)</code>, which of the following would be a problem?
 </p>
 <div class="mc-options">
 <p><label><input type="radio" name="w10-q1" data-correct="false"> The linear model cannot handle a continuous predictor when the response is binary.</label> <label><input type="radio" name="w10-q1" data-correct="false"> The linear model would refuse to run and return an error.</label> <label><input type="radio" name="w10-q1" data-correct="true"> The linear model can predict values below 0 and above 1, which are not valid probabilities, and the equal variance of errors assumption is violated because residuals from a binary response are not uniformly spread.</label> <label><input type="radio" name="w10-q1" data-correct="false"> The linear model assumes the response is a count, which conflicts with a binary response.</label></p>
@@ -2666,7 +2714,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-The linear model will run without error and produce coefficient estimates, but its predictions for territory quality at the extremes of the range will fall outside [0, 1]. For example, a predicted success probability of 1.3 or −0.2 has no meaning. The model also assumes equal spread of errors at all fitted values, but for a binary response the spread depends on the probability itself: it’s largest when p ≈ 0.5 and smallest near p = 0 or p = 1. Both problems disappear when we use a GLM with the logit link.
+The linear model will run without error and produce coefficient estimates, but its predictions for seed mass at the extremes of the range will fall outside [0, 1]. For example, a predicted germination probability of 1.3 or −0.2 has no meaning. The model also assumes equal spread of errors at all fitted values, but for a binary response the spread depends on the probability itself: it’s largest when p ≈ 0.5 and smallest near p = 0 or p = 1. Both problems disappear when we use a GLM with the logit link.
 </p>
 </div>
 </div>
@@ -2674,10 +2722,10 @@ The linear model will run without error and produce coefficient estimates, but i
 <section id="the-bernoulli-distribution-and-logit-link" class="level3">
 <h3 class="anchored" data-anchor-id="the-bernoulli-distribution-and-logit-link">The Bernoulli distribution and logit link</h3>
 <p>The Bernoulli distribution models a single binary trial: each observation is either 0 or 1, with probability p of being 1. The model for the distributional assumption is:</p>
-<p><span class="math display">\[success_i \sim Bernoulli(p_i)\]</span></p>
-<p>where <span class="math inline">\(p_i\)</span> is the probability of breeding success for pair <span class="math inline">\(i\)</span>.</p>
+<p><span class="math display">\[germinated_i \sim Bernoulli(p_i)\]</span></p>
+<p>where <span class="math inline">\(p_i\)</span> is the probability that seed <span class="math inline">\(i\)</span> germinates.</p>
 <p>The logit link connects the linear predictor to <span class="math inline">\(p_i\)</span> by transforming probabilities to log-odds:</p>
-<p><span class="math display">\[logit(p_i) = \log\!\left(\frac{p_i}{1-p_i}\right) = \beta_0 + \beta_1 \times quality_i\]</span></p>
+<p><span class="math display">\[logit(p_i) = \log\!\left(\frac{p_i}{1-p_i}\right) = \beta_0 + \beta_1 \times seedmass_i\]</span></p>
 <p>Log-odds can range from <span class="math inline">\(-\infty\)</span> to <span class="math inline">\(+\infty\)</span>, so they work as a linear predictor without risk of predictions outside [0, 1]. To get predicted probabilities from the log-odds, we apply <code>plogis()</code>.</p>
 <div class="question-block">
 <p>
@@ -2698,11 +2746,11 @@ Log-odds of 0 means the odds are exp(0) = 1, which means success and failure are
 </section>
 <section id="fitting-the-model" class="level3">
 <h3 class="anchored" data-anchor-id="fitting-the-model">Fitting the model</h3>
-<p>In R, a Bernoulli GLM uses <code>family = binomial(link = &quot;logit&quot;)</code>. The family name is <code>binomial</code> rather than <code>bernoulli</code> because Bernoulli is actually a special case of the Binomial (one trial per observation), and R covers both with the same family. As always, fitting the model is the easiest part. Start with <code>territory_quality</code> as the only predictor:</p>
+<p>In R, a Bernoulli GLM uses <code>family = binomial(link = &quot;logit&quot;)</code>. The family name is <code>binomial</code> rather than <code>bernoulli</code> because Bernoulli is actually a special case of the Binomial (one trial per observation), and R covers both with the same family. As always, fitting the model is the easiest part. Start with <code>seed_mass</code> as the only predictor:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>success_mod <span class="ot">&lt;-</span> <span class="fu">glm</span>(success <span class="sc">~</span> territory_quality,</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>                   <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">&quot;logit&quot;</span>),</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                   <span class="at">data =</span> oystercatcher)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>germ_mod <span class="ot">&lt;-</span> <span class="fu">glm</span>(germinated <span class="sc">~</span> seed_mass,</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">&quot;logit&quot;</span>),</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">data =</span> germination)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 </section>
@@ -2710,23 +2758,26 @@ Log-odds of 0 means the odds are exp(0) = 1, which means success and failure are
 <h2 class="anchored" data-anchor-id="diagnose-the-model-and-check-assumptions">5. Diagnose the model and check assumptions</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(success_mod)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(germ_mod)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>The residual plots for a Bernoulli GLM look different from those of a linear model or Poisson GLM. Because each observation is either 0 or 1, the raw residuals cluster into two distinct bands in the residuals vs fitted plot: one band for observations where <code>success = 1</code> and one for where <code>success = 0</code>. This two-banded appearance is expected and doesn’t indicate a problem.</p>
+<p>The residual plots for a Bernoulli GLM look different from those of a linear model or Poisson GLM. Because each observation is either 0 or 1, the raw residuals cluster into two distinct bands in the residuals vs fitted plot: one band for seeds that germinated (<code>germinated = 1</code>) and one for seeds that didn’t (<code>germinated = 0</code>). This two-banded appearance is expected and doesn’t indicate a problem.</p>
 <div class="question-block">
 <p>
 <strong>Question 3.</strong> You notice the residuals vs fitted plot shows two distinct bands of points rather than a single cloud. What does this mean?
 </p>
 <div class="mc-options">
-<p><label><input type="radio" name="w10-q3" data-correct="false"> The model has failed to converge and the estimates are unreliable.</label> <label><input type="radio" name="w10-q3" data-correct="false"> There are two separate subgroups in the data that should be modelled separately.</label> <label><input type="radio" name="w10-q3" data-correct="true"> This is expected for a binary response. The two bands are the residuals from observations where success = 1 and success = 0. It does not indicate a violation of assumptions.</label> <label><input type="radio" name="w10-q3" data-correct="false"> The equal variance of errors assumption is violated and the model should be refitted with a transformation.</label></p>
+<p><label><input type="radio" name="w10-q3" data-correct="false"> The model has failed to converge and the estimates are unreliable.</label> <label><input type="radio" name="w10-q3" data-correct="false"> There are two separate subgroups in the data that should be modelled separately.</label> <label><input type="radio" name="w10-q3" data-correct="true"> This is expected for a binary response. The two bands are the residuals from seeds that germinated (1) and those that did not (0). It does not indicate a violation of assumptions.</label> <label><input type="radio" name="w10-q3" data-correct="false"> The equal variance of errors assumption is violated and the model should be refitted with a transformation.</label></p>
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-Think of it this way: every observation is exactly 0 or 1. There’s nowhere else for the points to go. The two bands are the residuals from the successes (1s) and failures (0s), not a sign of trouble, just an unavoidable consequence of a binary response. What you’re looking for is a systematic trend <em>within</em> each band. A curve or funnel inside the bands is a concern. Two flat parallel bands with no internal pattern is fine.
+Think of it this way: every observation is exactly 0 or 1. There’s nowhere else for the points to go. The two bands are the residuals from the germinated seeds (1s) and the non-germinated seeds (0s), not a sign of trouble, just an unavoidable consequence of a binary response. What you’re looking for is a systematic trend <em>within</em> each band. A curve or funnel inside the bands is a concern. Two flat parallel bands with no internal pattern is fine.
+</p>
+<p>
+This two-banded plot is honestly not much use for spotting real problems, which is exactly why we’ll turn to a better diagnostic (binned residuals) below.
 </p>
 </div>
 </div>
@@ -2762,30 +2813,61 @@ Overdispersion is a concern for Poisson GLMs but not for Bernoulli. Once you kno
 </p>
 </div>
 </div>
+<section id="better-diagnostics-with-performance" class="level3">
+<h3 class="anchored" data-anchor-id="better-diagnostics-with-performance">Better diagnostics with <code>performance</code></h3>
+<p>The two-banded base plot is honest but hard to read: with every point pinned to 0 or 1, a real problem is easy to miss. Back in Workshop 4 we met the <code>performance</code> package and its <code>check_model()</code> function for prettier, better-labelled diagnostics. It’s even more useful here, because for a Bernoulli GLM it automatically swaps in diagnostics designed for binary data:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">&quot;performance&quot;</span>, <span class="st">&quot;see&quot;</span>))  <span class="co"># Run once</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(performance)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">check_model</span>(germ_mod)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Two panels matter most:</p>
+<ul>
+<li><strong>Binned residuals.</strong> This is the fix for the two-banded plot. Instead of plotting all 200 individual 0/1 residuals, <code>check_model()</code> sorts the seeds by their fitted probability, groups them into bins, and plots the <em>average</em> residual of each bin against the average fitted value. Averaging cancels the 0/1 noise, so any systematic trend the raw plot hid becomes visible. The grey band is an approximate error bound: if the model fits, most points fall inside it, scattered around zero with no slope. A run of points drifting above or below zero, or a clear curve, would signal that the relationship with the predictor isn’t quite right (for example, non-linearity on the log-odds scale).</li>
+<li><strong>Posterior predictive check.</strong> <code>check_model()</code> uses the fitted model to simulate many fake datasets and overlays them on the observed data. If the model is reasonable, the simulated proportion of 1s and 0s should look like the real split.</li>
+</ul>
+<p>As in Workshop 4, each panel prints guidance text describing what a passing plot looks like. Read it in context: not every assumption is equally important, and minor wobbles in real data are normal.</p>
+<div class="question-block">
+<p>
+<strong>Question 6.</strong> On the binned residuals plot for <code>germ_mod</code>, almost all the points fall inside the grey error bounds and scatter around zero with no obvious slope. What should you conclude?
+</p>
+<div class="mc-options">
+<p><label><input type="radio" name="w10-q6" data-correct="false"> The two-banded pattern has been hidden, so this plot is less trustworthy than the base residuals vs fitted plot.</label> <label><input type="radio" name="w10-q6" data-correct="true"> The model fits acceptably: binning has removed the 0/1 noise, and with points inside the bounds and no systematic trend there is no sign of misfit with seed mass.</label> <label><input type="radio" name="w10-q6" data-correct="false"> The seeds should be re-binned until every point lies exactly on the zero line.</label> <label><input type="radio" name="w10-q6" data-correct="false"> Points inside the bounds indicate overdispersion, which must now be corrected.</label></p>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">
+Show Answer
+</button>
+<div class="instructor-answer">
+<p>
+Points scattered inside the error bounds with no slope is exactly what a well-fitting Bernoulli GLM looks like. Binning is what makes this readable: it averages away the 0/1 noise that produced the two useless bands, leaving a plot in which a genuine problem (a curve, or a run of points drifting off zero) would actually show up. Here nothing does, so seed mass enters the model on a sensible scale. And overdispersion still doesn’t apply — points inside the bounds are a good sign, not a dispersion diagnostic.
+</p>
+</div>
+</div>
+</section>
 </section>
 <section id="summarise-the-results" class="level2">
 <h2 class="anchored" data-anchor-id="summarise-the-results">6. Summarise the results</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(success_mod)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(germ_mod)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The coefficient table gives estimates on the log-odds scale. From the output, the fitted equation is approximately:</p>
-<p><span class="math display">\[logit(\hat{p}_i) = -2.14 + 0.44 \times quality_i\]</span></p>
+<p><span class="math display">\[logit(\hat{p}_i) = -1.63 + 0.089 \times seedmass_i\]</span></p>
 <section id="predictions-on-the-log-odds-scale" class="level3">
 <h3 class="anchored" data-anchor-id="predictions-on-the-log-odds-scale">Predictions on the log-odds scale</h3>
-<p>Substitute a value of <code>territory_quality</code> directly into the equation to get the predicted log-odds.</p>
+<p>Substitute a value of <code>seed_mass</code> directly into the equation to get the predicted log-odds.</p>
 <div class="question-block">
 <p>
-<strong>Question 6.</strong> What is the predicted log-odds of success for a pair on a territory with quality = 4? And for quality = 8?
+<strong>Question 7.</strong> What is the predicted log-odds of germination for a seed of mass 20 µg? And for a seed of mass 30 µg?
 </p>
 <textarea class="student-answer" rows="4" placeholder="Show your working for both values..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
-<pre><code>-2.14 + 0.44 * 4   # = -0.38  (quality = 4)
--2.14 + 0.44 * 8   # =  1.38  (quality = 8)</code></pre>
+<pre><code>-1.63 + 0.089 * 20   # =  0.15  (seed_mass = 20)
+-1.63 + 0.089 * 30   # =  1.04  (seed_mass = 30)</code></pre>
 <p>
-A log-odds of −0.38 is below zero, so the probability of success is below 0.5. A log-odds of +1.38 is above zero, so the probability is above 0.5. To get exact probabilities, back-transform with <code>plogis()</code>.
+A log-odds of +0.15 is just above zero, so the probability of germination is just above 0.5. A log-odds of +1.04 is well above zero, so the probability is clearly above 0.5. To get exact probabilities, back-transform with <code>plogis()</code>.
 </p>
 </div>
 </div>
@@ -2795,22 +2877,22 @@ A log-odds of −0.38 is below zero, so the probability of success is below 0.5.
 <p>To convert log-odds to a probability, use <code>plogis()</code>. You can also work it out from the definition: p = exp(log-odds) / (1 + exp(log-odds)).</p>
 <div class="question-block">
 <p>
-<strong>Question 7.</strong> Using <code>plogis()</code>, convert your log-odds predictions from Question 6 to probabilities. At what territory quality does the model predict a 50% chance of success?
+<strong>Question 8.</strong> Using <code>plogis()</code>, convert your log-odds predictions from Question 7 to probabilities. At what seed mass does the model predict a 50% chance of germination?
 </p>
 <textarea class="student-answer" rows="5" placeholder="Back-transform both log-odds values and solve for the 50% threshold..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
-<pre><code>plogis(-0.38)   # ≈ 0.41  (quality = 4: 41% chance of success)
-plogis( 1.38)   # ≈ 0.80  (quality = 8: 80% chance of success)</code></pre>
+<pre><code>plogis(0.15)   # ≈ 0.54  (seed_mass = 20: 54% chance of germination)
+plogis(1.04)   # ≈ 0.74  (seed_mass = 30: 74% chance of germination)</code></pre>
 <p>
-For a 50% chance of success, we need the log-odds to equal 0:
+For a 50% chance of germination, we need the log-odds to equal 0:
 </p>
-<pre><code>-2.14 + 0.44 * quality = 0
-quality = 2.14 / 0.44 ≈ 4.9</code></pre>
+<pre><code>-1.63 + 0.089 * seed_mass = 0
+seed_mass = 1.63 / 0.089 ≈ 18.3</code></pre>
 <p>
-The model predicts that a territory quality of around 4.9 gives a 50% probability of success. Below that the odds favour failure; above it they favour success.
+The model predicts that a seed mass of around 18.3 µg gives a 50% probability of germination. Below that the odds favour no germination; above it they favour germination.
 </p>
 </div>
 </div>
@@ -2819,18 +2901,18 @@ The model predicts that a territory quality of around 4.9 gives a 50% probabilit
 <h3 class="anchored" data-anchor-id="plotting-the-probability-curve">Plotting the probability curve</h3>
 <p>Create a fake dataset, generate predictions on the log-odds scale, then back-transform with <code>plogis()</code> to get predicted probabilities and confidence interval limits:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>fake <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">territory_quality =</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="fu">min</span>(oystercatcher<span class="sc">$</span>territory_quality),</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                                           <span class="at">to   =</span> <span class="fu">max</span>(oystercatcher<span class="sc">$</span>territory_quality),</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                                           <span class="at">length.out =</span> <span class="dv">50</span>))</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>preds       <span class="ot">&lt;-</span> <span class="fu">predict</span>(success_mod, <span class="at">newdata =</span> fake, <span class="at">se.fit =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>fit    <span class="ot">&lt;-</span> <span class="fu">plogis</span>(preds<span class="sc">$</span>fit)</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>low    <span class="ot">&lt;-</span> <span class="fu">plogis</span>(preds<span class="sc">$</span>fit <span class="sc">-</span> <span class="fl">1.96</span> <span class="sc">*</span> preds<span class="sc">$</span>se.fit)</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>upp    <span class="ot">&lt;-</span> <span class="fu">plogis</span>(preds<span class="sc">$</span>fit <span class="sc">+</span> <span class="fl">1.96</span> <span class="sc">*</span> preds<span class="sc">$</span>se.fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fake <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">seed_mass =</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="fu">min</span>(germination<span class="sc">$</span>seed_mass),</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">to   =</span> <span class="fu">max</span>(germination<span class="sc">$</span>seed_mass),</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">length.out =</span> <span class="dv">50</span>))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>preds       <span class="ot">&lt;-</span> <span class="fu">predict</span>(germ_mod, <span class="at">newdata =</span> fake, <span class="at">se.fit =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>fit    <span class="ot">&lt;-</span> <span class="fu">plogis</span>(preds<span class="sc">$</span>fit)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>low    <span class="ot">&lt;-</span> <span class="fu">plogis</span>(preds<span class="sc">$</span>fit <span class="sc">-</span> <span class="fl">1.96</span> <span class="sc">*</span> preds<span class="sc">$</span>se.fit)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>upp    <span class="ot">&lt;-</span> <span class="fu">plogis</span>(preds<span class="sc">$</span>fit <span class="sc">+</span> <span class="fl">1.96</span> <span class="sc">*</span> preds<span class="sc">$</span>se.fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="question-block">
 <p>
-<strong>Question 8.</strong> Using the <code>fake</code> dataset, create a figure showing predicted probability of success against territory quality, with a 95% confidence band. Add the raw data points using <code>geom_jitter()</code>.
+<strong>Question 9.</strong> Using the <code>fake</code> dataset, create a figure showing predicted probability of germination against seed mass, with a 95% confidence band. Add the raw data points using <code>geom_jitter()</code>.
 </p>
 <textarea class="student-answer" rows="6" placeholder="Write your ggplot2 code here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">
@@ -2839,18 +2921,18 @@ Show Answer
 <div class="instructor-answer">
 <pre><code>ggplot() +
   geom_ribbon(data = fake,
-              aes(x = territory_quality, ymin = low, ymax = upp),
+              aes(x = seed_mass, ymin = low, ymax = upp),
               fill = &quot;grey80&quot;) +
   geom_line(data = fake,
-            aes(x = territory_quality, y = fit)) +
-  geom_jitter(data = oystercatcher,
-              aes(x = territory_quality, y = success),
+            aes(x = seed_mass, y = fit)) +
+  geom_jitter(data = germination,
+              aes(x = seed_mass, y = germinated),
               height = 0.03, alpha = 0.35) +
-  labs(x = &quot;Territory quality&quot;,
-       y = &quot;Probability of breeding success&quot;) +
+  labs(x = &quot;Seed mass (µg)&quot;,
+       y = &quot;Probability of germination&quot;) +
   theme_minimal()</code></pre>
 <p>
-The result is an S-shaped (logistic) curve: probability rises steeply across the middle of the quality range and flattens out near 0 and 1. The S-shape is a direct consequence of the logit link, and it ensures predictions stay within [0, 1] across the entire range of territory quality.
+The result is a gently S-shaped (logistic) curve: probability rises across the mass range while staying within [0, 1] at both ends. The S-shape is a direct consequence of the logit link. Because seed mass is only a modest predictor on its own, the rise here is gradual rather than steep — most of the action, as we’ll see next, is in genotype and stratification.
 </p>
 </div>
 </div>
@@ -2858,108 +2940,113 @@ The result is an S-shaped (logistic) curve: probability rises steeply across the
 </section>
 <section id="interpret-and-draw-conclusions" class="level2">
 <h2 class="anchored" data-anchor-id="interpret-and-draw-conclusions">7. Interpret and draw conclusions</h2>
-<p>The model predicts that breeding success increases with territory quality. The positive slope means that each additional unit of territory quality increases the log-odds of success by approximately 0.44. On the probability scale, the relationship isn’t linear: an increase from quality 2 to quality 3 has a smaller effect than an increase from quality 5 to quality 6 (where the curve is steepest).</p>
+<p>The model predicts that germination probability increases with seed mass. The positive slope means that each additional microgram of seed mass increases the log-odds of germination by approximately 0.089. On the probability scale the relationship isn’t linear, but seed mass alone is a fairly weak predictor: it nudges the probability rather than driving it. The real drivers are the ones we’ve ignored so far — genotype and cold stratification — so let’s add them.</p>
 </section>
 </section>
-<section id="adding-breeding-experience" class="level1">
-<h1>Adding breeding experience</h1>
-<p>So far we have only included <code>territory_quality</code>. The research question also asks about <code>experience</code>. Add it to the model:</p>
+<section id="adding-genotype-and-stratification" class="level1">
+<h1>Adding genotype and stratification</h1>
+<p>The research question isn’t really about seed mass; it’s about how <strong>genotype</strong> and <strong>cold stratification</strong> combine to control germination, and specifically whether cold matters more for one genotype than the other. That “whether the effect of one predictor depends on another” is exactly what an <strong>interaction</strong> captures. We fit it with <code>*</code>, which adds both main effects <em>and</em> their interaction, while keeping <code>seed_mass</code> as a separate additive term:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>success_mod2 <span class="ot">&lt;-</span> <span class="fu">glm</span>(success <span class="sc">~</span> territory_quality <span class="sc">+</span> experience,</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">&quot;logit&quot;</span>),</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">data =</span> oystercatcher)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>germ_mod2 <span class="ot">&lt;-</span> <span class="fu">glm</span>(germinated <span class="sc">~</span> seed_mass <span class="sc">+</span> genotype <span class="sc">*</span> stratification,</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">&quot;logit&quot;</span>),</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">data =</span> germination)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<p>Writing <code>genotype * stratification</code> is shorthand for <code>genotype + stratification + genotype:stratification</code>. The <code>seed_mass</code> term sits outside the interaction: it has one slope that applies to every seed, which is what we mean by a “separate continuous effect.”</p>
 <section id="diagnose-the-new-model" class="level2">
 <h2 class="anchored" data-anchor-id="diagnose-the-new-model">Diagnose the new model</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(success_mod2)</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(germ_mod2)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(performance)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="fu">check_model</span>(germ_mod2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>The diagnostic plots should look similar to the first model: two-banded residuals are still expected, and the Q-Q plot is still uninformative. Check the residuals vs leverage plot for any influential observations.</p>
+<p>The diagnostics should look similar to the first model: two-banded base residuals are still expected, the Q-Q plot is still uninformative, and the binned residuals should sit inside their bounds. One new panel appears in <code>check_model()</code> output: a <strong>Collinearity</strong> check. Because the model now contains an interaction, you may see high collinearity flagged for the terms involved in it. This is expected and not a problem: interaction terms are built from their main effects, so they’re correlated with them by construction. It’s only worth worrying about when two <em>separate</em> predictors are highly collinear.</p>
 </section>
 <section id="summarise-and-interpret" class="level2">
 <h2 class="anchored" data-anchor-id="summarise-and-interpret">Summarise and interpret</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(success_mod2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(germ_mod2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<p>From the output, the fitted equation on the log-odds scale is approximately:</p>
+<p><span class="math display">\[logit(\hat{p}_i) = -4.43 + 0.11 \times seedmass_i + 2.71 \times dog1_i + 4.08 \times Cold_i - 2.46 \times (dog1_i \times Cold_i)\]</span></p>
+<p>where <code>dog1</code> and <code>Cold</code> are 1 when the seed is the mutant genotype and cold-treated respectively, and 0 otherwise.</p>
 <div class="question-block">
 <p>
-<strong>Question 9.</strong> The <code>experienceExperienced</code> coefficient is approximately +2.0. What does this mean?
+<strong>Question 10.</strong> The <code>stratificationCold</code> coefficient is about +4.08 and the interaction <code>genotypedog1:stratificationCold</code> is about −2.46. What does the interaction term tell you?
 </p>
 <div class="mc-options">
-<p><label><input type="radio" name="w10-q9" data-correct="false"> Experienced breeders have a 2.0 percentage point higher success rate than first-time breeders.</label> <label><input type="radio" name="w10-q9" data-correct="false"> Experienced breeders succeed on 2.0 more occasions per season than first-time breeders.</label> <label><input type="radio" name="w10-q9" data-correct="true"> Holding territory quality constant, experienced breeders have a log-odds of success that is 2.0 higher than first-time breeders. This corresponds to multiplying the odds of success by exp(2.0) ≈ 7.4: experienced breeders have roughly 7.4 times the odds of success compared to first-time breeders at the same territory quality.</label> <label><input type="radio" name="w10-q9" data-correct="false"> The effect of territory quality on success is 2.0 times stronger for experienced breeders than for first-time breeders.</label></p>
+<p><label><input type="radio" name="w10-q10" data-correct="false"> Cold stratification reduces germination in <code>dog1</code> seeds, because the interaction coefficient is negative.</label> <label><input type="radio" name="w10-q10" data-correct="true"> The boost from cold is much smaller for <code>dog1</code> than for WT. Cold adds +4.08 to the log-odds of germination in WT but only 4.08 − 2.46 = +1.62 in <code>dog1</code>; in odds terms cold multiplies the odds by ~59 in WT but only ~5 in <code>dog1</code>.</label> <label><input type="radio" name="w10-q10" data-correct="false"> <code>dog1</code> seeds are 2.46 times less likely to germinate than WT seeds overall.</label> <label><input type="radio" name="w10-q10" data-correct="false"> Seed mass has a weaker effect on germination in <code>dog1</code> seeds than in WT seeds.</label></p>
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-On the log-odds scale, the coefficient is the difference in log-odds between the two groups, holding all other predictors constant. To make this more intuitive, exponentiate it: exp(2.0) ≈ 7.4. Experienced breeders have roughly 7.4 times the <em>odds</em> of success compared to first-time breeders on the same territory. This doesn’t mean they are 7.4 times more likely to succeed. Odds and probability aren’t the same thing. People confuse them constantly, including in peer-reviewed papers. Don’t be one of them.
+The interaction coefficient modifies the effect of cold depending on genotype. For WT (the reference), cold adds +4.08 to the log-odds. For <code>dog1</code>, cold adds 4.08 + (−2.46) = +1.62. Exponentiating: cold multiplies the odds of germination by exp(4.08) ≈ 59 in WT but only exp(1.62) ≈ 5 in <code>dog1</code>. Note cold is still <em>positive</em> for <code>dog1</code> — it just does far less. That makes biological sense: the <code>dog1</code> mutant has lost dormancy, so its seeds germinate readily even when warm and cold has little left to add. This is a gene × environment interaction: the effect of the environment (cold) depends on the genotype.
 </p>
 </div>
 </div>
 <div class="question-block">
 <p>
-<strong>Question 10.</strong> Using your fitted equation from <code>success_mod2</code>, calculate the predicted probability of success for a first-time breeding pair on a territory with quality = 5, and for an experienced pair on the same territory.
+<strong>Question 11.</strong> Using the fitted equation from <code>germ_mod2</code>, calculate the predicted probability of germination at seed mass = 25 µg for all four genotype × treatment combinations.
 </p>
-<textarea class="student-answer" rows="6" placeholder="Write the log-odds for each, then apply plogis()..."></textarea>
+<textarea class="student-answer" rows="6" placeholder="Write the log-odds for each of the four cells, then apply plogis()..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">
 Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-With approximate coefficients: intercept ≈ −3.5, territory_quality ≈ 0.5, experienceExperienced ≈ 2.0.
+Start from the base term for a warm WT seed at 25 µg: −4.43 + 0.11 × 25 = −1.68. Then add the relevant coefficients:
 </p>
-<pre><code># First-time breeder, quality = 5
-log_odds_first &lt;- -3.5 + 0.5 * 5 + 0
-plogis(log_odds_first)   # plogis(-1.0) ≈ 0.27
-
-# Experienced breeder, quality = 5
-log_odds_exp &lt;- -3.5 + 0.5 * 5 + 2.0
-plogis(log_odds_exp)     # plogis(1.0) ≈ 0.73</code></pre>
+<pre><code>plogis(-1.68)                  # WT,   Warm ≈ 0.16
+plogis(-1.68 + 4.08)           # WT,   Cold ≈ 0.92
+plogis(-1.68 + 2.71)           # dog1, Warm ≈ 0.74
+plogis(-1.68 + 2.71 + 4.08 - 2.46)  # dog1, Cold ≈ 0.93</code></pre>
 <p>
-At the same territory quality of 5, first-time breeders have a predicted success probability of about 27%, while experienced breeders have about 73%. The difference is large in probability terms even though the log-odds difference is the fixed value of 2.0 regardless of quality.
+Cold is transformative for WT (0.16 → 0.92) but barely moves <code>dog1</code> (0.74 → 0.93). That gap between the two genotypes’ response to cold <em>is</em> the interaction, now expressed as probabilities. Notice these match the raw cell germination rates you saw in the EDA — a good sign the model is capturing the data.
 </p>
 </div>
 </div>
 </section>
 <section id="plot-the-model-fit" class="level2">
 <h2 class="anchored" data-anchor-id="plot-the-model-fit">Plot the model fit</h2>
-<p>Let’s use <code>ggeffects</code> and have it do the tedious coding for us. When both predictors are included, <code>ggpredict()</code> with <code>terms = c(&quot;territory_quality&quot;, &quot;experience&quot;)</code> shows separate probability curves for each experience level:</p>
+<p>Let’s use <code>ggeffects</code> and have it do the tedious coding for us. With an interaction, pass all three predictors to <code>ggpredict()</code>: the first goes on the x-axis, the second becomes coloured curves, and the third splits into panels:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggeffects)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>preds2 <span class="ot">&lt;-</span> <span class="fu">ggpredict</span>(success_mod2, <span class="at">terms =</span> <span class="fu">c</span>(<span class="st">&quot;territory_quality&quot;</span>, <span class="st">&quot;experience&quot;</span>))</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(preds2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggeffects)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>preds2 <span class="ot">&lt;-</span> <span class="fu">ggpredict</span>(germ_mod2, <span class="at">terms =</span> <span class="fu">c</span>(<span class="st">&quot;seed_mass&quot;</span>, <span class="st">&quot;genotype&quot;</span>, <span class="st">&quot;stratification&quot;</span>))</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(preds2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>The two S-curves will be offset from each other: the experienced-breeder curve sits to the left of the first-time-breeder curve, meaning experienced breeders achieve the same probability of success at a lower territory quality.</p>
+<p>You’ll get two panels, one per stratification treatment. In the <strong>Warm</strong> panel the WT curve sits far below the <code>dog1</code> curve (dormant wild-type vs non-dormant mutant). In the <strong>Cold</strong> panel both curves are high and close together. That change — a big genotype gap under warm conditions that nearly closes under cold — is the visual signature of the interaction.</p>
 </section>
 </section>
-<section id="a-new-challenger-antimicrobial-peptides" class="level1">
-<h1>A new challenger: antimicrobial peptides</h1>
-<p>If time allows, work through the following dataset. It comes from an in vitro study testing whether a novel antimicrobial peptide (AMP) can clear <em>Staphylococcus aureus</em> infections in a cell-culture model. AMPs are short proteins produced by the immune system that disrupt bacterial membranes. There is a lot of interest in them as alternatives to conventional antibiotics, partly because bacteria evolve resistance to them more slowly. Download the data below and save it to your <code>BI3010/data/</code> folder.</p>
-<p><a href="data:text/plain;base64,ImNsZWFyZWQiICJwZXB0aWRlX2NvbmMiICJzdHJhaW4iDQoxIDE0LjkgIlN1c2NlcHRpYmxlIg0KMSAxMCAiU3VzY2VwdGlibGUiDQoxIDEwLjggIlJlc2lzdGFudCINCjAgMTAuNSAiUmVzaXN0YW50Ig0KMSAxNS44ICJSZXNpc3RhbnQiDQoxIDEwLjYgIlJlc2lzdGFudCINCjEgMTguMSAiU3VzY2VwdGlibGUiDQoxIDMuNCAiU3VzY2VwdGlibGUiDQoxIDEzLjIgIlN1c2NlcHRpYmxlIg0KMCAxMS44ICJSZXNpc3RhbnQiDQowIDkuMyAiU3VzY2VwdGlibGUiDQoxIDE5LjEgIlJlc2lzdGFudCINCjEgMTMuNCAiU3VzY2VwdGlibGUiDQowIDEuNSAiUmVzaXN0YW50Ig0KMCA5LjkgIlJlc2lzdGFudCINCjEgMTcuMyAiU3VzY2VwdGlibGUiDQowIDcuOSAiUmVzaXN0YW50Ig0KMSA3LjkgIlJlc2lzdGFudCINCjEgMTUuNCAiU3VzY2VwdGlibGUiDQowIDMgIlJlc2lzdGFudCINCjAgNy42ICJSZXNpc3RhbnQiDQowIDE2LjUgIlJlc2lzdGFudCINCjAgMS44ICJTdXNjZXB0aWJsZSINCjEgMTQuNiAiU3VzY2VwdGlibGUiDQowIDcuNCAiUmVzaXN0YW50Ig0KMSAxOC40ICJTdXNjZXB0aWJsZSINCjAgMTUuOCAiUmVzaXN0YW50Ig0KMCA0LjggIlN1c2NlcHRpYmxlIg0KMCAxNy4zICJTdXNjZXB0aWJsZSINCjAgNS45ICJSZXNpc3RhbnQiDQoxIDkgIlN1c2NlcHRpYmxlIg0KMCAzLjcgIlJlc2lzdGFudCINCjEgMTAuMSAiU3VzY2VwdGlibGUiDQoxIDExLjQgIlJlc2lzdGFudCINCjEgMTMuNiAiUmVzaXN0YW50Ig0KMCAzLjIgIlN1c2NlcHRpYmxlIg0KMCAyLjggIlJlc2lzdGFudCINCjAgNC40ICJTdXNjZXB0aWJsZSINCjEgMTkuOSAiU3VzY2VwdGlibGUiDQoxIDE4LjIgIlJlc2lzdGFudCINCjEgOC43ICJTdXNjZXB0aWJsZSINCjEgMTguNyAiU3VzY2VwdGlibGUiDQowIDE1LjYgIlJlc2lzdGFudCINCjEgMTYuNSAiU3VzY2VwdGlibGUiDQowIDIwICJSZXNpc3RhbnQiDQoxIDE2LjUgIlJlc2lzdGFudCINCjAgMTUuMiAiUmVzaXN0YW50Ig0KMCAzLjUgIlJlc2lzdGFudCINCjAgOS42ICJSZXNpc3RhbnQiDQoxIDExLjMgIlN1c2NlcHRpYmxlIg0KMCAyLjggIlN1c2NlcHRpYmxlIg0KMCAxNSAiUmVzaXN0YW50Ig0KMCA0LjQgIlJlc2lzdGFudCINCjAgMy41ICJSZXNpc3RhbnQiDQowIDEwLjkgIlJlc2lzdGFudCINCjEgNy44ICJTdXNjZXB0aWJsZSINCjAgNy43ICJSZXNpc3RhbnQiDQowIDEyLjIgIlN1c2NlcHRpYmxlIg0KMSAxNS41ICJTdXNjZXB0aWJsZSINCjEgMTIuNCAiUmVzaXN0YW50Ig0KMCAzLjkgIlN1c2NlcHRpYmxlIg0KMCAxNS4xICJSZXNpc3RhbnQiDQoxIDE5LjMgIlN1c2NlcHRpYmxlIg0KMCA1LjEgIlN1c2NlcHRpYmxlIg0KMCAyLjkgIlN1c2NlcHRpYmxlIg0KMCAxNS42ICJSZXNpc3RhbnQiDQoxIDE0LjcgIlJlc2lzdGFudCINCjAgNy4zICJSZXNpc3RhbnQiDQowIDYgIlJlc2lzdGFudCINCjAgNC41ICJSZXNpc3RhbnQiDQowIDMgIlJlc2lzdGFudCINCjEgMTkuOSAiUmVzaXN0YW50Ig0KMSAxMi42ICJSZXNpc3RhbnQiDQoxIDkuMiAiUmVzaXN0YW50Ig0KMCAyLjMgIlJlc2lzdGFudCINCjEgMTAuNCAiU3VzY2VwdGlibGUiDQoxIDE2LjYgIlN1c2NlcHRpYmxlIg0KMCAxMi41ICJSZXNpc3RhbnQiDQoxIDE2LjkgIlJlc2lzdGFudCINCjEgMTIuMiAiU3VzY2VwdGlibGUiDQoxIDE4LjEgIlN1c2NlcHRpYmxlIg0KMCA1LjEgIlJlc2lzdGFudCINCjEgMTguNiAiUmVzaXN0YW50Ig0KMCAyLjYgIlJlc2lzdGFudCINCjAgNi4xICJSZXNpc3RhbnQiDQowIDcuNiAiU3VzY2VwdGlibGUiDQowIDcuOCAiUmVzaXN0YW50Ig0KMCA0LjcgIlJlc2lzdGFudCINCjAgMi4yICJSZXNpc3RhbnQiDQowIDEwLjggIlJlc2lzdGFudCINCjEgMTcuNiAiUmVzaXN0YW50Ig0KMSAxOSAiU3VzY2VwdGlibGUiDQowIDcuMyAiUmVzaXN0YW50Ig0KMSAxOC4yICJSZXNpc3RhbnQiDQowIDExLjUgIlN1c2NlcHRpYmxlIg0KMCAxMy42ICJSZXNpc3RhbnQiDQoxIDE2LjQgIlJlc2lzdGFudCINCjEgMTYuMSAiUmVzaXN0YW50Ig0KMSAxNC4yICJTdXNjZXB0aWJsZSINCjEgNi4xICJTdXNjZXB0aWJsZSINCjEgMTMuMiAiUmVzaXN0YW50Ig0KMSAxOS4zICJSZXNpc3RhbnQiDQowIDMuMSAiUmVzaXN0YW50Ig0KMSAxNi40ICJTdXNjZXB0aWJsZSINCjEgOS4zICJTdXNjZXB0aWJsZSINCjEgMTYuMyAiUmVzaXN0YW50Ig0KMSAxNy40ICJTdXNjZXB0aWJsZSINCjAgOS4yICJSZXNpc3RhbnQiDQowIDEzLjIgIlJlc2lzdGFudCINCjEgMTguNyAiU3VzY2VwdGlibGUiDQowIDE3LjMgIlJlc2lzdGFudCINCjAgMy42ICJTdXNjZXB0aWJsZSINCjEgMTUgIlJlc2lzdGFudCINCjEgMTYuMyAiU3VzY2VwdGlibGUiDQowIDQuOSAiU3VzY2VwdGlibGUiDQowIDMuMyAiUmVzaXN0YW50Ig0KMCA1LjYgIlJlc2lzdGFudCINCjEgMTQuNiAiU3VzY2VwdGlibGUiDQowIDEwLjIgIlJlc2lzdGFudCINCjAgNC4yICJTdXNjZXB0aWJsZSINCjEgMTQuOCAiU3VzY2VwdGlibGUiDQowIDEzLjYgIlJlc2lzdGFudCINCjEgMTUgIlN1c2NlcHRpYmxlIg0KMCAxMS41ICJSZXNpc3RhbnQiDQoxIDE0ICJTdXNjZXB0aWJsZSINCjEgMTQuNiAiUmVzaXN0YW50Ig0KMSAxOC40ICJSZXNpc3RhbnQiDQoxIDE4LjEgIlN1c2NlcHRpYmxlIg0KMCAzLjQgIlJlc2lzdGFudCINCjAgMTQuNyAiUmVzaXN0YW50Ig0KMCAxLjEgIlJlc2lzdGFudCINCjAgMTMuNyAiU3VzY2VwdGlibGUiDQowIDQuNSAiUmVzaXN0YW50Ig0KMSA5LjMgIlN1c2NlcHRpYmxlIg0KMCA3LjYgIlN1c2NlcHRpYmxlIg0KMCAxMi42ICJSZXNpc3RhbnQiDQoxIDE5LjIgIlN1c2NlcHRpYmxlIg0KMCAzLjUgIlN1c2NlcHRpYmxlIg0KMCA3LjUgIlJlc2lzdGFudCINCjAgMTQuNyAiU3VzY2VwdGlibGUiDQowIDkuOCAiUmVzaXN0YW50Ig0KMSAxOC40ICJSZXNpc3RhbnQiDQowIDUuMyAiU3VzY2VwdGlibGUiDQoxIDE5LjIgIlN1c2NlcHRpYmxlIg0KMCA0LjkgIlN1c2NlcHRpYmxlIg0KMCAxMy45ICJSZXNpc3RhbnQiDQowIDEuMiAiUmVzaXN0YW50Ig0KMCA3LjQgIlN1c2NlcHRpYmxlIg0KMCA2LjYgIlN1c2NlcHRpYmxlIg0KMSAxNSAiUmVzaXN0YW50Ig0KMSAxNyAiU3VzY2VwdGlibGUiDQoxIDE3LjcgIlN1c2NlcHRpYmxlIg0KMCA2LjYgIlJlc2lzdGFudCINCjEgMTcuMiAiU3VzY2VwdGlibGUiDQoxIDE4LjggIlN1c2NlcHRpYmxlIg0KMCA4LjcgIlN1c2NlcHRpYmxlIg0KMCA1LjMgIlN1c2NlcHRpYmxlIg0KMCAxLjIgIlJlc2lzdGFudCINCjAgNS44ICJSZXNpc3RhbnQiDQoxIDE2LjkgIlN1c2NlcHRpYmxlIg0K" download="amp.txt" class="ws-download-btn">Download amp.txt</a></p>
-<p>The dataset contains 160 experimental replicates. Each row is one replicate, with the following variables:</p>
+<section id="a-new-challenger-amphibian-chytrid-infection" class="level1">
+<h1>A new challenger: amphibian chytrid infection</h1>
+<p>If time allows, work through the following dataset. It comes from a field study of chytridiomycosis, a disease caused by the fungus <em>Batrachochytrium dendrobatidis</em> (Bd) that has driven amphibian declines worldwide. Researchers swabbed frogs at a set of ponds and tested each for Bd infection, recording the water temperature at capture and whether the pond was permanent or temporary (temporary ponds dry out seasonally, which interrupts the fungus’s life cycle). Download the data below and save it to your <code>BI3010/data/</code> folder.</p>
+<p><a href="data:text/plain;base64,ImluZmVjdGVkIiAid2F0ZXJfdGVtcCIgInBvbmRfdHlwZSINCjEgMjAuOCAiVGVtcG9yYXJ5Ig0KMCAxNy43ICJQZXJtYW5lbnQiDQoxIDE4LjIgIlRlbXBvcmFyeSINCjAgMTggIlBlcm1hbmVudCINCjEgMjEuNCAiUGVybWFuZW50Ig0KMCAxOC4xICJUZW1wb3JhcnkiDQoxIDIyLjggIlBlcm1hbmVudCINCjEgMTMuNSAiUGVybWFuZW50Ig0KMSAxOS43ICJUZW1wb3JhcnkiDQoxIDE4LjggIlBlcm1hbmVudCINCjAgMTcuMiAiUGVybWFuZW50Ig0KMCAyMy40ICJQZXJtYW5lbnQiDQowIDE5LjkgIlRlbXBvcmFyeSINCjAgMTIuMyAiVGVtcG9yYXJ5Ig0KMCAxNy42ICJQZXJtYW5lbnQiDQowIDIyLjMgIlRlbXBvcmFyeSINCjEgMTYuNCAiUGVybWFuZW50Ig0KMSAxNi40ICJUZW1wb3JhcnkiDQowIDIxLjEgIlRlbXBvcmFyeSINCjEgMTMuMyAiUGVybWFuZW50Ig0KMSAxNi4yICJUZW1wb3JhcnkiDQowIDIxLjggIlBlcm1hbmVudCINCjAgMTIuNSAiVGVtcG9yYXJ5Ig0KMCAyMC42ICJQZXJtYW5lbnQiDQowIDE2ICJQZXJtYW5lbnQiDQowIDIzICJUZW1wb3JhcnkiDQoxIDIxLjMgIlBlcm1hbmVudCINCjEgMTQuNCAiVGVtcG9yYXJ5Ig0KMCAyMi4zICJUZW1wb3JhcnkiDQoxIDE1LjEgIlBlcm1hbmVudCINCjAgMTcuMSAiVGVtcG9yYXJ5Ig0KMSAxMy43ICJUZW1wb3JhcnkiDQowIDE3LjggIlBlcm1hbmVudCINCjEgMTguNSAiVGVtcG9yYXJ5Ig0KMCAxOS45ICJQZXJtYW5lbnQiDQoxIDEzLjQgIlBlcm1hbmVudCINCjEgMTMuMSAiUGVybWFuZW50Ig0KMCAxNC4xICJQZXJtYW5lbnQiDQowIDIzLjkgIlBlcm1hbmVudCINCjAgMjIuOSAiVGVtcG9yYXJ5Ig0KMSAxNi44ICJUZW1wb3JhcnkiDQowIDIzLjIgIlBlcm1hbmVudCINCjEgMjEuMiAiUGVybWFuZW50Ig0KMCAyMS44ICJQZXJtYW5lbnQiDQoxIDI0ICJQZXJtYW5lbnQiDQowIDIxLjggIlRlbXBvcmFyeSINCjEgMjEgIlBlcm1hbmVudCINCjEgMTMuNiAiVGVtcG9yYXJ5Ig0KMCAxNy40ICJUZW1wb3JhcnkiDQoxIDE4LjUgIlBlcm1hbmVudCINCjAgMTMuMiAiVGVtcG9yYXJ5Ig0KMCAyMC44ICJQZXJtYW5lbnQiDQowIDE0LjIgIlRlbXBvcmFyeSINCjAgMTMuNiAiVGVtcG9yYXJ5Ig0KMSAxOC4yICJUZW1wb3JhcnkiDQoxIDE2LjMgIlBlcm1hbmVudCINCjEgMTYuMiAiUGVybWFuZW50Ig0KMSAxOS4xICJQZXJtYW5lbnQiDQowIDIxLjIgIlBlcm1hbmVudCINCjEgMTkuMiAiUGVybWFuZW50Ig0KMSAxMy44ICJQZXJtYW5lbnQiDQoxIDIwLjkgIlBlcm1hbmVudCINCjAgMjMuNiAiUGVybWFuZW50Ig0KMCAxNC42ICJQZXJtYW5lbnQiDQoxIDEzLjIgIlBlcm1hbmVudCINCjAgMjEuMiAiVGVtcG9yYXJ5Ig0KMCAyMC43ICJUZW1wb3JhcnkiDQoxIDE2ICJQZXJtYW5lbnQiDQoxIDE1LjIgIlBlcm1hbmVudCINCjEgMTQuMiAiVGVtcG9yYXJ5Ig0KMSAxMy4yICJUZW1wb3JhcnkiDQowIDIzLjkgIlBlcm1hbmVudCINCjEgMTkuMyAiUGVybWFuZW50Ig0KMSAxNy4yICJQZXJtYW5lbnQiDQowIDEyLjggIlBlcm1hbmVudCINCjAgMTggIlRlbXBvcmFyeSINCjAgMjEuOCAiUGVybWFuZW50Ig0KMSAxOS4zICJQZXJtYW5lbnQiDQoxIDIyICJQZXJtYW5lbnQiDQowIDE5LjEgIlBlcm1hbmVudCINCjEgMjIuOCAiUGVybWFuZW50Ig0KMSAxNC42ICJUZW1wb3JhcnkiDQowIDIzLjEgIlBlcm1hbmVudCINCjEgMTMgIlBlcm1hbmVudCINCjEgMTUuMiAiVGVtcG9yYXJ5Ig0KMSAxNi4yICJQZXJtYW5lbnQiDQoxIDE2LjMgIlBlcm1hbmVudCINCjEgMTQuMyAiUGVybWFuZW50Ig0KMCAxMi44ICJUZW1wb3JhcnkiDQowIDE4LjIgIlRlbXBvcmFyeSINCjEgMjIuNSAiUGVybWFuZW50Ig0KMCAyMy40ICJQZXJtYW5lbnQiDQoxIDE2ICJQZXJtYW5lbnQiDQowIDIyLjkgIlRlbXBvcmFyeSINCjAgMTguNiAiVGVtcG9yYXJ5Ig0KMSAyMCAiUGVybWFuZW50Ig0KMCAyMS43ICJUZW1wb3JhcnkiDQowIDIxLjUgIlBlcm1hbmVudCINCjAgMjAuMyAiUGVybWFuZW50Ig0KMSAxNS4yICJUZW1wb3JhcnkiDQoxIDE5LjcgIlBlcm1hbmVudCINCjAgMjMuNiAiVGVtcG9yYXJ5Ig0KMSAxMy4zICJQZXJtYW5lbnQiDQowIDIxLjcgIlRlbXBvcmFyeSINCjAgMTcuMiAiVGVtcG9yYXJ5Ig0KMSAyMS43ICJQZXJtYW5lbnQiDQowIDIyLjMgIlBlcm1hbmVudCINCjAgMTcuMiAiVGVtcG9yYXJ5Ig0KMSAxOS43ICJQZXJtYW5lbnQiDQowIDIzLjIgIlRlbXBvcmFyeSINCjAgMjIuMyAiVGVtcG9yYXJ5Ig0KMCAxMy42ICJQZXJtYW5lbnQiDQowIDIwLjggIlRlbXBvcmFyeSINCjEgMjEuNyAiUGVybWFuZW50Ig0KMCAxNC40ICJUZW1wb3JhcnkiDQoxIDEzLjQgIlBlcm1hbmVudCINCjEgMTQuOSAiUGVybWFuZW50Ig0KMCAyMC42ICJUZW1wb3JhcnkiDQoxIDE3LjggIlBlcm1hbmVudCINCjAgMTQgIlBlcm1hbmVudCINCjEgMjAuNyAiUGVybWFuZW50Ig0KMCAyMCAiVGVtcG9yYXJ5Ig0KMCAyMC45ICJQZXJtYW5lbnQiDQowIDE4LjYgIlRlbXBvcmFyeSINCjAgMjAuMiAiVGVtcG9yYXJ5Ig0KMSAyMC42ICJQZXJtYW5lbnQiDQowIDIzICJUZW1wb3JhcnkiDQowIDIyLjggIlRlbXBvcmFyeSINCjEgMTMuNSAiUGVybWFuZW50Ig0KMCAyMC43ICJUZW1wb3JhcnkiDQoxIDEyLjEgIlBlcm1hbmVudCINCjAgMjAgIlBlcm1hbmVudCINCjEgMTQuMiAiVGVtcG9yYXJ5Ig0KMCAxNy4yICJUZW1wb3JhcnkiDQoxIDE2LjEgIlRlbXBvcmFyeSINCjEgMTkuMyAiUGVybWFuZW50Ig0KMCAyMy41ICJQZXJtYW5lbnQiDQoxIDEzLjYgIlRlbXBvcmFyeSINCjEgMTYuMSAiVGVtcG9yYXJ5Ig0KMCAyMC42ICJQZXJtYW5lbnQiDQowIDE3LjYgIlRlbXBvcmFyeSINCjAgMjMgIlRlbXBvcmFyeSINCjEgMTQuNyAiUGVybWFuZW50Ig0KMCAyMy41ICJUZW1wb3JhcnkiDQowIDE0LjUgIlRlbXBvcmFyeSINCjEgMjAuMiAiVGVtcG9yYXJ5Ig0KMSAxMi4xICJUZW1wb3JhcnkiDQowIDE2ICJQZXJtYW5lbnQiDQoxIDE1LjYgIlBlcm1hbmVudCINCjAgMjAuOCAiVGVtcG9yYXJ5Ig0KMCAyMi4xICJUZW1wb3JhcnkiDQowIDIyLjUgIlRlbXBvcmFyeSINCjAgMTUuNSAiUGVybWFuZW50Ig0KMCAyMi4zICJUZW1wb3JhcnkiDQoxIDIzLjIgIlBlcm1hbmVudCINCjAgMTYuOCAiVGVtcG9yYXJ5Ig0KMSAxNC43ICJQZXJtYW5lbnQiDQoxIDEyLjEgIlBlcm1hbmVudCINCjEgMTUgIlRlbXBvcmFyeSINCjAgMjIgIlRlbXBvcmFyeSINCjEgMTMuNiAiUGVybWFuZW50Ig0KMCAxNi4xICJUZW1wb3JhcnkiDQoxIDIzLjIgIlBlcm1hbmVudCINCjEgMTUgIlBlcm1hbmVudCINCjAgMTkgIlRlbXBvcmFyeSINCjEgMjIuOSAiUGVybWFuZW50Ig0KMCAxMy43ICJUZW1wb3JhcnkiDQoxIDEzLjcgIlBlcm1hbmVudCINCjEgMTggIlBlcm1hbmVudCINCjAgMTguNCAiVGVtcG9yYXJ5Ig0K" download="chytrid.txt" class="ws-download-btn">Download chytrid.txt</a></p>
+<p>The dataset contains 170 swabbed frogs. Each row is one frog, with the following variables:</p>
 <ul>
-<li><code>cleared</code>: whether the <em>S. aureus</em> infection was eliminated within 24 hours (1 = yes, 0 = no).</li>
-<li><code>peptide_conc</code>: concentration of the AMP applied, in µM (continuous, 1 to 20).</li>
-<li><code>strain</code>: whether the bacterial strain was susceptible to the peptide or carried an efflux pump gene associated with reduced AMP uptake (<code>&quot;Susceptible&quot;</code> / <code>&quot;Resistant&quot;</code>).</li>
+<li><code>infected</code>: whether the frog tested positive for Bd (1 = yes, 0 = no).</li>
+<li><code>water_temp</code>: water temperature at the capture site, in °C (continuous, 12 to 24). Bd grows best in cool water and is inhibited when it warms up.</li>
+<li><code>pond_type</code>: whether the frog was caught at a <code>&quot;Permanent&quot;</code> pond or a <code>&quot;Temporary&quot;</code> one.</li>
 </ul>
-<p>The research question is predictive: which combinations of peptide concentration and strain type are associated with a higher probability of clearing the infection?</p>
+<p>The research question is predictive: how are water temperature and pond type associated with the probability that a frog is infected with Bd?</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>amp <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;Data/amp.txt&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>amp<span class="sc">$</span>strain <span class="ot">&lt;-</span> <span class="fu">factor</span>(amp<span class="sc">$</span>strain, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;Susceptible&quot;</span>, <span class="st">&quot;Resistant&quot;</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>chytrid <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;Data/chytrid.txt&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>chytrid<span class="sc">$</span>pond_type <span class="ot">&lt;-</span> <span class="fu">factor</span>(chytrid<span class="sc">$</span>pond_type, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;Temporary&quot;</span>, <span class="st">&quot;Permanent&quot;</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>Go through the full seven-step workflow. A few things to keep in mind:</p>
+<p>This dataset has the simpler additive shape (one continuous predictor plus one two-level factor, no interaction), so a model like <code>infected ~ water_temp + pond_type</code> is a sensible place to start. Go through the full seven-step workflow. A few things to keep in mind:</p>
 <ol type="1">
-<li><p>The response is binary, so use jitter plots rather than raw scatter plots to visualise it. <code>mean(amp$cleared)</code> gives the overall clearance rate; <code>tapply(amp$cleared, amp$strain, mean)</code> gives it separately by strain.</p></li>
-<li><p>Think carefully about hidden assumptions. The <code>cleared</code> variable is a binary endpoint measured at 24 hours: what does that assume about the clearance process? Are there any representativeness concerns about using a cell-culture model to draw conclusions about clinical use?</p></li>
+<li><p>The response is binary, so use jitter plots rather than raw scatter plots to visualise it. <code>mean(chytrid$infected)</code> gives the overall infection rate; <code>tapply(chytrid$infected, chytrid$pond_type, mean)</code> gives it separately by pond type.</p></li>
+<li><p>Diagnose the model with both <code>plot()</code> and <code>check_model()</code>. The binned residuals plot is again the one to focus on; there is no interaction here, so don’t expect a collinearity warning.</p></li>
+<li><p>Think carefully about hidden assumptions. A single swab is an imperfect test: what does a negative result actually guarantee? And is water temperature at the moment of capture a good stand-in for the conditions the fungus experienced?</p></li>
 <li><p>Use <code>plogis()</code> to back-transform any predictions from the log-odds scale to the probability scale.</p></li>
 </ol>
 <div class="question-block">
 <p>
-<strong>Question 11.</strong> After completing your AMP analysis, summarise your main findings. How does peptide concentration affect the probability of clearing the infection, and does this differ between susceptible and resistant strains?
+<strong>Question 12.</strong> After completing your chytrid analysis, summarise your main findings. How do water temperature and pond type affect the probability of infection?
 </p>
 <textarea class="student-answer" rows="6" placeholder="Describe the direction and size of each effect in plain language. Back-transform at least one prediction to the probability scale to support your answer..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">
@@ -2967,10 +3054,10 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-Higher peptide concentrations are associated with a higher probability of clearing the infection: the <code>peptide_conc</code> coefficient is positive on the log-odds scale. Exponentiating it gives the multiplicative change in odds per additional µM of peptide. For susceptible strains, the model predicts roughly 50% clearance probability at around 10 µM (the point where log-odds cross zero). Resistant strains require substantially higher concentrations to achieve the same probability, with the <code>strainResistant</code> coefficient being negative and corresponding to a reduction in the odds of clearance at any given concentration.
+Warmer water is associated with a <em>lower</em> probability of infection: the <code>water_temp</code> coefficient is negative on the log-odds scale (about −0.23), consistent with Bd being inhibited at higher temperatures. Frogs at permanent ponds are more likely to be infected than those at temporary ponds: the <code>pond_typePermanent</code> coefficient is positive (about +1.57), which exponentiates to roughly a 4.8-fold increase in the odds of infection. In probability terms, the model predicts a 50% infection risk at around 14 °C at temporary ponds but not until about 21 °C at permanent ponds — permanent water shifts the whole curve towards higher infection because the fungus is never flushed out by the pond drying.
 </p>
 <p>
-Key hidden assumptions worth flagging: “cleared within 24 hours” is an arbitrary endpoint that may miss slower-acting dynamics, and a cell-culture model excludes host immune responses, pharmacokinetics, and the polymicrobial environment of a real infection. Both concerns are squarely in the validity column of our assumption table.
+Key hidden assumptions worth flagging: a single swab can miss a genuine infection (a negative doesn’t guarantee the frog is Bd-free), and a one-off temperature reading may not represent the conditions the fungus actually experienced over the frog’s recent history. Both sit in the validity column of our assumption table.
 </p>
 </div>
 </div>
@@ -3028,27 +3115,27 @@ Key hidden assumptions worth flagging: “cleared within 24 hours” is an arbit
 <tr class="odd">
 <td>1. Validity</td>
 <td>The data can answer the research question.</td>
-<td>Counting a nest as successful if it survived to hatching but not checking whether chicks actually fledged.</td>
+<td>Scoring a burst seed coat as “germinated” without checking that a viable seedling actually emerged.</td>
 </tr>
 <tr class="even">
 <td>2. Representativeness</td>
 <td>The sample reflects the population of interest.</td>
-<td>Data collected only from pairs on the best territories because those were easiest to monitor.</td>
+<td>Testing only large, well-filled seeds because they were easiest to handle, then generalising to all seeds.</td>
 </tr>
 <tr class="odd">
 <td>3. Additivity</td>
-<td>The effects of territory quality and experience are independent and additive on the log-odds scale.</td>
-<td>If experience matters more on poor territories than on good ones, the two predictors interact.</td>
+<td>Effects are additive on the log-odds scale unless an interaction is fitted. Here we deliberately relax this: <code>genotype * stratification</code> lets the effect of cold differ between genotypes.</td>
+<td>Leaving out the interaction when cold genuinely helps WT far more than <code>dog1</code>, forcing both genotypes to share one cold effect.</td>
 </tr>
 <tr class="even">
 <td>4. Linearity</td>
-<td>The relationship between each continuous predictor and the log-odds of success is linear.</td>
-<td>Success probability rising quickly at low quality then levelling off, rather than following the logistic form.</td>
+<td>The relationship between each continuous predictor (seed mass) and the log-odds of germination is linear. Checked with the binned residuals plot.</td>
+<td>Binned residuals curving away from zero, showing seed mass acts non-linearly on the log-odds scale.</td>
 </tr>
 <tr class="odd">
 <td>5. Independence of errors</td>
-<td>Each observation is an independent breeding attempt.</td>
-<td>The same individual appearing in multiple years without this being accounted for.</td>
+<td>Each seed is an independent observation.</td>
+<td>Seeds from the same maternal plant or the same Petri dish being more alike than independent seeds.</td>
 </tr>
 <tr class="even">
 <td>6. Equal variance of errors</td>

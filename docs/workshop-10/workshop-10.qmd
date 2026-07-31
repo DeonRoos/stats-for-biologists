@@ -32,38 +32,44 @@ make_download_btn <- function(path, label = NULL) {
 
 ```{r data-generation, include=FALSE}
 set.seed(2024)
-n <- 180
+n <- 200
 
-territory_quality <- round(runif(n, 1, 10), 1)
-experience <- factor(
-  sample(c("First", "Experienced"), n, replace = TRUE, prob = c(0.4, 0.6)),
-  levels = c("First", "Experienced")
+seed_mass <- round(runif(n, 15, 35), 1)   # micrograms
+genotype <- factor(
+  sample(c("WT", "dog1"), n, replace = TRUE, prob = c(0.5, 0.5)),
+  levels = c("WT", "dog1")
+)
+stratification <- factor(
+  sample(c("Warm", "Cold"), n, replace = TRUE, prob = c(0.5, 0.5)),
+  levels = c("Warm", "Cold")
 )
 
-log_odds <- -3.0 + 0.5 * territory_quality + 1.5 * (experience == "Experienced")
-p_success <- plogis(log_odds)
-success   <- rbinom(n, size = 1, prob = p_success)
+log_odds <- -5.2 + 0.13 * seed_mass +
+            3.3 * (genotype == "dog1") +
+            3.9 * (stratification == "Cold") +
+           -3.0 * (genotype == "dog1") * (stratification == "Cold")
+germinated <- rbinom(n, size = 1, prob = plogis(log_odds))
 
-oystercatcher <- data.frame(success, territory_quality, experience)
+germination <- data.frame(germinated, seed_mass, genotype, stratification)
 
 dir.create("Data", showWarnings = FALSE)
-write.table(oystercatcher, "Data/oystercatcher.txt", row.names = FALSE)
+write.table(germination, "Data/germination.txt", row.names = FALSE)
 
-# AMP dataset
+# Chytrid dataset
 set.seed(2025)
-n_amp <- 160
+n_bd <- 170
 
-peptide_conc <- round(runif(n_amp, 1, 20), 1)
-strain <- factor(
-  sample(c("Susceptible", "Resistant"), n_amp, replace = TRUE),
-  levels = c("Susceptible", "Resistant")
+water_temp <- round(runif(n_bd, 12, 24), 1)
+pond_type <- factor(
+  sample(c("Temporary", "Permanent"), n_bd, replace = TRUE),
+  levels = c("Temporary", "Permanent")
 )
 
-log_odds_amp <- -3.5 + 0.35 * peptide_conc - 1.8 * (strain == "Resistant")
-cleared <- rbinom(n_amp, 1, plogis(log_odds_amp))
+log_odds_bd <- 3.65 - 0.25 * water_temp + 1.5 * (pond_type == "Permanent")
+infected <- rbinom(n_bd, 1, plogis(log_odds_bd))
 
-amp <- data.frame(cleared, peptide_conc, strain)
-write.table(amp, "Data/amp.txt", row.names = FALSE)
+chytrid <- data.frame(infected, water_temp, pond_type)
+write.table(chytrid, "Data/chytrid.txt", row.names = FALSE)
 ```
 
 ```{=html}
@@ -308,6 +314,44 @@ function toggleGlossary() {
       <div class="glossary-zh-def">将对数几率转换为概率的R函数。<code>plogis(0)</code> = 0.5，<code>plogis(2)</code> ≈ 0.88，<code>plogis(-2)</code> ≈ 0.12。它是<code>qlogis()</code>（将概率转换为对数几率）的逆函数。每当需要将伯努利GLM的预测值或置信区间上下限进行反变换时，使用此函数。</div>
     </div>
 
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">check_model() / performance</span>
+        <span class="glossary-zh-term">check_model() / performance 包</span>
+      </div>
+      <div class="glossary-en-def">A function from the <code>performance</code> package (first met in Workshop 4) that produces model-appropriate diagnostic plots. For a Bernoulli GLM it automatically switches to diagnostics suited to binary data, including a Posterior Predictive Check and a Binned Residuals plot, and prints guidance text on each panel describing what a passing plot looks like.</div>
+      <div class="glossary-zh-def">来自 <code>performance</code> 包（第4次研讨课首次介绍）的函数，可生成与模型类型相匹配的诊断图。对于伯努利GLM，它会自动切换到适合二元数据的诊断图，包括后验预测检验和分箱残差图，并在每张图上打印说明文字，描述通过的图应有的样子。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Binned residuals</span>
+        <span class="glossary-zh-term">分箱残差</span>
+      </div>
+      <div class="glossary-en-def">A residual plot designed for binary responses. Instead of plotting all the individual 0/1 residuals (which fall into two uninformative bands), observations are sorted by their fitted probability, grouped into bins, and the <em>average</em> residual of each bin is plotted against the average fitted value. Averaging cancels the 0/1 noise, so a systematic trend becomes visible. Most points should fall within the shaded error bounds and scatter around zero with no slope. This is the panel to focus on when checking a Bernoulli GLM.</div>
+      <div class="glossary-zh-def">专为二元响应设计的残差图。它不绘制所有单个的0/1残差（那样会形成两条毫无信息的带状），而是将观测值按其拟合概率排序、分组到各个区间（箱），并将每个箱的<em>平均</em>残差对平均拟合值作图。取平均消除了0/1噪声，从而使系统性趋势变得可见。大多数点应落在阴影误差范围内，围绕零散布且没有斜率。这是检查伯努利GLM时应重点关注的面板。</div>
+    </div>
+
+    <div class="glossary-section-header">Interactions</div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Interaction</span>
+        <span class="glossary-zh-term">交互作用</span>
+      </div>
+      <div class="glossary-en-def">When the effect of one predictor depends on the value of another. Fitted in R with <code>*</code> (e.g. <code>genotype * stratification</code>), which adds the two main effects plus their interaction term. On the log-odds scale the interaction coefficient is the difference between the two groups in how much the second predictor changes the log-odds. Here, cold stratification raises germination far more in wild-type seeds than in the dormancy mutant: the effect of cold <em>depends on</em> genotype.</div>
+      <div class="glossary-zh-def">当一个预测变量的效应取决于另一个预测变量的取值时，即存在交互作用。在R中用 <code>*</code> 拟合（例如 <code>genotype * stratification</code>），它会加入两个主效应以及它们的交互项。在对数几率尺度上，交互系数表示第二个预测变量改变对数几率的幅度在两组之间的差异。此处，冷层积对野生型种子萌发的提升远大于对休眠突变体的提升：冷处理的效应<em>取决于</em>基因型。</div>
+    </div>
+
+    <div class="glossary-entry">
+      <div class="glossary-terms">
+        <span class="glossary-en-term">Gene × environment (G×E)</span>
+        <span class="glossary-zh-term">基因型 × 环境（G×E）</span>
+      </div>
+      <div class="glossary-en-def">A specific kind of interaction in which the effect of an environmental treatment differs between genotypes (or vice versa). A genotype that responds strongly to a treatment while another barely responds is the signature of G×E. In this workshop, wild-type germination is highly sensitive to cold stratification whereas the <code>dog1</code> dormancy mutant germinates readily regardless of temperature.</div>
+      <div class="glossary-zh-def">一种特定的交互作用，即环境处理的效应在不同基因型之间存在差异（反之亦然）。一个基因型对处理反应强烈而另一个几乎无反应，正是 G×E 的标志。在本次研讨课中，野生型的萌发对冷层积高度敏感，而 <code>dog1</code> 休眠突变体无论温度如何都能顺利萌发。</div>
+    </div>
+
   </div>
 </div>
 ```
@@ -321,8 +365,8 @@ By the end of this workshop you should be able to:
 1. Explain why binary response data cannot be modelled with a Normal linear model and why a Bernoulli GLM is appropriate.
 2. Describe how the logit link function connects probabilities to log-odds, and convert between the two using `plogis()`.
 3. Fit a Bernoulli GLM in R using `glm()` with `family = binomial(link = "logit")`.
-4. Interpret the two-banded pattern in Bernoulli GLM residual plots and explain why overdispersion is not a concern.
-5. Interpret model coefficients on the log-odds scale and calculate predicted probabilities for specific combinations of predictor values.
+4. Diagnose a Bernoulli GLM using both the base residual plots and the binned residuals plot from `check_model()`, and explain why overdispersion is not a concern.
+5. Interpret model coefficients on the log-odds scale — including an interaction between two categorical predictors alongside a separate continuous effect — and calculate predicted probabilities for specific combinations of predictor values.
 :::
 
 # Workshop structure
@@ -344,75 +388,83 @@ In Workshop 9 we went from Normal linear models to Poisson GLMs for count data. 
 
 ## 1. Formulate a research question
 
-The dataset for this workshop comes from a long-term study of Eurasian oystercatcher (*Haematopus ostralegus*) breeding at a coastal site. Download it below and save it to your `BI3010/data/` folder.
+The dataset for this workshop comes from a seed-germination experiment in the model plant *Arabidopsis thaliana*. Freshly harvested seeds are often **dormant**: they will not germinate even in good conditions until dormancy is broken, usually by a spell of cold (winter). The gene *DOG1* (*DELAY OF GERMINATION 1*) is a key regulator of this dormancy. The experiment compares wild-type seeds (`WT`) with a `dog1` loss-of-function mutant, each given either a warm or a cold pre-treatment, to ask how genotype and cold interact to control germination. Download the data below and save it to your `BI3010/data/` folder.
 
 ```{r, echo=FALSE, results='asis'}
-cat(make_download_btn("Data/oystercatcher.txt"))
+cat(make_download_btn("Data/germination.txt"))
 ```
 
-Each row is one breeding pair in one season. The variables are:
+Each row is one seed. The variables are:
 
-- `success`: whether the pair fledged at least one chick that season (1 = yes, 0 = no).
-- `territory_quality`: a continuous index of territory quality, scored from 1 (poor) to 10 (excellent) based on food availability and nest-site safety.
-- `experience`: whether the pair were first-time breeders (`"First"`) or had bred at least once before (`"Experienced"`).
+- `germinated`: whether the seed germinated within the test window (1 = yes, 0 = no).
+- `seed_mass`: the mass of the seed in micrograms (µg), a continuous measure of seed provisioning; heavier seeds tend to germinate more readily.
+- `genotype`: whether the seed was wild-type (`"WT"`) or the dormancy mutant (`"dog1"`).
+- `stratification`: whether the seed received a warm pre-treatment (`"Warm"`) or a cold, dormancy-breaking pre-treatment (`"Cold"`).
 
-The research question is predictive: which combinations of territory quality and breeding experience are associated with higher or lower probability of breeding success?
+The research question is predictive: how do seed mass, genotype, and cold stratification combine to determine the probability that a seed germinates — and does the effect of cold differ between the two genotypes?
 
 Load the data:
 
 ```{r, eval=FALSE}
-oystercatcher <- read.table("Data/oystercatcher.txt", header = TRUE)
-oystercatcher$experience <- factor(oystercatcher$experience,
-                                   levels = c("First", "Experienced"))
+germination <- read.table("Data/germination.txt", header = TRUE)
+germination$genotype <- factor(germination$genotype,
+                               levels = c("WT", "dog1"))
+germination$stratification <- factor(germination$stratification,
+                                     levels = c("Warm", "Cold"))
 ```
 
-The second line sets the factor levels explicitly so that `"First"` is the reference (baseline) category in the model. This means the intercept will represent first-time breeders, and any `experience` coefficient will represent the difference for experienced breeders relative to first-time breeders.
+The last two lines set the factor levels explicitly so that `"WT"` and `"Warm"` are the reference (baseline) categories. This means the intercept will represent a warm-treated wild-type seed, the `genotype` coefficient will represent the difference for the `dog1` mutant, and the `stratification` coefficient will represent the difference for cold treatment, each relative to that baseline.
 
 ## 2. Perform exploratory data analysis
 
-The response variable is binary, so some of the usual EDA tools behave a bit differently. `geom_histogram()` on a 0/1 variable produces a two-bar chart (not very illuminating, but fine for checking the split between successes and failures). `table()` gives counts; `mean()` gives the proportion of successes.
+The response variable is binary, so some of the usual EDA tools behave a bit differently. `geom_histogram()` on a 0/1 variable produces a two-bar chart (not very illuminating, but fine for checking the split between germinated and not). `table()` gives counts; `mean()` gives the proportion that germinated.
 
 ```{r, eval=FALSE}
-str(oystercatcher)
-summary(oystercatcher)
-table(oystercatcher$success)
-mean(oystercatcher$success)   # overall success rate
+str(germination)
+summary(germination)
+table(germination$germinated)
+mean(germination$germinated)   # overall germination rate
 ```
 
 ```{r, eval=FALSE}
-table(oystercatcher$experience, oystercatcher$success)
+table(germination$genotype, germination$germinated)
+table(germination$stratification, germination$germinated)
 ```
 
 A raw scatter plot of 0s and 1s is deeply unhelpful: every point sits on one of two horizontal lines and you get no sense of how the data are distributed. Adding a small amount of vertical jitter helps enormously:
 
 ```{r, eval=FALSE}
-ggplot(oystercatcher, aes(x = territory_quality, y = success)) +
+ggplot(germination, aes(x = seed_mass, y = germinated)) +
   geom_jitter(height = 0.05, alpha = 0.4) +
-  labs(x = "Territory quality", y = "Breeding success (0/1)") +
+  labs(x = "Seed mass (µg)", y = "Germinated (0/1)") +
   theme_minimal()
 ```
 
+Because the research question is really about how cold interacts with genotype, the most useful EDA plot shows the germination rate for each genotype under each treatment. If the effect of cold is larger for one genotype than the other, the two lines won't be parallel — that non-parallelism is the visual signature of an interaction:
+
 ```{r, eval=FALSE}
-ggplot(oystercatcher, aes(x = experience, y = success)) +
-  geom_bar(stat = "summary", fun = "mean") +
-  labs(x = "Breeding experience", y = "Proportion successful") +
+ggplot(germination, aes(x = stratification, y = germinated,
+                        colour = genotype, group = genotype)) +
+  geom_point(stat = "summary", fun = "mean", size = 3) +
+  geom_line(stat = "summary", fun = "mean") +
+  labs(x = "Stratification", y = "Proportion germinated", colour = "Genotype") +
   theme_minimal()
 ```
 
 ## 3. Identify hidden assumptions
 
-The usual hidden assumptions apply: validity (does `success` capture what we mean by breeding success?), representativeness (does this population generalise to oystercatchers elsewhere?), and independence (each pair must be a separate, independent observation; pairs sharing a territory or the same individual appearing across years would violate this).
+The usual hidden assumptions apply: validity (does `germinated` capture what we mean — a seed that produces a viable seedling, not just a burst seed coat?), representativeness (do these lab-grown seeds generalise to field conditions?), and independence (each seed must be a separate, independent observation; seeds from the same maternal plant or the same Petri dish may be more alike than independent seeds, which would violate this).
 
-Dispersion isn't a concern for Bernoulli GLMs. The variance of a Bernoulli outcome is p(1 − p), which is completely determined by p, the probability of success. There's no free dispersion parameter to estimate or check.
+Dispersion isn't a concern for Bernoulli GLMs. The variance of a Bernoulli outcome is p(1 − p), which is completely determined by p, the probability of germination. There's no free dispersion parameter to estimate or check.
 
 ## 4. Fit an appropriate model
 
 ### Why not use a linear model?
 
-The response variable `success` can only be 0 or 1. A Normal linear model fitted to binary data has two problems. First, it will happily predict values below 0 and above 1, and you can't have a probability of −0.2 or 1.3. Second, the spread of 0/1 residuals is largest when p ≈ 0.5 and shrinks near 0 or 1, so the equal variance of errors assumption is violated by design. The linear model will run without complaint. It's just wrong.
+The response variable `germinated` can only be 0 or 1. A Normal linear model fitted to binary data has two problems. First, it will happily predict values below 0 and above 1, and you can't have a probability of −0.2 or 1.3. Second, the spread of 0/1 residuals is largest when p ≈ 0.5 and shrinks near 0 or 1, so the equal variance of errors assumption is violated by design. The linear model will run without complaint. It's just wrong.
 
 <div class="question-block">
-<p><strong>Question 1.</strong> If you fitted <code>lm(success ~ territory_quality, data = oystercatcher)</code>, which of the following would be a problem?</p>
+<p><strong>Question 1.</strong> If you fitted <code>lm(germinated ~ seed_mass, data = germination)</code>, which of the following would be a problem?</p>
 <div class="mc-options">
   <label><input type="radio" name="w10-q1" data-correct="false"> The linear model cannot handle a continuous predictor when the response is binary.</label>
   <label><input type="radio" name="w10-q1" data-correct="false"> The linear model would refuse to run and return an error.</label>
@@ -421,7 +473,7 @@ The response variable `success` can only be 0 or 1. A Normal linear model fitted
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>The linear model will run without error and produce coefficient estimates, but its predictions for territory quality at the extremes of the range will fall outside [0, 1]. For example, a predicted success probability of 1.3 or −0.2 has no meaning. The model also assumes equal spread of errors at all fitted values, but for a binary response the spread depends on the probability itself: it's largest when p ≈ 0.5 and smallest near p = 0 or p = 1. Both problems disappear when we use a GLM with the logit link.</p>
+<p>The linear model will run without error and produce coefficient estimates, but its predictions for seed mass at the extremes of the range will fall outside [0, 1]. For example, a predicted germination probability of 1.3 or −0.2 has no meaning. The model also assumes equal spread of errors at all fitted values, but for a binary response the spread depends on the probability itself: it's largest when p ≈ 0.5 and smallest near p = 0 or p = 1. Both problems disappear when we use a GLM with the logit link.</p>
 </div>
 </div>
 
@@ -429,13 +481,13 @@ The response variable `success` can only be 0 or 1. A Normal linear model fitted
 
 The Bernoulli distribution models a single binary trial: each observation is either 0 or 1, with probability p of being 1. The model for the distributional assumption is:
 
-$$success_i \sim Bernoulli(p_i)$$
+$$germinated_i \sim Bernoulli(p_i)$$
 
-where $p_i$ is the probability of breeding success for pair $i$.
+where $p_i$ is the probability that seed $i$ germinates.
 
 The logit link connects the linear predictor to $p_i$ by transforming probabilities to log-odds:
 
-$$logit(p_i) = \log\!\left(\frac{p_i}{1-p_i}\right) = \beta_0 + \beta_1 \times quality_i$$
+$$logit(p_i) = \log\!\left(\frac{p_i}{1-p_i}\right) = \beta_0 + \beta_1 \times seedmass_i$$
 
 Log-odds can range from $-\infty$ to $+\infty$, so they work as a linear predictor without risk of predictions outside [0, 1]. To get predicted probabilities from the log-odds, we apply `plogis()`.
 
@@ -455,35 +507,36 @@ Log-odds can range from $-\infty$ to $+\infty$, so they work as a linear predict
 
 ### Fitting the model
 
-In R, a Bernoulli GLM uses `family = binomial(link = "logit")`. The family name is `binomial` rather than `bernoulli` because Bernoulli is actually a special case of the Binomial (one trial per observation), and R covers both with the same family. As always, fitting the model is the easiest part. Start with `territory_quality` as the only predictor:
+In R, a Bernoulli GLM uses `family = binomial(link = "logit")`. The family name is `binomial` rather than `bernoulli` because Bernoulli is actually a special case of the Binomial (one trial per observation), and R covers both with the same family. As always, fitting the model is the easiest part. Start with `seed_mass` as the only predictor:
 
 ```{r, eval=FALSE}
-success_mod <- glm(success ~ territory_quality,
-                   family = binomial(link = "logit"),
-                   data = oystercatcher)
+germ_mod <- glm(germinated ~ seed_mass,
+                family = binomial(link = "logit"),
+                data = germination)
 ```
 
 ## 5. Diagnose the model and check assumptions
 
 ```{r, eval=FALSE}
 par(mfrow = c(2, 2))
-plot(success_mod)
+plot(germ_mod)
 par(mfrow = c(1, 1))
 ```
 
-The residual plots for a Bernoulli GLM look different from those of a linear model or Poisson GLM. Because each observation is either 0 or 1, the raw residuals cluster into two distinct bands in the residuals vs fitted plot: one band for observations where `success = 1` and one for where `success = 0`. This two-banded appearance is expected and doesn't indicate a problem.
+The residual plots for a Bernoulli GLM look different from those of a linear model or Poisson GLM. Because each observation is either 0 or 1, the raw residuals cluster into two distinct bands in the residuals vs fitted plot: one band for seeds that germinated (`germinated = 1`) and one for seeds that didn't (`germinated = 0`). This two-banded appearance is expected and doesn't indicate a problem.
 
 <div class="question-block">
 <p><strong>Question 3.</strong> You notice the residuals vs fitted plot shows two distinct bands of points rather than a single cloud. What does this mean?</p>
 <div class="mc-options">
   <label><input type="radio" name="w10-q3" data-correct="false"> The model has failed to converge and the estimates are unreliable.</label>
   <label><input type="radio" name="w10-q3" data-correct="false"> There are two separate subgroups in the data that should be modelled separately.</label>
-  <label><input type="radio" name="w10-q3" data-correct="true"> This is expected for a binary response. The two bands are the residuals from observations where success = 1 and success = 0. It does not indicate a violation of assumptions.</label>
+  <label><input type="radio" name="w10-q3" data-correct="true"> This is expected for a binary response. The two bands are the residuals from seeds that germinated (1) and those that did not (0). It does not indicate a violation of assumptions.</label>
   <label><input type="radio" name="w10-q3" data-correct="false"> The equal variance of errors assumption is violated and the model should be refitted with a transformation.</label>
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>Think of it this way: every observation is exactly 0 or 1. There's nowhere else for the points to go. The two bands are the residuals from the successes (1s) and failures (0s), not a sign of trouble, just an unavoidable consequence of a binary response. What you're looking for is a systematic trend <em>within</em> each band. A curve or funnel inside the bands is a concern. Two flat parallel bands with no internal pattern is fine.</p>
+<p>Think of it this way: every observation is exactly 0 or 1. There's nowhere else for the points to go. The two bands are the residuals from the germinated seeds (1s) and the non-germinated seeds (0s), not a sign of trouble, just an unavoidable consequence of a binary response. What you're looking for is a systematic trend <em>within</em> each band. A curve or funnel inside the bands is a concern. Two flat parallel bands with no internal pattern is fine.</p>
+<p>This two-banded plot is honestly not much use for spotting real problems, which is exactly why we'll turn to a better diagnostic (binned residuals) below.</p>
 </div>
 </div>
 
@@ -515,28 +568,59 @@ The residual plots for a Bernoulli GLM look different from those of a linear mod
 </div>
 </div>
 
+### Better diagnostics with `performance`
+
+The two-banded base plot is honest but hard to read: with every point pinned to 0 or 1, a real problem is easy to miss. Back in Workshop 4 we met the `performance` package and its `check_model()` function for prettier, better-labelled diagnostics. It's even more useful here, because for a Bernoulli GLM it automatically swaps in diagnostics designed for binary data:
+
+```{r, eval=FALSE}
+install.packages(c("performance", "see"))  # Run once
+library(performance)
+check_model(germ_mod)
+```
+
+Two panels matter most:
+
+- **Binned residuals.** This is the fix for the two-banded plot. Instead of plotting all 200 individual 0/1 residuals, `check_model()` sorts the seeds by their fitted probability, groups them into bins, and plots the *average* residual of each bin against the average fitted value. Averaging cancels the 0/1 noise, so any systematic trend the raw plot hid becomes visible. The grey band is an approximate error bound: if the model fits, most points fall inside it, scattered around zero with no slope. A run of points drifting above or below zero, or a clear curve, would signal that the relationship with the predictor isn't quite right (for example, non-linearity on the log-odds scale).
+- **Posterior predictive check.** `check_model()` uses the fitted model to simulate many fake datasets and overlays them on the observed data. If the model is reasonable, the simulated proportion of 1s and 0s should look like the real split.
+
+As in Workshop 4, each panel prints guidance text describing what a passing plot looks like. Read it in context: not every assumption is equally important, and minor wobbles in real data are normal.
+
+<div class="question-block">
+<p><strong>Question 6.</strong> On the binned residuals plot for <code>germ_mod</code>, almost all the points fall inside the grey error bounds and scatter around zero with no obvious slope. What should you conclude?</p>
+<div class="mc-options">
+  <label><input type="radio" name="w10-q6" data-correct="false"> The two-banded pattern has been hidden, so this plot is less trustworthy than the base residuals vs fitted plot.</label>
+  <label><input type="radio" name="w10-q6" data-correct="true"> The model fits acceptably: binning has removed the 0/1 noise, and with points inside the bounds and no systematic trend there is no sign of misfit with seed mass.</label>
+  <label><input type="radio" name="w10-q6" data-correct="false"> The seeds should be re-binned until every point lies exactly on the zero line.</label>
+  <label><input type="radio" name="w10-q6" data-correct="false"> Points inside the bounds indicate overdispersion, which must now be corrected.</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Points scattered inside the error bounds with no slope is exactly what a well-fitting Bernoulli GLM looks like. Binning is what makes this readable: it averages away the 0/1 noise that produced the two useless bands, leaving a plot in which a genuine problem (a curve, or a run of points drifting off zero) would actually show up. Here nothing does, so seed mass enters the model on a sensible scale. And overdispersion still doesn't apply — points inside the bounds are a good sign, not a dispersion diagnostic.</p>
+</div>
+</div>
+
 ## 6. Summarise the results
 
 ```{r, eval=FALSE}
-summary(success_mod)
+summary(germ_mod)
 ```
 
 The coefficient table gives estimates on the log-odds scale. From the output, the fitted equation is approximately:
 
-$$logit(\hat{p}_i) = -2.14 + 0.44 \times quality_i$$
+$$logit(\hat{p}_i) = -1.63 + 0.089 \times seedmass_i$$
 
 ### Predictions on the log-odds scale
 
-Substitute a value of `territory_quality` directly into the equation to get the predicted log-odds.
+Substitute a value of `seed_mass` directly into the equation to get the predicted log-odds.
 
 <div class="question-block">
-<p><strong>Question 6.</strong> What is the predicted log-odds of success for a pair on a territory with quality = 4? And for quality = 8?</p>
+<p><strong>Question 7.</strong> What is the predicted log-odds of germination for a seed of mass 20 µg? And for a seed of mass 30 µg?</p>
 <textarea class="student-answer" rows="4" placeholder="Show your working for both values..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<pre><code>-2.14 + 0.44 * 4   # = -0.38  (quality = 4)
--2.14 + 0.44 * 8   # =  1.38  (quality = 8)</code></pre>
-<p>A log-odds of −0.38 is below zero, so the probability of success is below 0.5. A log-odds of +1.38 is above zero, so the probability is above 0.5. To get exact probabilities, back-transform with <code>plogis()</code>.</p>
+<pre><code>-1.63 + 0.089 * 20   # =  0.15  (seed_mass = 20)
+-1.63 + 0.089 * 30   # =  1.04  (seed_mass = 30)</code></pre>
+<p>A log-odds of +0.15 is just above zero, so the probability of germination is just above 0.5. A log-odds of +1.04 is well above zero, so the probability is clearly above 0.5. To get exact probabilities, back-transform with <code>plogis()</code>.</p>
 </div>
 </div>
 
@@ -545,16 +629,16 @@ Substitute a value of `territory_quality` directly into the equation to get the 
 To convert log-odds to a probability, use `plogis()`. You can also work it out from the definition: p = exp(log-odds) / (1 + exp(log-odds)).
 
 <div class="question-block">
-<p><strong>Question 7.</strong> Using <code>plogis()</code>, convert your log-odds predictions from Question 6 to probabilities. At what territory quality does the model predict a 50% chance of success?</p>
+<p><strong>Question 8.</strong> Using <code>plogis()</code>, convert your log-odds predictions from Question 7 to probabilities. At what seed mass does the model predict a 50% chance of germination?</p>
 <textarea class="student-answer" rows="5" placeholder="Back-transform both log-odds values and solve for the 50% threshold..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<pre><code>plogis(-0.38)   # ≈ 0.41  (quality = 4: 41% chance of success)
-plogis( 1.38)   # ≈ 0.80  (quality = 8: 80% chance of success)</code></pre>
-<p>For a 50% chance of success, we need the log-odds to equal 0:</p>
-<pre><code>-2.14 + 0.44 * quality = 0
-quality = 2.14 / 0.44 ≈ 4.9</code></pre>
-<p>The model predicts that a territory quality of around 4.9 gives a 50% probability of success. Below that the odds favour failure; above it they favour success.</p>
+<pre><code>plogis(0.15)   # ≈ 0.54  (seed_mass = 20: 54% chance of germination)
+plogis(1.04)   # ≈ 0.74  (seed_mass = 30: 74% chance of germination)</code></pre>
+<p>For a 50% chance of germination, we need the log-odds to equal 0:</p>
+<pre><code>-1.63 + 0.089 * seed_mass = 0
+seed_mass = 1.63 / 0.089 ≈ 18.3</code></pre>
+<p>The model predicts that a seed mass of around 18.3 µg gives a 50% probability of germination. Below that the odds favour no germination; above it they favour germination.</p>
 </div>
 </div>
 
@@ -563,150 +647,160 @@ quality = 2.14 / 0.44 ≈ 4.9</code></pre>
 Create a fake dataset, generate predictions on the log-odds scale, then back-transform with `plogis()` to get predicted probabilities and confidence interval limits:
 
 ```{r, eval=FALSE}
-fake <- data.frame(territory_quality = seq(from = min(oystercatcher$territory_quality),
-                                           to   = max(oystercatcher$territory_quality),
-                                           length.out = 50))
+fake <- data.frame(seed_mass = seq(from = min(germination$seed_mass),
+                                   to   = max(germination$seed_mass),
+                                   length.out = 50))
 
-preds       <- predict(success_mod, newdata = fake, se.fit = TRUE)
+preds       <- predict(germ_mod, newdata = fake, se.fit = TRUE)
 fake$fit    <- plogis(preds$fit)
 fake$low    <- plogis(preds$fit - 1.96 * preds$se.fit)
 fake$upp    <- plogis(preds$fit + 1.96 * preds$se.fit)
 ```
 
 <div class="question-block">
-<p><strong>Question 8.</strong> Using the <code>fake</code> dataset, create a figure showing predicted probability of success against territory quality, with a 95% confidence band. Add the raw data points using <code>geom_jitter()</code>.</p>
+<p><strong>Question 9.</strong> Using the <code>fake</code> dataset, create a figure showing predicted probability of germination against seed mass, with a 95% confidence band. Add the raw data points using <code>geom_jitter()</code>.</p>
 <textarea class="student-answer" rows="6" placeholder="Write your ggplot2 code here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 <pre><code>ggplot() +
   geom_ribbon(data = fake,
-              aes(x = territory_quality, ymin = low, ymax = upp),
+              aes(x = seed_mass, ymin = low, ymax = upp),
               fill = "grey80") +
   geom_line(data = fake,
-            aes(x = territory_quality, y = fit)) +
-  geom_jitter(data = oystercatcher,
-              aes(x = territory_quality, y = success),
+            aes(x = seed_mass, y = fit)) +
+  geom_jitter(data = germination,
+              aes(x = seed_mass, y = germinated),
               height = 0.03, alpha = 0.35) +
-  labs(x = "Territory quality",
-       y = "Probability of breeding success") +
+  labs(x = "Seed mass (µg)",
+       y = "Probability of germination") +
   theme_minimal()</code></pre>
-<p>The result is an S-shaped (logistic) curve: probability rises steeply across the middle of the quality range and flattens out near 0 and 1. The S-shape is a direct consequence of the logit link, and it ensures predictions stay within [0, 1] across the entire range of territory quality.</p>
+<p>The result is a gently S-shaped (logistic) curve: probability rises across the mass range while staying within [0, 1] at both ends. The S-shape is a direct consequence of the logit link. Because seed mass is only a modest predictor on its own, the rise here is gradual rather than steep — most of the action, as we'll see next, is in genotype and stratification.</p>
 </div>
 </div>
 
 ## 7. Interpret and draw conclusions
 
-The model predicts that breeding success increases with territory quality. The positive slope means that each additional unit of territory quality increases the log-odds of success by approximately 0.44. On the probability scale, the relationship isn't linear: an increase from quality 2 to quality 3 has a smaller effect than an increase from quality 5 to quality 6 (where the curve is steepest).
+The model predicts that germination probability increases with seed mass. The positive slope means that each additional microgram of seed mass increases the log-odds of germination by approximately 0.089. On the probability scale the relationship isn't linear, but seed mass alone is a fairly weak predictor: it nudges the probability rather than driving it. The real drivers are the ones we've ignored so far — genotype and cold stratification — so let's add them.
 
-# Adding breeding experience
+# Adding genotype and stratification
 
-So far we have only included `territory_quality`. The research question also asks about `experience`. Add it to the model:
+The research question isn't really about seed mass; it's about how **genotype** and **cold stratification** combine to control germination, and specifically whether cold matters more for one genotype than the other. That "whether the effect of one predictor depends on another" is exactly what an **interaction** captures. We fit it with `*`, which adds both main effects *and* their interaction, while keeping `seed_mass` as a separate additive term:
 
 ```{r, eval=FALSE}
-success_mod2 <- glm(success ~ territory_quality + experience,
-                    family = binomial(link = "logit"),
-                    data = oystercatcher)
+germ_mod2 <- glm(germinated ~ seed_mass + genotype * stratification,
+                 family = binomial(link = "logit"),
+                 data = germination)
 ```
+
+Writing `genotype * stratification` is shorthand for `genotype + stratification + genotype:stratification`. The `seed_mass` term sits outside the interaction: it has one slope that applies to every seed, which is what we mean by a "separate continuous effect."
 
 ## Diagnose the new model
 
 ```{r, eval=FALSE}
 par(mfrow = c(2, 2))
-plot(success_mod2)
+plot(germ_mod2)
 par(mfrow = c(1, 1))
+
+library(performance)
+check_model(germ_mod2)
 ```
 
-The diagnostic plots should look similar to the first model: two-banded residuals are still expected, and the Q-Q plot is still uninformative. Check the residuals vs leverage plot for any influential observations.
+The diagnostics should look similar to the first model: two-banded base residuals are still expected, the Q-Q plot is still uninformative, and the binned residuals should sit inside their bounds. One new panel appears in `check_model()` output: a **Collinearity** check. Because the model now contains an interaction, you may see high collinearity flagged for the terms involved in it. This is expected and not a problem: interaction terms are built from their main effects, so they're correlated with them by construction. It's only worth worrying about when two *separate* predictors are highly collinear.
 
 ## Summarise and interpret
 
 ```{r, eval=FALSE}
-summary(success_mod2)
+summary(germ_mod2)
 ```
 
+From the output, the fitted equation on the log-odds scale is approximately:
+
+$$logit(\hat{p}_i) = -4.43 + 0.11 \times seedmass_i + 2.71 \times dog1_i + 4.08 \times Cold_i - 2.46 \times (dog1_i \times Cold_i)$$
+
+where `dog1` and `Cold` are 1 when the seed is the mutant genotype and cold-treated respectively, and 0 otherwise.
+
 <div class="question-block">
-<p><strong>Question 9.</strong> The <code>experienceExperienced</code> coefficient is approximately +2.0. What does this mean?</p>
+<p><strong>Question 10.</strong> The <code>stratificationCold</code> coefficient is about +4.08 and the interaction <code>genotypedog1:stratificationCold</code> is about −2.46. What does the interaction term tell you?</p>
 <div class="mc-options">
-  <label><input type="radio" name="w10-q9" data-correct="false"> Experienced breeders have a 2.0 percentage point higher success rate than first-time breeders.</label>
-  <label><input type="radio" name="w10-q9" data-correct="false"> Experienced breeders succeed on 2.0 more occasions per season than first-time breeders.</label>
-  <label><input type="radio" name="w10-q9" data-correct="true"> Holding territory quality constant, experienced breeders have a log-odds of success that is 2.0 higher than first-time breeders. This corresponds to multiplying the odds of success by exp(2.0) ≈ 7.4: experienced breeders have roughly 7.4 times the odds of success compared to first-time breeders at the same territory quality.</label>
-  <label><input type="radio" name="w10-q9" data-correct="false"> The effect of territory quality on success is 2.0 times stronger for experienced breeders than for first-time breeders.</label>
+  <label><input type="radio" name="w10-q10" data-correct="false"> Cold stratification reduces germination in <code>dog1</code> seeds, because the interaction coefficient is negative.</label>
+  <label><input type="radio" name="w10-q10" data-correct="true"> The boost from cold is much smaller for <code>dog1</code> than for WT. Cold adds +4.08 to the log-odds of germination in WT but only 4.08 − 2.46 = +1.62 in <code>dog1</code>; in odds terms cold multiplies the odds by ~59 in WT but only ~5 in <code>dog1</code>.</label>
+  <label><input type="radio" name="w10-q10" data-correct="false"> <code>dog1</code> seeds are 2.46 times less likely to germinate than WT seeds overall.</label>
+  <label><input type="radio" name="w10-q10" data-correct="false"> Seed mass has a weaker effect on germination in <code>dog1</code> seeds than in WT seeds.</label>
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>On the log-odds scale, the coefficient is the difference in log-odds between the two groups, holding all other predictors constant. To make this more intuitive, exponentiate it: exp(2.0) ≈ 7.4. Experienced breeders have roughly 7.4 times the <em>odds</em> of success compared to first-time breeders on the same territory. This doesn't mean they are 7.4 times more likely to succeed. Odds and probability aren't the same thing. People confuse them constantly, including in peer-reviewed papers. Don't be one of them.</p>
+<p>The interaction coefficient modifies the effect of cold depending on genotype. For WT (the reference), cold adds +4.08 to the log-odds. For <code>dog1</code>, cold adds 4.08 + (−2.46) = +1.62. Exponentiating: cold multiplies the odds of germination by exp(4.08) ≈ 59 in WT but only exp(1.62) ≈ 5 in <code>dog1</code>. Note cold is still <em>positive</em> for <code>dog1</code> — it just does far less. That makes biological sense: the <code>dog1</code> mutant has lost dormancy, so its seeds germinate readily even when warm and cold has little left to add. This is a gene × environment interaction: the effect of the environment (cold) depends on the genotype.</p>
 </div>
 </div>
 
 <div class="question-block">
-<p><strong>Question 10.</strong> Using your fitted equation from <code>success_mod2</code>, calculate the predicted probability of success for a first-time breeding pair on a territory with quality = 5, and for an experienced pair on the same territory.</p>
-<textarea class="student-answer" rows="6" placeholder="Write the log-odds for each, then apply plogis()..."></textarea>
+<p><strong>Question 11.</strong> Using the fitted equation from <code>germ_mod2</code>, calculate the predicted probability of germination at seed mass = 25 µg for all four genotype × treatment combinations.</p>
+<textarea class="student-answer" rows="6" placeholder="Write the log-odds for each of the four cells, then apply plogis()..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>With approximate coefficients: intercept ≈ −3.5, territory_quality ≈ 0.5, experienceExperienced ≈ 2.0.</p>
-<pre><code># First-time breeder, quality = 5
-log_odds_first <- -3.5 + 0.5 * 5 + 0
-plogis(log_odds_first)   # plogis(-1.0) ≈ 0.27
-
-# Experienced breeder, quality = 5
-log_odds_exp <- -3.5 + 0.5 * 5 + 2.0
-plogis(log_odds_exp)     # plogis(1.0) ≈ 0.73</code></pre>
-<p>At the same territory quality of 5, first-time breeders have a predicted success probability of about 27%, while experienced breeders have about 73%. The difference is large in probability terms even though the log-odds difference is the fixed value of 2.0 regardless of quality.</p>
+<p>Start from the base term for a warm WT seed at 25 µg: −4.43 + 0.11 × 25 = −1.68. Then add the relevant coefficients:</p>
+<pre><code>plogis(-1.68)                  # WT,   Warm ≈ 0.16
+plogis(-1.68 + 4.08)           # WT,   Cold ≈ 0.92
+plogis(-1.68 + 2.71)           # dog1, Warm ≈ 0.74
+plogis(-1.68 + 2.71 + 4.08 - 2.46)  # dog1, Cold ≈ 0.93</code></pre>
+<p>Cold is transformative for WT (0.16 → 0.92) but barely moves <code>dog1</code> (0.74 → 0.93). That gap between the two genotypes' response to cold <em>is</em> the interaction, now expressed as probabilities. Notice these match the raw cell germination rates you saw in the EDA — a good sign the model is capturing the data.</p>
 </div>
 </div>
 
 ## Plot the model fit
 
-Let's use `ggeffects` and have it do the tedious coding for us. When both predictors are included, `ggpredict()` with `terms = c("territory_quality", "experience")` shows separate probability curves for each experience level:
+Let's use `ggeffects` and have it do the tedious coding for us. With an interaction, pass all three predictors to `ggpredict()`: the first goes on the x-axis, the second becomes coloured curves, and the third splits into panels:
 
 ```{r, eval=FALSE}
 library(ggeffects)
 
-preds2 <- ggpredict(success_mod2, terms = c("territory_quality", "experience"))
+preds2 <- ggpredict(germ_mod2, terms = c("seed_mass", "genotype", "stratification"))
 plot(preds2)
 ```
 
-The two S-curves will be offset from each other: the experienced-breeder curve sits to the left of the first-time-breeder curve, meaning experienced breeders achieve the same probability of success at a lower territory quality.
+You'll get two panels, one per stratification treatment. In the **Warm** panel the WT curve sits far below the `dog1` curve (dormant wild-type vs non-dormant mutant). In the **Cold** panel both curves are high and close together. That change — a big genotype gap under warm conditions that nearly closes under cold — is the visual signature of the interaction.
 
-# A new challenger: antimicrobial peptides
+# A new challenger: amphibian chytrid infection
 
-If time allows, work through the following dataset. It comes from an in vitro study testing whether a novel antimicrobial peptide (AMP) can clear *Staphylococcus aureus* infections in a cell-culture model. AMPs are short proteins produced by the immune system that disrupt bacterial membranes. There is a lot of interest in them as alternatives to conventional antibiotics, partly because bacteria evolve resistance to them more slowly. Download the data below and save it to your `BI3010/data/` folder.
+If time allows, work through the following dataset. It comes from a field study of chytridiomycosis, a disease caused by the fungus *Batrachochytrium dendrobatidis* (Bd) that has driven amphibian declines worldwide. Researchers swabbed frogs at a set of ponds and tested each for Bd infection, recording the water temperature at capture and whether the pond was permanent or temporary (temporary ponds dry out seasonally, which interrupts the fungus's life cycle). Download the data below and save it to your `BI3010/data/` folder.
 
 ```{r, echo=FALSE, results='asis'}
-cat(make_download_btn("Data/amp.txt"))
+cat(make_download_btn("Data/chytrid.txt"))
 ```
 
-The dataset contains 160 experimental replicates. Each row is one replicate, with the following variables:
+The dataset contains 170 swabbed frogs. Each row is one frog, with the following variables:
 
-- `cleared`: whether the *S. aureus* infection was eliminated within 24 hours (1 = yes, 0 = no).
-- `peptide_conc`: concentration of the AMP applied, in µM (continuous, 1 to 20).
-- `strain`: whether the bacterial strain was susceptible to the peptide or carried an efflux pump gene associated with reduced AMP uptake (`"Susceptible"` / `"Resistant"`).
+- `infected`: whether the frog tested positive for Bd (1 = yes, 0 = no).
+- `water_temp`: water temperature at the capture site, in °C (continuous, 12 to 24). Bd grows best in cool water and is inhibited when it warms up.
+- `pond_type`: whether the frog was caught at a `"Permanent"` pond or a `"Temporary"` one.
 
-The research question is predictive: which combinations of peptide concentration and strain type are associated with a higher probability of clearing the infection?
+The research question is predictive: how are water temperature and pond type associated with the probability that a frog is infected with Bd?
 
 ```{r, eval=FALSE}
-amp <- read.table("Data/amp.txt", header = TRUE)
-amp$strain <- factor(amp$strain, levels = c("Susceptible", "Resistant"))
+chytrid <- read.table("Data/chytrid.txt", header = TRUE)
+chytrid$pond_type <- factor(chytrid$pond_type, levels = c("Temporary", "Permanent"))
 ```
 
-Go through the full seven-step workflow. A few things to keep in mind:
+This dataset has the simpler additive shape (one continuous predictor plus one two-level factor, no interaction), so a model like `infected ~ water_temp + pond_type` is a sensible place to start. Go through the full seven-step workflow. A few things to keep in mind:
 
-1. The response is binary, so use jitter plots rather than raw scatter plots to visualise it. `mean(amp$cleared)` gives the overall clearance rate; `tapply(amp$cleared, amp$strain, mean)` gives it separately by strain.
+1. The response is binary, so use jitter plots rather than raw scatter plots to visualise it. `mean(chytrid$infected)` gives the overall infection rate; `tapply(chytrid$infected, chytrid$pond_type, mean)` gives it separately by pond type.
 
-2. Think carefully about hidden assumptions. The `cleared` variable is a binary endpoint measured at 24 hours: what does that assume about the clearance process? Are there any representativeness concerns about using a cell-culture model to draw conclusions about clinical use?
+2. Diagnose the model with both `plot()` and `check_model()`. The binned residuals plot is again the one to focus on; there is no interaction here, so don't expect a collinearity warning.
 
-3. Use `plogis()` to back-transform any predictions from the log-odds scale to the probability scale.
+3. Think carefully about hidden assumptions. A single swab is an imperfect test: what does a negative result actually guarantee? And is water temperature at the moment of capture a good stand-in for the conditions the fungus experienced?
+
+4. Use `plogis()` to back-transform any predictions from the log-odds scale to the probability scale.
 
 ```{r, eval=FALSE}
 ```
 
 <div class="question-block">
-<p><strong>Question 11.</strong> After completing your AMP analysis, summarise your main findings. How does peptide concentration affect the probability of clearing the infection, and does this differ between susceptible and resistant strains?</p>
+<p><strong>Question 12.</strong> After completing your chytrid analysis, summarise your main findings. How do water temperature and pond type affect the probability of infection?</p>
 <textarea class="student-answer" rows="6" placeholder="Describe the direction and size of each effect in plain language. Back-transform at least one prediction to the probability scale to support your answer..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>Higher peptide concentrations are associated with a higher probability of clearing the infection: the <code>peptide_conc</code> coefficient is positive on the log-odds scale. Exponentiating it gives the multiplicative change in odds per additional µM of peptide. For susceptible strains, the model predicts roughly 50% clearance probability at around 10 µM (the point where log-odds cross zero). Resistant strains require substantially higher concentrations to achieve the same probability, with the <code>strainResistant</code> coefficient being negative and corresponding to a reduction in the odds of clearance at any given concentration.</p>
-<p>Key hidden assumptions worth flagging: "cleared within 24 hours" is an arbitrary endpoint that may miss slower-acting dynamics, and a cell-culture model excludes host immune responses, pharmacokinetics, and the polymicrobial environment of a real infection. Both concerns are squarely in the validity column of our assumption table.</p>
+<p>Warmer water is associated with a <em>lower</em> probability of infection: the <code>water_temp</code> coefficient is negative on the log-odds scale (about −0.23), consistent with Bd being inhibited at higher temperatures. Frogs at permanent ponds are more likely to be infected than those at temporary ponds: the <code>pond_typePermanent</code> coefficient is positive (about +1.57), which exponentiates to roughly a 4.8-fold increase in the odds of infection. In probability terms, the model predicts a 50% infection risk at around 14 °C at temporary ponds but not until about 21 °C at permanent ponds — permanent water shifts the whole curve towards higher infection because the fungus is never flushed out by the pond drying.</p>
+<p>Key hidden assumptions worth flagging: a single swab can miss a genuine infection (a negative doesn't guarantee the frog is Bd-free), and a one-off temperature reading may not represent the conditions the fungus actually experienced over the frog's recent history. Both sit in the validity column of our assumption table.</p>
 </div>
 </div>
 
@@ -753,11 +847,11 @@ Two final requests from me (Deon):
 
 | Assumption | Description | Example of violation |
 |---|---|---|
-| 1. Validity | The data can answer the research question. | Counting a nest as successful if it survived to hatching but not checking whether chicks actually fledged. |
-| 2. Representativeness | The sample reflects the population of interest. | Data collected only from pairs on the best territories because those were easiest to monitor. |
-| 3. Additivity | The effects of territory quality and experience are independent and additive on the log-odds scale. | If experience matters more on poor territories than on good ones, the two predictors interact. |
-| 4. Linearity | The relationship between each continuous predictor and the log-odds of success is linear. | Success probability rising quickly at low quality then levelling off, rather than following the logistic form. |
-| 5. Independence of errors | Each observation is an independent breeding attempt. | The same individual appearing in multiple years without this being accounted for. |
+| 1. Validity | The data can answer the research question. | Scoring a burst seed coat as "germinated" without checking that a viable seedling actually emerged. |
+| 2. Representativeness | The sample reflects the population of interest. | Testing only large, well-filled seeds because they were easiest to handle, then generalising to all seeds. |
+| 3. Additivity | Effects are additive on the log-odds scale unless an interaction is fitted. Here we deliberately relax this: `genotype * stratification` lets the effect of cold differ between genotypes. | Leaving out the interaction when cold genuinely helps WT far more than `dog1`, forcing both genotypes to share one cold effect. |
+| 4. Linearity | The relationship between each continuous predictor (seed mass) and the log-odds of germination is linear. Checked with the binned residuals plot. | Binned residuals curving away from zero, showing seed mass acts non-linearly on the log-odds scale. |
+| 5. Independence of errors | Each seed is an independent observation. | Seeds from the same maternal plant or the same Petri dish being more alike than independent seeds. |
 | 6. Equal variance of errors | Not assumed for Bernoulli GLMs. The variance is p(1 − p), fixed once p is known. | Not applicable: heteroscedasticity is built into the Bernoulli distribution and is not a violation. |
 | 7. Normality of errors | Not assumed for Bernoulli GLMs. | Not applicable: the Q-Q plot is uninformative and should not be used to assess model fit. |
 | 8. Dispersion | Not applicable. The Bernoulli distribution has no free dispersion parameter to check. | Unlike Poisson GLMs, overdispersion cannot occur with a true Bernoulli response. |

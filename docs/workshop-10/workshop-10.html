@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Roos &amp; Pinard">
-<meta name="dcterms.date" content="2026-07-31">
+<meta name="dcterms.date" content="2026-08-09">
 
 <title>Workshop 10: Bernoulli GLMs</title>
 <style>
@@ -2307,7 +2307,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">31 July 2026</p>
+      <p class="date">9 August 2026</p>
     </div>
   </div>
   
@@ -2610,7 +2610,7 @@ margin-top: 0.25rem;
 <li>Describe how the logit link function connects probabilities to log-odds, and convert between the two using <code>plogis()</code>.</li>
 <li>Fit a Bernoulli GLM in R using <code>glm()</code> with <code>family = binomial(link = &quot;logit&quot;)</code>.</li>
 <li>Diagnose a Bernoulli GLM using both the base residual plots and the binned residuals plot from <code>check_model()</code>, and explain why overdispersion is not a concern.</li>
-<li>Interpret model coefficients on the log-odds scale — including an interaction between two categorical predictors alongside a separate continuous effect — and calculate predicted probabilities for specific combinations of predictor values.</li>
+<li>Interpret model coefficients on the log-odds scale, including an interaction between two categorical predictors alongside a separate continuous effect, and calculate predicted probabilities for specific combinations of predictor values.</li>
 </ol>
 </div>
 </div>
@@ -2651,7 +2651,7 @@ margin-top: 0.25rem;
 <li><code>genotype</code>: whether the seed was wild-type (<code>&quot;WT&quot;</code>) or the dormancy mutant (<code>&quot;dog1&quot;</code>).</li>
 <li><code>stratification</code>: whether the seed received a warm pre-treatment (<code>&quot;Warm&quot;</code>) or a cold, dormancy-breaking pre-treatment (<code>&quot;Cold&quot;</code>).</li>
 </ul>
-<p>The research question is predictive: how do seed mass, genotype, and cold stratification combine to determine the probability that a seed germinates — and does the effect of cold differ between the two genotypes?</p>
+<p>The research question is predictive: how do seed mass, genotype, and cold stratification combine to determine the probability that a seed germinates, and does the effect of cold differ between the two genotypes?</p>
 <p>Load the data:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>germination <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;Data/germination.txt&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span>
@@ -2682,7 +2682,7 @@ margin-top: 0.25rem;
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Seed mass (µg)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Germinated (0/1)&quot;</span>) <span class="sc">+</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>Because the research question is really about how cold interacts with genotype, the most useful EDA plot shows the germination rate for each genotype under each treatment. If the effect of cold is larger for one genotype than the other, the two lines won’t be parallel — that non-parallelism is the visual signature of an interaction:</p>
+<p>Because the research question is really about how cold interacts with genotype, the most useful EDA plot shows the germination rate for each genotype under each treatment. If the effect of cold is larger for one genotype than the other, the two lines won’t be parallel; that non-parallelism is the visual signature of an interaction:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(germination, <span class="fu">aes</span>(<span class="at">x =</span> stratification, <span class="at">y =</span> germinated,</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                        <span class="at">colour =</span> genotype, <span class="at">group =</span> genotype)) <span class="sc">+</span></span>
@@ -2694,7 +2694,7 @@ margin-top: 0.25rem;
 </section>
 <section id="identify-hidden-assumptions" class="level2">
 <h2 class="anchored" data-anchor-id="identify-hidden-assumptions">3. Identify hidden assumptions</h2>
-<p>The usual hidden assumptions apply: validity (does <code>germinated</code> capture what we mean — a seed that produces a viable seedling, not just a burst seed coat?), representativeness (do these lab-grown seeds generalise to field conditions?), and independence (each seed must be a separate, independent observation; seeds from the same maternal plant or the same Petri dish may be more alike than independent seeds, which would violate this).</p>
+<p>The usual hidden assumptions apply: validity (does <code>germinated</code> capture what we mean, a seed that produces a viable seedling rather than just a burst seed coat?), representativeness (do these lab-grown seeds generalise to field conditions?), and independence (each seed must be a separate, independent observation; seeds from the same maternal plant or the same Petri dish may be more alike than independent seeds, which would violate this).</p>
 <p>Dispersion isn’t a concern for Bernoulli GLMs. The variance of a Bernoulli outcome is p(1 − p), which is completely determined by p, the probability of germination. There’s no free dispersion parameter to estimate or check.</p>
 </section>
 <section id="fit-an-appropriate-model" class="level2">
@@ -2839,7 +2839,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-Points scattered inside the error bounds with no slope is exactly what a well-fitting Bernoulli GLM looks like. Binning is what makes this readable: it averages away the 0/1 noise that produced the two useless bands, leaving a plot in which a genuine problem (a curve, or a run of points drifting off zero) would actually show up. Here nothing does, so seed mass enters the model on a sensible scale. And overdispersion still doesn’t apply — points inside the bounds are a good sign, not a dispersion diagnostic.
+Points scattered inside the error bounds with no slope is exactly what a well-fitting Bernoulli GLM looks like. Binning is what makes this readable: it averages away the 0/1 noise that produced the two useless bands, leaving a plot in which a genuine problem (a curve, or a run of points drifting off zero) would actually show up. Here nothing does, so seed mass enters the model on a sensible scale. And overdispersion still doesn’t apply; points inside the bounds are a good sign, not a dispersion diagnostic.
 </p>
 </div>
 </div>
@@ -2932,7 +2932,7 @@ Show Answer
        y = &quot;Probability of germination&quot;) +
   theme_minimal()</code></pre>
 <p>
-The result is a gently S-shaped (logistic) curve: probability rises across the mass range while staying within [0, 1] at both ends. The S-shape is a direct consequence of the logit link. Because seed mass is only a modest predictor on its own, the rise here is gradual rather than steep — most of the action, as we’ll see next, is in genotype and stratification.
+The result is a gently S-shaped (logistic) curve: probability rises across the mass range while staying within [0, 1] at both ends. The S-shape is a direct consequence of the logit link. Because seed mass is only a modest predictor on its own, the rise here is gradual rather than steep; most of the action, as we’ll see next, is in genotype and stratification.
 </p>
 </div>
 </div>
@@ -2940,7 +2940,7 @@ The result is a gently S-shaped (logistic) curve: probability rises across the m
 </section>
 <section id="interpret-and-draw-conclusions" class="level2">
 <h2 class="anchored" data-anchor-id="interpret-and-draw-conclusions">7. Interpret and draw conclusions</h2>
-<p>The model predicts that germination probability increases with seed mass. The positive slope means that each additional microgram of seed mass increases the log-odds of germination by approximately 0.089. On the probability scale the relationship isn’t linear, but seed mass alone is a fairly weak predictor: it nudges the probability rather than driving it. The real drivers are the ones we’ve ignored so far — genotype and cold stratification — so let’s add them.</p>
+<p>The model predicts that germination probability increases with seed mass. The positive slope means that each additional microgram of seed mass increases the log-odds of germination by approximately 0.089. On the probability scale the relationship isn’t linear, but seed mass alone is a fairly weak predictor: it nudges the probability rather than driving it. The real drivers are the ones we’ve ignored so far, genotype and cold stratification, so let’s add them.</p>
 </section>
 </section>
 <section id="adding-genotype-and-stratification" class="level1">
@@ -2984,7 +2984,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-The interaction coefficient modifies the effect of cold depending on genotype. For WT (the reference), cold adds +4.08 to the log-odds. For <code>dog1</code>, cold adds 4.08 + (−2.46) = +1.62. Exponentiating: cold multiplies the odds of germination by exp(4.08) ≈ 59 in WT but only exp(1.62) ≈ 5 in <code>dog1</code>. Note cold is still <em>positive</em> for <code>dog1</code> — it just does far less. That makes biological sense: the <code>dog1</code> mutant has lost dormancy, so its seeds germinate readily even when warm and cold has little left to add. This is a gene × environment interaction: the effect of the environment (cold) depends on the genotype.
+The interaction coefficient modifies the effect of cold depending on genotype. For WT (the reference), cold adds +4.08 to the log-odds. For <code>dog1</code>, cold adds 4.08 + (−2.46) = +1.62. Exponentiating: cold multiplies the odds of germination by exp(4.08) ≈ 59 in WT but only exp(1.62) ≈ 5 in <code>dog1</code>. Note cold is still <em>positive</em> for <code>dog1</code>; it just does far less. That makes biological sense: the <code>dog1</code> mutant has lost dormancy, so its seeds germinate readily even when warm and cold has little left to add. This is a gene × environment interaction: the effect of the environment (cold) depends on the genotype.
 </p>
 </div>
 </div>
@@ -3005,7 +3005,7 @@ plogis(-1.68 + 4.08)           # WT,   Cold ≈ 0.92
 plogis(-1.68 + 2.71)           # dog1, Warm ≈ 0.74
 plogis(-1.68 + 2.71 + 4.08 - 2.46)  # dog1, Cold ≈ 0.93</code></pre>
 <p>
-Cold is transformative for WT (0.16 → 0.92) but barely moves <code>dog1</code> (0.74 → 0.93). That gap between the two genotypes’ response to cold <em>is</em> the interaction, now expressed as probabilities. Notice these match the raw cell germination rates you saw in the EDA — a good sign the model is capturing the data.
+Cold transforms germination in WT (0.16 → 0.92) but barely moves <code>dog1</code> (0.74 → 0.93). That gap between the two genotypes’ response to cold <em>is</em> the interaction, now expressed as probabilities. Notice these match the raw cell germination rates you saw in the EDA, a good sign the model is capturing the data.
 </p>
 </div>
 </div>
@@ -3019,7 +3019,7 @@ Cold is transformative for WT (0.16 → 0.92) but barely moves <code>dog1</code>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>preds2 <span class="ot">&lt;-</span> <span class="fu">ggpredict</span>(germ_mod2, <span class="at">terms =</span> <span class="fu">c</span>(<span class="st">&quot;seed_mass&quot;</span>, <span class="st">&quot;genotype&quot;</span>, <span class="st">&quot;stratification&quot;</span>))</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(preds2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>You’ll get two panels, one per stratification treatment. In the <strong>Warm</strong> panel the WT curve sits far below the <code>dog1</code> curve (dormant wild-type vs non-dormant mutant). In the <strong>Cold</strong> panel both curves are high and close together. That change — a big genotype gap under warm conditions that nearly closes under cold — is the visual signature of the interaction.</p>
+<p>You’ll get two panels, one per stratification treatment. In the <strong>Warm</strong> panel the WT curve sits far below the <code>dog1</code> curve (dormant wild-type vs non-dormant mutant). In the <strong>Cold</strong> panel both curves are high and close together. That change, a big genotype gap under warm conditions that nearly closes under cold, is the visual signature of the interaction.</p>
 </section>
 </section>
 <section id="a-new-challenger-amphibian-chytrid-infection" class="level1">
@@ -3054,7 +3054,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-Warmer water is associated with a <em>lower</em> probability of infection: the <code>water_temp</code> coefficient is negative on the log-odds scale (about −0.23), consistent with Bd being inhibited at higher temperatures. Frogs at permanent ponds are more likely to be infected than those at temporary ponds: the <code>pond_typePermanent</code> coefficient is positive (about +1.57), which exponentiates to roughly a 4.8-fold increase in the odds of infection. In probability terms, the model predicts a 50% infection risk at around 14 °C at temporary ponds but not until about 21 °C at permanent ponds — permanent water shifts the whole curve towards higher infection because the fungus is never flushed out by the pond drying.
+Warmer water is associated with a <em>lower</em> probability of infection: the <code>water_temp</code> coefficient is negative on the log-odds scale (about −0.23), consistent with Bd being inhibited at higher temperatures. Frogs at permanent ponds are more likely to be infected than those at temporary ponds: the <code>pond_typePermanent</code> coefficient is positive (about +1.57), which exponentiates to roughly a 4.8-fold increase in the odds of infection. In probability terms, the model predicts a 50% infection risk at around 14 °C at temporary ponds but not until about 21 °C at permanent ponds; permanent water shifts the whole curve towards higher infection because the fungus is never flushed out by the pond drying.
 </p>
 <p>
 Key hidden assumptions worth flagging: a single swab can miss a genuine infection (a negative doesn’t guarantee the frog is Bd-free), and a one-off temperature reading may not represent the conditions the fungus actually experienced over the frog’s recent history. Both sit in the validity column of our assumption table.

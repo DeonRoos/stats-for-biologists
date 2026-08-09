@@ -361,7 +361,7 @@ Ideally we'd confirm the absence of mongoose on Tokunoshima before proceeding, b
 1. Decline to perform the analysis because of the assumption violation.
 2. Perform the analysis but include clear, prominent statements about this limitation.
 
-Both are defensible. For the purposes of this workshop (learning the method), we go with option 2. If this were a real project, I'd push hard to confirm the absence of mongoose before doing any analysis. If that weren't possible, I'd probably pull out of the project entirely — but others would go with option 2.
+Both are defensible. For the purposes of this workshop (learning the method), we go with option 2. If this were a real project, I'd push hard to confirm the absence of mongoose before doing any analysis. If that weren't possible, I'd probably pull out of the project entirely, but others would go with option 2.
 </div>
 :::
 

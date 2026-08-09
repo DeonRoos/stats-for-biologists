@@ -709,7 +709,7 @@ The main-effects model treats the effects of shark density and reef complexity a
 
     var score = document.getElementById('cs-score');
     score.style.display = 'block';
-    score.textContent = correct + ' / 5 correct' + (correct === 5 ? ' — nice work!' : correct >= 3 ? ' — nearly there.' : ' — have another look at the explanations above.');
+    score.textContent = correct + ' / 5 correct' + (correct === 5 ? ', nice work!' : correct >= 3 ? ', nearly there.' : ', have another look at the explanations above.');
 
     document.getElementById('cs-check-btn').disabled = true;
   };
@@ -850,7 +850,7 @@ summary(bio_mod)
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>No — we get something far more intuitive, requiring fewer mental gymnastics to explain. Predators eat prey. The more predators, the less prey. Just that simple. The positive coefficient from the main-effects model was an artefact of a model missing the interaction term. Once the interaction is included, the model correctly captures that the shark effect is negative but varies with reef complexity. This is also why we should always diagnose before interpreting: a model with violated assumptions can produce coefficients that aren't just imprecise but point in the wrong direction entirely.</p>
+<p>No, we get something far more intuitive, requiring fewer mental gymnastics to explain. Predators eat prey. The more predators, the less prey. Just that simple. The positive coefficient from the main-effects model was an artefact of a model missing the interaction term. Once the interaction is included, the model correctly captures that the shark effect is negative but varies with reef complexity. This is also why we should always diagnose before interpreting: a model with violated assumptions can produce coefficients that aren't just imprecise but point in the wrong direction entirely.</p>
 </div>
 </div>
 
@@ -925,7 +925,7 @@ ggplot(fake) +
   theme_minimal()
 ```
 
-One limitation of heatmaps is that it's hard to communicate uncertainty on them. A common workaround is to produce two additional plots: one showing predictions at the upper 95% confidence limit and one at the lower. But this isn't ideal either — it's really hard for our eyes to match up the same region across multiple heatmaps, so you never get a precise sense of the uncertainty at any specific location. If you have any bright ideas for how to effectively convey uncertainty with heatmaps (or even just maps in general), you might have a great paper on your hands. We're not aware of anyone who has found a particularly compelling solution to this yet.
+One limitation of heatmaps is that it's hard to communicate uncertainty on them. A common workaround is to produce two additional plots: one showing predictions at the upper 95% confidence limit and one at the lower. But this isn't ideal either; it's really hard for our eyes to match up the same region across multiple heatmaps, so you never get a precise sense of the uncertainty at any specific location. If you have any bright ideas for how to effectively convey uncertainty with heatmaps (or even just maps in general), you might have a great paper on your hands. We're not aware of anyone who has found a particularly compelling solution to this yet.
 
 # A new challenger: Asian elephants
 

@@ -421,7 +421,7 @@ Return to the `alligator_bite.txt` dataset from the first workshop. We didn't gi
 <textarea class="student-answer" rows="5" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p><strong>Independence of errors.</strong> Alligators are returned to the communal pond after measurement before the next one is retrieved. Despite staff assurances that individuals can be identified, it seems plausible that the same alligator could be captured twice. If so, some "observations" are repeated measurements of the same animal — a direct violation of independence.</p>
+<p><strong>Independence of errors.</strong> Alligators are returned to the communal pond after measurement before the next one is retrieved. Despite staff assurances that individuals can be identified, it seems plausible that the same alligator could be captured twice. If so, some "observations" are repeated measurements of the same animal, a direct violation of independence.</p>
 
 <p><strong>Validity (bite force).</strong> It sounds like actually getting alligators to bite the device might have been a bit hard. Did each animal bite as hard as it could, or just hard enough for the staff to feel like they had a measurement? If the latter, recorded values may not reflect true maximum bite strength.</p>
 

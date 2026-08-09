@@ -575,7 +575,7 @@ This is rarely done in practice but helps clarify how the two plot types relate 
 
 # The Good and The Bad
 
-The second dataset for this workshop is `abdn_flats.txt`. Download it below and save it to your `BI3010/data/` folder. It contains more than 500 records of rental properties listed in Aberdeenshire on the ASPC website. The variables are:
+The second dataset for this workshop is `abdn_flats.txt`. Download it below and save it to your `BI3010/data/` folder. It contains more than 500 records of rental properties advertised across Aberdeenshire. The variables are:
 
 1. `Price`: monthly rent (£)
 2. `Bedrooms`: number of bedrooms
@@ -586,19 +586,17 @@ The second dataset for this workshop is `abdn_flats.txt`. Download it below and 
 7. `EPC`: Energy Performance Certificate (A is most efficient, G is worst)
 8. `Tax`: council tax band (A is lowest, H is highest; based on property value in April 1991)
 9. `DayAdded`: when the record was added to the dataset (not when the property was listed)
-10. `PropertyURL`: web link for the listing
-11. `Address`: property name or address
-12. `Latitude`: latitude coordinate (North to South; think of a "ladder")
-13. `Longitude`: longitude coordinate (East to West; "the long way around")
-14. `UniCommuteTime`: estimated walk time to the Zoology Building (Google Maps API)
-15. `HouseType`: detached, semi-detached, terrace, or flat
-16. `Furnished`: fully furnished, part furnished, or unfurnished
+10. `Latitude`: latitude coordinate (North to South; think of a "ladder")
+11. `Longitude`: longitude coordinate (East to West; "the long way around")
+12. `UniCommuteTime`: estimated walk time to the Zoology Building (minutes)
+13. `HouseType`: detached, semi-detached, terrace, or flat
+14. `Furnished`: fully furnished, part furnished, or unfurnished
 
 ```{r, echo=FALSE, results='asis'}
 cat(make_download_btn("data/abdn_flats.txt"))
 ```
 
-Do a quick EDA to get familiar with the data and check for anything unusual. If you spot what looks like an error, you can verify it directly using the property URL. We'll return to this dataset later in the course.
+Do a quick EDA to get familiar with the data and check for anything unusual. If you spot what looks like an error, make a note of it. We'll return to this dataset later in the course.
 
 ## The Good
 
@@ -831,7 +829,7 @@ The next figure comes from [Wood et al. (2025)](https://www.science.org/doi/10.1
 <ol>
 <li><strong>The colour palette.</strong> The hell is with the weird colour palette and pattern that looks like it was stolen from a 1990s bus seat? Who was like "Yeaaaaaah bruh, this looks siiiiiiick dude." Why is one bar darker than the other?</li>
 <li><strong>Abbreviations.</strong> Do you know what "Sal/Veh" means? Great figures don't need a legend or a paper for you to make sense of them; you can see amazing figures with zero context and they still make total sense. I don't know what this figure is telling me <em>even with context</em>.</li>
-<li><strong>Inconsistent data point styling.</strong> All the randomly shaped points. What do they mean? Why are some filled and others empty? Are those all the observations they had, because if so — what's that? Like 10 observations? Get outta here with that.</li>
+<li><strong>Inconsistent data point styling.</strong> All the randomly shaped points. What do they mean? Why are some filled and others empty? Are those all the observations they had, because if so, what's that? Like 10 observations? Get outta here with that.</li>
 <li><strong>Bars are the wrong choice.</strong> The bars are completely unnecessary here and probably misleading. What the authors are trying to show are specific values (called "point estimates"). For example, the category "Sal/DCZ" is estimated at roughly -50 on the y-axis. That's the value that's important. By using a bar you're implying there was also a -49, and -48, and -47, all the way to 0. That's not the case. It's -50. Just -50. Using bars is, for some reason, super common in some fields. Medics <em>looooooove</em> them. They're overused and rarely the best choice. A lot of the time (but not always), bars should be replaced by points.</li>
 </ol>
 <p>How I'd make this figure: I'd use points for the estimated values instead of bars. I probably wouldn't add points to show the data, but if I did, I'd make those points much smaller (and be consistent). I'd write the full category name and rotate them 90 degrees so it'd fit. (I'd also get rid of the P-value "bars" and asterisks at the top of the figure.)</p>

@@ -380,9 +380,9 @@ where $Species_i$ is the count of species in plot $i$, modelled as coming from a
 
 ### Choosing a link function
 
-Because λ must always be positive (you can't have a negative expected count), we can't fit a straight line directly to λ — the line could go below zero. The log link solves this: it maps the linear predictor (which can be any value) onto the log scale, where values can range freely, and then the inverse (`exp()`) maps back to always-positive predictions.
+Because λ must always be positive (you can't have a negative expected count), we can't fit a straight line directly to λ; the line could go below zero. The log link solves this: it maps the linear predictor (which can be any value) onto the log scale, where values can range freely, and then the inverse (`exp()`) maps back to always-positive predictions.
 
-> Keep in mind(!): the link function doesn't transform the species counts — those never change. We're only changing the *linear predictor*. This is a super common misunderstanding with GLMs and link functions.
+> Keep in mind(!): the link function doesn't transform the species counts; those never change. We're only changing the *linear predictor*. This is a super common misunderstanding with GLMs and link functions.
 
 The equation for the linear predictor is:
 
@@ -394,7 +394,7 @@ where $\beta_0$ is the intercept (the log expected species count when Biomass = 
 
 Spare a moment's thought for how complex the process behind the number of plant species in a plot of land actually is. How much sunlight does each plot get? How much rainfall? What seeds were already present in the soil before data collection started? Why were *those* seeds there and not others? Why did some of them germinate in time to be counted?
 
-We have no data to explain any of that variation — yet it's all still there, and it's what we're asking the stochastic part of the model to absorb. The deterministic part we can actually study is the role of plant biomass and soil pH.
+We have no data to explain any of that variation, yet it's all still there, and it's what we're asking the stochastic part of the model to absorb. The deterministic part we can actually study is the role of plant biomass and soil pH.
 
 ### Fitting the model
 
@@ -471,7 +471,7 @@ par(mfrow = c(1, 1))
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>No observations exceed a Cook's distance of 1, which would be the threshold for serious concern. However, a few sit uncomfortably close to the boundary — we're not exactly jumping for joy with those Cook's distances. The values are fine, but it's worth noting. The bigger problem here is overdispersion, not influential observations.</p>
+<p>No observations exceed a Cook's distance of 1, which would be the threshold for serious concern. However, a few sit uncomfortably close to the boundary, we're not exactly jumping for joy with those Cook's distances. The values are fine, but keep half an eye on them. The bigger problem here is overdispersion, not influential observations.</p>
 </div>
 </div>
 

@@ -254,7 +254,7 @@ plot(boto_model)
 par(mfrow = c(1, 1))  # reset
 ```
 
-`plot()` works directly on a model object, returning all four diagnostic plots in one call. It uses base R graphics rather than ggplot2 — the output is plainer, but nothing extra needs setting up, making it the standard tool for a quick check. You will see a ggplot2-based alternative later in this workshop.
+`plot()` works directly on a model object, returning all four diagnostic plots in one call. It uses base R graphics rather than ggplot2; the output is plainer, but nothing extra needs setting up, making it the standard tool for a quick check. You will see a ggplot2-based alternative later in this workshop.
 
 Alternatively, press Return in the console after `plot(boto_model)` to step through them one at a time. Let's go through each plot and what it tells us.
 
@@ -441,7 +441,7 @@ plot(boto_model, which = 4)
     {px:null,py:null,col:null,
      desc:"Baseline: 13 observations with a clear positive trend, no special point added."},
     {px:14,py:5,col:"#c0392b",
-     desc:"Special point at x = 14, y = 5. Far to the right of the data (high leverage) and far below the trend (large residual). Both combine to give a high Cook’s D — the fitted line rotates substantially toward this single observation."},
+     desc:"Special point at x = 14, y = 5. Far to the right of the data (high leverage) and far below the trend (large residual). Both combine to give a high Cook’s D; the fitted line rotates substantially toward this single observation."},
     {px:14,py:29,col:"#d07000",
      desc:"Special point at x = 14, y = 29. Same high leverage as the previous scenario, but y is right on the trend, so the residual is tiny. Cook’s D is low and the line barely shifts. Leverage alone does not make a point influential."},
     {px:5.5,py:24,col:"#7b2f9e",
@@ -680,7 +680,7 @@ Bring across the beetle model from Workshop 3 (`beet_mod <- lm(offspring ~ tempe
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>Yes. The Residuals vs Fitted plot shows clear non-linearity: residuals follow a wave pattern, positive at low and high temperatures, negative in the middle. The beetles have a thermal optimum at around 20°C — too cold or too hot and they produce fewer offspring. Basically, we're trying to fit a straight line through a hump. It just doesn't work, and the parameter estimates aren't suitable for inference.</p>
+<p>Yes. The Residuals vs Fitted plot shows clear non-linearity: residuals follow a wave pattern, positive at low and high temperatures, negative in the middle. The beetles have a thermal optimum at around 20°C; too cold or too hot and they produce fewer offspring. Basically, we're trying to fit a straight line through a hump. It just doesn't work, and the parameter estimates aren't suitable for inference.</p>
 <p>The Scale-Location also shows a wave, though it's less obvious. The Q-Q and Residuals vs Leverage plots look relatively acceptable, but those can't override the clear linearity violation.</p>
 <pre><code class="language-r">par(mfrow = c(2, 2))
 plot(beet_mod)

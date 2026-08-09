@@ -382,9 +382,9 @@ The question is: can we predict the monthly rent of a listed property? We'll use
 
 ## 2. Perform exploratory data analysis
 
-Spend a few minutes exploring the dataset. Check for odd values. The dataset includes a URL for each property, so you can check unusual entries directly, a rare luxury in science!
+Spend a few minutes exploring the dataset. Check for odd values, and make a note of anything that looks suspicious.
 
-One thing to be aware of: some properties may have had their listed price changed since the data were collected. For example, there's one property that when I first added it to the dataset was listed at a whopping £3,200 a month but a year later, that price had dropped to £2,900 (because no one was willing to pay £3.2k in rent). You'll need to decide for yourself how to handle these. Your options are: (1) keep the original price, (2) update to the current price, or (3) create a new row for the "new" listing. Option 3 violates an assumption. Can you identify which one?
+One thing to be aware of with rental data like this: a property's listed price can change over time. Suppose a property first listed at a whopping £3,200 a month has, a year later, dropped to £2,900 (because no one was willing to pay £3.2k in rent). You'll need to decide how to handle a case like this. Your options are: (1) keep the original price, (2) update to the current price, or (3) create a new row for the "new" listing. Option 3 violates an assumption. Can you identify which one?
 
 ## 3. Identify any hidden assumptions
 
@@ -412,8 +412,6 @@ In predictive modelling, we can include all sensible explanatory variables witho
 | `EPC` | Energy Performance Certificate band (A = most efficient, G = least) |
 | `Tax` | Council tax band (A = lowest, H = highest) |
 | `DayAdded` | Date the record was added to the dataset |
-| `PropertyURL` | Listing URL |
-| `Address` | Property address |
 | `Latitude` | Latitude coordinates |
 | `Longitude` | Longitude coordinates |
 | `UniCommuteTime` | Walking time to the Zoology Building (minutes) |
@@ -610,8 +608,8 @@ Pay attention to the `Estimate` for `FloorArea`. The model is predicting that ad
 </div>
 
 <div class="question-block">
-<p><strong>Question 3.</strong> Go to <a href="https://www.aspc.co.uk/" target="_blank">ASPC</a> and find a recently listed rental property. Use your model to predict its monthly rent, then compare the prediction with the listed price.</p>
-<textarea class="student-answer" rows="5" placeholder="Paste the URL, enter the property's values, and note the predicted vs actual rent..."></textarea>
+<p><strong>Question 3.</strong> Use your model to predict the monthly rent of a property with 3 rooms, a floor area of 61 m², EPC band C, and Tax band C. Report the prediction and its 95% confidence interval.</p>
+<textarea class="student-answer" rows="5" placeholder="Enter the property's values and note the predicted rent and its interval..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 <pre><code class="language-r"># Example using a hypothetical property with 3 rooms, 61 m², EPC C, Tax C
@@ -626,7 +624,7 @@ predict(rent_mod, newdata = my_property)
 
 # Add 95% confidence interval
 predict(rent_mod, newdata = my_property, interval = "confidence")</code></pre>
-<p>The residual is the difference between your model's prediction and the listed price. If the true price falls within the confidence interval, the model's uncertainty correctly captured the listing.</p>
+<p>The confidence interval shows the range of monthly rents the model considers plausible for a property with these characteristics. A wider interval means more uncertainty in the prediction.</p>
 <p>If you want to see how this kind of model could be translated into something you might see online, with some marketing saying something like "We're using the most advanced Generative Artificial Intelligence to predict how much rent you should be asking for", see <a href="https://deonroos.shinyapps.io/BI3010_Rent/" target="_blank">this demonstration app</a>. This is a little toy website I made (entirely in R). Two things to note: there's a decent chance the website will crash if lots of people try to use it at the same time, and the "Fancy model" also accounts for spatial patterns in rent across Aberdeen.</p>
 </div>
 </div>
@@ -1314,7 +1312,7 @@ Two issues commonly appear:
 
 **Heteroscedasticity.** Residual spread tends to increase with fitted values. There are two reasons for this. First, landlords tend to round rents to the nearest £25 to £50 for cheaper properties and to the nearest £50 to £100 for more expensive ones, which creates measurement "noise" that scales with price. Second, it's easier to pin down the right rent for a cheaper property (the difference between £500 and £750 is proportionally large) whereas for expensive properties a £250 difference is relatively small, so estimates naturally vary more.
 
-**Influential observations.** One or more expensive properties may appear beyond the Cook's distance contour lines. Confirm whether the recorded price is correct using the `PropertyURL`. If the price is correct, you have two options: ignore the problem and note it when reporting, or remove the observation.
+**Influential observations.** One or more properties may appear beyond the Cook's distance contour lines. Inspect the offending rows and decide whether the recorded values look plausible. If they do, you have two options: ignore the problem and note it when reporting, or remove the observation.
 
 Fix any influential observations and rerun:
 

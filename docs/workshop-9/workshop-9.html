@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Roos &amp; Pinard">
-<meta name="dcterms.date" content="2026-07-17">
+<meta name="dcterms.date" content="2026-08-09">
 
 <title>Workshop 9: Poisson GLMs</title>
 <style>
@@ -2305,7 +2305,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">17 July 2026</p>
+      <p class="date">9 August 2026</p>
     </div>
   </div>
   
@@ -2662,9 +2662,9 @@ margin-top: 0.25rem;
 </section>
 <section id="choosing-a-link-function" class="level3">
 <h3 class="anchored" data-anchor-id="choosing-a-link-function">Choosing a link function</h3>
-<p>Because λ must always be positive (you can’t have a negative expected count), we can’t fit a straight line directly to λ — the line could go below zero. The log link solves this: it maps the linear predictor (which can be any value) onto the log scale, where values can range freely, and then the inverse (<code>exp()</code>) maps back to always-positive predictions.</p>
+<p>Because λ must always be positive (you can’t have a negative expected count), we can’t fit a straight line directly to λ; the line could go below zero. The log link solves this: it maps the linear predictor (which can be any value) onto the log scale, where values can range freely, and then the inverse (<code>exp()</code>) maps back to always-positive predictions.</p>
 <blockquote class="blockquote">
-<p>Keep in mind(!): the link function doesn’t transform the species counts — those never change. We’re only changing the <em>linear predictor</em>. This is a super common misunderstanding with GLMs and link functions.</p>
+<p>Keep in mind(!): the link function doesn’t transform the species counts; those never change. We’re only changing the <em>linear predictor</em>. This is a super common misunderstanding with GLMs and link functions.</p>
 </blockquote>
 <p>The equation for the linear predictor is:</p>
 <p><span class="math display">\[log(\lambda_i) = \beta_0 + \beta_1 \times Biomass_i\]</span></p>
@@ -2673,7 +2673,7 @@ margin-top: 0.25rem;
 <section id="which-explanatory-variables-to-include" class="level3">
 <h3 class="anchored" data-anchor-id="which-explanatory-variables-to-include">Which explanatory variables to include?</h3>
 <p>Spare a moment’s thought for how complex the process behind the number of plant species in a plot of land actually is. How much sunlight does each plot get? How much rainfall? What seeds were already present in the soil before data collection started? Why were <em>those</em> seeds there and not others? Why did some of them germinate in time to be counted?</p>
-<p>We have no data to explain any of that variation — yet it’s all still there, and it’s what we’re asking the stochastic part of the model to absorb. The deterministic part we can actually study is the role of plant biomass and soil pH.</p>
+<p>We have no data to explain any of that variation, yet it’s all still there, and it’s what we’re asking the stochastic part of the model to absorb. The deterministic part we can actually study is the role of plant biomass and soil pH.</p>
 </section>
 <section id="fitting-the-model" class="level3">
 <h3 class="anchored" data-anchor-id="fitting-the-model">Fitting the model</h3>
@@ -2757,7 +2757,7 @@ Show Answer
 </button>
 <div class="instructor-answer">
 <p>
-No observations exceed a Cook’s distance of 1, which would be the threshold for serious concern. However, a few sit uncomfortably close to the boundary — we’re not exactly jumping for joy with those Cook’s distances. The values are fine, but it’s worth noting. The bigger problem here is overdispersion, not influential observations.
+No observations exceed a Cook’s distance of 1, which would be the threshold for serious concern. However, a few sit uncomfortably close to the boundary, we’re not exactly jumping for joy with those Cook’s distances. The values are fine, but keep half an eye on them. The bigger problem here is overdispersion, not influential observations.
 </p>
 </div>
 </div>

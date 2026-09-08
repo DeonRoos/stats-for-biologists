@@ -36,10 +36,10 @@ rabbit <- data.frame(
 
 prs <- ifelse(rabbit$mongoose == "Present", 1, 0)
 
-b0 <- 271
-b1 <- -5
+b0 <- 2710
+b1 <- -50
 
-rabbit$weight <- round(rnorm(n = n, mean = b0 + b1 * prs, sd = 20), digits = 1)
+rabbit$weight <- round(rnorm(n = n, mean = b0 + b1 * prs, sd = 200), digits = 1)
 summary(rabbit)
 summary(lm(weight ~ mongoose, data = rabbit))
 
@@ -47,7 +47,7 @@ ggplot(rabbit) +
   geom_violin(aes(x = mongoose, y = weight))
 
 rabbit$mongoose[7] <- "Absent"
-rabbit$weight[41] <- 380.8
+rabbit$weight[41] <- 3808.0
 write.table(rabbit, here("Workshops/Workshop 5 - LM with categorical predictors/Data", "rabbits.txt"), row.names = FALSE)
 ```
 
@@ -68,7 +68,7 @@ Mistake 1:
 * The rabbit in the 7th row was actually from Oshima, not Tokunoshima.
 
 Mistake 2:
-* We cannot remember which rabbit, but we accidentally added 100 to its weight.
+* We cannot remember which rabbit, but we accidentally added 1000 to its weight.
 
 They ask you to resolve these issues but also to check for any other possible mistakes.
 
@@ -102,17 +102,17 @@ rabbit[7,]
 # If we do a plot of the data:
 ggplot(rabbit) +
   geom_histogram(aes(x = weight))
-# We can clearly see there's one rabbit that's much larger than the others. From the figure, we can also see that it's the only rabbit that's larger than 350 g, so we can use that as our condition and subtract 100 g. We also learn that this is on row 41 (the number to the left of the output).
-rabbit[rabbit$weight > 350,]
+# We can clearly see there's one rabbit that's much larger than the others. From the figure, we can also see that it's the only rabbit that's larger than 3500 g, so we can use that as our condition and subtract 1000 g. We also learn that this is on row 41 (the number to the left of the output).
+rabbit[rabbit$weight > 3500,]
 ```
 
 2.5  Correct the above data entry mistake and confirm that you're correction has worked
 
 ```{r, include=answer_sheet, class.source="bg-success", eval = T}
 # There are a couple of different ways we can do this correction:
-rabbit$weight[rabbit$weight > 350]  <- rabbit$weight[rabbit$weight > 350] - 100
+rabbit$weight[rabbit$weight > 3500] <- rabbit$weight[rabbit$weight > 3500] - 1000
 # Or we can do:
-# rabbit[41,2] <- rabbit[41,2]-100 #Not run
+# rabbit[41,2] <- rabbit[41,2]-1000 #Not run
 
 # To check if this worked, we can do:
 rabbit[41,]
@@ -379,7 +379,7 @@ ggplot(rabbit) +
   geom_point(aes(x = mongoose, y = weight))
 # Correcting 2 data entries identified in EDA and through communication with researchers
 rabbit$mongoose[7] <- "Present"
-rabbit$weight[rabbit$weight > 350] <- rabbit$weight[rabbit$weight > 350] - 100
+rabbit$weight[rabbit$weight > 3500] <- rabbit$weight[rabbit$weight > 3500] - 1000
 
 # Concerns prior to modelling
 # Unclear if mongoose on one island are actually absent or just not detected, or not reported

@@ -220,7 +220,9 @@ Welcome to the first BI3010 workshop. Over the next ten workshop sessions, you'l
 3. Use the results of the EDA (Exploratory Data Analysis) to identify any issues in the data;
 4. Begin thinking about the assumptions we make with a specific dataset even before we begin using statistics.
 
-These skills apply every time you pick up a new dataset and will come up throughout the course.
+All of these objectives link to useful skills for **initial, quick explorations** and screening of datasets. Because it's so important to ensure that the data we subsequently use in analysis is suitable for answering our question, the importance of such EDA cannot be overstated.
+
+These skills will be used throughout the course.
 :::
 
 # Workshop structure
@@ -228,7 +230,7 @@ These skills apply every time you pick up a new dataset and will come up through
 ::: {.callout-note}
 ## The Analytical Workflow
 
-These workshops follow an analytical workflow built around linear models, but the same steps apply to almost any analysis: you're learning how to go from a raw dataset to an evidenced answer.
+The workshops on this course will have you learn an analytical workflow, focussing mainly on analysing data using linear models (and eventually generalised linear models). That is, you're going to learn how to go from getting a dataset to extracting evidence to answer your research question. Importantly though, this workflow is not unique to linear models (or GLMs). You would (or at least *should*) use this same general workflow, regardless the dataset, the scenario, or the analytical method you may find yourself using.
 
 The general workflow we'll be using can be broken down into:
 
@@ -240,7 +242,7 @@ The general workflow we'll be using can be broken down into:
 6. Summarise the results.
 7. Interpret and provide inferences.
 
-We'll skip Step 1 here for convenience, but in your own work it's the most important step. Every subsequent decision (how to collect data, which model to fit, how to interpret results) depends on having a clear question. Don't mistake its absence in these workshops for evidence that it doesn't matter.
+For the BI3010 workshops we are generally going to skip Step 1 in the workflow for convenience sake, but in your own work Step 1 is key as every subsequent step in the workflow is dependent on your question. In your own work (e.g. your Honour's project) it's important to take the time to think carefully about what the question you want to answer is, how best to design an experiment or data collection protocol to get data suitable for answering it, which statistical method would be suitable for analysing the data, and what caveats and limitations come with all of these. Basically, don't take the omission of Step 1 in this course as evidence that it's not important. It is.
 :::
 
 # Getting Started with R
@@ -274,9 +276,9 @@ To run code from a script, you can:
 
 ## Commenting guide
 
-Good comments are notes about intent, not narration. They'll save you time when you return to old code, and some jobs will check them too.
+It's good practice to make comments to yourself (and others) while writing code. Comments generally act as notes that help explain your general intent for a section of code, which in three weeks' time can be an absolute lifesaver. They're also super useful for anyone else reading your code (and your commenting may be evaluated for some jobs).
 
-Opinions vary (see [here](https://statmodeling.stat.columbia.edu/2024/02/07/when-all-else-fails-add-a-code-comment/) for a stern take), but my rule: briefly describe what you're *trying to do*, not what each line does.
+There are many different opinions as to how to write good comments (see [here](https://statmodeling.stat.columbia.edu/2024/02/07/when-all-else-fails-add-a-code-comment/) for a particularly stern view), but a general principle I subscribe to is: aim to very concisely describe your general purpose for the next few lines of code. What are *you* trying to do, and not, what does *each line of code* do.
 
 For example, I would write:
 
@@ -312,7 +314,7 @@ ggplot(my_data, aes(x = country, y = total_sales)) + # using ggplot, take my_dat
 # When I see comments like this IRL, I die a little bit inside. Keep it clean and concise.
 ```
 
-Reading those comments is more work than reading the code itself. Think of comments as post-it notes: short signals for sections you might want to revisit, not a line-by-line narration of what the code does.
+The latter is so overly descriptive that it becomes as much of a chore to read the comments as the actual code itself. In fact, I think the code does a better job of quickly and efficiently explaining its purpose than these comments do! Another way to think of how to best write comments is: think of comments as post-it notes. You want them to be short and to act as a signal for sections that you want to dive deeper into (e.g. for debugging).
 
 ## On using LLMs
 
@@ -328,11 +330,9 @@ Using them effectively and responsibly is a skill in itself. Make your prompt sp
 
 # Workshop Instructions
 
-In this workshop, we're going to load two datasets, starting with alligator bite strength, and carry out Exploratory Data Analysis (EDA) alongside some simple data quality assurance. The aim is to find weird things in the data, things that might indicate mistakes.
+In this workshop, we're going to load two datasets, starting with alligator bite strength, and carry out Exploratory Data Analysis (EDA) along with some simple data quality assurance. Broadly, our aim in such cases is to identify *weird* things in the data that might indicate mistakes, such as data entry errors. In real-world analysis, this step is incredibly important because mistakes are easily made, especially during data entry. Imagine entering 5,000 nearly identical observations into a spreadsheet. People get bored, start thinking about other things, get mixed up about which observation they should be adding, among many other distractions. It's hard to stay super focused during mundane work for long periods. It would be unrealistic to expect or assume that mistakes would never happen, so we need to check for them. The problem is that if we don't spot these errors, they can significantly influence the results when it comes time to analyse the data.
 
-Errors in data entry are more common than you'd think. Imagine entering 5,000 nearly identical observations into a spreadsheet. People get bored, lose their place, hit the wrong key. If we don't catch those mistakes before analysis, they can quietly wreck the results.
-
-The good news: we don't need complex statistics to check for this, and the `R` coding is *relatively* straightforward.
+The good news is that we don't need any complex statistics to check for these issues, and the `R` coding is *relatively* straightforward.
 
 ## Setting Up Your Project
 
@@ -483,11 +483,15 @@ These questions may seem trivial, but honestly, they're the first questions we a
 
 # Getting to Know the Data
 
-The dataset has `r nrow(ali)` alligators from Parker Island Gator Farm, Florida. For each one, bite strength (pounds per square inch) and body length nose-to-tail (centimeters, one decimal place) were recorded.
+Here's what we know about the data. The data contains `r nrow(ali)` observations (sometimes referred to as samples) of alligator bite strength, measured in pounds per square inch. All `r nrow(ali)` alligators were measured at Parker Island Gator Farm, Florida, USA. For each bite strength, the length of the alligator, from nose to tail, was measured and is provided in centimeters (to one decimal place).
 
-Before going further, do a quick search: what's the bite strength of a typical alligator, and how long are they? EDA means looking for things that seem *weird*, and you can only spot weird if you know what normal looks like. Note the typical values as a comment in your script.
+Before we move ahead with the data, let's take a second to become familiar with alligator bite strength. Using your search engine of preference, do a quick search to find out the bite strength of alligators. Do the same for the length of an average alligator.
 
-Now let's check that the data is sensibly structured: numbers stored as numbers, text as characters, and so on. A value like `2174.94BIGBITE` would cause `R` to treat the entire column as text, which breaks any numerical analysis.
+When we do exploratory data analysis, we're specifically looking for things that look *weird*. In order to know if something is *weird*, we need to know what "normal" is; hence why it's a good idea to have some sort of notion of what a "normal" alligator's bite strength and length may be.
+
+Write down the average bite strength of an alligator, measured in pounds per square inch, and the average length of an alligator in centimeters (ideally as a comment in your script).
+
+With that done, let's move on to understanding our data. For starters, let's check if the data is sensibly structured. In `R`, this means that numbers are numbers, words are characters (or sometimes factors), and so on. Basically, we want to make sure there aren't any bite measurements like `2174.94BIGBITE`, which would mess us up by causing `R` to think that all `bite` values are characters and not numbers.
 
 To do this quickly, we can use the `str()` function (short for "structure"):
 
@@ -495,9 +499,9 @@ To do this quickly, we can use the `str()` function (short for "structure"):
 str(ali)
 ```
 
-`ali` is a `data.frame` with `r nrow(ali)` observations and two variables. Both `length` and `bite` are `num` (numeric). All good. The `$` in `ali$bite` is how `R` pulls a single column out of a dataset; you'll use it constantly.
+We see that `ali` is a `data.frame` (great, as it should be!), with `r nrow(ali)` observations (or samples) and two variables. The `$` operator is used to extract specific variables from a dataframe, so `ali$bite` will give you just the `bite` variable from the `ali` dataset. From this, we can see that both the `length` and `bite` variables are being treated as numbers (indicated by `num`), and we get a handful of example values for both `length` and `bite`.
 
-Nothing unusual so far.
+So far, we're not seeing anything unusual, which is great, it means we haven't identified any problems that we need to fix.
 
 If we wanted to, we could extract the `length` variable from the dataset by doing:
 
@@ -507,23 +511,27 @@ ali$length
 
 How would you extract the `bite` variable?
 
-Let's calculate some summary statistics. The average length:
+Let's use these extracted variables to calculate some summary statistics, starting with the mean (i.e. average). To do so, we use the `mean()` function. To find the average length of our alligators, we do:
 
 ```{r}
 mean(ali$length)
 ```
 
-The average alligator here is `r round(mean(ali$length), digits = 1)` cm, longer than wild alligators, but farm animals often are. Compare this with what you found online. Small differences are fine; large ones are worth questioning.
+We can see that the average alligator in Parker Island Gator Farm is `r round(mean(ali$length), digits = 1)` cm long.
 
-Now calculate the average bite strength:
+Compare this value with the mean length of alligators you found from a quick internet search. It might be a bit longer than expected, but this could be due to these alligators coming from a farm rather than the wild. Perhaps they're given lots of food to help them grow? While our numbers may not match exactly with online data, significant discrepancies could be worth investigating.
+
+Similarly, calculate the average bite strength of our alligators and see if there's anything unusual there.
 
 ```{r}
 mean(ali$bite)
 ```
 
-Assuming you found that alligator bite strength is roughly 2,000 PSI, our alligators appear to be biting with an extra 1,500 PSI *on average*. That seems like *a lot* more. This is something that should make us sit up and pay attention. We don't know for sure if there's a problem, but we have reason to believe there *might* be one. It's now up to us to prove that there *isn't* a problem.
+Assuming you found that alligator bite strength is roughly 2,000 pounds per square inch, our alligators appear to be biting with an extra 1,500 pounds per square inch *on average*. That seems like *a lot* more.
 
-`summary()` gives a quick overview of the whole dataset. Run it now and see if anything stands out:
+This is something that should make us sit up and pay attention. We don't know for sure if there's a problem, but we have reason to believe there *might* be one. It's now up to us to prove that there *isn't* a problem.
+
+There are many descriptive techniques to check for anomalies in our data, but a convenient "short cut" is to use the `summary()` function. This function provides a generic summary of our entire dataset when we supply `ali` as the sole argument. Try this now and see if you can identify any issues with the data:
 
 ```{r, results="hide"}
 summary(ali)
@@ -573,35 +581,59 @@ summary(ali&#36;length)  # summary for length only</code></pre>
 
 # Data Detective
 
-Hopefully you spotted at least one suspicious value. Let's track it down.
+Hopefully, you've identified at least one questionable value in our dataset. What should we do now? Throw out the entire dataset? (No. The answer is "No, you do not throw out the dataset", at least not yet.) Let's try to figure out what's going on, starting with finding the problem observations.
 
-We know there's an alligator recorded as `r max(ali$length)` cm long, which is `r round(max(ali$length)/100, digits = 0)` m, longer than a bus. Here's how to find it.
+How do we do that?
 
-Square brackets `[]` are R's indexing tool: they extract specific rows or columns from a dataframe using the format `dataset[row, column]`. Omit the row number and you get all rows; omit the column and you get all columns. For example, to see all columns for row 30:
+Let's start by considering what we think a weird observation might look like. We can use the `summary(ali)` output to help us here. For instance, we know we have an alligator that was apparently `r max(ali$length)` cm long (`r round(max(ali$length)/100, digits = 0)` m, that's longer than a bus!). How do we find that value in our dataset to see if there was anything else unusual about it?
 
-```{r}
-ali[30,]
+This is where square brackets `[]` come into play. In `R`, square brackets are used for "indexing" to extract specific rows or columns from a dataframe. Think of square brackets as a way to point to or select parts of your data.
+
+To use them effectively, first consider how you would find the information manually (e.g. in Excel):
+
+1. We'd start by looking at the `ali` dataset.
+2. We'd then skim through the `ali` dataset, looking for any rows where alligators are `r max(ali$length)` cm long.
+3. Once we've found these rows, examine all the information related to those alligators.
+
+How does that translate into `R`? Almost exactly; we just need to write those three steps using code.
+
+First, we'd start by looking at the `ali` dataset.
+
+```{r, eval=FALSE}
+ali
 ```
 
-To find our giant alligator, we need a condition: find rows where `length` equals `r max(ali$length)`. In R, "equal to" is `==` (a single `=` assigns a value; `==` tests whether two things match). The result is a `TRUE`/`FALSE` for every row:
+Next, we'd skim through the `ali` dataset, looking for any rows where alligators are `r max(ali$length)` cm long. This is where we can use square brackets `[]` in conjunction with conditional statements. Conditional statements allow us to specify criteria like "when this condition is met, do *something*".
+
+In our case, the condition is finding alligators that are `r max(ali$length)` cm long. In `R`, we write this condition using double equal signs (`==`) to denote "equal to" (a single `=` assigns a value; `==` tests whether two things match). This is basically the same as your eyes going down the Excel column looking for `r max(ali$length)`, noting any instances where it was true or not. For example:
 
 ```{r}
 ali$length == 2293.0
 ```
 
-We can use that condition directly inside square brackets to pull out the matching rows:
+The output is a list of `r nrow(ali)` values, each being either `TRUE` or `FALSE`, corresponding to each row in the `ali` dataset. `TRUE` values indicate rows where the alligator is `r max(ali$length)` cm long, and `FALSE` values indicate rows where it is not (in `R`, "not equal to" is denoted as `!=`).
+
+Finally, once we've found these rows, we examine all the information related to those alligators. When using square brackets, remember that the row number comes before the comma, and the column number comes after (e.g. `ali[row, column]`). If we omit either the row or column number, `R` will return all rows or all columns respectively. For instance, to view all the information (i.e. all columns) for the 30th row, you would use:
+
+```{r}
+ali[30,]
+```
+
+To make life a bit easier for ourselves, we can use these square brackets in combination with the conditional statement to extract the entire row for the alligator that's `r max(ali$length)` cm long. The `TRUE` and `FALSE` values act as indicators for which rows we want to display: if a value is `TRUE`, we see that row; if it's `FALSE`, we don't. We can achieve this by writing:
 
 ```{r}
 ali[ali$length == 2293,]
 ```
 
-`length` is about 10 times what we'd expect (200--400 cm), and `bite` is about 100 times typical. Neither has a decimal point. Let's compare against a normal observation:
+What do you make of this observation? We're expecting `length` to be about 200 to 400 centimeters (2 to 4 m), but this alligator is apparently 10 times bigger than that. And `bite` is about 100 times bigger. Neither of the two values seems to have a decimal point (or at least `R` has given them zeros after the decimal point).
+
+Why might that be the case? Let's find a "normal" observation to compare this giant alligator to. Assuming the first observation is a normal one, use the square brackets to extract the first row of data from the `ali` dataset:
 
 ```{r}
 ali[1, ]
 ```
 
-The first alligator looks fine. So either giant alligators are among us, or there's been a data entry mistake.
+Well, they're clearly different. The first alligator in our dataset looks pretty normal. Maybe a bit on the big side (just over 4 m long), but not weirdly so. There are only two possible explanations for this: either there are giant alligators among us, or there has been a data entry mistake.
 
 ## Question Set Three
 
@@ -631,9 +663,9 @@ max_length <- max(ali$length)
 ali[ali$length == max_length, ]
 ```
 
-Storing the result means we don't have to repeat the raw number, and the code reads more clearly.
+By storing the result of `max(ali$length)` in a variable (`max_length`), we can simplify our code and make it more readable. This way, if we need to refer to the maximum length multiple times, we only need to use the `max_length` variable. Within the `ali` dataset, this code extracts all columns (since we have not specified anything after the comma in the square brackets) for any rows where the length of an alligator is equal to the maximum length of any alligator.
 
-The same logic works with other conditions, for example, all alligators longer than average:
+We can also adapt the conditional statement to find rows based on different criteria. For example, if we wanted to extract all rows with alligators that were greater than the average length, we could do:
 
 ```{r}
 # Calculate the average alligator length
@@ -643,15 +675,15 @@ average_length <- mean(ali$length)
 ali[ali$length > average_length, ]
 ```
 
-More than one alligator qualifies this time. Our problem observation is still in there.
+In this case, `ali[ali$length > average_length, ]` will give us all columns for rows where the length of the alligator is greater than the calculated average length. We now get data from more than one alligator, as more than one alligator meets our condition of being longer than average. We can also see the "data entry mistake alligator" using this method.
 
-Let's go one step further with `quantile()`. Look back at `summary(ali)`: the `1st Qu.` and `3rd Qu.` values are the 25th and 75th percentiles. We can retrieve them directly:
+Let's refine our approach further by using a different function: `quantile()`. First, rerun the `summary(ali)` code to observe the quantiles (`1st Qu.` and `3rd Qu.`) that it reports. These quantiles represent the values below which 25% of the data falls and above which 75% of the data falls. We can retrieve these quantile values ourselves by doing:
 
 ```{r}
 quantile(ali$length, probs = c(0.25,0.75))
 ```
 
-`probs` sets which percentiles to return. `c()` combines multiple values into a vector; needed here because we're asking for two at once. For a single percentile, write `quantile(ali$length, probs = 0.75)` without `c()`.
+The `probs` argument in the `quantile()` function allows us to specify which probabilities we want to calculate quantiles for. In the previous example, we requested the 25% (`0.25`) and 75% (`0.75`) quantiles. Since we wanted to get these two values, we used the `c()` function, which combines (or "concatenates") multiple values into a single vector. If we only need a single quantile, such as the 75th percentile, we can directly write `quantile(ali$length, probs = 0.75)`. In this case, there's no need to use `c()` because we're only asking for one value.
 
 ## Question Set Four
 
@@ -699,15 +731,19 @@ We have two options: edit `alligator_bite.txt` directly and reload, or fix it in
 
 Doing the correction in your code is totally transparent; it's right there for anyone who looks at your code to see.
 
-The fix uses the indexing skills from above. `ali$bite[20]` points to row 20 of the `bite` column specifically (no comma needed since we're already working with a single column).
+So how do we fix row 20? Well, we use the skills from above: extracting, indexing, assigning, and simple math.
 
-We can start by replacing row 20 with itself (which does nothing, but makes the pattern clear):
+Let's start with `ali$bite`. We only want to change row 20. How do we select only row 20? `ali$bite[20]`. Note that we don't need to specify a column in the square brackets, because we're working with a single column, the `bite` column.
+
+Next, we need to replace `ali$bite[20]` with an altered version of itself, so we would write:
 
 ```{r}
 ali$bite[20] <- ali$bite[20]
 ```
 
-Now we just divide, which shifts the decimal two places to the right:
+This will just replace the `bite` value from row 20 with itself. We're not actually doing anything here, but we're getting closer.
+
+Next, we need to "add" back in the decimal point that was lost during data entry. How do we shift the value two places to the right of the decimal point? We divide by 100, leaving us with:
 
 ```{r}
 # Resolving data entry issue with missing decimal point

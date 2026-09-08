@@ -360,7 +360,12 @@ function toggleGlossary() {
 7. Interpret and draw conclusions.
 :::
 
-Today we work through the same dataset twice: once to build a predictive model and once to build a causal model. Using the same data for both goals shows how the purpose of the model shapes every decision you make about it.
+Today we're going to explore two different approaches to modelling using the same dataset, with both models fitted using a linear model. You might recognise this dataset from the first week of the course; it contains information about rental prices in Aberdeen. The two models we're focusing on are:
+
+1. A **predictive model** aimed at predicting rent prices as accurately as possible.
+2. A **causal model** designed to understand the effect of square metres on rent price.
+
+This exercise will show that the same statistical tools can be used for different goals, whether you want to build a simple predictive "AI" model or explore causal relationships.
 
 The dataset is the Aberdeen rental flats data from Workshop 2. If you no longer have it, download it below and save it to your `BI3010/data/` folder.
 
@@ -374,22 +379,24 @@ abdn <- read.table("abdn_flats.txt", header = TRUE)
 
 # Predictive modelling
 
-Predictive models are a natural starting point for multiple-predictor models because the inclusion criteria are simple: add variables that improve predictions. We don't need to worry about causal assumptions here (don't tell the Machine Learning folks I said that!); we just want the model to guess the rent accurately.
+Predictive models are a great starting point when considering models with multiple explanatory variables because they're usually more straightforward: no need to worry about tricky causal assumptions here (don't tell the Machine Learning folks I said that!). We just want the model to guess the rent as accurately as possible.
 
 ## 1. Formulate a research question
 
-The question is: can we predict the monthly rent of a listed property? We'll use floor area (m²), total number of rooms, energy efficiency band (EPC), and council tax band as predictors.
+This one's simple: we just want to predict rent. We're not interested in *why* a rented property (flat or house) is more or less expensive; we just want to predict the listed price as accurately as possible. To do so we'll limit ourselves to floor area (m²), the total number of rooms, the energy efficiency band, and the council tax band as explanatory variables.
 
 ## 2. Perform exploratory data analysis
 
-Spend a few minutes exploring the dataset. Check for odd values, and make a note of anything that looks suspicious.
+As usual, spend a few minutes exploring the dataset. Check for any obvious errors or odd values.
 
-One thing to be aware of with rental data like this: a property's listed price can change over time. Suppose a property first listed at a whopping £3,200 a month has, a year later, dropped to £2,900 (because no one was willing to pay £3.2k in rent). You'll need to decide how to handle a case like this. Your options are: (1) keep the original price, (2) update to the current price, or (3) create a new row for the "new" listing. Option 3 violates an assumption. Can you identify which one?
+As a warning, some properties were listed at a specific price but may have had that price reduced since. For example, there's one property that when I first added it to the dataset was listed at a whopping £3,200 a month, but by the time of writing that price had dropped to £2,900 (because no one was willing to pay £3.2k in rent). In these cases you'll need to decide for yourself how you want to deal with them. Your options are: 1) retain the original price if you think it wasn't a data entry mistake, 2) update the price with the newly lowered rent, or 3) create an entirely new observation for this "new" listing. Note that option 3) will lead to an assumption being violated. Do you know which assumption would be broken if you created a new observation for any property that had its price lowered?
 
 ## 3. Identify any hidden assumptions
 
+Even in a predictive model, we need to think about potential hidden assumptions. If our data is flawed or not representative, our predictions will be flawed too. Take a moment to consider the limitations. For example, could we use this model to predict rent prices in London?
+
 <div class="question-block">
-<p><strong>Question 1.</strong> The dataset mixes houses and flats without distinguishing between them. What effect might this have on the predictive model?</p>
+<p><strong>Question 1.</strong> The dataset includes both houses and flats, with no distinction made between them. We could add that distinction (we have the data), but let's pretend we didn't. What effect might this lack of distinction have on the predictive model?</p>
 <textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
@@ -399,7 +406,7 @@ One thing to be aware of with rental data like this: a property's listed price c
 
 ## 4. Fit an appropriate model
 
-In predictive modelling, we can include all sensible explanatory variables without worrying about the underlying causal relationships. The dataset variables are:
+One reason predictive modelling is so accessible is that we can throw all of our (sensible) explanatory variables into the model without worrying too much about the underlying relationships. The dataset variables are:
 
 | Variable | Description |
 |---|---|
@@ -418,11 +425,11 @@ In predictive modelling, we can include all sensible explanatory variables witho
 | `HouseType` | Detached, semi-detached, terrace, or flat |
 | `Furnished` | Fully furnished, part furnished, or unfurnished |
 
-We'll keep it to four predictors: `FloorArea`, `Rooms`, `EPC`, and `Tax`.
+But let's keep it simple today and use just four: `FloorArea`, `Rooms`, `EPC`, and `Tax`.
 
 For some reason, the value of a property in 1991 is how the council tax band is decided. I don't get why 1991 is special (I doubt it actually is) but that's what they do. It's dumb. C'est la vie.
 
-One complication: `EPC` and `Tax` are inherently continuous quantities (energy efficiency and property value) that have been **discretised** into letter bands. This forces R to create a separate dummy variable for every band except the reference. Written out in full, the model equation is:
+Something to note in this dataset are the `EPC` and `Tax` variables. In both, the underlying "values" are really continuous (tax band is a measure of the property's value in 1991, and EPC is a measure of how energy efficient a property is), but they've been **discretised**, or converted into groups (e.g. a property valued at £100,000 in 1991 is in the `A` tax band). Whenever this is done it can make our life pretty horrible when it comes to the actual model, which you can see when we write out the full notation:
 
 $$Price_i \sim \text{Normal}(\mu_i, \sigma)$$
 
@@ -436,7 +443,9 @@ $$\begin{align}
 
 where $\beta_0$ is the predicted rent for a property with zero floor area, zero rooms, EPC band A, and tax band A; $\beta_1$ is the change per additional m²; $\beta_2$ is the change per additional room; and $\beta_3$ through $\beta_8$ and $\beta_9$ through $\beta_{14}$ are the differences between each band and the reference (band A in each case).
 
-As you can see, `EPC` and `Tax` being recorded as categories has made our model stupidly and crazily more complicated than it would otherwise be. That's 14 parameters, compared to just 4 if they had been kept as continuous scores. Discretising continuous variables into categories creates a lot of extra work and often loses information in the process. Avoid it where you can.
+As you can see, `EPC` and `Tax` being recorded as categories has made our model stupidly and crazily more complicated than it would otherwise be. If `EPC` and `Tax` were continuous variables, we'd need to estimate just *four* parameters instead of 14! In this case we can't go backwards: the data we have is categorical and we have to respect that, so we're stuck estimating 14 parameters.
+
+A general tip: avoid creating categorical variables out of continuous ones when you can, it'll save you headaches down the road (and often makes your analyses more reliable).
 
 Despite the notation complexity, fitting the model in R is straightforward:
 
@@ -448,6 +457,8 @@ summary(rent_mod)
 This produces a giant list of estimated parameters, reminding us why it's best to avoid excessive categorisation. Keep this in mind for your future work (including your Honour's project), both for simplicity and for more meaningful analyses!
 
 ## 5. Diagnose the model and check assumptions
+
+In previous workshops we saved assumption checks for the Friday session, but by now you should be feeling more confident and able to do this more quickly.
 
 ```{r, eval=FALSE}
 par(mfrow = c(2, 2))
@@ -540,7 +551,7 @@ par(mfrow = c(1, 1))
 
 ## 6. Summarise the results
 
-With multiple predictors, `ggeffects` makes plotting much easier than building every prediction data frame by hand:
+Given the number of explanatory variables in our predictive model, we'll use `ggeffects` to do the plotting, though you can definitely do it manually if you prefer more control (the manual approach is shown further down):
 
 ```{r, eval=FALSE}
 library(ggeffects)
@@ -631,9 +642,9 @@ predict(rent_mod, newdata = my_property, interval = "confidence")</code></pre>
 
 # Causal modelling
 
-We now switch goals. Instead of predicting rent as accurately as possible, we want to understand the **causal effect of floor area on rent**: if a property had an extra 10 m², how much more would we expect it to rent for?
+Having run a model that aims to predict rent as accurately as possible, we're now going to switch over to causal modelling using the same dataset. Hopefully the differences and similarities between the two approaches will become clear.
 
-This is a different question and requires a different analytical approach.
+Instead of predicting rent, we want to understand the **causal effect of floor area on rent**: if a property had an extra 10 m², how much more would we expect it to rent for? This is a different question and requires a different analytical approach.
 
 ## Confounders
 
@@ -645,173 +656,124 @@ In a pipe, Z is caused by the predictor of interest X and in turn causes the res
 
 Click Z in the DAG to add or remove it from the model.
 
-```{ojs}
-//| echo: false
-pipe_data = {
-  const n = 260, s = 0.85;
-  const rows = [];
-  for (let i = 0; i < n; i++) {
-    const x = Math.random() * 10;
-    const z = s * x + (1 - s) * Math.random() * 10;
-    const y = s * z + (1 - s) * Math.random() * 10;
-    rows.push({ x, y, z });
+
+```{=html}
+<div id="dag-pipe"></div>
+<script>
+window.__mkCausalDag = function(opts){
+  var NS = "http://www.w3.org/2000/svg";
+  var data = opts.data, sel = false;
+  function mean(a){var s=0;for(var i=0;i<a.length;i++)s+=a[i];return s/a.length;}
+  function ols(xa,ya){var mx=mean(xa),my=mean(ya),sxy=0,sxx=0,i;
+    for(i=0;i<xa.length;i++){sxy+=(xa[i]-mx)*(ya[i]-my);sxx+=(xa[i]-mx)*(xa[i]-mx);}
+    var b1=sxy/sxx;return {b0:my-b1*mx,b1:b1};}
+  function compute(){
+    var xs=data.map(function(d){return d.x;}),ys=data.map(function(d){return d.y;}),
+        zs=data.map(function(d){return d.z;}),n=xs.length,b0,b1,mse=0,sxx=0,mX,i;
+    if(!sel){var r=ols(xs,ys);b0=r.b0;b1=r.b1;mX=mean(xs);
+      for(i=0;i<n;i++)sxx+=(xs[i]-mX)*(xs[i]-mX);
+      for(i=0;i<n;i++){var e=ys[i]-b0-b1*xs[i];mse+=e*e;}mse/=(n-2);
+    } else {var rY=ols(zs,ys),rX=ols(zs,xs);
+      var eY=ys.map(function(y,j){return y-rY.b0-rY.b1*zs[j];});
+      var eX=xs.map(function(x,j){return x-rX.b0-rX.b1*zs[j];});
+      b1=ols(eX,eY).b1;mX=mean(xs);b0=mean(ys)-b1*mX;
+      for(i=0;i<n;i++){var e2=eY[i]-b1*eX[i];mse+=e2*e2;}mse/=(n-3);
+      for(i=0;i<n;i++)sxx+=eX[i]*eX[i];}
+    var se=Math.sqrt(mse/sxx);
+    return {b0:b0,b1:b1,se:se,ci_lo:b1-1.96*se,ci_hi:b1+1.96*se,mse:mse,sxx:sxx,mX:mX,n:n};
   }
-  return rows;
-}
-```
-
-```{ojs}
-//| echo: false
-pipe_interactive = {
-  const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
-  const ols  = (xa, ya) => {
-    const mx = mean(xa), my = mean(ya);
-    const b1 = xa.reduce((s, x, i) => s + (x - mx) * (ya[i] - my), 0) /
-               xa.reduce((s, x)    => s + (x - mx) ** 2, 0);
-    return { b0: my - b1 * mx, b1 };
-  };
-
-  let sel = false;
-
-  const computeModel = () => {
-    const xs = pipe_data.map(d => d.x);
-    const ys = pipe_data.map(d => d.y);
-    const zs = pipe_data.map(d => d.z);
-    const n  = xs.length;
-    let b0, b1, mse, sxx, mX;
-    if (!sel) {
-      ({ b0, b1 } = ols(xs, ys));
-      mX  = mean(xs);
-      sxx = xs.reduce((s, x) => s + (x - mX) ** 2, 0);
-      mse = xs.reduce((s, x, i) => s + (ys[i] - b0 - b1 * x) ** 2, 0) / (n - 2);
-    } else {
-      const rY = ols(zs, ys), rX = ols(zs, xs);
-      const eY = ys.map((y, i) => y - rY.b0 - rY.b1 * zs[i]);
-      const eX = xs.map((x, i) => x - rX.b0 - rX.b1 * zs[i]);
-      b1  = ols(eX, eY).b1;
-      mX  = mean(xs);
-      b0  = mean(ys) - b1 * mX;
-      const rFW = eY.map((e, i) => e - b1 * eX[i]);
-      mse = rFW.reduce((s, r) => s + r ** 2, 0) / (n - 3);
-      sxx = eX.reduce((s, e) => s + e ** 2, 0);
-    }
-    const se = Math.sqrt(mse / sxx), ci_lo = b1 - 1.96 * se, ci_hi = b1 + 1.96 * se;
-    const xMin = Math.min(...xs), xMax = Math.max(...xs);
-    const xSeq = Array.from({ length: 60 }, (_, i) => xMin + i * (xMax - xMin) / 59);
-    const band = xSeq.map(x => ({
-      x,
-      y1: b0 + b1 * x - 1.96 * Math.sqrt(mse * (1/n + (x - mX)**2 / sxx)),
-      y2: b0 + b1 * x + 1.96 * Math.sqrt(mse * (1/n + (x - mX)**2 / sxx))
-    }));
-    return { slope: b1, ci_lo, ci_hi,
-      line: [{ x: xMin, y: b0 + b1*xMin }, { x: xMax, y: b0 + b1*xMax }], band };
-  };
-
-  const wrapper = document.createElement("div");
-  const row     = document.createElement("div");
-  row.style.cssText = "display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;";
-  const plotDiv = document.createElement("div");
-  const coefDiv = document.createElement("div");
-  coefDiv.className = "stat-display";
-  const msgDiv  = document.createElement("div");
-  msgDiv.style.marginTop = "0.8rem";
-  wrapper.append(row, coefDiv, msgDiv);
-
-  const NS = "http://www.w3.org/2000/svg";
-  const dagSvg = document.createElementNS(NS, "svg");
-  dagSvg.setAttribute("width", "220"); dagSvg.setAttribute("height", "88");
-  dagSvg.setAttribute("style", "cursor:default;font-family:inherit;flex-shrink:0;");
-
-  const addMarker = (id, color) => {
-    const m = document.createElementNS(NS, "marker");
-    m.setAttribute("id", id); m.setAttribute("markerWidth", "10");
-    m.setAttribute("markerHeight", "7"); m.setAttribute("refX", "9");
-    m.setAttribute("refY", "3.5"); m.setAttribute("orient", "auto");
-    const p = document.createElementNS(NS, "polygon");
-    p.setAttribute("points", "0 0, 10 3.5, 0 7"); p.setAttribute("fill", color);
-    m.appendChild(p); return m;
-  };
-  const defs = document.createElementNS(NS, "defs");
-  defs.appendChild(addMarker("pp-ca", "#2d6a4f"));
-  defs.appendChild(addMarker("pp-cl", "#adb5bd"));
+  var root=document.getElementById(opts.mountId);
+  var row=document.createElement("div");
+  row.style.cssText="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;";
+  var plotDiv=document.createElement("div");
+  var dagSvg=document.createElementNS(NS,"svg");
+  var coefDiv=document.createElement("div");coefDiv.className="stat-display";
+  var msgDiv=document.createElement("div");msgDiv.style.marginTop="0.8rem";
+  row.appendChild(plotDiv);row.appendChild(dagSvg);
+  root.appendChild(row);root.appendChild(coefDiv);root.appendChild(msgDiv);
+  dagSvg.setAttribute("width","220");dagSvg.setAttribute("height",String(opts.svgH));
+  dagSvg.setAttribute("style","font-family:inherit;flex-shrink:0;");
+  function svgE(tag,attrs){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);return e;}
+  var mkId=opts.mountId,defs=document.createElementNS(NS,"defs");
+  function marker(id,color){var m=svgE("marker",{id:id,markerWidth:10,markerHeight:7,refX:9,refY:3.5,orient:"auto"});
+    m.appendChild(svgE("polygon",{points:"0 0, 10 3.5, 0 7",fill:color}));return m;}
+  defs.appendChild(marker(mkId+"-out",opts.edgeOut.stroke));
+  defs.appendChild(marker(mkId+"-in",opts.edgeIn.stroke));
   dagSvg.appendChild(defs);
-
-  const R = 25;
-  const P = { x: {cx:35,cy:44}, z: {cx:110,cy:44}, y: {cx:185,cy:44} };
-  const mkEdge = (fr, to) => {
-    const dx = P[to].cx - P[fr].cx, dy = P[to].cy - P[fr].cy, d = Math.hypot(dx, dy);
-    const ln = document.createElementNS(NS, "line");
-    ln.setAttribute("x1", P[fr].cx + R*dx/d); ln.setAttribute("y1", P[fr].cy + R*dy/d);
-    ln.setAttribute("x2", P[to].cx - R*dx/d); ln.setAttribute("y2", P[to].cy - R*dy/d);
-    ln.setAttribute("stroke-width", "2.2"); dagSvg.appendChild(ln); return ln;
-  };
-  const eXZ = mkEdge("x", "z"), eZY = mkEdge("z", "y");
-
-  const mkNode = (cx, cy, label, stroke, clickable) => {
-    const g = document.createElementNS(NS, "g");
-    if (clickable) g.setAttribute("style", "cursor:pointer;user-select:none;");
-    const c = document.createElementNS(NS, "circle");
-    c.setAttribute("cx", cx); c.setAttribute("cy", cy); c.setAttribute("r", R);
-    c.setAttribute("fill", "white"); c.setAttribute("stroke", stroke);
-    c.setAttribute("stroke-width", "2.5");
-    const t = document.createElementNS(NS, "text");
-    t.setAttribute("x", cx); t.setAttribute("y", cy + 5);
-    t.setAttribute("text-anchor", "middle"); t.setAttribute("font-size", "13");
-    t.setAttribute("font-weight", "600"); t.setAttribute("fill", stroke);
-    t.textContent = label;
-    g.appendChild(c); g.appendChild(t); dagSvg.appendChild(g);
-    return { g, c, t };
-  };
-  mkNode(P.x.cx, P.x.cy, "X", "#2d6a4f", false);
-  const nZ = mkNode(P.z.cx, P.z.cy, "Z", "#4a5568", true);
-  mkNode(P.y.cx, P.y.cy, "Y", "#d4a017", false);
-  row.append(plotDiv, dagSvg);
-
-  const renderAll = () => {
-    const [col, dash, mk] = sel
-      ? ["#adb5bd", "6,4", "url(#pp-cl)"]
-      : ["#2d6a4f", "none", "url(#pp-ca)"];
-    [eXZ, eZY].forEach(e => {
-      e.setAttribute("stroke", col); e.setAttribute("stroke-dasharray", dash);
-      e.setAttribute("marker-end", mk);
-    });
-    nZ.c.setAttribute("fill",   sel ? "#fef9e7" : "white");
-    nZ.c.setAttribute("stroke", sel ? "#d4a017" : "#4a5568");
-    nZ.t.setAttribute("fill",   sel ? "#d4a017" : "#4a5568");
-
-    const m = computeModel();
-    plotDiv.replaceChildren(Plot.plot({
-      marks: [
-        Plot.areaY(m.band, { x:"x", y1:"y1", y2:"y2", fill:"#d4a017", fillOpacity:0.15 }),
-        Plot.dot(pipe_data, { x:"x", y:"y", fill:"#2d6a4f", opacity:0.55, r:4 }),
-        Plot.line(m.line, { x:"x", y:"y", stroke:"#d4a017", strokeWidth:2.5 })
-      ],
-      x: { label: "X (e.g. floor area)" }, y: { label: "Y (e.g. price)" },
-      width: 380, height: 280, style: { background: "transparent", fontSize: 12 }
-    }));
-
-    const fmt = x => (x >= 0 ? "+" : "") + x.toFixed(2);
-    const cls = Math.abs(m.slope) < 0.15 ? "near-zero" : m.slope > 0 ? "positive" : "negative";
-    coefDiv.innerHTML = `
-      <span class="stat-value ${cls}">${fmt(m.slope)}</span>
-      <div class="stat-label">X coefficient &middot; change in Y per unit X<br>
-        95% CI: [${fmt(m.ci_lo)}, ${fmt(m.ci_hi)}]<br>
-        <code style="font-size:0.9em">${sel ? "lm(Y ~ X + Z)" : "lm(Y ~ X)"}</code>
-      </div>`;
-
-    if (!sel) {
-      msgDiv.style.cssText = "padding:0.75rem 1rem;border-radius:6px;font-size:0.9em;line-height:1.5;background:#f0fdf4;border-left:4px solid #2d6a4f;margin-top:0.5rem;";
-      msgDiv.innerHTML = "<strong>Total effect estimated.</strong> Z is the mechanism through which X affects Y. Leaving Z out keeps the full X&rarr;Z&rarr;Y pathway open and captures the total causal effect of X on Y.";
-    } else {
-      msgDiv.style.cssText = "padding:0.75rem 1rem;border-radius:6px;font-size:0.9em;line-height:1.5;background:#fff5f5;border-left:4px solid #c0392b;margin-top:0.5rem;";
-      msgDiv.innerHTML = "<strong>Over-controlled.</strong> Z is a mediator carrying the X&rarr;Y effect. Including it blocks the causal pathway and the X coefficient collapses towards zero. X still has an effect; you have removed the route through which it acts.";
-    }
-  };
-
-  nZ.g.addEventListener("click", () => { sel = !sel; renderAll(); });
-  renderAll();
-  return wrapper;
-}
+  var R=25,P=opts.nodePos,edgeEls=[];
+  opts.edges.forEach(function(ed){var a=P[ed.from],b=P[ed.to];
+    var dx=b[0]-a[0],dy=b[1]-a[1],d=Math.hypot(dx,dy);
+    var ln=svgE("line",{x1:a[0]+R*dx/d,y1:a[1]+R*dy/d,x2:b[0]-R*dx/d,y2:b[1]-R*dy/d,"stroke-width":2.2});
+    dagSvg.appendChild(ln);edgeEls.push(ln);});
+  function node(key,label,stroke,clickable){var pos=P[key];var g=svgE("g",{});
+    if(clickable)g.setAttribute("style","cursor:pointer;user-select:none;");
+    var c=svgE("circle",{cx:pos[0],cy:pos[1],r:R,fill:"white",stroke:stroke,"stroke-width":2.5});
+    var t=svgE("text",{x:pos[0],y:pos[1]+5,"text-anchor":"middle","font-size":13,"font-weight":600,fill:stroke});
+    t.textContent=label;g.appendChild(c);g.appendChild(t);dagSvg.appendChild(g);return {c:c,t:t,g:g};}
+  node("X","X","#2d6a4f",false);node("Y","Y","#d4a017",false);
+  var nZ=node("Z","Z","#4a5568",true);
+  nZ.g.addEventListener("click",function(){sel=!sel;render();});
+  function fmt(v){return (v>=0?"+":"")+v.toFixed(2);}
+  function drawPlot(m){
+    var W=380,H=280,ML=48,MR=14,MT=12,MB=40,PW=W-ML-MR,PH=H-MT-MB;
+    var xs=data.map(function(d){return d.x;}),ys=data.map(function(d){return d.y;});
+    var xMin=Math.min.apply(null,xs),xMax=Math.max.apply(null,xs);
+    var allY=ys.slice();m.band.forEach(function(p){allY.push(p.y1);allY.push(p.y2);});
+    var yMin=Math.min.apply(null,allY),yMax=Math.max.apply(null,allY);
+    var padY=(yMax-yMin)*0.05;yMin-=padY;yMax+=padY;
+    function sx(x){return ML+(x-xMin)/(xMax-xMin)*PW;}
+    function sy(y){return MT+PH-(y-yMin)/(yMax-yMin)*PH;}
+    var s='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:400px;font-family:inherit;">';
+    var top=m.band.map(function(p){return sx(p.x).toFixed(1)+","+sy(p.y2).toFixed(1);}).join(" ");
+    var bot=m.band.slice().reverse().map(function(p){return sx(p.x).toFixed(1)+","+sy(p.y1).toFixed(1);}).join(" ");
+    s+='<polygon points="'+top+' '+bot+'" fill="#d4a017" fill-opacity="0.15"/>';
+    data.forEach(function(d){s+='<circle cx="'+sx(d.x).toFixed(1)+'" cy="'+sy(d.y).toFixed(1)+'" r="3.2" fill="#2d6a4f" opacity="0.5"/>';});
+    s+='<line x1="'+sx(m.line[0].x).toFixed(1)+'" y1="'+sy(m.line[0].y).toFixed(1)+'" x2="'+sx(m.line[1].x).toFixed(1)+'" y2="'+sy(m.line[1].y).toFixed(1)+'" stroke="#d4a017" stroke-width="2.5"/>';
+    s+='<line x1="'+ML+'" y1="'+(MT+PH)+'" x2="'+(ML+PW)+'" y2="'+(MT+PH)+'" stroke="#888"/>';
+    s+='<line x1="'+ML+'" y1="'+MT+'" x2="'+ML+'" y2="'+(MT+PH)+'" stroke="#888"/>';
+    s+='<text x="'+(ML+PW/2)+'" y="'+(H-6)+'" text-anchor="middle" font-size="11" fill="#444">'+opts.xLabel+'</text>';
+    s+='<text transform="rotate(-90 12 '+(MT+PH/2)+')" x="12" y="'+(MT+PH/2+4)+'" text-anchor="middle" font-size="11" fill="#444">'+opts.yLabel+'</text>';
+    s+='</svg>';plotDiv.innerHTML=s;
+  }
+  function render(){
+    var m=compute();var xs=data.map(function(d){return d.x;});
+    var xMin=Math.min.apply(null,xs),xMax=Math.max.apply(null,xs);
+    m.line=[{x:xMin,y:m.b0+m.b1*xMin},{x:xMax,y:m.b0+m.b1*xMax}];m.band=[];
+    for(var i=0;i<60;i++){var x=xMin+i*(xMax-xMin)/59;
+      var half=1.96*Math.sqrt(m.mse*(1/m.n+(x-m.mX)*(x-m.mX)/m.sxx));
+      m.band.push({x:x,y1:m.b0+m.b1*x-half,y2:m.b0+m.b1*x+half});}
+    drawPlot(m);
+    var st=sel?opts.edgeIn:opts.edgeOut;
+    edgeEls.forEach(function(e){e.setAttribute("stroke",st.stroke);
+      e.setAttribute("stroke-dasharray",st.dash);
+      e.setAttribute("marker-end","url(#"+mkId+(sel?"-in":"-out")+")");});
+    nZ.c.setAttribute("fill",sel?opts.zFillIn:"white");
+    nZ.c.setAttribute("stroke",sel?opts.zStrokeIn:"#4a5568");
+    nZ.t.setAttribute("fill",sel?opts.zStrokeIn:"#4a5568");
+    var cls=Math.abs(m.b1)<opts.nearZero?"near-zero":(m.b1>0?"positive":"negative");
+    coefDiv.innerHTML='<span class="stat-value '+cls+'">'+fmt(m.b1)+'</span>'+
+      '<div class="stat-label">X coefficient &middot; change in Y per unit X<br>95% CI: ['+fmt(m.ci_lo)+', '+fmt(m.ci_hi)+']<br><code style="font-size:0.9em">'+(sel?'lm(Y ~ X + Z)':'lm(Y ~ X)')+'</code></div>';
+    var msg=sel?opts.msgIn:opts.msgOut;
+    msgDiv.style.cssText="padding:0.75rem 1rem;border-radius:6px;font-size:0.9em;line-height:1.5;margin-top:0.5rem;background:"+msg.bg+";border-left:4px solid "+msg.border+";";
+    msgDiv.innerHTML=msg.html;
+  }
+  render();
+};
+(function(){
+  var d=[],s=0.85,i;
+  for(i=0;i<260;i++){var x=Math.random()*10,z=s*x+(1-s)*Math.random()*10,y=s*z+(1-s)*Math.random()*10;d.push({x:x,y:y,z:z});}
+  window.__mkCausalDag({
+    mountId:"dag-pipe", data:d, svgH:88,
+    nodePos:{X:[35,44],Z:[110,44],Y:[185,44]},
+    edges:[{from:"X",to:"Z"},{from:"Z",to:"Y"}],
+    edgeOut:{stroke:"#2d6a4f",dash:"none"}, edgeIn:{stroke:"#adb5bd",dash:"6,4"},
+    zFillIn:"#fef9e7", zStrokeIn:"#d4a017",
+    xLabel:"X (e.g. floor area)", yLabel:"Y (e.g. price)", nearZero:0.15,
+    msgOut:{bg:"#f0fdf4",border:"#2d6a4f",html:"<strong>Total effect estimated.</strong> Z is the mechanism through which X affects Y. Leaving Z out keeps the full X\u2192Z\u2192Y pathway open and captures the total causal effect of X on Y."},
+    msgIn:{bg:"#fff5f5",border:"#c0392b",html:"<strong>Over-controlled.</strong> Z is a mediator carrying the X\u2192Y effect. Including it blocks the causal pathway and the X coefficient collapses towards zero. X still has an effect; you have removed the route through which it acts."}
+  });
+})();
+</script>
 ```
 
 Within this data: `FloorArea` → `Rooms` → `Price`. Larger properties have more rooms, and more rooms drives price. Including `Rooms` when asking about the causal effect of `FloorArea` would block this path. The correct causal model leaves `Rooms` out.
@@ -850,173 +812,25 @@ In a fork, Z causes both X and Y: the structure is X ← Z → Y. X and Y appear
 
 Click Z in the DAG to add or remove it from the model.
 
-```{ojs}
-//| echo: false
-fork_data = {
-  const n = 280, s = 0.8;
-  const rows = [];
-  for (let i = 0; i < n; i++) {
-    const z = Math.random();
-    const x = s * z * 10 + (1 - s) * Math.random() * 10;
-    const y = s * z * 10 + (1 - s) * Math.random() * 10;
-    rows.push({ x, y, z });
-  }
-  return rows;
-}
-```
 
-```{ojs}
-//| echo: false
-fork_interactive = {
-  const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
-  const ols  = (xa, ya) => {
-    const mx = mean(xa), my = mean(ya);
-    const b1 = xa.reduce((s, x, i) => s + (x - mx) * (ya[i] - my), 0) /
-               xa.reduce((s, x)    => s + (x - mx) ** 2, 0);
-    return { b0: my - b1 * mx, b1 };
-  };
-
-  let sel = false;
-
-  const computeModel = () => {
-    const xs = fork_data.map(d => d.x);
-    const ys = fork_data.map(d => d.y);
-    const zs = fork_data.map(d => d.z);
-    const n  = xs.length;
-    let b0, b1, mse, sxx, mX;
-    if (!sel) {
-      ({ b0, b1 } = ols(xs, ys));
-      mX  = mean(xs);
-      sxx = xs.reduce((s, x) => s + (x - mX) ** 2, 0);
-      mse = xs.reduce((s, x, i) => s + (ys[i] - b0 - b1 * x) ** 2, 0) / (n - 2);
-    } else {
-      const rY = ols(zs, ys), rX = ols(zs, xs);
-      const eY = ys.map((y, i) => y - rY.b0 - rY.b1 * zs[i]);
-      const eX = xs.map((x, i) => x - rX.b0 - rX.b1 * zs[i]);
-      b1  = ols(eX, eY).b1;
-      mX  = mean(xs);
-      b0  = mean(ys) - b1 * mX;
-      const rFW = eY.map((e, i) => e - b1 * eX[i]);
-      mse = rFW.reduce((s, r) => s + r ** 2, 0) / (n - 3);
-      sxx = eX.reduce((s, e) => s + e ** 2, 0);
-    }
-    const se = Math.sqrt(mse / sxx), ci_lo = b1 - 1.96 * se, ci_hi = b1 + 1.96 * se;
-    const xMin = Math.min(...xs), xMax = Math.max(...xs);
-    const xSeq = Array.from({ length: 60 }, (_, i) => xMin + i * (xMax - xMin) / 59);
-    const band = xSeq.map(x => ({
-      x,
-      y1: b0 + b1 * x - 1.96 * Math.sqrt(mse * (1/n + (x - mX)**2 / sxx)),
-      y2: b0 + b1 * x + 1.96 * Math.sqrt(mse * (1/n + (x - mX)**2 / sxx))
-    }));
-    return { slope: b1, ci_lo, ci_hi,
-      line: [{ x: xMin, y: b0 + b1*xMin }, { x: xMax, y: b0 + b1*xMax }], band };
-  };
-
-  const wrapper = document.createElement("div");
-  const row     = document.createElement("div");
-  row.style.cssText = "display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;";
-  const plotDiv = document.createElement("div");
-  const coefDiv = document.createElement("div");
-  coefDiv.className = "stat-display";
-  const msgDiv  = document.createElement("div");
-  msgDiv.style.marginTop = "0.8rem";
-  wrapper.append(row, coefDiv, msgDiv);
-
-  const NS = "http://www.w3.org/2000/svg";
-  const dagSvg = document.createElementNS(NS, "svg");
-  dagSvg.setAttribute("width", "220"); dagSvg.setAttribute("height", "155");
-  dagSvg.setAttribute("style", "cursor:default;font-family:inherit;flex-shrink:0;");
-
-  const addMarker = (id, color) => {
-    const m = document.createElementNS(NS, "marker");
-    m.setAttribute("id", id); m.setAttribute("markerWidth", "10");
-    m.setAttribute("markerHeight", "7"); m.setAttribute("refX", "9");
-    m.setAttribute("refY", "3.5"); m.setAttribute("orient", "auto");
-    const p = document.createElementNS(NS, "polygon");
-    p.setAttribute("points", "0 0, 10 3.5, 0 7"); p.setAttribute("fill", color);
-    m.appendChild(p); return m;
-  };
-  const defs = document.createElementNS(NS, "defs");
-  defs.appendChild(addMarker("fk-bd", "#c0392b"));
-  defs.appendChild(addMarker("fk-cl", "#adb5bd"));
-  dagSvg.appendChild(defs);
-
-  const R = 25;
-  const P = { z: {cx:110,cy:35}, x: {cx:38,cy:125}, y: {cx:182,cy:125} };
-  const mkEdge = (fr, to) => {
-    const dx = P[to].cx - P[fr].cx, dy = P[to].cy - P[fr].cy, d = Math.hypot(dx, dy);
-    const ln = document.createElementNS(NS, "line");
-    ln.setAttribute("x1", P[fr].cx + R*dx/d); ln.setAttribute("y1", P[fr].cy + R*dy/d);
-    ln.setAttribute("x2", P[to].cx - R*dx/d); ln.setAttribute("y2", P[to].cy - R*dy/d);
-    ln.setAttribute("stroke-width", "2.2"); dagSvg.appendChild(ln); return ln;
-  };
-  const eZX = mkEdge("z", "x"), eZY = mkEdge("z", "y");
-
-  const mkNode = (cx, cy, label, stroke, clickable) => {
-    const g = document.createElementNS(NS, "g");
-    if (clickable) g.setAttribute("style", "cursor:pointer;user-select:none;");
-    const c = document.createElementNS(NS, "circle");
-    c.setAttribute("cx", cx); c.setAttribute("cy", cy); c.setAttribute("r", R);
-    c.setAttribute("fill", "white"); c.setAttribute("stroke", stroke);
-    c.setAttribute("stroke-width", "2.5");
-    const t = document.createElementNS(NS, "text");
-    t.setAttribute("x", cx); t.setAttribute("y", cy + 5);
-    t.setAttribute("text-anchor", "middle"); t.setAttribute("font-size", "13");
-    t.setAttribute("font-weight", "600"); t.setAttribute("fill", stroke);
-    t.textContent = label;
-    g.appendChild(c); g.appendChild(t); dagSvg.appendChild(g);
-    return { g, c, t };
-  };
-  const nZ = mkNode(P.z.cx, P.z.cy, "Z", "#4a5568", true);
-  mkNode(P.x.cx, P.x.cy, "X", "#2d6a4f", false);
-  mkNode(P.y.cx, P.y.cy, "Y", "#d4a017", false);
-  row.append(plotDiv, dagSvg);
-
-  const renderAll = () => {
-    const [col, dash, mk] = sel
-      ? ["#adb5bd", "6,4", "url(#fk-cl)"]
-      : ["#c0392b", "none", "url(#fk-bd)"];
-    [eZX, eZY].forEach(e => {
-      e.setAttribute("stroke", col); e.setAttribute("stroke-dasharray", dash);
-      e.setAttribute("marker-end", mk);
-    });
-    nZ.c.setAttribute("fill",   sel ? "#fef9e7" : "white");
-    nZ.c.setAttribute("stroke", sel ? "#d4a017" : "#4a5568");
-    nZ.t.setAttribute("fill",   sel ? "#d4a017" : "#4a5568");
-
-    const m = computeModel();
-    plotDiv.replaceChildren(Plot.plot({
-      marks: [
-        Plot.areaY(m.band, { x:"x", y1:"y1", y2:"y2", fill:"#d4a017", fillOpacity:0.15 }),
-        Plot.dot(fork_data, { x:"x", y:"y", fill:"#2d6a4f", opacity:0.55, r:4 }),
-        Plot.line(m.line, { x:"x", y:"y", stroke:"#d4a017", strokeWidth:2.5 })
-      ],
-      x: { label: "X (e.g. EPC band)" }, y: { label: "Y (e.g. price)" },
-      width: 380, height: 280, style: { background: "transparent", fontSize: 12 }
-    }));
-
-    const fmt = x => (x >= 0 ? "+" : "") + x.toFixed(2);
-    const cls = Math.abs(m.slope) < 0.15 ? "near-zero" : m.slope > 0 ? "positive" : "negative";
-    coefDiv.innerHTML = `
-      <span class="stat-value ${cls}">${fmt(m.slope)}</span>
-      <div class="stat-label">X coefficient &middot; change in Y per unit X<br>
-        95% CI: [${fmt(m.ci_lo)}, ${fmt(m.ci_hi)}]<br>
-        <code style="font-size:0.9em">${sel ? "lm(Y ~ X + Z)" : "lm(Y ~ X)"}</code>
-      </div>`;
-
-    if (sel) {
-      msgDiv.style.cssText = "padding:0.75rem 1rem;border-radius:6px;font-size:0.9em;line-height:1.5;background:#f0fdf4;border-left:4px solid #2d6a4f;margin-top:0.5rem;";
-      msgDiv.innerHTML = "<strong>Correctly specified.</strong> Including Z closes the confounded path X&larr;Z&rarr;Y. The X coefficient now estimates the true direct effect, near zero, because the apparent X&ndash;Y association was created by Z acting on both.";
-    } else {
-      msgDiv.style.cssText = "padding:0.75rem 1rem;border-radius:6px;font-size:0.9em;line-height:1.5;background:#fff5f5;border-left:4px solid #c0392b;margin-top:0.5rem;";
-      msgDiv.innerHTML = "<strong>Confounded.</strong> Z causes both X and Y, inflating the X coefficient. The apparent X&rarr;Y association runs through Z, not from X to Y directly.";
-    }
-  };
-
-  nZ.g.addEventListener("click", () => { sel = !sel; renderAll(); });
-  renderAll();
-  return wrapper;
-}
+```{=html}
+<div id="dag-fork"></div>
+<script>
+(function(){
+  var d=[],s=0.8,i;
+  for(i=0;i<280;i++){var z=Math.random(),x=s*z*10+(1-s)*Math.random()*10,y=s*z*10+(1-s)*Math.random()*10;d.push({x:x,y:y,z:z});}
+  window.__mkCausalDag({
+    mountId:"dag-fork", data:d, svgH:155,
+    nodePos:{Z:[110,35],X:[38,125],Y:[182,125]},
+    edges:[{from:"Z",to:"X"},{from:"Z",to:"Y"}],
+    edgeOut:{stroke:"#c0392b",dash:"none"}, edgeIn:{stroke:"#adb5bd",dash:"6,4"},
+    zFillIn:"#fef9e7", zStrokeIn:"#d4a017",
+    xLabel:"X (e.g. EPC band)", yLabel:"Y (e.g. price)", nearZero:0.15,
+    msgOut:{bg:"#fff5f5",border:"#c0392b",html:"<strong>Confounded.</strong> Z causes both X and Y, inflating the X coefficient. The apparent X\u2192Y association runs through Z, not from X to Y directly."},
+    msgIn:{bg:"#f0fdf4",border:"#2d6a4f",html:"<strong>Correctly specified.</strong> Including Z closes the confounded path X\u2190Z\u2192Y. The X coefficient now estimates the true direct effect, near zero, because the apparent X\u2013Y association was created by Z acting on both."}
+  });
+})();
+</script>
 ```
 
 Within this data: `EPC` ← `FloorArea` → `Price`. Larger properties tend to have better energy efficiency ratings and also cost more. Any apparent EPC effect on price in a model without `FloorArea` would partly be floor area in disguise. Including `FloorArea` as an adjustment variable closes this confounded path.
@@ -1057,167 +871,24 @@ A concrete example: imagine both floor area and property condition independently
 
 The collider structure doesn't appear in the current flats DAG, but it's the hardest mistake to spot. "Controlling for more variables" sounds rigorous, but adding a collider makes the model *worse*, not better. Click Z to see the effect.
 
-```{ojs}
-//| echo: false
-coll_interactive = {
-  const n = 350;
-  const allRows = [];
-  for (let i = 0; i < n; i++) {
-    const x = Math.random() * 10;
-    const y = Math.random() * 10;
-    const z = x + y + (Math.random() - 0.5) * 2;
-    allRows.push({ x, y, z });
-  }
-
-  const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
-  const ols  = (xa, ya) => {
-    const mx = mean(xa), my = mean(ya);
-    const b1 = xa.reduce((s, x, i) => s + (x - mx) * (ya[i] - my), 0) /
-               xa.reduce((s, x)    => s + (x - mx) ** 2, 0);
-    return { b0: my - b1 * mx, b1 };
-  };
-
-  let sel = false;
-
-  const computeModel = () => {
-    const xs = allRows.map(d => d.x);
-    const ys = allRows.map(d => d.y);
-    const zs = allRows.map(d => d.z);
-    const nn = xs.length;
-    let b0, b1, mse, sxx, mX;
-    if (!sel) {
-      ({ b0, b1 } = ols(xs, ys));
-      mX  = mean(xs);
-      sxx = xs.reduce((s, x) => s + (x - mX) ** 2, 0);
-      mse = xs.reduce((s, x, i) => s + (ys[i] - b0 - b1 * x) ** 2, 0) / (nn - 2);
-    } else {
-      const rY = ols(zs, ys), rX = ols(zs, xs);
-      const eY = ys.map((y, i) => y - rY.b0 - rY.b1 * zs[i]);
-      const eX = xs.map((x, i) => x - rX.b0 - rX.b1 * zs[i]);
-      b1  = ols(eX, eY).b1;
-      mX  = mean(xs);
-      b0  = mean(ys) - b1 * mX;
-      const rFW = eY.map((e, i) => e - b1 * eX[i]);
-      mse = rFW.reduce((s, r) => s + r ** 2, 0) / (nn - 3);
-      sxx = eX.reduce((s, e) => s + e ** 2, 0);
-    }
-    const se = Math.sqrt(mse / sxx), ci_lo = b1 - 1.96 * se, ci_hi = b1 + 1.96 * se;
-    const xMin = Math.min(...xs), xMax = Math.max(...xs);
-    const xSeq = Array.from({ length: 60 }, (_, i) => xMin + i * (xMax - xMin) / 59);
-    const band = xSeq.map(x => ({
-      x,
-      y1: b0 + b1 * x - 1.96 * Math.sqrt(mse * (1/nn + (x - mX)**2 / sxx)),
-      y2: b0 + b1 * x + 1.96 * Math.sqrt(mse * (1/nn + (x - mX)**2 / sxx))
-    }));
-    return { slope: b1, ci_lo, ci_hi,
-      line: [{ x: xMin, y: b0 + b1*xMin }, { x: xMax, y: b0 + b1*xMax }], band };
-  };
-
-  const wrapper = document.createElement("div");
-  const row     = document.createElement("div");
-  row.style.cssText = "display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;";
-  const plotDiv = document.createElement("div");
-  const coefDiv = document.createElement("div");
-  coefDiv.className = "stat-display";
-  const msgDiv  = document.createElement("div");
-  msgDiv.style.marginTop = "0.8rem";
-  wrapper.append(row, coefDiv, msgDiv);
-
-  const NS = "http://www.w3.org/2000/svg";
-  const dagSvg = document.createElementNS(NS, "svg");
-  dagSvg.setAttribute("width", "220"); dagSvg.setAttribute("height", "155");
-  dagSvg.setAttribute("style", "cursor:default;font-family:inherit;flex-shrink:0;");
-
-  const addMarker = (id, color) => {
-    const m = document.createElementNS(NS, "marker");
-    m.setAttribute("id", id); m.setAttribute("markerWidth", "10");
-    m.setAttribute("markerHeight", "7"); m.setAttribute("refX", "9");
-    m.setAttribute("refY", "3.5"); m.setAttribute("orient", "auto");
-    const p = document.createElementNS(NS, "polygon");
-    p.setAttribute("points", "0 0, 10 3.5, 0 7"); p.setAttribute("fill", color);
-    m.appendChild(p); return m;
-  };
-  const defs = document.createElementNS(NS, "defs");
-  defs.appendChild(addMarker("cc-cl", "#adb5bd"));
-  defs.appendChild(addMarker("cc-op", "#e67e22"));
-  dagSvg.appendChild(defs);
-
-  const R = 25;
-  const P = { x: {cx:38,cy:35}, y: {cx:182,cy:35}, z: {cx:110,cy:125} };
-  const mkEdge = (fr, to) => {
-    const dx = P[to].cx - P[fr].cx, dy = P[to].cy - P[fr].cy, d = Math.hypot(dx, dy);
-    const ln = document.createElementNS(NS, "line");
-    ln.setAttribute("x1", P[fr].cx + R*dx/d); ln.setAttribute("y1", P[fr].cy + R*dy/d);
-    ln.setAttribute("x2", P[to].cx - R*dx/d); ln.setAttribute("y2", P[to].cy - R*dy/d);
-    ln.setAttribute("stroke-width", "2.2"); dagSvg.appendChild(ln); return ln;
-  };
-  const eXZ = mkEdge("x", "z"), eYZ = mkEdge("y", "z");
-
-  const mkNode = (cx, cy, label, stroke, clickable) => {
-    const g = document.createElementNS(NS, "g");
-    if (clickable) g.setAttribute("style", "cursor:pointer;user-select:none;");
-    const c = document.createElementNS(NS, "circle");
-    c.setAttribute("cx", cx); c.setAttribute("cy", cy); c.setAttribute("r", R);
-    c.setAttribute("fill", "white"); c.setAttribute("stroke", stroke);
-    c.setAttribute("stroke-width", "2.5");
-    const t = document.createElementNS(NS, "text");
-    t.setAttribute("x", cx); t.setAttribute("y", cy + 5);
-    t.setAttribute("text-anchor", "middle"); t.setAttribute("font-size", "13");
-    t.setAttribute("font-weight", "600"); t.setAttribute("fill", stroke);
-    t.textContent = label;
-    g.appendChild(c); g.appendChild(t); dagSvg.appendChild(g);
-    return { g, c, t };
-  };
-  mkNode(P.x.cx, P.x.cy, "X", "#2d6a4f", false);
-  mkNode(P.y.cx, P.y.cy, "Y", "#d4a017", false);
-  const nZ = mkNode(P.z.cx, P.z.cy, "Z", "#4a5568", true);
-  row.append(plotDiv, dagSvg);
-
-  const renderAll = () => {
-    const [col, dash, mk] = sel
-      ? ["#e67e22", "none", "url(#cc-op)"]
-      : ["#adb5bd", "6,4",  "url(#cc-cl)"];
-    [eXZ, eYZ].forEach(e => {
-      e.setAttribute("stroke", col); e.setAttribute("stroke-dasharray", dash);
-      e.setAttribute("marker-end", mk);
-    });
-    nZ.c.setAttribute("fill",   sel ? "#fff3e0" : "white");
-    nZ.c.setAttribute("stroke", sel ? "#e67e22" : "#4a5568");
-    nZ.t.setAttribute("fill",   sel ? "#e67e22" : "#4a5568");
-
-    const m = computeModel();
-    plotDiv.replaceChildren(Plot.plot({
-      marks: [
-        Plot.areaY(m.band, { x:"x", y1:"y1", y2:"y2", fill:"#d4a017", fillOpacity:0.15 }),
-        Plot.dot(allRows,  { x:"x", y:"y",   fill:"#2d6a4f", opacity:0.55, r:4 }),
-        Plot.line(m.line,  { x:"x", y:"y",   stroke:"#d4a017", strokeWidth:2.5 })
-      ],
-      x: { label: "X", nice: true }, y: { label: "Y", nice: true },
-      width: 380, height: 280, style: { background: "transparent", fontSize: 12 }
-    }));
-
-    const fmt = x => (x >= 0 ? "+" : "") + x.toFixed(2);
-    const cls = Math.abs(m.slope) < 0.08 ? "near-zero" : m.slope > 0 ? "positive" : "negative";
-    coefDiv.innerHTML = `
-      <span class="stat-value ${cls}">${fmt(m.slope)}</span>
-      <div class="stat-label">X coefficient &middot; change in Y per unit X<br>
-        95% CI: [${fmt(m.ci_lo)}, ${fmt(m.ci_hi)}]<br>
-        <code style="font-size:0.9em">${sel ? "lm(Y ~ X + Z)" : "lm(Y ~ X)"}</code>
-      </div>`;
-
-    if (!sel) {
-      msgDiv.style.cssText = "padding:0.75rem 1rem;border-radius:6px;font-size:0.9em;line-height:1.5;background:#f0fdf4;border-left:4px solid #2d6a4f;margin-top:0.5rem;";
-      msgDiv.innerHTML = "<strong>Correctly specified.</strong> Z is a collider: leave it out. X and Y are truly independent, and the near-zero slope reflects that.";
-    } else {
-      msgDiv.style.cssText = "padding:0.75rem 1rem;border-radius:6px;font-size:0.9em;line-height:1.5;background:#fff5f5;border-left:4px solid #c0392b;margin-top:0.5rem;";
-      msgDiv.innerHTML = "<strong>Collider bias.</strong> Including Z conditions on a common effect of X and Y. Because Z = X + Y + noise, holding Z constant forces higher X to be offset by lower Y, creating a strong spurious negative slope where none exists in reality.";
-    }
-  };
-
-  nZ.g.addEventListener("click", () => { sel = !sel; renderAll(); });
-  renderAll();
-  return wrapper;
-}
+```{=html}
+<div id="dag-collider"></div>
+<script>
+(function(){
+  var d=[],i;
+  for(i=0;i<350;i++){var x=Math.random()*10,y=Math.random()*10,z=x+y+(Math.random()-0.5)*2;d.push({x:x,y:y,z:z});}
+  window.__mkCausalDag({
+    mountId:"dag-collider", data:d, svgH:155,
+    nodePos:{X:[38,35],Y:[182,35],Z:[110,125]},
+    edges:[{from:"X",to:"Z"},{from:"Y",to:"Z"}],
+    edgeOut:{stroke:"#adb5bd",dash:"6,4"}, edgeIn:{stroke:"#e67e22",dash:"none"},
+    zFillIn:"#fff3e0", zStrokeIn:"#e67e22",
+    xLabel:"X", yLabel:"Y", nearZero:0.08,
+    msgOut:{bg:"#f0fdf4",border:"#2d6a4f",html:"<strong>Correctly specified.</strong> Z is a collider: leave it out. X and Y are truly independent, and the near-zero slope reflects that."},
+    msgIn:{bg:"#fff5f5",border:"#c0392b",html:"<strong>Collider bias.</strong> Including Z conditions on a common effect of X and Y. Because Z = X + Y + noise, holding Z constant forces higher X to be offset by lower Y, creating a strong spurious negative slope where none exists in reality."}
+  });
+})();
+</script>
 ```
 
 <div class="question-block">
@@ -1244,11 +915,11 @@ abdn <- read.table("abdn_flats.txt", header = TRUE)
 
 ## 1. Formulate a research question
 
-"How much does monthly rent change when the floor area of a property increases?" We want the *causal* effect of `FloorArea` on `Price`, not just a predictive association.
+Our research question is to understand the causal effect of square metres on rent, or "How much would rent be if a property were larger or smaller?" The important thing is that we're asking a *causal* question, not simply exploiting associations (i.e. correlations) to make accurate predictions.
 
 ## Creating a DAG
 
-To estimate a causal effect responsibly, we need to reason about confounding. We do this by drawing a Directed Acyclic Graph (DAG) that captures our beliefs about how variables cause one another. The `check_dag()` function from the `performance` package helps build and interrogate DAGs in R.
+To estimate a causal effect responsibly, we need to reason about confounding. We do this by drawing a Directed Acyclic Graph (DAG) that captures our beliefs about how variables cause one another. Drawing a DAG can be intellectually challenging (does the floor area of a property cause the number of rooms, or is it the number of rooms that causes the floor area?) and is often a laborious process, which is one of the better arguments for running an experiment whenever you can. It can also just be a pain to draw, especially if you do it in PowerPoint. Thankfully, the `check_dag()` function from the `performance` package helps build and interrogate DAGs in R.
 
 This requires the developer version of `performance`. Install it with:
 
@@ -1408,7 +1079,7 @@ plot(ggpredict(EPC_mod, terms = "EPC"))
 
 <p>The EPC effect estimates are often noisy with this dataset, with wide confidence intervals that span zero for some bands. This either means the DAG is more complex than assumed, or the dataset is too small to estimate the EPC effect reliably with this approach.</p>
 
-<p>A more complete DAG (accounting for property age, property type, and historic price) would likely change which variables need to be included, and might reveal that the current dataset cannot answer this causal question at all without collecting additional variables.</p>
+<p>A more complete DAG (accounting for property age, property type, and historic price) would likely change which variables need to be included, and might reveal that the current dataset cannot answer this causal question at all without collecting additional variables. This is a nice example of where drawing the DAG <em>before</em> collecting data prevents headaches later, by telling you which variables you will actually need.</p>
 </div>
 </div>
 

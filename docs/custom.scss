@@ -506,17 +506,20 @@ table.table th {
 // ------------------------------------------------------------
 .mc-options { margin: 0.6rem 0 0.8rem; display: flex; flex-direction: column; gap: 0.3rem; }
 .mc-options label {
-  display: flex; align-items: center; gap: 0.6rem;
+  display: block;
   padding: 0.45rem 0.75rem;
+  padding-left: 2.1rem;
+  text-indent: -1.35rem;
   border: 1.5px solid $hair;
   border-radius: 0;
   cursor: pointer;
   font-size: 0.92rem;
+  line-height: 1.45;
   background: $paper-input;
   transition: background 0.1s, border-color 0.1s;
 }
 .mc-options label:hover { background: #f6f0e3; border-color: $rust; }
-.mc-options input[type=radio] { cursor: pointer; flex-shrink: 0; accent-color: $rust; }
+.mc-options input[type=radio] { cursor: pointer; accent-color: $rust; margin-right: 0.5rem; vertical-align: -0.12em; }
 .mc-options.unanswered label { border-color: #b23b1c; background: #fbeee6; }
 label.mc-correct   { background: #e3ecd9 !important; border-color: $olive !important; font-weight: 700; }
 label.mc-incorrect { background: #fbeee6 !important; border-color: #b23b1c !important; }

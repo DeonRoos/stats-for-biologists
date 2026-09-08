@@ -239,7 +239,7 @@ Before we can work with this dataset, our colleagues in Japan have emailed to fl
 
 **Mistake 1:** The rabbit in the 7th row was actually from Oshima, not Tokunoshima.
 
-**Mistake 2:** They cannot remember which rabbit, but they accidentally added 100 to its weight.
+**Mistake 2:** They cannot remember which rabbit, but they accidentally added 1000 to its weight.
 
 They ask you to resolve both issues and also check for any other possible mistakes.
 
@@ -294,10 +294,10 @@ ggplot(rabbit) +
   geom_histogram(aes(x = weight))
 ```
 
-There is one rabbit much heavier than all others, well above 350 g. We can use that as a condition to identify it and subtract 100:
+There is one rabbit much heavier than all others, well above 3500 g. We can use that as a condition to identify it and subtract 1000:
 
 ```r
-rabbit[rabbit$weight > 350, ]
+rabbit[rabbit$weight > 3500, ]
 # Row 41 is the culprit.
 ```
 </div>
@@ -311,7 +311,7 @@ rabbit[rabbit$weight > 350, ]
 <div class="instructor-answer">
 
 ```r
-rabbit$weight[rabbit$weight > 350] <- rabbit$weight[rabbit$weight > 350] - 100
+rabbit$weight[rabbit$weight > 3500] <- rabbit$weight[rabbit$weight > 3500] - 1000
 
 # Confirm:
 rabbit[41, ]
@@ -623,9 +623,9 @@ summary(rabbit_mod)
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 
-$$\mu_i = 269.6 + (-2.9) \times \text{Present}_i$$
+$$\mu_i = 2695.6 + (-28.5) \times \text{Present}_i$$
 
-The first blank is 269.566 ($\beta_0$) and the second is &minus;2.866 ($\beta_1$). Rounding to one decimal place is appropriate here given that weights are recorded in whole grams and the estimated difference is small.
+The first blank is 2695.621 ($\beta_0$) and the second is &minus;28.528 ($\beta_1$). Rounding to one decimal place is appropriate here given that weights are recorded to a tenth of a gram and the estimated difference is small relative to the rabbits' body weight.
 </div>
 :::
 
@@ -633,16 +633,16 @@ The first blank is 269.566 ($\beta_0$) and the second is &minus;2.866 ($\beta_1$
 **Question 2.** Using your completed equation, what weight ($\mu$) would you predict for a rabbit where mongoose are present?
 
 <div class="mc-options">
-  <label><input type="radio" name="qs4-q2" data-correct="false"> 269.6 g</label>
-  <label><input type="radio" name="qs4-q2" data-correct="false"> 272.5 g</label>
-  <label><input type="radio" name="qs4-q2" data-correct="true"> 266.7 g</label>
-  <label><input type="radio" name="qs4-q2" data-correct="false"> 2.9 g</label>
+  <label><input type="radio" name="qs4-q2" data-correct="false"> 2695.6 g</label>
+  <label><input type="radio" name="qs4-q2" data-correct="false"> 2724.1 g</label>
+  <label><input type="radio" name="qs4-q2" data-correct="true"> 2667.1 g</label>
+  <label><input type="radio" name="qs4-q2" data-correct="false"> 28.5 g</label>
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 Substitute `Present = 1`:
 
-$$\mu_i = 269.6 + (-2.9) \times 1 = 266.7 \text{ g}$$
+$$\mu_i = 2695.6 + (-28.5) \times 1 = 2667.1 \text{ g}$$
 
 Note: I am rounding to one decimal place throughout. Rabbit weights were recorded as whole grams and the estimated coefficient is small, so claiming more decimal places would imply more precision than the data actually support.
 </div>
@@ -652,16 +652,16 @@ Note: I am rounding to one decimal place throughout. Rabbit weights were recorde
 **Question 3.** Using your completed equation, what weight ($\mu$) would you predict for a rabbit where mongoose are absent?
 
 <div class="mc-options">
-  <label><input type="radio" name="qs4-q3" data-correct="false"> 266.7 g</label>
-  <label><input type="radio" name="qs4-q3" data-correct="false"> 272.5 g</label>
-  <label><input type="radio" name="qs4-q3" data-correct="true"> 269.6 g</label>
+  <label><input type="radio" name="qs4-q3" data-correct="false"> 2667.1 g</label>
+  <label><input type="radio" name="qs4-q3" data-correct="false"> 2724.1 g</label>
+  <label><input type="radio" name="qs4-q3" data-correct="true"> 2695.6 g</label>
   <label><input type="radio" name="qs4-q3" data-correct="false"> 0 g</label>
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 Substitute `Present = 0`:
 
-$$\mu_i = 269.6 + (-2.9) \times 0 = 269.6 \text{ g}$$
+$$\mu_i = 2695.6 + (-28.5) \times 0 = 2695.6 \text{ g}$$
 
 When the dummy variable is 0, $\beta_1$ drops out completely and we are left with $\beta_0$ alone.
 </div>
@@ -673,12 +673,9 @@ When the dummy variable is 0, $\beta_1$ drops out completely and we are left wit
 <textarea class="student-answer" rows="5" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-The model suggests mongoose presence is associated with a weight reduction of about 3 g, but the standard error on that estimate is large (5.4 g). A quick 95% confidence interval:
+Taken at face value, yes: the model estimates that rabbits are about 29 g lighter where mongoose are present (2695.6 g when absent, 2667.1 g when present). But before reading anything into that, look at the *size* of the effect. Amami rabbits weigh on average around 2.7 kg, so a difference of roughly 29 g is only about 1% of body weight. Biologically, that is tiny. It's hard to see how a difference that small would tell us anything meaningful about whether mongoose are harming the rabbits.
 
-- Upper limit: &minus;2.9 + (5.4 &times; 1.96) = +7.7 g
-- Lower limit: &minus;2.9 &minus; (5.4 &times; 1.96) = &minus;13.5 g
-
-The confidence interval spans zero, meaning the data are consistent with no effect at all. There is very little statistical evidence for a meaningful difference.
+This is a judgement about *biological* importance, not one about statistical significance (i.e. we aren't using P-values here). Tools like P-values are what a lot of people reach for to decide if something is important or not, despite being told for decades not to, rather than just thinking about it for themselves. Here, I don't care if 30 g is statistically significant. It's biologically *unimportant*. A 1% change in body mass is utterly biologically trivial.
 </div>
 :::
 
@@ -688,7 +685,7 @@ The confidence interval spans zero, meaning the data are consistent with no effe
 <textarea class="student-answer" rows="4" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-3 g is pretty small for a species that weighs on average around 2.7 kg. Combined with the wide uncertainty and the unresolved question of whether mongoose are even absent from Tokunoshima, we're not really sure what we've learned here.
+29 g is pretty small for a species that weighs on average around 2.7 kg, only about 1% of body weight. Combined with the wide uncertainty and the unresolved question of whether mongoose are even absent from Tokunoshima, we're not really sure what we've learned here.
 
 We identified before running the model that the mongoose variable might not be reliable, and we now find a tiny effect. So what should we take away from this? I'm not sure myself.
 </div>
@@ -722,7 +719,7 @@ When you run this, you'll likely see a `Warning` (not an `Error`) telling you th
 rabbit$mongoose <- factor(rabbit$mongoose)
 ```
 
-Then refit and rerun `ggpredict()`. In practice, I tend to convert categorical variables to factors before fitting any model, since some packages refuse to work with character strings. Whether you do so is up to you, but given how little effort it takes, it's worth the habit.
+Then refit and rerun `ggpredict()`. In truth, I've never found fitting a model with characters to be especially problematic, though some packages won't allow it at all. So I generally do convert my categorical variables to factors before fitting models. Whether you want to or not is up to you, but given how little effort it takes, I lean towards just converting to `factor`.
 
 Regardless of whether you convert, plot the predictions:
 
@@ -805,7 +802,7 @@ ggplot(rabbit) +
 
 # Correct two data entry errors flagged by researchers
 rabbit$mongoose[7] <- "Present"
-rabbit$weight[rabbit$weight > 350] <- rabbit$weight[rabbit$weight > 350] - 100
+rabbit$weight[rabbit$weight > 3500] <- rabbit$weight[rabbit$weight > 3500] - 1000
 
 # Concern prior to modelling:
 # It is unclear whether mongoose are genuinely absent from Tokunoshima,
@@ -846,7 +843,7 @@ ggplot(fake) +
 <div class="instructor-answer">
 There's no clean answer here, and that's the point.
 
-The assumption of validity is questionable (we don't truly know mongoose are absent from Tokunoshima). The estimated effect is tiny (about 3 g in an animal weighing 2.7 kg) and the uncertainty is large enough to include zero. The effect could also reflect something mundane, such as using different scales on the two islands.
+The assumption of validity is questionable (we don't truly know mongoose are absent from Tokunoshima). The estimated effect is tiny (about 29 g, roughly 1%, in an animal weighing 2.7 kg) and the uncertainty is large enough to include zero. The effect could also reflect something mundane, such as using different scales on the two islands.
 
 The hardest part of statistics has nothing to do with equations or distributions. It's deciding whether the data are appropriate for the question. The thing that would keep me up at night would be if anyone were to use our model to make decisions with real-world consequences. Are we really confident enough in our model to have that rest on our conscience? I don't think I am.
 

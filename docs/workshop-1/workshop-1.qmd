@@ -319,14 +319,16 @@ Reading those comments is more work than reading the code itself. Think of comme
 ::: {.callout-caution}
 ## On using LLMs
 
-LLMs (Large Language Models, or AI) have become common tools in programming and data analysis: good for boring or fiddly tasks, one-off problems, and tidying code (see [here](https://nicholas.carlini.com/writing/2024/how-i-use-ai.html) for a pragmatic take on this). The catch is that you need to know enough to tell when the output is correct and when it's plausible-sounding nonsense. That line blurs fast as the code gets more complex. For analysis, without a sound theoretical understanding, they tend to get it wrong **60%** of the time if the user can't specify their data and question properly (see [here](https://doi.org/10.1111/2041-210x.70267)). To make sure that doesn't happen to you, you need to understand statistical theory and assumptions.
+LLMs (Large Language Models, or AI) are now commonly used within programming and data analysis. They can be good for boring or fiddly tasks, one-off problems, and tidying code (see [here](https://nicholas.carlini.com/writing/2024/how-i-use-ai.html) for a pragmatic take on this). The catch is that you need to know enough about programming to tell when the code they produce is correct and when it's plausible-sounding nonsense. That line blurs fast as the code gets more complex, especially when the code is more complex than you are capable of producing yourself. For analysis specifically, without a sound theoretical understanding of statistics and data, they tend to get it wrong **60%** of the time if the user can't specify their data and question properly (see [here](https://doi.org/10.1111/2041-210x.70267)). To make sure that doesn't happen to you, you need to understand statistical theory and assumptions.
 
-Using them well is a skill in itself. Make your prompt specific: describe what you want, paste the relevant code, include any error messages, and say you're working in `R` (otherwise you'll get Python). Mention any packages you want to use, or specify base `R`.
+Within BI3010, you are allowed to use an LLM (or genAI) during workshops but *not during tests*. I would advise using them with caution though. Keep in mind you are here to learn. Offloading that task to a LLM means you aren't learning. I'd suggest you try to solve any problems yourself first. Make a mistake and then try to learn from the mistake. If you can't solve it, you are welcome to have an LLM try help to solve the problem. If it does solve the problem, try to understand how it solved it.
+
+Using them effectively and responsibly is a skill in itself. Make your prompt specific: describe what you want, copy and paste the relevant code that gives an error, include any error messages, and say you're working in `R` (otherwise you might get Python thrown back at you). Mention any packages you want to use, or specify base `R`.
 :::
 
 # Workshop Instructions
 
-In this workshop, we're going to load two datasets, starting with alligator bite strength, and carry out Exploratory Data Analysis (EDA) alongside some simple Data Quality Assurance. The aim is to find weird things in the data, things that might indicate mistakes.
+In this workshop, we're going to load two datasets, starting with alligator bite strength, and carry out Exploratory Data Analysis (EDA) alongside some simple data quality assurance. The aim is to find weird things in the data, things that might indicate mistakes.
 
 Errors in data entry are more common than you'd think. Imagine entering 5,000 nearly identical observations into a spreadsheet. People get bored, lose their place, hit the wrong key. If we don't catch those mistakes before analysis, they can quietly wreck the results.
 
@@ -334,7 +336,7 @@ The good news: we don't need complex statistics to check for this, and the `R` c
 
 ## Setting Up Your Project
 
-We'll use an **R Project** to organise our work. An R Project is a folder with a small `.Rproj` file inside it. When you open that file, RStudio automatically sets the working directory to the project folder, with no manual path-setting required, and it works the same on any computer or operating system.
+We'll use an R Project to organise our work. An R Project is just a folder somewhere on your PC with a small `.Rproj` file inside it. When you open that file, RStudio automatically sets the working directory to the project folder (basically saying "go here to find the data and scripts"), with no manual path-setting required, and it will work the same on any computer or operating system.
 
 **Step 1: Create the folder structure**
 
@@ -360,7 +362,7 @@ BI3010/
 
 Open RStudio and go to `File > New Project > Existing Directory`. Navigate to your `BI3010` folder and click `Create Project`. RStudio will create a `BI3010.Rproj` file inside the folder and restart with the project open.
 
-From now on, always open RStudio by double-clicking `BI3010.Rproj` rather than opening RStudio directly. This ensures the working directory is always set correctly.
+From now on, you can either open RStudio by double-clicking `BI3010.Rproj` or by opening RStudio directly and using the `Project` drop down button at the top right to select `BI3010.Rproj`. This ensures the working directory is always set correctly.
 
 **Step 3: Create a script for this workshop**
 
@@ -378,9 +380,9 @@ cat(make_download_btn("data/alligator_bite.txt"))
 
 Now we can load the data. The `.txt` extension tells us it's a plain text file, so we use `read.table()`. We need two arguments: the filename (including the `data/` subfolder path), and `header = TRUE` to tell `R` that the first row contains column names rather than data.
 
-Because the project sets the working directory to `BI3010/`, we can refer to files using paths relative to that folder, with no need to type out the full path.
+Because the project sets the working directory to `BI3010/`, we can refer to files using "relative paths" (e.g. `data/alligator_bite.txt`) rather than "absolute paths" (e.g. `H:/BI3010/data/alligator_bite.txt`). Doing this saves yourself a bit of typing but also means you can share the entire folder with someone else and they don't need to change the path to where ever they saved the project.
 
-Tip: `?read.table` (or `?` followed by any function name) opens the help page.
+Tip: `?read.table` (or `?` followed by any function name) opens the help page for that function. For example, you can use this to figure out what `header = TRUE` is doing in the `read.table()` code below.
 
 ```{r, eval=FALSE}
 ali <- read.table("data/alligator_bite.txt", header = TRUE)
@@ -395,7 +397,7 @@ ali <- read.table("data/alligator_bite.txt",
 
 ## Checking It Worked
 
-If you hit an error, don't panic. Nothing in `R` is permanent (unless you very explicitly make it so). Run the code again, fix the issue, move on. The only thing that's permanent is your script and original data, so save your script often and comment as you go. Not sure whether removing something will break things? Comment it out with `#` first rather than deleting it.
+If you hit an error when trying to run code, don't panic. Nothing in `R` is permanent (unless you very explicitly make it so). If you hit an error, read the error message, trouble shoot solutions, run the code again, and move on (assuming it was fixed). The only thing that's permanent is your script and original data, so save your script often and write comments as you go. If you think you might have some redundant code that you're not sure whether removing it will break your entire script, then comment it out with `#` first rather than deleting it (remember that comments are not read as code).
 
 If you get an error loading data, common causes are:
 
@@ -406,9 +408,9 @@ If you get an error loading data, common causes are:
 - The quotation marks are in the wrong location.
 - You may have missed the final bracket `)` in the `read.table()` function.
 
-To confirm that the file has been read properly, click the blue button next to the name in the Environment panel (normally in the upper right of RStudio).
+To confirm that the file has been read properly, you should see it in the Environment panel (normally in the upper right of RStudio).
 
-To inspect the data, you have a few options. The following shows the first six rows (use `n` to change how many, e.g. `head(ali, n = 10)`):
+To do an initial quick inspect the data, you have a few options. The following shows the first six rows (use `n` to change how many, e.g. `head(ali, n = 10)`):
 
 ```{r}
 head(ali)
@@ -523,7 +525,7 @@ Assuming you found that alligator bite strength is roughly 2,000 PSI, our alliga
 
 `summary()` gives a quick overview of the whole dataset. Run it now and see if anything stands out:
 
-```{r}
+```{r, results="hide"}
 summary(ali)
 ```
 
@@ -619,7 +621,7 @@ The first alligator looks fine. So either giant alligators are among us, or ther
 
 # A More Refined Detective
 
-The approach above works, but typing `r max(ali$length)` every time is awkward. Better to store the maximum in a variable and reference that instead:
+The approach above works, but typing 2293 every time is awkward and can cause issues. Referencing specific numbers like this in code is called "magic numbers" because to anyone looking at your code, they have absolutely no idea why this number is special and what why you are working with it. Better to store the maximum in a clearly labelled variable and reference that instead:
 
 ```{r}
 # Get the maximum alligator length
@@ -654,7 +656,7 @@ quantile(ali$length, probs = c(0.25,0.75))
 ## Question Set Four
 
 <div class="question-block">
-<p><strong>Question 1.</strong> Using <code>quantile()</code>, extract all rows in the <code>ali</code> dataset where <code>bite</code> values are above the 3rd quantile.</p>
+<p><strong>Question 1.</strong> Write the code that would extract all rows in the <code>ali</code> dataset where <code>bite</code> values are above the 3rd quantile.</p>
 <textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
@@ -689,11 +691,13 @@ So, we've identified a problem. What now? Do we delete the observation? Declare 
 
 But we do need to do something. Row 20 of our dataset is clearly a mistake, but correcting it is a really sensitive topic. Part of the reason for that sensitivity is because a non-trivial number of scientists have been found to actually *fake* their data in order to further their own careers and prestige (e.g. see [here](https://www.science.org/content/article/university-investigation-found-prominent-spider-biologist-fabricated-falsified-data), [here](https://www.science.org/content/article/does-ocean-acidification-alter-fish-behavior-fraud-allegations-create-sea-doubt), and most ironically [here](https://behavioralscientist.org/harvard-professor-under-scrutiny-for-alleged-data-fraud/) for examples).
 
-We want to be better than that. So before touching anything, go back to the source: not the downloaded file, but the original recorded values. Here that means contacting Parker Island Gator Farm to confirm our suspicion that row 20 is simply missing decimal points.
+We want to be better than that. So before touching anything, go back to the source: not the downloaded file, but the original recorded values. Here that means contacting Parker Island Gator Farm to confirm our suspicion that row 20 is simply missing decimal points. (Please don't actually contact them. They'll be confused as hell.)
 
 In the interest of time, I'll confirm that it's missing decimal points so we can move on to fixing the problem. Specifically, `bite` should have two decimal points, and `length` should have one.
 
-We have two options: edit `alligator_bite.txt` directly and reload, or fix it in `R`. Do it in `R`. If you edit the raw file, there's no record of what changed or why, and that starts to look a lot like the data manipulation we were just reading about. At minimum, you'd have to say: "We had this weird observation, but we've totally sorted it out. Don't worry. *Trust us.*" The correction in code is transparent; it's right there for anyone auditing your work.
+We have two options: edit `alligator_bite.txt` directly and reload, or fix it in `R`. Do it in `R`. If you edit the raw file, there's no record of what changed or why, and that starts to look a lot like the data manipulation in the examples I showed above.
+
+Doing the correction in your code is totally transparent; it's right there for anyone who looks at your code to see.
 
 The fix uses the indexing skills from above. `ali$bite[20]` points to row 20 of the `bite` column specifically (no comma needed since we're already working with a single column).
 
@@ -710,7 +714,7 @@ Now we just divide, which shifts the decimal two places to the right:
 ali$bite[20] <- ali$bite[20] / 100
 ```
 
-Using a hardcoded row number like `[20]` works here, but it's fragile: if the dataset were ever re-sorted or a row added above this one, row 20 would point to the wrong observation. A safer approach uses the same conditional indexing we've already learned, targeting the value itself rather than its position:
+Using a hardcoded row number like `[20]` works here, but it's fragile: if the dataset were ever re-sorted or a row added above this one, row 20 would point to the wrong observation (i.e. 20 is a "magic number"). A safer approach uses the same conditional indexing we've already learned, targeting the value itself rather than its position:
 
 ```{r, eval=FALSE}
 ali$bite[ali$bite > 100000] <- ali$bite[ali$bite > 100000] / 100
@@ -721,21 +725,17 @@ This reads as: "for any `bite` value greater than 100,000, divide it by 100." It
 ## Question Set Five
 
 <div class="question-block">
-<p><strong>Question 1.</strong> Resolve the data entry mistake for <code>ali&#36;length</code>. Be sure to add a clear comment indicating that you have made this change, so that if anyone reviews your code, they understand the reason for the modification and don't suspect any foul play.</p>
+<p><strong>Question 1.</strong> Write (copy &amp; paste) the code you used to resolve the data entry mistake for <code>ali&#36;length</code>. Be sure to add a clear comment indicating that you have made this change, so that if anyone reviews your code, they understand the reason for the modification and don't suspect any foul play.</p>
 <textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
 <pre><code class="language-r"># Correcting missing decimal point, confirmed by Parker Island Gator Farm on 1/1/2020
-# Row index approach (works here, but fragile if the dataset changes):
-ali&#36;length[20] <- ali&#36;length[20] / 10
-
-# More robust: target the value directly using a condition
 ali&#36;length[ali&#36;length > 2000] <- ali&#36;length[ali&#36;length > 2000] / 10</code></pre>
 </div>
 </div>
 
 <div class="question-block">
-<p><strong>Question 2.</strong> Having made any changes to your data, it's always worthwhile checking it again to make sure you didn't create a new mistake. Do so now using any techniques you feel are appropriate.</p>
+<p><strong>Question 2.</strong> Having made any changes to your data, you need to check it to make sure you didn't create a new mistake. Do so now using any techniques you feel are appropriate. Copy and paste the code you used to check if the correction worked.</p>
 <textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
@@ -785,63 +785,42 @@ unique(fast$species)
 ```
 
 <div class="question-block">
-<p><strong>Mistake 1.</strong> One observation has an impossible weight value. Find it, identify which row it is in, and write the code to correct it. (Hint: look at the minimum weight value.)</p>
-<textarea class="student-answer" rows="3" placeholder="Describe the error and write your correction code here..."></textarea>
+<p><strong>Question 1.</strong> Identify all unusual observations in the dataset.</p>
+<textarea class="student-answer" rows="6" placeholder="List every unusual observation you found..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>One individual has a recorded weight of <strong>0 g</strong>, which is impossible. After confirming with the data provider, the correct weight is 45,514 g.</p>
-<pre><code class="language-r">fast[fast&#36;weight == 0,]
-fast&#36;weight[fast&#36;weight == 0] <- 45514</code></pre>
+<ul>
+<li>One individual has a recorded weight of 0 g. It should be 45514.</li>
+<li>One individual has a recorded weight of 3 g. It should be 47255.</li>
+<li>One of the species names has been entered incorrectly. It should be Peregrine Falcon.</li>
+<li>One Peregrine Falcon has a recorded speed of 35,711 km/h. It is missing two decimal places.</li>
+<li>One observation has a missing value (<code>NA</code>, or "not available") in the speed column. The data provider does not know what this value should be.</li>
+</ul>
 </div>
 </div>
 
 <div class="question-block">
-<p><strong>Mistake 2.</strong> There's a second unusual weight in this dataset. Find it, identify which row it is in, and write the code to correct it.</p>
-<textarea class="student-answer" rows="3" placeholder="Describe the error and write your correction code here..."></textarea>
+<p><strong>Question 2.</strong> Copy and paste the code you used to resolve the above issues.</p>
+<textarea class="student-answer" rows="6" placeholder="Write your correction code here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>One individual has a recorded weight of <strong>3 g</strong>. The smallest of the three species (Peregrine Falcon) typically weighs around 400 to 1,300 g, so 3 g is clearly wrong. The correct weight is 47,255 g.</p>
-<pre><code class="language-r">fast[fast&#36;weight == 3,]
-fast&#36;weight[fast&#36;weight == 3] <- 47255</code></pre>
-</div>
-</div>
+<pre><code class="language-r"># Weight of 0 g corrected to the value confirmed by the data provider
+fast&#36;weight[fast&#36;weight == 0] <- 45514
 
-<div class="question-block">
-<p><strong>Mistake 3.</strong> One of the species names has been entered incorrectly. Use <code>unique()</code> on the species column to find the problem.</p>
-<textarea class="student-answer" rows="3" placeholder="Describe the error and write your correction code here..."></textarea>
-<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
-<div class="instructor-answer">
-<p>One entry reads <strong>"Peregrin Took"</strong> instead of "Peregrine Falcon". This is almost certainly a typo (with a <em>Lord of the Rings</em> flavour).</p>
-<pre><code class="language-r">unique(fast&#36;species)
+# Weight of 3 g corrected to the value confirmed by the data provider
+fast&#36;weight[fast&#36;weight == 3] <- 47255
+
+# Species typo corrected, then re-factored
 fast&#36;species[fast&#36;species == "Peregrin Took"] <- "Peregrine Falcon"
-fast&#36;species <- factor(fast&#36;species)</code></pre>
-</div>
-</div>
+fast&#36;species <- factor(fast&#36;species)
 
-<div class="question-block">
-<p><strong>Mistake 4.</strong> One observation has a speed value that is physically impossible for any living thing. Find it and correct it.</p>
-<textarea class="student-answer" rows="3" placeholder="Describe the error and write your correction code here..."></textarea>
-<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
-<div class="instructor-answer">
-<p>One Peregrine Falcon has a recorded speed of <strong>35,711 km/h</strong>. The fastest recorded speed for a Peregrine Falcon is around 390 km/h. Dividing by 100 gives 357.11 km/h, which is plausible, so this is another missing decimal point error. Note that the <code>NA</code> in the speed column makes <code>max()</code> tricky here.</p>
-<pre><code class="language-r">fast[fast&#36;speed == max(fast&#36;speed, na.rm = TRUE),]
+# Peregrine Falcon speed missing two decimal places, so divide by 100
+fast&#36;speed[fast&#36;speed > 10000 &amp; !is.na(fast&#36;speed)] <- fast&#36;speed[fast&#36;speed > 10000 &amp; !is.na(fast&#36;speed)] / 100
 
-# Row index approach (fragile: only reliable if the dataset has not changed):
-fast&#36;speed[15] <- fast&#36;speed[15] / 100
+# The NA in speed is left as-is: the data provider cannot confirm the true value
 
-# More robust: target the value directly
-fast&#36;speed[fast&#36;speed > 10000 &amp; !is.na(fast&#36;speed)] <- fast&#36;speed[fast&#36;speed > 10000 &amp; !is.na(fast&#36;speed)] / 100</code></pre>
-</div>
-</div>
-
-<div class="question-block">
-<p><strong>Mistake 5.</strong> There's one remaining issue in the dataset. What is it, where is it, and how should it be handled?</p>
-<textarea class="student-answer" rows="3" placeholder="Describe the issue and explain your reasoning..."></textarea>
-<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
-<div class="instructor-answer">
-<p>One observation has a missing value (<code>NA</code>) in the speed column. <code>NA</code> means "not available" and is R's standard way to represent missing data. The data provider can't confirm what the true value should be, so the only honest option is to leave it as <code>NA</code>. Functions like <code>mean()</code> will return <code>NA</code> when any value is missing unless you add <code>na.rm = TRUE</code>.</p>
-<p>After all corrections, run a final check:</p>
-<pre><code class="language-r">summary(fast)</code></pre>
+# Final check
+summary(fast)</code></pre>
 </div>
 </div>
 
@@ -856,6 +835,7 @@ Make sure you have corrected all five data entry errors before answering these q
 <textarea class="student-answer" rows="2" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
+<p>The median weight is <strong>46,453 g</strong>.</p>
 <pre><code class="language-r">median(fast&#36;weight)</code></pre>
 </div>
 </div>
@@ -865,6 +845,7 @@ Make sure you have corrected all five data entry errors before answering these q
 <textarea class="student-answer" rows="2" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
+<p>The median speed is <strong>102.1 km/h</strong>.</p>
 <pre><code class="language-r">median(fast&#36;speed, na.rm = TRUE)</code></pre>
 </div>
 </div>
@@ -874,7 +855,7 @@ Make sure you have corrected all five data entry errors before answering these q
 <textarea class="student-answer" rows="2" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>The <code>table()</code> function gives a count per species, but there are other ways to check:</p>
+<p>The most common species is the <strong>Saiga Antelope</strong> (177 individuals, compared with 167 Cheetahs and 156 Peregrine Falcons). The <code>table()</code> function gives a count per species, but there are other ways to check:</p>
 <pre><code class="language-r">table(fast&#36;species)</code></pre>
 </div>
 </div>

@@ -230,7 +230,7 @@ $$\mu_i = 213.2 + (-5.3) \times drought_i$$
 
 We used this to generate a figure, but how do we know if we can trust the result? How do we know we haven't been cursed by the Monkey's Paw? The uncomfortable answer is that we can't confirm it with absolute certainty. The results might be completely unreliable, either because the data violated a hidden assumption or because the model isn't well suited to the data. The particularly bad news is that we almost always get *some* answer from a model, even when the data or model are badly flawed.
 
-This means it falls to us to actively look for signs that the model results shouldn't be interpreted. This is especially important when a model could influence real-world decisions. We don't want to conclude a drug is safe only to discover later it has serious [side effects](https://pubmed.ncbi.nlm.nih.gov/21507989/).
+This means it falls to us to actively look for signs that the model results shouldn't be interpreted. It's worth repeating, because it's really important: we are trying to find any evidence that suggests the model results should not be trusted. This is especially important when a model could influence real-world decisions. We don't want to conclude a drug is safe only to discover later it has serious [side effects](https://pubmed.ncbi.nlm.nih.gov/21507989/).
 
 One more uncomfortable truth: the assumptions we care about *most* (validity and representativeness) are the hardest to test formally. They require domain knowledge, careful EDA, and clear thinking about the data-generating process. That is why you should spend the majority of your time on EDA and thinking about the context before fitting any model.
 
@@ -246,7 +246,7 @@ Unlike the `fake` dataset approach from Workshop 3, here we pass the original da
 
 # Diagnosing the four horsemen
 
-The four standard diagnostic plots are produced in one call:
+We're now ready to run some diagnostics using those "four horsemen" (of the apocalypse) plots. The code is straightforward: you just `plot()` the model. All four standard diagnostic plots are produced in one call:
 
 ```{r, echo=TRUE, eval=FALSE}
 par(mfrow = c(2, 2))  # arrange as 2x2 grid
@@ -256,7 +256,7 @@ par(mfrow = c(1, 1))  # reset
 
 `plot()` works directly on a model object, returning all four diagnostic plots in one call. It uses base R graphics rather than ggplot2; the output is plainer, but nothing extra needs setting up, making it the standard tool for a quick check. You will see a ggplot2-based alternative later in this workshop.
 
-Alternatively, press Return in the console after `plot(boto_model)` to step through them one at a time. Let's go through each plot and what it tells us.
+Alternatively, pay close attention to your R console: after `plot(boto_model)` you'll see a prompt saying `Hit <Return> to see next plot:`, and pressing Return four times steps through them one at a time. Let's go through each plot and what it tells us.
 
 ## Residuals vs Fitted
 
@@ -284,7 +284,7 @@ This plot is used to check two assumptions.
 
 ### Linearity
 
-If the residuals display a "wavy" pattern across the fitted values, drawing a straight line through the data isn't capturing the relationship well. Here's a simulated example that clearly violates linearity:
+Linearity is one of the more important assumptions we care about, and it's often grouped with additivity because the two share similar properties and consequences. If the residuals display a "wavy" pattern across the fitted values, drawing a straight line through the data isn't capturing the relationship well. Here's a simulated example that clearly violates linearity:
 
 ```{r fig.height=4}
 set.seed(1)

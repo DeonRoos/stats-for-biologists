@@ -21,6 +21,7 @@ format:
 knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show = "show",
                       message = FALSE, warning = FALSE)
 library(ggplot2)
+reef <- read.table("Data/reef.txt", header = TRUE)
 
 make_download_btn <- function(path, label = NULL) {
   fname <- basename(path)
@@ -342,7 +343,7 @@ $$\mu_i = \beta_0 + \beta_1 \times shark_i + \beta_2 \times reef_i$$
 
 where $\beta_0$ is the predicted biomass change when both predictors are zero, $\beta_1$ is the change in predicted biomass for each additional shark per km², and $\beta_2$ is the change for each additional unit of reef complexity.
 
-```{r, eval=FALSE}
+```{r}
 bio_mod <- lm(biomass_change ~ shark_density + reef_complexity, data = reef)
 ```
 
@@ -350,7 +351,7 @@ bio_mod <- lm(biomass_change ~ shark_density + reef_complexity, data = reef)
 
 Before interpreting the model, check the residual plots:
 
-```{r, eval=FALSE}
+```{r}
 par(mfrow = c(2, 2))
 plot(bio_mod)
 par(mfrow = c(1, 1))
@@ -410,7 +411,7 @@ summary(bio_mod)
 
 Use `ggeffects` to quickly visualise the predicted relationship between each predictor and the response:
 
-```{r, eval=FALSE}
+```{r}
 library(ggeffects)
 preds <- ggpredict(bio_mod)
 plot(preds)
@@ -430,7 +431,7 @@ plot(preds)
 
 # Including an interaction
 
-The main-effects model treats the effects of shark density and reef complexity as independent. But think about what is ecologically plausible. In a structurally simple reef with few hiding places, more sharks should reduce fish biomass substantially. In a complex reef with many refuges, the same number of sharks might have much less impact because prey can avoid them. This means the effect of shark density on biomass isn't constant: it depends on reef complexity. That's an interaction.
+The main-effects model treats the effects of shark density and reef complexity as independent. For example, it can't account for a scenario where we add a million sharks to the system, in which case reef complexity is probably not going to matter much. But thinking about it logically, the effect of sharks is likely more pronounced on a very simple reef (lots of predators and nowhere to hide), while the same number of sharks on a more complex reef might matter much less (lots of predators, but lots of places to hide). This means the effect of shark density on biomass isn't constant: it depends on reef complexity. How do we account for this combined effect? Through an interaction.
 
 ```{=html}
 <div class="card-sort-container" id="card-sort-interaction">
@@ -764,7 +765,7 @@ The `*` notation is shorthand and preferred for readability.
 
 Now fit the model with the interaction:
 
-```{r, eval=FALSE}
+```{r}
 bio_mod <- lm(biomass_change ~ shark_density * reef_complexity, data = reef)
 ```
 
@@ -772,7 +773,7 @@ bio_mod <- lm(biomass_change ~ shark_density * reef_complexity, data = reef)
 
 Check the residuals again:
 
-```{r, eval=FALSE}
+```{r}
 par(mfrow = c(2, 2))
 plot(bio_mod)
 par(mfrow = c(1, 1))
@@ -877,7 +878,7 @@ A coefficient table tells you the direction and magnitude of an interaction but 
 
 To produce the heatmap, we need predicted values at every combination of shark density and reef complexity. The `expand.grid()` function generates a data frame containing exactly those combinations:
 
-```{r, eval=FALSE}
+```{r}
 shark_density_seq <- seq(from = min(reef$shark_density),
                          to   = max(reef$shark_density),
                          length.out = 20)
@@ -896,13 +897,13 @@ fake <- expand.grid(
 
 Now add the model predictions:
 
-```{r, eval=FALSE}
+```{r}
 fake$fit <- predict(bio_mod, newdata = fake)
 ```
 
 ## Plotting the heatmap
 
-```{r, eval=FALSE}
+```{r}
 ggplot(fake) +
   geom_tile(aes(x = shark_density, y = reef_complexity, fill = fit)) +
   labs(x = "Shark density",
@@ -915,7 +916,7 @@ The heatmap makes the interaction visible: the highest predicted biomass occurs 
 
 The default blue palette can be hard to read. My preferred option is the viridis `"magma"` palette, which gives much better contrast across the full range:
 
-```{r, eval=FALSE}
+```{r}
 ggplot(fake) +
   geom_tile(aes(x = shark_density, y = reef_complexity, fill = fit)) +
   scale_fill_viridis_c(option = "magma") +

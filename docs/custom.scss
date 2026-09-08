@@ -183,7 +183,7 @@ code {
 // box. Force the light letterpress inline-code style with !important so it
 // always wins and stays readable.
 p code, li code, td code, h1 code, h2 code, h3 code, a code,
-.callout-body code, .instructor-answer code {
+.callout-body code:not(.sourceCode), .instructor-answer code {
   background: $inline-bg !important;
   color: $ink !important;
   padding: 0.05em 0.35em !important;

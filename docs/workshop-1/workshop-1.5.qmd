@@ -287,16 +287,16 @@ For each assumption below, select the scenario that best illustrates it being vi
 </div>
 
 <div class="question-block">
-<p><strong>Assumption 3: Additivity.</strong> Which scenario is most likely to violate Additivity?</p>
+<p><strong>Assumption 3: Additivity.</strong> Additivity means the combined effect of two things is just the sum of their separate effects, with no interaction between them. Which scenario violates it?</p>
 <div class="mc-options">
-  <label><input type="radio" name="mc_add"> Both temperature and rainfall independently affect crop yield</label>
-  <label><input type="radio" name="mc_add"> Exercise frequency and calorie intake both independently influence body weight</label>
-  <label><input type="radio" name="mc_add" data-correct="true"> A drug reduces blood pressure on its own, but causes a dangerous reaction when combined with alcohol</label>
-  <label><input type="radio" name="mc_add"> Both sunlight hours and soil nitrogen independently predict plant height</label>
+  <label><input type="radio" name="mc_add"> Two painkillers act through separate pathways, one blocking pain signals in the nerves and the other reducing inflammation, so each lowers pain by the same amount whether or not the other has been taken</label>
+  <label><input type="radio" name="mc_add"> Two genes influence a plant's height, and the effect of one is the same regardless of which version of the other gene the plant carries</label>
+  <label><input type="radio" name="mc_add" data-correct="true"> A drug lowers blood pressure on its own, but combined with alcohol it causes a dangerous drop far larger than either alone</label>
+  <label><input type="radio" name="mc_add"> Air temperature falls by a set amount for every 100 m you climb, whether you are near the equator or close to the poles</label>
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>The drug and alcohol interact: the combined effect isn't simply the sum of each alone. Additivity assumes that predictors work independently, and this is a clear violation. The other examples describe situations where effects are independent and additive.</p>
+<p>The drug and alcohol interact: together they produce a drop far larger than either alone, so their effects can't simply be added. In the other three, the two factors act through separate, independent channels, two unrelated genes, two drug pathways, elevation versus latitude, so the effect of one doesn't shift when the other changes, and that independence is exactly what additivity means. Notice how carefully these have to be chosen: in biology, factors interact more often than not, which is why we test for interactions rather than assume them away.</p>
 </div>
 </div>
 
@@ -367,11 +367,11 @@ Still within your groups, visit the following [NBN Atlas](https://species.nbnatl
 <textarea class="student-answer" rows="5" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p><strong>Validity.</strong> A data point only appears when a deer was present, seen, and reported by an observer. We can't guarantee that every observer spots a deer even when one is there, and skill levels will vary considerably. There's also the question of identification: what if it was a roe deer, a dog, or even Bigfoot?</p>
+<p><strong>Validity.</strong> A data point only appears when a deer was present, seen, and reported by an observer. We can't guarantee that every observer spots a deer even when one is there, and skill levels will vary considerably. There will also be loads of instances where there is a deer and an observer detects it but doesn't report it (e.g. did you report the last time you saw a deer?). There's also the question of identification and misidentification: was it a roe deer or a red deer? A dog? The Loch Ness monster? The point is that each observation captures all of this: each data point is "someone saw an animal, thought it was a red deer, remembered to report it, had the record accepted and it was 'verified' as a red deer", and not simply "each data point is where red deer are present".</p>
 
-<p><strong>Representativeness.</strong> The dataset only records successful sightings, not failed searches. Every blank area on the map has two possible meanings: someone looked and found no deer, or no one looked at all. These are very different situations but look identical in the data. Survey effort is also not uniform across the UK. Someone near Fort William is fairly accustomed to red deer, whereas someone spotting one in London would find it much more exciting and be far more likely to report it. That reporting bias makes the dataset unreliable as a picture of where deer actually are.</p>
+<p><strong>Representativeness.</strong> The dataset only records successful sightings, not failed searches. Every blank area on the map has two possible meanings: someone looked and found no deer, or no one looked at all. These are very different situations but look identical in the data. Survey effort is also not uniform across the UK. Someone near Fort William is fairly used to red deer, whereas someone spotting one in London would find it way more exciting and be far more likely to report it. That reporting bias makes the dataset unreliable as a picture of where deer actually are.</p>
 
-<p>In short, what the data captures is: <em>observations where a deer was present, seen, and reported</em>. What we want it to represent is: <em>observations where deer are either present or absent</em>. Those aren't the same thing.</p>
+<p>In short, what the data captures is: <em>observations where people have looked, a deer was present, seen, and reported</em>. What we want it to represent is: <em>observations where deer are either present or absent</em>. Those aren't the same thing.</p>
 </div>
 </div>
 
@@ -384,7 +384,7 @@ Having done this, compare the [NBN Atlas](https://species.nbnatlas.org/species/N
 <textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>The core of the range is likely reliable, but the range edge is likely highly unreliable, with some areas probably overestimated and others underestimated. As we approach a species' range edge, we might find: 1) the species are less common so aren't seen as often, 2) they are relatively "new" at the range edge so aren't reported as often, 3) they might colonise an area but quickly go locally extinct (meaning we might have false positive "detections"), and 4) there are lots of additional little things that all contribute to detections being highly unreliable, especially at range edges.</p>
+<p>The core of the range is probably pretty reliable, but the range edge is likely unreliable, with some areas probably overestimated and others underestimated. As we approach a species' range edge, we might find: 1) the species are less common so aren't seen as often, 2) they are relatively "new" at the range edge so aren't reported as often (or what happens in some cases is that the new species are misidentified, e.g. collared doves in the USA), and 3) they might colonise an area but quickly go locally extinct (meaning we might have false positive "detections"), not to mention various other "small" things that make data weird at range edges.</p>
 </div>
 </div>
 
@@ -393,7 +393,7 @@ Having done this, compare the [NBN Atlas](https://species.nbnatlas.org/species/N
 <textarea class="student-answer" rows="3" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>Probably less so. The UK public tends to be engaged with wildlife reporting, particularly for larger mammals and birds. In other countries this culture either doesn't exist or is less pronounced, and in some datasets it's not uncommon for all observations from a single country to come from a single highly motivated individual. Reporting intensity and accuracy will differ substantially across borders, making a multi-country range map inherently uneven.</p>
+<p>Probably less so, but it varies quite a bit by country. The UK public tends to be engaged with wildlife reporting, especially for birds but also, to a lesser extent, for mammals. In other countries this culture (or corresponding reporting infrastructure) either doesn't exist or is less pronounced, and in some datasets it's not uncommon for all observations from a country to come from one really motivated individual. Reporting intensity and accuracy will differ substantially across borders, making a multi-country range map inherently uneven.</p>
 </div>
 </div>
 
@@ -421,7 +421,7 @@ Return to the `alligator_bite.txt` dataset from the first workshop. We didn't gi
 <textarea class="student-answer" rows="5" placeholder="Write your answer here..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p><strong>Independence of errors.</strong> Alligators are returned to the communal pond after measurement before the next one is retrieved. Despite staff assurances that individuals can be identified, it seems plausible that the same alligator could be captured twice. If so, some "observations" are repeated measurements of the same animal, a direct violation of independence.</p>
+<p><strong>Independence of errors.</strong> Alligators are returned to the same pond after getting measured before the next one is retrieved. Despite the staff assurances that individuals can be identified, it seems at least plausible that the same alligator could be captured twice, especially if they've captured and measured enough alligators that they get tired. If so, some of our "observations" might be repeated measurements of the same animal, a direct violation of independence.</p>
 
 <p><strong>Validity (bite force).</strong> It sounds like actually getting alligators to bite the device might have been a bit hard. Did each animal bite as hard as it could, or just hard enough for the staff to feel like they had a measurement? If the latter, recorded values may not reflect true maximum bite strength.</p>
 

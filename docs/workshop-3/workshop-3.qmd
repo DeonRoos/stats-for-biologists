@@ -223,7 +223,7 @@ function toggleGlossary() {
 ::: {.callout-note}
 ## The Analytical Workflow
 
-Starting this week, we apply the full analytical workflow to a single dataset before working through an independent one. Today's focus is step 4.
+Starting this week, we'll begin by applying this entire workflow to a single dataset for a more integrated experience, before giving you a new dataset to work through independently. Today's focus is step 4.
 
 1. Formulate a research question.
 2. Perform exploratory data analysis.
@@ -253,9 +253,11 @@ cat(make_download_btn("../workshop-2/Data/boto.txt"))
 From the question we can identify:
 
 - **Response variable:** `length`
-- **Predictor variable:** `drought`
+- **Predictor variable** (also known as the explanatory variable or covariate)**:** `drought`
 
-Before fitting any model, we need to decide whether a Normal distribution is a reasonable description of the data-generating process for boto length. Formally, we're asking whether the following is plausible:
+In essence, we want to understand how `length` changes as `drought` varies.
+
+Before proceeding, it's crucial to consider whether the data-generating process for boto length (i.e. all the factors influencing dolphin size) can be reasonably approximated by a Normal distribution. Formally, we're asking whether the following is plausible:
 
 $$length_i \sim \text{Normal}(\mu_i, \sigma)$$
 
@@ -263,15 +265,17 @@ Here, $length_i$ is the length of dolphin $i$, assumed to follow a Normal distri
 
 ## Is a Normal distribution appropriate?
 
-The first question is whether `length` is continuous or discrete. A discrete variable can only take integer values (1 cm, 2 cm, etc.). A continuous variable can in principle take any value within a range. Although the researchers rounded lengths to the nearest centimetre, actual dolphin length isn't constrained to whole-centimetre increments. `length` is inherently continuous, and the Normal distribution generates continuous values. To see this, run:
+To decide whether assuming a Normal distribution is reasonable, we start by asking if `length` is continuous or discrete. A discrete variable could *only* take integer (whole number) values like 1 cm, 2 cm, and so on. Phrased another way, we could never have a dolphin that was 270.1 cm; it would either be 270 or 271 cm. In contrast, while our data are rounded to the nearest centimetre, the actual lengths of the dolphins aren't constrained to such increments; `length` is inherently continuous. A Normal distribution is appropriate for generating continuous values (though there are others). To see this visually, you can run the following code, which uses `rnorm()`, or "randomly generate `n` values from a Normal distribution":
 
 ```{r, eval=FALSE}
 rnorm(n = 10, mean = 200, sd = 10)
 ```
 
-The generated values look much like the lengths in the boto dataset, which is reassuring. The only visible difference is that the researchers rounded their measurements.
+After running the code, you'll notice that the simulated values look pretty similar to the lengths of our boto dolphins, suggesting that a Normal distribution is a good fit in this respect (note we're only using `rnorm()` here for demonstration purposes, you wouldn't really do this in a formal analysis). The only difference between the `rnorm()` values and the actual `length` measurements is that the researchers seem to have rounded their measurements.
 
 The next question is whether there are natural bounds that might cause problems. Boto length cannot be zero or negative, and the Normal distribution can technically produce such values. However, the minimum observed length is well above zero, so the risk of the model predicting physically impossible values is low. A Normal distribution is a reasonable choice here, though we should verify this after fitting by checking that the model doesn't produce implausible predictions. If it did, we'd switch to a different distribution using a Generalised Linear Model (GLM), which we cover later in the course.
+
+Working through the process of selecting an appropriate distribution might feel overwhelming when you're new to statistics. However, with experience, these decisions become intuitive and can often be made in a matter of seconds.
 
 ::: {.callout-warning}
 ## An important distinction
@@ -361,7 +365,9 @@ Where:
 - $\beta_0$ is the **intercept**: the predicted length when `drought = 0`.
 - $\beta_1$ is the **slope**: the change in predicted length for each additional year of drought.
 
-Fitting this in R takes one line:
+If you need a refresher, feel free to go back to the lecture slides or recording.
+
+That's the conceptual model. But how do we translate that into `R` code? It's pretty straightforward, and we can store the model output so we can use it again later without having to rerun the model each time. Here's how we do it:
 
 ```{r, eval=FALSE}
 boto_model <- lm(length ~ drought, data = boto)
@@ -373,13 +379,13 @@ boto_model <- lm(length ~ drought, data = boto)
 - The formula `length ~ drought` specifies the relationship. `length` is the response variable; `drought` is the predictor. This corresponds directly to $\mu_i = \beta_0 + \beta_1 \times drought_i$. R adds the intercept automatically.
 - We store the result in `boto_model` so we can use it later without re-running.
 
-Now look at the results:
+Now, let's get to the interesting part: what does the model tell us? We can use the `summary()` function to see the results:
 
 ```{r, eval=FALSE}
 summary(boto_model)
 ```
 
-The `Estimates` column gives us $\beta_0$ and $\beta_1$: **213.3** and **−5.3**, respectively.
+When we run `summary()` on our model we get a lot of information, but for starters we're particularly interested in the `Estimates` section. From this, we can see the estimated values for $\beta_0$ and $\beta_1$: **213.3** and **−5.3**, respectively. But what do these values mean?
 
 ## What the parameters mean
 
@@ -524,11 +530,11 @@ ggplot(curves2, aes(x, y, colour = decimals, group = decimals)) +
 
 In this second example the explanatory variable runs up to one million and the true parameters are extremely small ($\beta_0 = 0.0000000652$, $\beta_1 = 0.0005161519$). Rounding to two decimal places gives $\beta_0 = 0.00$ and $\beta_1 = 0.00$, which is useless.
 
-The lesson: before rounding, ask how much the number changes and what the scale of your predictor is. An arbitrary rounding decision can meaningfully alter your results. In BI3010 assessments, the number of decimal places to report will always be specified.
+So in the first example, rounding to two decimal places is perfect. In the second, it's terrible. The point is that when you round numbers for something like a report or thesis, you need to think about it. How much does the number change if I round to zero decimal places? What about to five? What is the range of the explanatory variable? Does it go to billions, or just a handful? All of these are important to consider, particularly when working with parameter estimates. In BI3010 assessments, the number of decimal places to report will always be specified.
 
 # Summarise the results
 
-We'll return to model diagnosis on Friday. For now, let's turn the results into a figure. There are two ways to do this.
+We'll come back to model diagnosis on Friday. For today we'll go through how to take these results and turn them into a figure. We'll show you two options. Option 1 is nice because it's really quick and easy; the downside is that you don't get much control over what the figure looks like, and these packages can often obscure what's going on. Option 2 can be more fiddly, but has the benefit of giving you flexibility and makes the underlying process pretty transparent.
 
 ## Option 1: ggeffects
 
@@ -542,11 +548,11 @@ preds <- ggpredict(boto_model)
 plot(preds)
 ```
 
-This produces the fitted line with a 95% confidence interval (we'll cover confidence intervals next week). It's quick but gives you limited control over the appearance.
+And there we have it, with 95% confidence thrown in as a bonus! (We'll cover 95% confidence intervals and what they mean next week.) As easy as that. Buuuuut... there are stylistic choices that I, personally and subjectively, don't like. I want to decide what's going on, not some automated software.
 
 ## Option 2: manual predictions
 
-Making the figure yourself is not much harder and is more transparent. The idea is to create a small dataset of drought values and use `predict()` to calculate the model's prediction for each one, exactly what you did by hand in the questions above.
+It's actually not much harder to make the figure ourselves, and we've already learnt all the techniques we need. The idea is to create a small *fake* dataset of drought values and use `predict()` to calculate the model's prediction for each one, exactly what you did by hand in the questions above.
 
 First, create a dataset with the drought values you want to predict at:
 
@@ -870,11 +876,13 @@ ggplot(fake) +
   theme_minimal()
 ```
 
-The entire analysis is about 40 lines including comments. It's reproducible and shareable. As a tip: don't confuse script length with complexity. A long script is often a sign of uncertainty, not sophistication. Less is usually more.
+The entire workflow is done in about 40 lines of code, and about a quarter of that is comments. More importantly, the entire analysis is done responsibly, with useful comments, and is now saved in a script that I can share with anyone who might want to see it. That last point is a big one. As mentioned previously, there are scientists out there who routinely fake data. Being able to provide a script that clearly demonstrates every step you took is a huge help in detecting those kinds of issues. I'd recommend attaching your `R` scripts as an appendix when you submit your Honour's project, not because the reviewers will go through it in any detail, but simply to instil some good research practices.
+
+As a tip, don't confuse the length of a script with complexity or the intelligence of the coder. When I did my Honour's project, my `R` script had something like 1,000 lines of code. It wasn't because I was doing anything particularly complicated (my analysis was more or less equivalent to the model you just ran), but because I didn't really know what I was doing, so I threw everything I could find at it. Often, less is more in coding.
 
 # Burying beetles: independent analysis
 
-Using everything you have just learned, work through a new dataset: `beetles.txt` on MyAberdeen. This data comes from a lab experiment investigating how short-term temperature exposure (6 hours per day) affects fecundity in burying beetles (*Nicrophorus vespilloides*), with the aim of understanding how the species might respond to climate change.
+Using the skills you've just developed, you're now going to analyse an entirely new dataset: `beetles.txt` on MyAberdeen. This data comes from a lab experiment by researchers interested in understanding how temperature impacts fecundity in burying beetles (*Nicrophorus vespilloides*), ultimately trying to understand how short-term (6 hours per day) exposures to temperature changes may affect how the species responds to climate change.
 
 Variables:
 
@@ -887,10 +895,10 @@ Download `beetles.txt` and place it in your `data/` folder:
 cat(make_download_btn("Data/beetles.txt"))
 ```
 
-Carry out an EDA, consider which assumptions are likely violated, fit an appropriate model, and plot the results. Make sure you are comfortable with the full workflow, as an equivalent analysis may appear in a quiz.
+Carry out an EDA, consider which assumptions are likely violated, fit an appropriate model, and plot the results. You can go about this in any manner you deem appropriate, but keep in mind that we may ask you to analyse an equivalent dataset in a quiz, so make sure you are comfortable with the workflow. If you don't manage to finish, don't worry, we'll return to these models on Friday.
 
 <div class="question-block">
-<p><strong>Worked answer.</strong> Once you have completed your own analysis, reveal the instructor's version to compare approaches.</p>
+<p><strong>Worked answer.</strong> Once you have completed your own analysis, reveal my version to compare approaches.</p>
 <textarea class="student-answer" rows="4" placeholder="Describe your approach, any assumptions you think are violated, and your main findings..."></textarea>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">

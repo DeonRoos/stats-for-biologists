@@ -32,7 +32,7 @@ make_download_btn <- function(path, label = NULL) {
 rabbit <- read.table("../workshop-5/Data/rabbits.txt",
                      header = TRUE)
 rabbit$mongoose[7] <- "Present"
-rabbit$weight[rabbit$weight > 350] <- rabbit$weight[rabbit$weight > 350] - 100
+rabbit$weight[rabbit$weight > 3500] <- rabbit$weight[rabbit$weight > 3500] - 1000
 rabbit_mod <- lm(weight ~ mongoose, data = rabbit)
 
 set.seed(42)
@@ -361,7 +361,7 @@ where $\beta_0$ is the average weight of rabbits when mongoose are absent ($Pres
 
 After fitting the model, the estimated parameters are:
 
-$$\mu_i = 269.6 + (-2.9) \times Present_i$$
+$$\mu_i = 2695.6 + (-28.5) \times Present_i$$
 
 > If your parameter estimates differ, you have likely missed one or both of the data entry errors in the dataset. Return to Workshop 5 and resolve them before continuing.
 
@@ -401,7 +401,7 @@ With a continuous predictor, we use this plot to check whether the relationship 
 
 ### Equal variance of errors
 
-What we can check is whether the residual spread is roughly equal across both groups. Look at the two vertical clusters of points: one around 266 g (mongoose present) and one around 270 g (mongoose absent). In both groups, individual rabbits deviate from the group mean by a similar amount, around 40 g in either direction. The assumption of equal variance of errors looks well met here.
+What we can check is whether the residual spread is roughly equal across both groups. Remember there was about a 29 g difference between the two islands, and we can see that here: the model predicts around 2696 g when mongoose are absent and around 2667 g when they are present. Look at the two vertical clusters of points around those two values. In both groups, individual rabbits deviate from the group mean by a similar amount, around 400 g in either direction. The assumption of equal variance of errors looks well met here.
 
 To understand what a problematic case looks like, consider this simulated dataset where Group B has much more variable responses than Group A:
 
@@ -442,7 +442,7 @@ The Scale-Location plot gives a second view of the equal variance assumption.
 plot(rabbit_mod, which = 3)
 ```
 
-The spread is slightly larger for the group predicted at around 270 g than for the group at 266 g, which is very slightly less clean than the Residuals vs Fitted plot suggested. Importantly though, this is nowhere near substantial enough to be worried about. Compare it with the same plot for the simulated data:
+The spread is slightly larger for the group predicted at around 2696 g than for the group at 2667 g, which is very slightly less clean than the Residuals vs Fitted plot suggested. Importantly though, this is nowhere near substantial enough to be worried about. Compare it with the same plot for the simulated data:
 
 ```{r, echo=FALSE}
 plot(m1, which = 3)

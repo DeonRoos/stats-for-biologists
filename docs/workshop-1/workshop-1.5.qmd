@@ -296,7 +296,7 @@ For each assumption below, select the scenario that best illustrates it being vi
 </div>
 <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
 <div class="instructor-answer">
-<p>The drug and alcohol interact: together they produce a drop far larger than either alone, so their effects can't simply be added. In the other three, the two factors act through separate, independent channels, two unrelated genes, two drug pathways, elevation versus latitude, so the effect of one doesn't shift when the other changes, and that independence is exactly what additivity means. Notice how carefully these have to be chosen: in biology, factors interact more often than not, which is why we test for interactions rather than assume them away.</p>
+<p>The drug and alcohol interact: when taken together they produce a drop much bigger than either alone, so their effects can't simply be added (it's multiplicative, not just additive). In the other three, the two variables act through separate, independent channels; two unrelated genes, two drug pathways, elevation versus latitude, so the effect of one doesn't shift when the other changes.</p>
 </div>
 </div>
 

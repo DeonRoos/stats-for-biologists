@@ -2660,23 +2660,14 @@ margin-top: 0.25rem;
 <p>To do an initial quick inspect the data, you have a few options. The following shows the first six rows (use <code>n</code> to change how many, e.g. <code>head(ali, n = 10)</code>):</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(ali)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>  length    bite
-1  408.9 2268.50
-2  378.1 2156.24
-3  343.5 1883.48
-4  337.2 1981.71
-5  419.5 2442.91
-6  427.5 2331.68</code></pre>
-</div>
 </div>
 <p>Or open the full dataset in a new tab; <code>View()</code> gives a spreadsheet-like view with sorting and filtering:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(ali)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(ali)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Or print everything to the console:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ali</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>ali</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Not recommended: it floods the console and is hard to read.</p>
 </section>
@@ -2747,41 +2738,30 @@ No, <code>bite</code> and <code>length</code> are both lower case. A general tip
 <p>With that done, let’s move on to understanding our data. For starters, let’s check if the data is sensibly structured. In <code>R</code>, this means that numbers are numbers, words are characters (or sometimes factors), and so on. Basically, we want to make sure there aren’t any bite measurements like <code>2174.94BIGBITE</code>, which would mess us up by causing <code>R</code> to think that all <code>bite</code> values are characters and not numbers.</p>
 <p>To do this quickly, we can use the <code>str()</code> function (short for “structure”):</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(ali)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>&#39;data.frame&#39;:   78 obs. of  2 variables:
- $ length: num  409 378 344 337 420 ...
- $ bite  : num  2268 2156 1883 1982 2443 ...</code></pre>
-</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(ali)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We see that <code>ali</code> is a <code>data.frame</code> (great, as it should be!), with 78 observations (or samples) and two variables. The <code>$</code> operator is used to extract specific variables from a dataframe, so <code>ali$bite</code> will give you just the <code>bite</code> variable from the <code>ali</code> dataset. From this, we can see that both the <code>length</code> and <code>bite</code> variables are being treated as numbers (indicated by <code>num</code>), and we get a handful of example values for both <code>length</code> and <code>bite</code>.</p>
 <p>So far, we’re not seeing anything unusual, which is great, it means we haven’t identified any problems that we need to fix.</p>
 <p>If we wanted to, we could extract the <code>length</code> variable from the dataset by doing:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>ali<span class="sc">$</span>length</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>ali<span class="sc">$</span>length</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>How would you extract the <code>bite</code> variable?</p>
 <p>Let’s use these extracted variables to calculate some summary statistics, starting with the mean (i.e. average). To do so, we use the <code>mean()</code> function. To find the average length of our alligators, we do:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(ali<span class="sc">$</span>length)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 373.9897</code></pre>
-</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(ali<span class="sc">$</span>length)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We can see that the average alligator in Parker Island Gator Farm is 374 cm long.</p>
 <p>Compare this value with the mean length of alligators you found from a quick internet search. It might be a bit longer than expected, but this could be due to these alligators coming from a farm rather than the wild. Perhaps they’re given lots of food to help them grow? While our numbers may not match exactly with online data, significant discrepancies could be worth investigating.</p>
 <p>Similarly, calculate the average bite strength of our alligators and see if there’s anything unusual there.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(ali<span class="sc">$</span>bite)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 3546.084</code></pre>
-</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(ali<span class="sc">$</span>bite)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Assuming you found that alligator bite strength is roughly 2,000 pounds per square inch, our alligators appear to be biting with an extra 1,500 pounds per square inch <em>on average</em>. That seems like <em>a lot</em> more.</p>
 <p>This is something that should make us sit up and pay attention. We don’t know for sure if there’s a problem, but we have reason to believe there <em>might</em> be one. It’s now up to us to prove that there <em>isn’t</em> a problem.</p>
 <p>There are many descriptive techniques to check for anomalies in our data, but a convenient “short cut” is to use the <code>summary()</code> function. This function provides a generic summary of our entire dataset when we supply <code>ali</code> as the sole argument. Try this now and see if you can identify any issues with the data:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ali)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ali)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Keep in mind, with EDA we’re looking for anything <em>weird</em> in the data.</p>
 <section id="question-set-two" class="level2">
@@ -2853,47 +2833,26 @@ Yes. A 2293 cm alligator is longer than a bus. And 123,632 PSI is about 60 times
 <p>How does that translate into <code>R</code>? Almost exactly; we just need to write those three steps using code.</p>
 <p>First, we’d start by looking at the <code>ali</code> dataset.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>ali</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>ali</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Next, we’d skim through the <code>ali</code> dataset, looking for any rows where alligators are 2293 cm long. This is where we can use square brackets <code>[]</code> in conjunction with conditional statements. Conditional statements allow us to specify criteria like “when this condition is met, do <em>something</em>”.</p>
 <p>In our case, the condition is finding alligators that are 2293 cm long. In <code>R</code>, we write this condition using double equal signs (<code>==</code>) to denote “equal to” (a single <code>=</code> assigns a value; <code>==</code> tests whether two things match). This is basically the same as your eyes going down the Excel column looking for 2293, noting any instances where it was true or not. For example:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>ali<span class="sc">$</span>length <span class="sc">==</span> <span class="fl">2293.0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code> [1] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-[13] FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE
-[25] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-[37] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-[49] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-[61] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-[73] FALSE FALSE FALSE FALSE FALSE FALSE</code></pre>
-</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>ali<span class="sc">$</span>length <span class="sc">==</span> <span class="fl">2293.0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The output is a list of 78 values, each being either <code>TRUE</code> or <code>FALSE</code>, corresponding to each row in the <code>ali</code> dataset. <code>TRUE</code> values indicate rows where the alligator is 2293 cm long, and <code>FALSE</code> values indicate rows where it is not (in <code>R</code>, “not equal to” is denoted as <code>!=</code>).</p>
 <p>Finally, once we’ve found these rows, we examine all the information related to those alligators. When using square brackets, remember that the row number comes before the comma, and the column number comes after (e.g. <code>ali[row, column]</code>). If we omit either the row or column number, <code>R</code> will return all rows or all columns respectively. For instance, to view all the information (i.e. all columns) for the 30th row, you would use:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>ali[<span class="dv">30</span>,]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>   length    bite
-30  343.4 2026.86</code></pre>
-</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>ali[<span class="dv">30</span>,]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>To make life a bit easier for ourselves, we can use these square brackets in combination with the conditional statement to extract the entire row for the alligator that’s 2293 cm long. The <code>TRUE</code> and <code>FALSE</code> values act as indicators for which rows we want to display: if a value is <code>TRUE</code>, we see that row; if it’s <code>FALSE</code>, we don’t. We can achieve this by writing:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>ali[ali<span class="sc">$</span>length <span class="sc">==</span> <span class="dv">2293</span>,]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>   length   bite
-20   2293 123632</code></pre>
-</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>ali[ali<span class="sc">$</span>length <span class="sc">==</span> <span class="dv">2293</span>,]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>What do you make of this observation? We’re expecting <code>length</code> to be about 200 to 400 centimeters (2 to 4 m), but this alligator is apparently 10 times bigger than that. And <code>bite</code> is about 100 times bigger. Neither of the two values seems to have a decimal point (or at least <code>R</code> has given them zeros after the decimal point).</p>
 <p>Why might that be the case? Let’s find a “normal” observation to compare this giant alligator to. Assuming the first observation is a normal one, use the square brackets to extract the first row of data from the <code>ali</code> dataset:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>ali[<span class="dv">1</span>, ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>  length   bite
-1  408.9 2268.5</code></pre>
-</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>ali[<span class="dv">1</span>, ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Well, they’re clearly different. The first alligator in our dataset looks pretty normal. Maybe a bit on the big side (just over 4 m long), but not weirdly so. There are only two possible explanations for this: either there are giant alligators among us, or there has been a data entry mistake.</p>
 <section id="question-set-three" class="level2">
@@ -2920,66 +2879,25 @@ The decimal points were accidentally omitted during data entry. The correct valu
 <h1>A More Refined Detective</h1>
 <p>The approach above works, but typing 2293 every time is awkward and can cause issues. Referencing specific numbers like this in code is called “magic numbers” because to anyone looking at your code, they have absolutely no idea why this number is special and what why you are working with it. Better to store the maximum in a clearly labelled variable and reference that instead:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the maximum alligator length</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>max_length <span class="ot">&lt;-</span> <span class="fu">max</span>(ali<span class="sc">$</span>length)</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Now use this value to find the problematic rows</span></span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>ali[ali<span class="sc">$</span>length <span class="sc">==</span> max_length, ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>   length   bite
-20   2293 123632</code></pre>
-</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the maximum alligator length</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>max_length <span class="ot">&lt;-</span> <span class="fu">max</span>(ali<span class="sc">$</span>length)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Now use this value to find the problematic rows</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>ali[ali<span class="sc">$</span>length <span class="sc">==</span> max_length, ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>By storing the result of <code>max(ali$length)</code> in a variable (<code>max_length</code>), we can simplify our code and make it more readable. This way, if we need to refer to the maximum length multiple times, we only need to use the <code>max_length</code> variable. Within the <code>ali</code> dataset, this code extracts all columns (since we have not specified anything after the comma in the square brackets) for any rows where the length of an alligator is equal to the maximum length of any alligator.</p>
 <p>We can also adapt the conditional statement to find rows based on different criteria. For example, if we wanted to extract all rows with alligators that were greater than the average length, we could do:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the average alligator length</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>average_length <span class="ot">&lt;-</span> <span class="fu">mean</span>(ali<span class="sc">$</span>length)</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract all rows where the alligator length is greater than the average</span></span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>ali[ali<span class="sc">$</span>length <span class="sc">&gt;</span> average_length, ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>   length      bite
-1   408.9   2268.50
-2   378.1   2156.24
-5   419.5   2442.91
-6   427.5   2331.68
-7   382.1   2186.78
-12  378.1   2204.37
-13  399.9   2205.96
-18  377.3   2026.39
-20 2293.0 123632.00
-21  418.4   2383.09
-23  412.6   2484.12
-28  391.1   2251.63
-34  422.3   2474.34
-40  375.7   2173.30
-43  379.7   2148.50
-44  468.4   2649.99
-48  390.1   2225.24
-49  388.3   2149.13
-50  466.4   2593.13
-57  403.7   2402.71
-59  410.0   2265.09
-61  445.6   2559.36
-62  401.6   2271.19
-63  382.3   2212.23
-65  448.8   2510.11
-68  392.9   2283.28
-69  379.5   2267.27
-71  417.9   2434.23
-77  435.3   2435.05
-78  391.0   2051.66</code></pre>
-</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the average alligator length</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>average_length <span class="ot">&lt;-</span> <span class="fu">mean</span>(ali<span class="sc">$</span>length)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract all rows where the alligator length is greater than the average</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>ali[ali<span class="sc">$</span>length <span class="sc">&gt;</span> average_length, ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>In this case, <code>ali[ali$length &gt; average_length, ]</code> will give us all columns for rows where the length of the alligator is greater than the calculated average length. We now get data from more than one alligator, as more than one alligator meets our condition of being longer than average. We can also see the “data entry mistake alligator” using this method.</p>
 <p>Let’s refine our approach further by using a different function: <code>quantile()</code>. First, rerun the <code>summary(ali)</code> code to observe the quantiles (<code>1st Qu.</code> and <code>3rd Qu.</code>) that it reports. These quantiles represent the values below which 25% of the data falls and above which 75% of the data falls. We can retrieve these quantile values ourselves by doing:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(ali<span class="sc">$</span>length, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.25</span>,<span class="fl">0.75</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>    25%     75% 
-316.025 390.775 </code></pre>
-</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(ali<span class="sc">$</span>length, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.25</span>,<span class="fl">0.75</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The <code>probs</code> argument in the <code>quantile()</code> function allows us to specify which probabilities we want to calculate quantiles for. In the previous example, we requested the 25% (<code>0.25</code>) and 75% (<code>0.75</code>) quantiles. Since we wanted to get these two values, we used the <code>c()</code> function, which combines (or “concatenates”) multiple values into a single vector. If we only need a single quantile, such as the 75th percentile, we can directly write <code>quantile(ali$length, probs = 0.75)</code>. In this case, there’s no need to use <code>c()</code> because we’re only asking for one value.</p>
 <section id="question-set-four" class="level2">
@@ -3038,17 +2956,17 @@ Row 20 appears to be the only observation with this problem. The other bite and 
 <p>Let’s start with <code>ali$bite</code>. We only want to change row 20. How do we select only row 20? <code>ali$bite[20]</code>. Note that we don’t need to specify a column in the square brackets, because we’re working with a single column, the <code>bite</code> column.</p>
 <p>Next, we need to replace <code>ali$bite[20]</code> with an altered version of itself, so we would write:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>ali<span class="sc">$</span>bite[<span class="dv">20</span>] <span class="ot">&lt;-</span> ali<span class="sc">$</span>bite[<span class="dv">20</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>ali<span class="sc">$</span>bite[<span class="dv">20</span>] <span class="ot">&lt;-</span> ali<span class="sc">$</span>bite[<span class="dv">20</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>This will just replace the <code>bite</code> value from row 20 with itself. We’re not actually doing anything here, but we’re getting closer.</p>
 <p>Next, we need to “add” back in the decimal point that was lost during data entry. How do we shift the value two places to the right of the decimal point? We divide by 100, leaving us with:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Resolving data entry issue with missing decimal point</span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>ali<span class="sc">$</span>bite[<span class="dv">20</span>] <span class="ot">&lt;-</span> ali<span class="sc">$</span>bite[<span class="dv">20</span>] <span class="sc">/</span> <span class="dv">100</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Resolving data entry issue with missing decimal point</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>ali<span class="sc">$</span>bite[<span class="dv">20</span>] <span class="ot">&lt;-</span> ali<span class="sc">$</span>bite[<span class="dv">20</span>] <span class="sc">/</span> <span class="dv">100</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Using a hardcoded row number like <code>[20]</code> works here, but it’s fragile: if the dataset were ever re-sorted or a row added above this one, row 20 would point to the wrong observation (i.e. 20 is a “magic number”). A safer approach uses the same conditional indexing we’ve already learned, targeting the value itself rather than its position:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>ali<span class="sc">$</span>bite[ali<span class="sc">$</span>bite <span class="sc">&gt;</span> <span class="dv">100000</span>] <span class="ot">&lt;-</span> ali<span class="sc">$</span>bite[ali<span class="sc">$</span>bite <span class="sc">&gt;</span> <span class="dv">100000</span>] <span class="sc">/</span> <span class="dv">100</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>ali<span class="sc">$</span>bite[ali<span class="sc">$</span>bite <span class="sc">&gt;</span> <span class="dv">100000</span>] <span class="ot">&lt;-</span> ali<span class="sc">$</span>bite[ali<span class="sc">$</span>bite <span class="sc">&gt;</span> <span class="dv">100000</span>] <span class="sc">/</span> <span class="dv">100</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>This reads as: “for any <code>bite</code> value greater than 100,000, divide it by 100.” It will find the right row regardless of where it sits in the dataset.</p>
 <section id="question-set-five" class="level2">
@@ -3135,13 +3053,13 @@ Show Answer
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>fast <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;data/animal_speed.txt&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>fast <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;data/animal_speed.txt&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Start your exploration here</span></span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fast)</span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(fast)</span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(fast<span class="sc">$</span>species)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Start your exploration here</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fast)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(fast)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(fast<span class="sc">$</span>species)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="question-block">
 <p>
@@ -3277,14 +3195,14 @@ The most common species is the <strong>Saiga Antelope</strong> (177 individuals,
 <p><a href="data:text/plain;base64,InllYXIiICJjaXR5IiAiYWxjIiAidWZvIiAiYmVsaWVmIiAiY2h1cGEiDQoxOTgxICJIb3VzdG9uIiA3LjggMCAibWVkaXVtIiAwLjE0DQoxOTgyICJIb3VzdG9uIiAxMC41IDMgImxvdyIgMC41Mg0KMTk4MyAiSG91c3RvbiIgNC45IDAgImhpZ2giIC0wLjU0DQoxOTg0ICJIb3VzdG9uIiA3LjEgMCAibG93IiAtMC41NA0KMTk4NSAiSG91c3RvbiIgNS44IDAgImxvdyIgLTAuNzcNCjE5ODYgIkhvdXN0b24iIDcgMCAiaGlnaCIgLTAuMQ0KMTk4NyAiSG91c3RvbiIgNy42IDAgImxvdyIgLTAuNDQNCjE5ODggIkhvdXN0b24iIDUuMyAwICJtZWRpdW0iIC0wLjUyDQoxOTg5ICJIb3VzdG9uIiA2LjkgMCAibWVkaXVtIiAtMC4wNw0KMTk5MCAiSG91c3RvbiIgNC40IDAgImhpZ2giIC0wLjYNCjE5OTEgIkhvdXN0b24iIDEwLjQgNCAibWVkaXVtIiAwLjkzDQoxOTkyICJIb3VzdG9uIiA2LjQgMCAibWVkaXVtIiAtMC4zNQ0KMTk5MyAiSG91c3RvbiIgOS43IDAgImhpZ2giIDAuNjcNCjE5OTQgIkhvdXN0b24iIDYuOCAwICJtZWRpdW0iIC0wLjINCjE5OTUgIkhvdXN0b24iIDcuNiAwICJoaWdoIiAwLjA2DQoxOTgxICJEYWxsYXMiIDkuNyAwICJtZWRpdW0iIDAuNQ0KMTk4MiAiRGFsbGFzIiA3LjggMSAibG93IiAtMC4xOQ0KMTk4MyAiRGFsbGFzIiA2LjUgMSAiaGlnaCIgMC4wNg0KMTk4NCAiRGFsbGFzIiA3LjIgMCAibG93IiAtMC40Ng0KMTk4NSAiRGFsbGFzIiA0LjMgMCAibG93IiAtMC45NA0KMTk4NiAiRGFsbGFzIiA2LjIgNSAiaGlnaCIgMC4zNg0KMTk4NyAiRGFsbGFzIiA0LjkgNyAibG93IiAtMC4wNw0KMTk4OCAiRGFsbGFzIiA5LjMgMCAibWVkaXVtIiAwLjINCjE5ODkgIkRhbGxhcyIgNS44IDAgIm1lZGl1bSIgLTAuMTcNCjE5OTAgIkRhbGxhcyIgMy42IDAgImhpZ2giIC0wLjc1DQoxOTkxICJEYWxsYXMiIDYuMiAzOCAibWVkaXVtIiAzLjU2DQoxOTkyICJEYWxsYXMiIDEgMCAibWVkaXVtIiAtMS40OQ0KMTk5MyAiRGFsbGFzIiA2LjUgMCAiaGlnaCIgLTAuMTcNCjE5OTQgIkRhbGxhcyIgNy4zIDEwICJtZWRpdW0iIDAuNzcNCjE5OTUgIkRhbGxhcyIgMTAuNSAwICJoaWdoIiAwLjc1DQoxOTgxICJBdXN0aW4iIDguNyAwICJtZWRpdW0iIDUNCjE5ODIgIkF1c3RpbiIgMTEuOSAwICJsb3ciIDAuNjINCjE5ODMgIkF1c3RpbiIgNy4zIDAgImhpZ2giIDAuMTINCjE5ODQgIkF1c3RpbiIgNi40IDAgImxvdyIgLTAuNzINCjE5ODUgIkF1c3RpbiIgMCAwICJsb3ciIC0yLjAzDQoxOTg2ICJBdXN0aW4iIDguNiAzICJoaWdoIiAwLjY1DQoxOTg3ICJBdXN0aW4iIDcuOCA4ICJsb3ciIDAuNDINCjE5ODggIkF1c3RpbiIgOC4xIDAgIm1lZGl1bSIgLTAuMDQNCjE5ODkgIkF1c3RpbiIgMCAwICJtZWRpdW0iIC0xLjcxDQoxOTkwICJBdXN0aW4iIDcuMSAwICJoaWdoIiAtMC4wNA0KMTk5MSAiQXVzdGluIiAxMS45IDMgIm1lZGl1bSIgMS4wOQ0KMTk5MiAiQXVzdGluIiAzLjUgMCAibWVkaXVtIiAtMC43Ng0KMTk5MyAiQXVzdGluIiA1LjkgMCAiaGlnaCIgLTAuMTUNCjE5OTQgIkF1c3RpbiIgNy4yIDEgIm1lZGl1bSIgLTAuMTENCjE5OTUgIkF1c3RpbiIgNy44IDAgImhpZ2giIDAuMjkNCjE5ODEgIlNhbiBBbnRvbmlvIiA2LjggMCAibWVkaXVtIiAtMC4xNw0KMTk4MiAiU2FuIEFudG9uaW8iIDcuOCAwICJsb3ciIC0wLjE3DQoxOTgzICJTYW4gQW50b25pbyIgOC40IDEgImhpZ2giIDAuNDkNCjE5ODQgIlNhbiBBbnRvbmlvIiAxMi45IDEgImxvdyIgMC42OA0KMTk4NSAiU2FuIEFudG9uaW8iIDQuNyA5OTk5ICJsb3ciIC0xLjE2DQoxOTg2ICJTYW4gQW50b25pbyIgOC42IDAgImhpZ2giIDAuMzENCjE5ODcgIlNhbiBBbnRvbmlvIiA0LjQgMjQgImxvdyIgMS40Mw0KMTk4OCAiU2FuIEFudG9uaW8iIDguOSAwICJtZWRpdW0iIDAuMTENCjE5ODkgIlNhbiBBbnRvbmlvIiAzLjUgMSAibWVkaXVtIiAtMC42Ng0KMTk5MCAiU2FuIEFudG9uaW8iIDcuNCAwICJoaWdoIiAwLjA2DQoxOTkxICJTYW4gQW50b25pbyIgMTAuNSA1ICJtZWRpdW0iIDEuMTgNCjE5OTIgIlNhbiBBbnRvbmlvIiA4IDAgIm1lZGl1bSIgLTAuMDUNCjE5OTMgIlNhbiBBbnRvbmlvIiA3LjcgMSAiaGlnaCIgMC4zOA0KMTk5NCAiU2FuIEFudG9uaW8iIDUuMSAwICJtZWRpdW0iIC0wLjU3DQoxOTk1ICJTYW4gQW50b25pbyIgNy41IDAgImhpZ2giIDAuMDgNCjE5ODEgIkZvcnQgV29ydGgiIDkuNSAwICJtZWRpdW0iIDAuMTYNCjE5ODIgIkZvcnQgV29ydGgiIDkuNSAwICJsb3ciIDAuMDYNCjE5ODMgIkZvcnQgV29ydGgiIDcuOSAwICJoaWdoIiAwLjE3DQoxOTg0ICJGb3J0IFdvcnRoIiAxMC40IDAgImxvdyIgMC4xMQ0KMTk4NSAiRm9ydCBXb3J0aCIgNC44IDAgImxvdyIgLTEuMDMNCjE5ODYgIkZvcnQgV29ydGgiIDUuOSAxICJoaWdoIiAtMC4wOA0KMTk4NyAiRm9ydCBXb3J0aCIgNS4xIDE1ICJsb3ciIDAuNzkNCjE5ODggIkZvcnQgV29ydGgiIDYuNCAwICJtZWRpdW0iIC0wLjM0DQoxOTg5ICJGb3J0IFdvcnRoIiA4LjIgMCAibWVkaXVtIiAwLjAyDQoxOTkwICJGb3J0IFdvcnRoIiAzLjkgMCAiaGlnaCIgLTAuNTgNCjE5OTEgIkZvcnQgV29ydGgiIDcuOCAxNCAibWVkaXVtIiAxLjMxDQoxOTkyICJGb3J0IFdvcnRoIiA2LjcgMCAibWVkaXVtIiAtMC4wOA0KMTk5MyAiRm9ydCBXb3J0aCIgOS4zIDEgImhpZ2giIDAuNTMNCjE5OTQgIkZvcnQgV29ydGgiIDQuNyAwICJtZWRpdW0iIC0wLjYyDQoxOTk1ICJGb3J0IFdvcnRoIiA3LjMgMCAiaGlnaCIgMC4yNw0KMTk4MSAiRWwgUGFzbyIgNi42IDAgIm1lZGl1bSIgLTAuMzUNCjE5ODIgIkVsIFBhc28iIDkuNiAwICJsb3ciIDAuMjINCjE5ODMgIkVsIFBhc28iIDcuNSAxICJoaWdoIiAwLjI5DQoxOTg0ICJFbCBQYXNvIiA4LjIgMCAibG93IiAtMC4yNQ0KMTk4NSAiRWwgUGFzbyIgOC45IDAgImxvdyIgMC4wMw0KMTk4NiAiRWwgUGFzbyIgOC43IDEgImhpZ2giIDAuNDQNCjE5ODcgIkVsIFBhc28iIDQuNiAyNSAibG93IiAxLjQ4DQoxOTg4ICJFbCBQYXNvIiA5LjEgMCAibWVkaXVtIiAwLjE1DQoxOTg5ICJFbCBQYXNvIiAxMS4zIDAgIm1lZGl1bSIgMC42DQoxOTkwICJFbCBQYXNvIiA4LjQgMCAiaGlnaCIgMC4xOQ0KMTk5MSAiRWwgUGFzbyIgOC41IDMgIm1lZGl1bSIgMC40NQ0KMTk5MiAiRWwgUGFzbyIgOC42IDAgIm1lZGl1bSIgMC4xMQ0KMTk5MyAiRWwgUGFzbyIgMTIuMSAxNiAiaGlnaCIgMi42Ng0KMTk5NCAiRWwgUGFzbyIgNy43IDEgIm1lZGl1bSIgMC4xDQoxOTk1ICJFbCBQYXNvIiA4IDAgImhpZ2giIDAuMTgNCjE5ODEgIkFybGluZ3RvbiIgNS42IDAgIm1lZGl1bSIgLTAuNDMNCjE5ODIgIkFybGluZ3RvbiIgOS45IDAgImxvdyIgMC4yNw0KMTk4MyAiQXJsaW5ndG9uIiA5LjUgMCAiaGlnaCIgMC41DQoxOTg0ICJBcmxpbmd0b24iIDkuNCAwICJsb3ciIDAuMDINCjE5ODUgIkFybGluZ3RvbiIgNy43IDAgImxvdyIgLTAuMjQNCjE5ODYgIkFybGluZ3RvbiIgOS42IDAgImhpZ2giIDAuNTgNCjE5ODcgIkFybGluZ3RvbiIgNi4xIDMgImxvdyIgLTAuMjkNCjE5ODggIkFybGluZ3RvbiIgNy4zIDAgIm1lZGl1bSIgLTAuMDgNCjE5ODkgIkFybGluZ3RvbiIgMy43IDAgIm1lZGl1bSIgLTAuNzkNCjE5OTAgIkFybGluZ3RvbiIgOS4zIDAgImhpZ2giIDAuNDUNCjE5OTEgIkFybGluZ3RvbiIgOC44IDggIm1lZGl1bSIgMC45Mg0KMTk5MiAiQXJsaW5ndG9uIiA1LjkgMCAibWVkaXVtIiAtMC40Mg0KMTk5MyAiQXJsaW5ndG9uIiAxMC42IDEgImhpZ2giIDAuOTINCjE5OTQgIkFybGluZ3RvbiIgNS43IDAgIm1lZGl1bSIgLTAuNDgNCjE5OTUgIkFybGluZ3RvbiIgNyAwICJoaWdoIiAwLjA4DQoxOTgxICJDb3JwdXMgQ2hyaXN0aSIgMTAuNSAwICJtZWRpdW0iIDAuNDkNCjE5ODIgIkNvcnB1cyBDaHJpc3RpIiA2LjEgMCAibG93IiAtMC43NA0KMTk4MyAiQ29ycHVzIENocmlzdGkiIDUuNyAwICJoaWdoIiAtMC4zNw0KMTk4NCAiQ29ycHVzIENocmlzdGkiIDkuOSAwICJsb3ciIDAuMTYNCjE5ODUgIkNvcnB1cyBDaHJpc3RpIiA1LjMgMCAibG93IiAtMC43NQ0KMTk4NiAiQ29ycHVzIENocmlzdGkiIDYuOSAxICJoaWdoIiAwLjA5DQoxOTg3ICJDb3JwdXMgQ2hyaXN0aSIgOC45IDEgImxvdyIgLTAuMjgNCjE5ODggIkNvcnB1cyBDaHJpc3RpIiA1LjggMCAibWVkaXVtIiAtMC40Ng0KMTk4OSAiQ29ycHVzIENocmlzdGkiIDcuNCAwICJtZWRpdW0iIDANCjE5OTAgIkNvcnB1cyBDaHJpc3RpIiAxMC4zIDAgImhpZ2giIDAuNjMNCjE5OTEgIkNvcnB1cyBDaHJpc3RpIiAxMS44IDEgIm1lZGl1bSIgMC42Ng0KMTk5MiAiQ29ycHVzIENocmlzdGkiIDYuOCAwICJtZWRpdW0iIC0wLjI4DQoxOTkzICJDb3JwdXMgQ2hyaXN0aSIgNy41IDEgImhpZ2giIDAuMQ0KMTk5NCAiQ29ycHVzIENocmlzdGkiIDcuNyAwICJtZWRpdW0iIC0wLjE0DQoxOTk1ICJDb3JwdXMgQ2hyaXN0aSIgLTUgMCAiaGlnaCIgMC4yOA0KMTk4MSAiUGxhbm8iIDcuMyAwICJtZWRpdW0iIC0wLjI1DQoxOTgyICJQbGFubyIgOS40IDEgImxvdyIgMA0KMTk4MyAiUGxhbm8iIDUuOSAwICJoaWdoIiAtMC4xNg0KMTk4NCAiUGxhbm8iIDEyLjMgMCAibG93IiAwLjYNCjE5ODUgIlBsYW5vIiAzLjQgMCAibG93IiAtMS4zNg0KMTk4NiAiUGxhbm8iIDguMyAxICJoaWdoIiAwLjI2DQoxOTg3ICJQbGFubyIgMy44IDAgImxvdyIgLTAuODMNCjE5ODggIlBsYW5vIiA3LjYgMCAibWVkaXVtIiAtMC4wNA0KMTk4OSAiUGxhbm8iIDkuMSAwICJtZWRpdW0iIDAuNDINCjE5OTAgIlBsYW5vIiA4LjggMCAiaGlnaCIgMC4yNQ0KMTk5MSAiUGxhbm8iIDguNyAwICJtZWRpdW0iIDAuMjcNCjE5OTIgIlBsYW5vIiA3LjcgMCAibWVkaXVtIiAtMC4wMQ0KMTk5MyAiUGxhbm8iIDEwLjcgMzMgImhpZ2giIDQuMDQNCjE5OTQgIlBsYW5vIiA0LjkgMCAibWVkaXVtIiAtMC41OQ0KMTk5NSAiUGxhbm8iIDkuMiAwICJoaWdoIiAwLjMzDQoxOTgxICJMYXJlZG8iIDggMCAibWVkaXVtIiAtMC4wOA0KMTk4MiAiTGFyZWRvIiAxMy4yIDAgImxvdyIgMC44MQ0KMTk4MyAiTGFyZWRvIiA2LjEgMCAiaGlnaCIgLTAuMjINCjE5ODQgIkxhcmVkbyIgOC45IDAgImxvdyIgMC4xMw0KMTk4NSAiTGFyZWRvIiA1LjkgMCAibG93IiAtMC43NA0KMTk4NiAiTGFyZWRvIiA4LjEgMCAiaGlnaCIgMC4wNA0KMTk4NyAiTGFyZWRvIiA1LjkgNSAibG93IiAtMC4xNw0KMTk4OCAiTGFyZWRvIiA0LjUgMCAibWVkaXVtIiAtMC43Nw0KMTk4OSAiTGFyZWRvIiA3LjQgMCAibWVkaXVtIiAtMC4xMg0KMTk5MCAiTGFyZWRvIiA1LjQgMCAiaGlnaCIgLTAuMzUNCjE5OTEgIkxhcmVkbyIgOC40IDEgIm1lZGl1bSIgMC4xNg0KMTk5MiAiTGFyZWRvIiA1LjIgMCAibWVkaXVtIiAtMC40OQ0KMTk5MyAiTGFyZWRvIiA5LjIgNiAiaGlnaCIgMS4xMQ0KMTk5NCAiTGFyZWRvIiA0LjkgMCAibWVkaXVtIiAtMC42Ng0KMTk5NSAiTGFyZWRvIiA4LjQgMCAiaGlnaCIgMC4xMQ0KMTk4MSAiTHViYm9jayIgNSAwICJtZWRpdW0iIC0wLjc2DQoxOTgyICJMdWJib2NrIiAxMC41IDAgImxvdyIgMC4yMw0KMTk4MyAiTHViYm9jayIgNS41IDAgImhpZ2giIC0wLjQyDQoxOTg0ICJMdWJib2NrIiA4LjQgMCAibG93IiAtMC4wNg0KMTk4NSAiTHViYm9jayIgNy45IDAgImxvdyIgLTAuMzYNCjE5ODYgIkx1YmJvY2siIDYuMSAwICJoaWdoIiAtMC4zOA0KMTk4NyAiTHViYm9jayIgOC42IDAgImxvdyIgLTAuMjYNCjE5ODggIkx1YmJvY2siIDguMiAwICJtZWRpdW0iIC0wLjA0DQoxOTg5ICJMdWJib2NrIiA0LjIgMSAibWVkaXVtIiAtMC42Mw0KMTk5MCAiTHViYm9jayIgNyAwICJoaWdoIiAtMC4xMQ0KMTk5MSAiTHViYm9jayIgNy44IDAgIm1lZGl1bSIgMC4wNw0KMTk5MiAiTHViYm9jayIgOC4xIDAgIm1lZGl1bSIgMC4xNQ0KMTk5MyAiTHViYm9jayIgNy45IDMgImhpZ2giIDAuNDgNCjE5OTQgIkx1YmJvY2siIDMuNyA1ICJtZWRpdW0iIC0wLjMyDQoxOTk1ICJMdWJib2NrIiA3LjggMCAiaGlnaCIgMC4wMg0KMTk4MSAiR2FybGFuZCIgNS43IDAgIm1lZGl1bSIgLTAuNDUNCjE5ODIgIkdhcmxhbmQiIDguMSAwICJsb3ciIC0wLjI4DQoxOTgzICJHYXJsYW5kIiA2LjcgMCAiaGlnaCIgLTAuMTQNCjE5ODQgIkdhcmxhbmQiIDguOCAwICJsb3ciIDAuMDcNCjE5ODUgIkdhcmxhbmQiIDYuNyAwICJsb3ciIC0wLjYyDQoxOTg2ICJHYXJsYW5kIiA0LjMgMCAiaGlnaCIgLTAuNTQNCjE5ODcgIkdhcmxhbmQiIDMuMSAwICJsb3ciIC0xLjM0DQoxOTg4ICJHYXJsYW5kIiA4LjQgMCAibWVkaXVtIiAwLjA5DQoxOTg5ICJHYXJsYW5kIiA3LjUgMCAibWVkaXVtIiAwLjExDQoxOTkwICJHYXJsYW5kIiA5LjggMCAiaGlnaCIgMC41Mw0KMTk5MSAiR2FybGFuZCIgOC40IDEgIm1lZGl1bSIgMC4xOQ0KMTk5MiAiR2FybGFuZCIgMS44IDAgIm1lZGl1bSIgLTEuMTMNCjE5OTMgIkdhcmxhbmQiIDEyIDEgImhpZ2giIDEuMDYNCjE5OTQgIkdhcmxhbmQiIDYuNyAwICJtZWRpdW0iIC0wLjE4DQoxOTk1ICJHYXJsYW5kIiA0LjMgMCAiaGlnaCIgLTAuNTQNCjE5ODEgIklydmluZyIgNC40IDAgIm1lZGl1bSIgLTAuODMNCjE5ODIgIklydmluZyIgOC4xIDAgImxvdyIgLTAuMDcNCjE5ODMgIklydmluZyIgNS42IDAgImhpZ2giIC0wLjI5DQoxOTg0ICJJcnZpbmciIDEwLjUgMCAibG93IiAwLjM2DQoxOTg1ICJJcnZpbmciIDguOCAxICJsb3ciIC0wLjA2DQoxOTg2ICJJcnZpbmciIDExLjkgMCAiaGlnaCIgMS4xNQ0KMTk4NyAiSXJ2aW5nIiA1LjYgMTQgImxvdyIgMC40Nw0KMTk4OCAiSXJ2aW5nIiA1LjggMCAibWVkaXVtIiAtMC40NQ0KMTk4OSAiSXJ2aW5nIiA5LjIgMSAibWVkaXVtIiAwLjI5DQoxOTkwICJJcnZpbmciIDYuNCAwICJoaWdoIiAtMC4wNg0KMTk5MSAiSXJ2aW5nIiAzLjYgNCAibWVkaXVtIiAtMC4zNw0KMTk5MiAiSXJ2aW5nIiAyLjMgMCAibWVkaXVtIiAtMS4yMg0KMTk5MyAiSXJ2aW5nIiAxMSAxNyAiaGlnaCIgMi4zNw0KMTk5NCAiSXJ2aW5nIiA4LjMgMCAibWVkaXVtIiAwLjA3DQoxOTk1ICJJcnZpbmciIDcuNyAwICJoaWdoIiAwLjI0DQoxOTgxICJBbWFyaWxsbyIgNS44IDAgIm1lZGl1bSIgLTAuNDYNCjE5ODIgIkFtYXJpbGxvIiAxMi43IDAgImxvdyIgMC42NQ0KMTk4MyAiYW1hcmlsbG8iIDguNiAwICJoaWdoIiAwLjUNCjE5ODQgIkFtYXJpbGxvIiA5LjQgMCAibG93IiAwLjAzDQoxOTg1ICJBbWFyaWxsbyIgNi4yIDAgImxvdyIgLTAuNjUNCjE5ODYgIkFtYXJpbGxvIiA5LjYgMCAiaGlnaCIgMC42Ng0KMTk4NyAiQW1hcmlsbG8iIDYgMCAibG93IiAtMC42Mw0KMTk4OCAiQW1hcmlsbG8iIDQuNiAwICJtZWRpdW0iIC0wLjY1DQoxOTg5ICJBbWFyaWxsbyIgNi40IDAgIm1lZGl1bSIgLTAuMzcNCjE5OTAgIkFtYXJpbGxvIiAxMS43IDAgImhpZ2giIDAuNzgNCjE5OTEgIkFtYXJpbGxvIiAxMi4yIDAgIm1lZGl1bSIgMC42DQoxOTkyICJBbWFyaWxsbyIgNy44IDAgIm1lZGl1bSIgMC4wMg0KMTk5MyAiQW1hcmlsbG8iIDEwLjUgMTUgImhpZ2giIDIuMzINCjE5OTQgIkFtYXJpbGxvIiAzLjIgMCAibWVkaXVtIiAtMC44NA0KMTk5NSAiQW1hcmlsbG8iIDUuMiAwICJoaWdoIiAtMC4xNA0KMTk4MSAiR3JhbmQgUHJhaXJpZSIgNS4zIDAgIm1lZGl1bSIgLTAuNzENCjE5ODIgIkdyYW5kIFByYWlyaWUiIDEwLjEgMCAibG93IiAtMC4xMg0KMTk4MyAiR3JhbmQgUHJhaXJpZSIgOS43IDAgImhpZ2giIDAuNjENCjE5ODQgIkdyYW5kIFByYWlyaWUiIDYuNiAwICJsb3ciIC0wLjY1DQoxOTg1ICJHcmFuZCBQcmFpcmllIiAzLjIgMCAibG93IiAtMS4zMw0KMTk4NiAiR3JhbmQgUHJhaXJpZSIgNiAwICJoaWdoIiAtMC4xNA0KMTk4NyAiR3JhbmQgUHJhaXJpZSIgMi40IDAgImxvdyIgLTEuNA0KMTk4OCAiR3JhbmQgUHJhaXJpZSIgNS44IDQgIm1lZGl1bSIgLTAuMDUNCjE5ODkgIkdyYW5kIFByYWlyaWUiIDYuNSAwICJtZWRpdW0iIC0wLjIzDQoxOTkwICJHcmFuZCBQcmFpcmllIiA0LjkgMCAiaGlnaCIgLTAuMzINCjE5OTEgIkdyYW5kIFByYWlyaWUiIDkuNiAwICJtZWRpdW0iIDAuMzENCjE5OTIgIkdyYW5kIFByYWlyaWUiIDguMSAwICJtZWRpdW0iIC0wLjAyDQoxOTkzICJHcmFuZCBQcmFpcmllIiA4LjUgNiAiaGlnaCIgMC44NA0KMTk5NCAiR3JhbmQgUHJhaXJpZSIgOC4zIDIgIm1lZGl1bSIgMC4yMQ0KMTk5NSAiR3JhbmQgUHJhaXJpZSIgNiAwICJoaWdoIiAtMC4xNA0K" download="chupa.txt" class="ws-download-btn">Download chupa.txt</a></p>
 <p>As a group, we’ll look at snippets of code and identify the errors.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>chupa <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;data/chupa.txt&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>chupa <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;data/chupa.txt&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(chupa)</span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(chupa)</span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(chupa<span class="sc">$</span>city)</span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(chupa)</span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(chupa<span class="sc">$</span>belief)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(chupa)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(chupa)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(chupa<span class="sc">$</span>city)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(chupa)</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(chupa<span class="sc">$</span>belief)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="question-block">
 <p>

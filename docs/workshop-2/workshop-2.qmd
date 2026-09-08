@@ -18,7 +18,7 @@ format:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show = "hide")
+knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show = "show")
 library(ggplot2)
 boto <- read.table("data/boto.txt", header = TRUE)
 abdn <- read.table("data/abdn_flats.txt", header = TRUE)
@@ -272,13 +272,13 @@ library(ggplot2)             # Load the software
 
 Once we have `ggplot2` installed and loaded, we can make a simple "ggplot":
 
-```{r, eval=FALSE}
+```{r}
 ggplot()
 ```
 
 Cool... a completely empty canvas. Well, it shouldn't really come as a surprise that there's nothing in this figure. For starters, we haven't even told it which dataset to use. Let's correct that now:
 
-```{r, eval=FALSE}
+```{r}
 ggplot(boto)
 ```
 
@@ -286,7 +286,7 @@ Still nothing. What we're missing here is where we tell `ggplot2` a couple of th
 
 Let's have `length` on the y-axis and `drought` on the x-axis, with the form (or geometry) that we want the data shown as being points:
 
-```{r, eval=FALSE}
+```{r}
 ggplot(boto) +
   geom_point(aes(y = length, x = drought))
 ```
@@ -335,14 +335,14 @@ Now we're getting somewhere. From an early data analysis perspective, what have 
 
 The above figure is great. It's simple and clear (though a bit ugly, we'll come back to that later), but how would we include a categorical variable like `sex`? Can we just copy our code from above and replace `drought` with `sex`? Let's see:
 
-```{r, eval=FALSE}
+```{r}
 ggplot(boto) +
   geom_point(aes(y = length, x = sex))
 ```
 
 Kind of? It's a bit hard to see the spread of data for each sex. A better way to show this is to use some tool that helps the reader understand the range of `length` for each `sex`, but also how the data is spread. There are two common options people use for this: boxplots and violin plots. It's trivially easy to swap between them, because all we need to do is change the geometry function from `geom_point()` to either `geom_boxplot()` or `geom_violin()`:
 
-```{r, eval=FALSE}
+```{r}
 # Boxplot
 ggplot(boto) +
   geom_boxplot(aes(y = length, x = sex))
@@ -358,7 +358,7 @@ With either boxplots or violin plots, it's fairly common that people add data po
 
 An alternative is to use something called "jittering". When we jitter points, we add a small random value to either or both the x and y position to spread the data out a little. With our boto data we wouldn't want to add anything to y (we're interested in the length of the dolphins, so we don't want to mess that up), but we can happily add something to x (or `sex`). To do so, we use `geom_jitter()` and specify that "noise" should only be added to x and not y, which we do by setting `height = 0` (i.e. zero noise added to "height", or the y-axis) and `width = 0.1` (i.e. points can move 0.1 units left and right on the x-axis):
 
-```{r, eval=FALSE}
+```{r}
 ggplot(boto) +
   geom_violin(aes(y = length, x = sex)) +
   geom_jitter(aes(y = length, x = sex), height = 0, width = 0.1)
@@ -447,7 +447,7 @@ With these basic figures in place, we can begin expanding on them. There's no sh
 
 With that in mind, let's use a few of these options, starting with colour. We'll keep `x = drought` and `y = length`, and colour the points according to `sex`. Because `sex` is a variable within our `boto` dataset, we include this within `aes()`. Remember, anything we want to change in the figure based on a variable in our dataset is included via `aes()`.
 
-```{r, eval=FALSE}
+```{r}
 ggplot(boto) +
   geom_point(aes(y = length, x = drought, colour = sex))
 ```
@@ -456,14 +456,14 @@ With a really minor addition to the code, we now have points coloured red and bl
 
 Let's assume we think the points are a bit too small for our audience to read. In that case, we can specify a value for `size =`. Should `size =` go inside `aes()` or outside? We're not using a variable in our dataset to determine the size of the point, so we include `size =` outside of `aes()`:
 
-```{r, eval=FALSE}
+```{r}
 ggplot(boto) +
   geom_point(aes(y = length, x = drought, colour = sex), size = 2)
 ```
 
 Easy enough, but the figure still looks kind of ugly. Let's make it more visually appealing. A really easy way to do this is to select one of the many themes built into `ggplot2`. Personally, I tend to use `theme_bw()` or `theme_minimal()`, but have a look online for other options if you don't like these. How do we include a theme? As an additional layer. Because themes change the overall look of a figure, we can place them anywhere in our layers (though traditionally they go at the end). At the same time, let's change the labels to make it look less like "code" and more polished, using the `labs()` (short for labels) function:
 
-```{r, eval=FALSE}
+```{r}
 ggplot(boto) +
   geom_point(aes(y = length, x = drought, colour = sex), size = 2) +
   labs(y = "Boto length (cm)",
@@ -474,7 +474,7 @@ ggplot(boto) +
 
 The last graphing option we'll cover in this workshop is facetting. Facetting allows us to split a figure into multiple smaller figures (technically called "multiples") based on a variable in our dataset. There are two options: `facet_wrap()` and `facet_grid()`. The difference is that `facet_grid()` gives you fairly precise control, especially when you want to facet by two variables, whereas `facet_wrap()` automates some of the decisions for you. Generally, `facet_wrap()` works well and is a good option to start with. In either, we specify how we want to split the figure using `~` (called "tilde"). For instance, `facet_wrap(~sex)` is like saying "split the figure into multiple facets based on sex":
 
-```{r, eval=FALSE}
+```{r}
 ggplot(boto) +
   geom_point(aes(y = length, x = drought, colour = sex), size = 2) +
   labs(y = "Boto length (cm)",
@@ -541,7 +541,7 @@ Frequency histograms are useful for visualising the distribution of data. The hi
 
 Create a histogram using the boto length data (you did this in Question Set Two, Question 4). We can improve the appearance of the graph by adding outlines to the bars and labels for the axes:
 
-```{r, eval=FALSE}
+```{r}
 ggplot(boto) +
   geom_histogram(aes(x = length), colour = "white") +
   labs(x = "Boto dolphin length",
@@ -551,7 +551,7 @@ ggplot(boto) +
 
 From the plot it is relatively easy to see how many dolphins are in each bin, but it is not so easy to see what lengths of dolphin each bin represents. In `ggplot2`, the default behaviour is to create 30 bins. That means `ggplot` divides the range of the x variable (in this case `length`) into 30 bins of equal width, so each bin covers roughly `(max - min) / 30`, or about 2.3 cm here. There is no ideal bin width, but usually you'd set one to give a reasonably smooth presentation of the distribution, and not so thin that each bin has a single observation. You can set the bin width manually by adding the `binwidth` argument to `geom_histogram()` (or specify how many bins you want with `bins`):
 
-```{r, eval=FALSE}
+```{r}
 ggplot(boto) +
   geom_histogram(aes(x = length), colour = "white", binwidth = 5) +
   labs(x = "Boto dolphin length",
@@ -567,7 +567,7 @@ Density plots are a similar idea to histograms, in that they're very useful for 
 
 Here's what the equivalent density plot looks like for the boto dolphins:
 
-```{r, eval=FALSE}
+```{r}
 ggplot(boto) +
   geom_density(aes(x = length)) +
   labs(x = "Boto dolphin length",
@@ -579,7 +579,7 @@ If you compare it to the histogram, you'd probably reach the same interpretation
 
 It's possible to combine a histogram and a density plot, though it's a bit fiddly because you need to convert proportion into counts (by multiplying proportion by the total number of dolphins and by the binwidth). I wouldn't normally do this in my own work, but it might help you see how the two relate to each other. Here's what the code could look like:
 
-```{r, eval=FALSE}
+```{r}
 ggplot(boto) +
   geom_histogram(aes(x = length), colour = "white", binwidth = 5) +
   geom_density(aes(x = length, y = after_stat(density * n * 5))) +

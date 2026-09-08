@@ -224,11 +224,11 @@ These assumptions (with some simple examples) are:
 |---|---|---|
 | 1. **Validity** | The data is able to answer the research question effectively. | Using IQ to measure overall intelligence (what does IQ even measure?). |
 | 2. **Representativeness** | The data reflects the population or group being studied. | Using survey data from a rural area to draw conclusions about an urban population. |
-| 3. **Additivity** | Effects of predictors are additive and there are no interactions between them. | Assuming that study hours and sleep hours independently affect exam scores without considering their combined effect. |
+| 3. **Additivity** | Effects of predictors are additive and there are no interactions between them. | Assuming that study hours and sleep hours independently affect exam scores without considering their combined effect (imagine a Venn diagram with study and sleep overlapping). |
 | 4. **Linearity** | The relationship between predictors and the outcome is linear. | Assuming plant growth will continue to increase indefinitely without ever levelling out. |
-| 5. **Independence of errors** | Observations are independent of each other. | If modelling height, the data come from the same group of children over time. |
-| 6. **Equal variance of errors** | Residuals have constant variance across all levels of predictors ("homoscedasticity"). | If modelling income, variability in salaries isn't the same across all levels of a company's hierarchy. |
-| 7. **Normality of errors** | Residuals should be normally distributed. | If modelling income, the presence of any extremely wealthy individuals will be hard for the model to understand and explain. |
+| 5. **Independence of errors** | Observations are independent of each other (related to residual errors). | If modelling height, the data come from the same group of children over time. |
+| 6. **Equal variance of errors** | Residuals have constant variance across all levels of predictors ("homoscedasticity"; related to residual errors). | If modelling income, variability in salaries isn't the same across all levels of a company's hierarchy. |
+| 7. **Normality of errors** | Residuals should be normally distributed (related to residual errors). | If modelling income, the presence of any extremely wealthy individuals will be hard for the model to understand and explain. |
 
 For this exercise, form groups of two to four at your table. Your task is to come up with seven datasets that you believe are likely to violate assumptions one to seven in the above table. Once you have come up with an example for a given assumption, choose one of your group to upload your example to the MyAberdeen discussion board, such that we build up a "portfolio" of lousy datasets.
 

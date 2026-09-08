@@ -542,6 +542,9 @@ The `ggeffects` package does the work for you:
 
 ```{r, eval=FALSE}
 install.packages("ggeffects")  # Run once
+```
+
+```{r, message=FALSE, warning=FALSE}
 library(ggeffects)
 
 preds <- ggpredict(boto_model)
@@ -556,13 +559,13 @@ It's actually not much harder to make the figure ourselves, and we've already le
 
 First, create a dataset with the drought values you want to predict at:
 
-```{r, eval=FALSE}
+```{r}
 fake <- data.frame(drought = 0:8)
 ```
 
 Then generate the predictions and add them to the dataset:
 
-```{r, eval=FALSE}
+```{r}
 fake$fit <- predict(boto_model, newdata = fake)
 ```
 
@@ -825,7 +828,7 @@ fake$fit <- predict(boto_model, newdata = fake)
 
 Now plot:
 
-```{r, eval=FALSE}
+```{r}
 ggplot(fake) +
   geom_line(aes(x = drought, y = fit)) +
   labs(x = "Number of drought years",

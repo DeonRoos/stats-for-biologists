@@ -412,7 +412,7 @@ To confirm that the file has been read properly, you should see it in the Enviro
 
 To do an initial quick inspect the data, you have a few options. The following shows the first six rows (use `n` to change how many, e.g. `head(ali, n = 10)`):
 
-```{r}
+```{r, results="hide"}
 head(ali)
 ```
 
@@ -495,7 +495,7 @@ With that done, let's move on to understanding our data. For starters, let's che
 
 To do this quickly, we can use the `str()` function (short for "structure"):
 
-```{r}
+```{r, results="hide"}
 str(ali)
 ```
 
@@ -513,7 +513,7 @@ How would you extract the `bite` variable?
 
 Let's use these extracted variables to calculate some summary statistics, starting with the mean (i.e. average). To do so, we use the `mean()` function. To find the average length of our alligators, we do:
 
-```{r}
+```{r, results="hide"}
 mean(ali$length)
 ```
 
@@ -523,7 +523,7 @@ Compare this value with the mean length of alligators you found from a quick int
 
 Similarly, calculate the average bite strength of our alligators and see if there's anything unusual there.
 
-```{r}
+```{r, results="hide"}
 mean(ali$bite)
 ```
 
@@ -607,7 +607,7 @@ Next, we'd skim through the `ali` dataset, looking for any rows where alligators
 
 In our case, the condition is finding alligators that are `r max(ali$length)` cm long. In `R`, we write this condition using double equal signs (`==`) to denote "equal to" (a single `=` assigns a value; `==` tests whether two things match). This is basically the same as your eyes going down the Excel column looking for `r max(ali$length)`, noting any instances where it was true or not. For example:
 
-```{r}
+```{r, results="hide"}
 ali$length == 2293.0
 ```
 
@@ -615,13 +615,13 @@ The output is a list of `r nrow(ali)` values, each being either `TRUE` or `FALSE
 
 Finally, once we've found these rows, we examine all the information related to those alligators. When using square brackets, remember that the row number comes before the comma, and the column number comes after (e.g. `ali[row, column]`). If we omit either the row or column number, `R` will return all rows or all columns respectively. For instance, to view all the information (i.e. all columns) for the 30th row, you would use:
 
-```{r}
+```{r, results="hide"}
 ali[30,]
 ```
 
 To make life a bit easier for ourselves, we can use these square brackets in combination with the conditional statement to extract the entire row for the alligator that's `r max(ali$length)` cm long. The `TRUE` and `FALSE` values act as indicators for which rows we want to display: if a value is `TRUE`, we see that row; if it's `FALSE`, we don't. We can achieve this by writing:
 
-```{r}
+```{r, results="hide"}
 ali[ali$length == 2293,]
 ```
 
@@ -629,7 +629,7 @@ What do you make of this observation? We're expecting `length` to be about 200 t
 
 Why might that be the case? Let's find a "normal" observation to compare this giant alligator to. Assuming the first observation is a normal one, use the square brackets to extract the first row of data from the `ali` dataset:
 
-```{r}
+```{r, results="hide"}
 ali[1, ]
 ```
 
@@ -655,7 +655,7 @@ Well, they're clearly different. The first alligator in our dataset looks pretty
 
 The approach above works, but typing 2293 every time is awkward and can cause issues. Referencing specific numbers like this in code is called "magic numbers" because to anyone looking at your code, they have absolutely no idea why this number is special and what why you are working with it. Better to store the maximum in a clearly labelled variable and reference that instead:
 
-```{r}
+```{r, results="hide"}
 # Get the maximum alligator length
 max_length <- max(ali$length)
 
@@ -667,7 +667,7 @@ By storing the result of `max(ali$length)` in a variable (`max_length`), we can 
 
 We can also adapt the conditional statement to find rows based on different criteria. For example, if we wanted to extract all rows with alligators that were greater than the average length, we could do:
 
-```{r}
+```{r, results="hide"}
 # Calculate the average alligator length
 average_length <- mean(ali$length)
 
@@ -679,7 +679,7 @@ In this case, `ali[ali$length > average_length, ]` will give us all columns for 
 
 Let's refine our approach further by using a different function: `quantile()`. First, rerun the `summary(ali)` code to observe the quantiles (`1st Qu.` and `3rd Qu.`) that it reports. These quantiles represent the values below which 25% of the data falls and above which 75% of the data falls. We can retrieve these quantile values ourselves by doing:
 
-```{r}
+```{r, results="hide"}
 quantile(ali$length, probs = c(0.25,0.75))
 ```
 
@@ -737,7 +737,7 @@ Let's start with `ali$bite`. We only want to change row 20. How do we select onl
 
 Next, we need to replace `ali$bite[20]` with an altered version of itself, so we would write:
 
-```{r}
+```{r, results="hide"}
 ali$bite[20] <- ali$bite[20]
 ```
 
@@ -745,7 +745,7 @@ This will just replace the `bite` value from row 20 with itself. We're not actua
 
 Next, we need to "add" back in the decimal point that was lost during data entry. How do we shift the value two places to the right of the decimal point? We divide by 100, leaving us with:
 
-```{r}
+```{r, results="hide"}
 # Resolving data entry issue with missing decimal point
 ali$bite[20] <- ali$bite[20] / 100
 ```

@@ -21,6 +21,10 @@ format:
 knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show = "show",
                       message = FALSE, warning = FALSE)
 library(ggplot2)
+rabbit <- read.table("Data/rabbits.txt", header = TRUE)
+rabbit$mongoose[7] <- "Present"
+rabbit$weight[rabbit$weight > 3500] <- rabbit$weight[rabbit$weight > 3500] - 1000
+rabbit_mod <- lm(weight ~ mongoose, data = rabbit)
 make_download_btn <- function(path, label = NULL) {
   fname <- basename(path)
   if (is.null(label)) label <- paste("Download", fname)
@@ -703,13 +707,13 @@ We will return to model diagnostics on Friday. For now, let's focus on step 6: t
 
 Make sure `ggeffects` is installed and loaded:
 
-```{r, eval=FALSE}
+```{r, message=FALSE, warning=FALSE}
 library(ggeffects)
 ```
 
 Ask `ggeffects` to predict rabbit weight across the two `mongoose` categories:
 
-```{r, eval=FALSE}
+```{r, message=FALSE, warning=FALSE}
 preds <- ggpredict(rabbit_mod)
 ```
 
@@ -723,7 +727,7 @@ Then refit and rerun `ggpredict()`. In truth, I've never found fitting a model w
 
 Regardless of whether you convert, plot the predictions:
 
-```{r, eval=FALSE}
+```{r, message=FALSE, warning=FALSE}
 plot(preds)
 ```
 
@@ -733,7 +737,7 @@ We can also follow the same manual approach as last week, with small adjustments
 
 When building the `fake` dataset, `mongoose` only needs the values that appear in the real data. The `unique()` function handles this neatly, which is especially useful when there are many groups:
 
-```{r, eval=FALSE}
+```{r, message=FALSE, warning=FALSE}
 fake <- data.frame(
   mongoose = unique(rabbit$mongoose)
 )
@@ -744,13 +748,13 @@ This gives a two-row dataset, one row for `Absent` and one for `Present`.
 
 Last week we only extracted the point predictions (`fit`). This week we also want the 95% confidence intervals, so we ask `predict()` for the standard error too:
 
-```{r, eval=FALSE}
+```{r, message=FALSE, warning=FALSE}
 preds <- predict(rabbit_mod, newdata = fake, se.fit = TRUE)
 ```
 
 Extract the point predictions first:
 
-```{r, eval=FALSE}
+```{r, message=FALSE, warning=FALSE}
 fake$fit <- preds$fit
 ```
 
@@ -760,7 +764,7 @@ If you need a reminder of what 95% CIs are: confidence intervals represent the p
 
 The 95% confidence interval is constructed by multiplying the standard error by 1.96, then adding and subtracting from `fit`:
 
-```{r, eval=FALSE}
+```{r, message=FALSE, warning=FALSE}
 fake$low95 <- preds$fit - 1.96 * preds$se.fit
 fake$upp95 <- preds$fit + 1.96 * preds$se.fit
 # You can also use confint(rabbit_mod) to check these values.
@@ -768,7 +772,7 @@ fake$upp95 <- preds$fit + 1.96 * preds$se.fit
 
 Now plot the predictions with error bars:
 
-```{r, eval=FALSE}
+```{r, message=FALSE, warning=FALSE}
 ggplot(fake) +
   geom_errorbar(aes(x = mongoose, ymin = low95, ymax = upp95)) +
   geom_point(aes(x = mongoose, y = fit)) +

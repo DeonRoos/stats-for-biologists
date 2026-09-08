@@ -18,9 +18,12 @@ format:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, results = "hide", fig.show = "show",
+knitr::opts_chunk$set(echo = TRUE, results = "show", fig.show = "show",
                       message = FALSE, warning = FALSE)
 library(ggplot2)
+abdn <- read.table("../workshop-2/Data/abdn_flats.txt", header = TRUE)
+rent_mod <- lm(Price ~ FloorArea + Rooms + EPC + Tax, data = abdn)
+rent_causal_mod <- lm(Price ~ FloorArea, data = abdn)
 
 make_download_btn <- function(path, label = NULL) {
   fname <- basename(path)
@@ -449,7 +452,7 @@ A general tip: avoid creating categorical variables out of continuous ones when 
 
 Despite the notation complexity, fitting the model in R is straightforward:
 
-```{r, eval=FALSE}
+```{r}
 rent_mod <- lm(Price ~ FloorArea + Rooms + EPC + Tax, data = abdn)
 summary(rent_mod)
 ```
@@ -460,7 +463,7 @@ This produces a giant list of estimated parameters, reminding us why it's best t
 
 In previous workshops we saved assumption checks for the Friday session, but by now you should be feeling more confident and able to do this more quickly.
 
-```{r, eval=FALSE}
+```{r}
 par(mfrow = c(2, 2))
 plot(rent_mod)
 par(mfrow = c(1, 1))
@@ -553,7 +556,7 @@ par(mfrow = c(1, 1))
 
 Given the number of explanatory variables in our predictive model, we'll use `ggeffects` to do the plotting, though you can definitely do it manually if you prefer more control (the manual approach is shown further down):
 
-```{r, eval=FALSE}
+```{r}
 library(ggeffects)
 summary(rent_mod)
 preds <- ggpredict(rent_mod)
@@ -574,7 +577,7 @@ To build the `FloorArea` prediction plot manually, holding other predictors at r
 
 ```{r, eval=FALSE}
 fake <- data.frame(
-  FloorArea = seq(from = min(abdn$FloorArea), to = max(abdn$FloorArea), by = 5),
+  FloorArea = seq(from = min(abdn$FloorArea, na.rm = TRUE), to = max(abdn$FloorArea, na.rm = TRUE), by = 5),
   Rooms     = median(abdn$Rooms),
   Tax       = "D",
   EPC       = "D"
@@ -967,13 +970,13 @@ lm(Price ~ FloorArea, data = abdn)
 
 ## 4. Fit an appropriate model
 
-```{r, eval=FALSE}
+```{r}
 rent_causal_mod <- lm(Price ~ FloorArea, data = abdn)
 ```
 
 ## 5. Diagnose the model and check assumptions
 
-```{r, eval=FALSE}
+```{r}
 par(mfrow = c(2, 2))
 plot(rent_causal_mod)
 par(mfrow = c(1, 1))
@@ -997,7 +1000,7 @@ par(mfrow = c(1, 1))
 
 ## 6. Summarise the results
 
-```{r, eval=FALSE}
+```{r}
 summary(rent_causal_mod)
 ```
 
@@ -1005,9 +1008,9 @@ Look at the coefficient for `FloorArea`. It should be noticeably larger than the
 
 Plot the estimated relationship:
 
-```{r, eval=FALSE}
+```{r}
 fake <- data.frame(
-  FloorArea = seq(from = min(abdn$FloorArea), to = max(abdn$FloorArea), length.out = 50)
+  FloorArea = seq(from = min(abdn$FloorArea, na.rm = TRUE), to = max(abdn$FloorArea, na.rm = TRUE), length.out = 50)
 )
 preds <- predict(rent_causal_mod, newdata = fake, se.fit = TRUE)
 fake$fit <- preds$fit

@@ -3,3 +3,18 @@
 .RData
 .Ruserdata
 .claude/
+
+# Student personal data (names, IDs, usernames, emails, grades, attendance). Never commit.
+Grades/Data/
+Course analysis/*.csv
+Quizzes/2024_attendance.*
+Quizzes/2024_lecture_watchtime.csv
+Quizzes/course_grades_2024.csv
+Quizzes/q1q2*.csv
+Quizzes/quiz_grades_2024.csv
+Quizzes/Q4/BI3010_grades.txt
+q1q2.csv
+Grades/2024_Q1.csv
+*Class List*.pdf
+demonstrators_*.xlsx
+Admin/

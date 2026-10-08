@@ -1,0 +1,121 @@
+"housing" "cage" "age_weeks" "new_neurons"
+"Enriched" "C12" 10 3316
+"Enriched" "C08" 9 3526
+"Running wheel" "C15" 9 4887
+"Standard" "C03" 9 3333
+"Standard" "C05" 8 3003
+"Standard" "C04" 8 2510
+"Enriched" "C11" 11 3761
+"Enriched" "C07" 11 3104
+"Standard" "C02" 9 3897
+"Running wheel" "C16" 8 4068
+"Standard" "C04" 8 3180
+"Standard" "C03" 11 3275
+"Standard" "C01" 12 2836
+"Isolated" "C41" 8 2600
+"Running wheel" "C13" 10 4147
+"Running wheel" "C17" 11 4571
+"Running wheel" "C17" 8 4275
+"Running wheel" "C18" 12 3556
+"Isolated" "C28" 12 2262
+"Standard" "C03" 10 3012
+"Standard" "C06" 8 3142
+"Enriched" "C09" 11 4094
+"Enriched" "C08" 9 2749
+"Enriched" "C11" 9 3741
+"Isolated" "C27" 8 2741
+"Enriched" "C09" 11 3529
+"Isolated" "C33" 10 2291
+"Enriched" "C10" 8 3279
+"running wheel" "C13" 11 3755
+"Running wheel" "C18" 11 4568
+"Standard" "C04" 12 2851
+"Running wheel" "C18" 8 3829
+"Isolated" "C43" 10 3185
+"Standard" "C04" 11 2790
+"Isolated" "C21" 11 2534
+"Running wheel" "C16" 12 3835
+"Isolated" "C34" 9 2478
+"Isolated" "C32" 11 2773
+"Enriched" "C08" 8 3150
+"Running wheel" "C15" 12 3926
+"Isolated" "C24" 9 NA
+"Enriched" "C07" 10 3759
+"Running wheel" "C14" 9 2981
+"Standard" "C05" 10 2933
+"Standard" "C06" 9 3197
+"Isolated" "C22" 9 2638
+"Isolated" "C42" 12 1880
+"Standard" "C02" 12 3112
+"Isolated" "C48" 12 2633
+"Enriched" "C09" 9 3592
+"Isolated" "C45" 10 3526
+"Isolated" "C29" 11 2612
+"Enriched" "C08" 9 3706
+"Isolated" "C25" 12 2504
+"Standard" "C06" 10 2529
+"Enriched" "C12" 10 3268
+"Running wheel" "C16" 10 4909
+"Isolated" "C30" 11 2179
+"Standard" "C01" 10 3112
+"Standard" "C02" 10 3733
+"Standard" "C01" 9 3416
+"Isolated" "C39" 9 2403
+"Enriched" "C08" 10 2870
+"Isolated" "C26" 10 2096
+"Standard" "C01" 12 2793
+"Isolated" "C20" 12 2480
+"Enriched" "C10" 9 3322
+"Running wheel" "C14" 8 3763
+"Isolated" "C38" 9 2903
+"Standard" "C04" 12 3114
+"Enriched" "C07" 11 3834
+"running wheel" "C18" 12 4988
+"Running wheel" "C17" 8 5610
+"Isolated" "C35" 9 2062
+"Standard" "C03" 10 2537
+"Isolated" "C19" 12 3040
+"Enriched" "C12" 12 3522
+"Enriched" "C10" 8 3782
+"Isolated" "C44" 12 3121
+"Running wheel" "C15" 12 4157
+"Running wheel" "C16" 9 3447
+"Running wheel" "C16" 12 5396
+"Enriched" "C07" 9 3134
+"Enriched" "C09" 10 3873
+"Running wheel" "C13" 10 4291
+"Running wheel" "C14" 8 4031
+"Enriched" "C12" 9 3626
+"Enriched" "C10" 10 3364
+"Isolated" "C37" 11 2756
+"running wheel" "C18" 8 4293
+"Standard" "C01" 8 2481
+"Enriched" "C11" 9 3629
+"Running wheel" "C13" 9 5556
+"Running wheel" "C15" 12 4094
+"Standard" "C03" 12 2725
+"Running wheel" "C15" 11 4498
+"Standard" "C05" 9 2735
+"Isolated" "C31" 10 2849
+"Standard" "C05" 12 NA
+"Running wheel" "C13" 8 4024
+"Standard" "C02" 11 3062
+"Running wheel" "C14" 11 3719
+"Isolated" "C46" 11 1372
+"Isolated" "C23" 11 2455
+"Enriched" "C10" 8 3586
+"Running wheel" "C17" 10 4424
+"Enriched" "C11" 10 3814
+"Isolated" "C47" 9 2091
+"Standard" "C02" 8 3501
+"Running wheel" "C17" 11 4127
+"Isolated" "C36" 9 2545
+"Standard" "C06" 11 2372
+"Isolated" "C40" 12 2745
+"Running wheel" "C14" 9 3655
+"Enriched" "C09" 9 3570
+"Enriched" "C11" 9 4157
+"Standard" "C06" 9 3382
+"Enriched" "C07" 9 3277
+"Enriched" "C12" 12 3954
+"Standard" "C05" 10 2732

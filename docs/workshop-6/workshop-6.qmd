@@ -635,6 +635,268 @@ The diagnostics raise no serious concerns. The main assumptions to reflect on ar
 </div>
 </div>
 
+# On your own: housing and new neurons
+
+Ok, now it's time for you to do the whole workflow on your own with no help, just like you did a few times in the formative quiz.
+
+The hippocampus, a part of the brain involved in learning and memory, is one of the few places where new neurons are still produced in adulthood. In mice, how many new neurons are made seems to depend on how the animals are housed.
+
+The dataset contains 120 mice housed under one of four conditions: standard laboratory cages, enriched cages (with tunnels, toys and extra nesting material), cages with a running wheel, or on their own (isolated). After six weeks, new neurons were counted in thin sections of each mouse's hippocampus. Download it below and save it to your `BI3010/data/` folder.
+
+`r make_download_btn("Data/neurogenesis.txt")`
+
+| Variable | Description |
+|---|---|
+| `housing` | Housing condition (Standard, Enriched, Running wheel, Isolated) |
+| `cage` | Cage ID |
+| `age_weeks` | Age of the mouse (weeks) at the start of the experiment |
+| `new_neurons` | Number of new neurons per mm³ of hippocampus |
+
+Your question: **does the number of new neurons differ between housing conditions?**
+
+Work through the analytical workflow from start to finish. Explore the data, identify any hidden assumptions, fit a sensible model, and diagnose it. There are no hints and no answers for this one. By the end you should be able to say whether you would trust your model, and why.
+
+# Assumption quiz
+
+For each scenario, pick the assumption that is most likely to be violated.
+
+```{r quiz-sims, include=FALSE}
+# Q2: enzyme rate saturates with substrate concentration
+set.seed(2024)
+substrate <- runif(60, 0, 50)
+rate <- 100 * substrate / (8 + substrate) + rnorm(60, 0, 4)
+enz_mod <- lm(rate ~ substrate)
+
+# Q4: one courier is far more variable than the others
+set.seed(11)
+courier <- rep(c("Courier A", "Courier B", "Courier C"), each = 60)
+delivery_hrs <- c(rnorm(60, 30, 4), rnorm(60, 42, 5), pmax(rnorm(60, 60, 28), 12))
+cour_mod <- lm(delivery_hrs ~ courier)
+
+# Q5: well-behaved model
+set.seed(7)
+load_kg <- runif(100, 0, 1500)
+fuel <- 9 + 0.004 * load_kg + rnorm(100, 0, 0.6)
+van_mod <- lm(fuel ~ load_kg)
+
+# Q7: right-skewed length of hospital stay
+sim_stay <- function(seed, n) {
+  set.seed(seed)
+  age <- runif(n, 20, 90)
+  stay <- rlnorm(n, meanlog = 0.6 + 0.015 * age, sdlog = 0.75)
+  lm(stay ~ age)
+}
+hosp_mod <- sim_stay(3, 200)
+
+# Q7b: three correctly specified models (n = 20) and a 20-patient hospital sample
+sim_correct <- function(seed) {
+  set.seed(seed)
+  x <- runif(20, 0, 10)
+  y <- 2 + 0.5 * x + rnorm(20)
+  lm(y ~ x)
+}
+lineup <- list(A = sim_correct(12), B = sim_stay(7, 20),
+               C = sim_correct(20), D = sim_correct(27))
+```
+
+<div class="question-block">
+<p><strong>Question 1.</strong> Mei wants to know whether background music affects reaction time. She recruits 12 volunteers, and each completes 50 reaction-time trials, half with music playing and half in silence. She fits a linear model to all 600 reaction times, with music (yes/no) as the explanatory variable.</p>
+<p>Which assumption is most likely to be violated?</p>
+<div class="mc-options">
+  <label><input type="radio" name="qs2-q1" data-correct="false"> Validity</label>
+  <label><input type="radio" name="qs2-q1" data-correct="false"> Representativeness</label>
+  <label><input type="radio" name="qs2-q1" data-correct="false"> Additivity</label>
+  <label><input type="radio" name="qs2-q1" data-correct="false"> Linearity</label>
+  <label><input type="radio" name="qs2-q1" data-correct="true"> Independence of errors</label>
+  <label><input type="radio" name="qs2-q1" data-correct="false"> Equal variance of errors</label>
+  <label><input type="radio" name="qs2-q1" data-correct="false"> Normality of errors</label>
+  <label><input type="radio" name="qs2-q1" data-correct="false"> None of these</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Independence of errors. Trials from the same person are more alike than trials from different people, because some people are simply faster than others. The model treats the data as 600 independent observations, or as though they came from 600 random people, when it's really only come from 12. That makes the model overconfident: standard errors that are too small and confidence intervals that are too narrow.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 2.</strong> Ana measures the rate of an enzyme reaction at a range of substrate concentrations. She fits <code>lm(rate ~ substrate)</code>. The Residuals vs Fitted plot is shown below.</p>
+
+```{r quiz-q2, echo=FALSE, fig.width=7, fig.height=4.5}
+plot(enz_mod, which = 1)
+```
+
+<p>Which assumption is most likely to be violated?</p>
+<div class="mc-options">
+  <label><input type="radio" name="qs2-q2" data-correct="false"> Validity</label>
+  <label><input type="radio" name="qs2-q2" data-correct="false"> Representativeness</label>
+  <label><input type="radio" name="qs2-q2" data-correct="false"> Additivity</label>
+  <label><input type="radio" name="qs2-q2" data-correct="true"> Linearity</label>
+  <label><input type="radio" name="qs2-q2" data-correct="false"> Independence of errors</label>
+  <label><input type="radio" name="qs2-q2" data-correct="false"> Equal variance of errors</label>
+  <label><input type="radio" name="qs2-q2" data-correct="false"> Normality of errors</label>
+  <label><input type="radio" name="qs2-q2" data-correct="false"> None of these</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Linearity. The residuals are negative at both ends and positive in the middle, so the straight line overshoots at low and high concentrations and undershoots in between. Reaction rate levels off once the enzyme is saturated, and a straight line can't follow that.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 3.</strong> Sofia works for a hospital that has redesigned one of its surgical wards. She wants to know whether patients on the new ward experience less pain than patients on the old ward. She uses the number of painkiller doses each patient receives during their stay as her measure of pain.</p>
+<p>Which assumption is most likely to be violated?</p>
+<div class="mc-options">
+  <label><input type="radio" name="qs2-q3" data-correct="true"> Validity</label>
+  <label><input type="radio" name="qs2-q3" data-correct="false"> Representativeness</label>
+  <label><input type="radio" name="qs2-q3" data-correct="false"> Additivity</label>
+  <label><input type="radio" name="qs2-q3" data-correct="false"> Linearity</label>
+  <label><input type="radio" name="qs2-q3" data-correct="false"> Independence of errors</label>
+  <label><input type="radio" name="qs2-q3" data-correct="false"> Equal variance of errors</label>
+  <label><input type="radio" name="qs2-q3" data-correct="false"> Normality of errors</label>
+  <label><input type="radio" name="qs2-q3" data-correct="false"> None of these</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Validity. Painkiller doses do depend on pain but only partly. They also depend on what was prescribed (e.g. paracetamol vs morphine, 500 mg vs 1 g), how busy the nurses are, and how willing a patient is to ask. If the new layout puts nurses closer to beds, for example, doses could rise without any change in pain.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 4.</strong> Tom compares how long parcels take to arrive with three courier companies. He fits <code>lm(delivery_hrs ~ courier)</code>. The Residuals vs Fitted plot is shown below.</p>
+
+```{r quiz-q4, echo=FALSE, fig.width=7, fig.height=4.5}
+plot(cour_mod, which = 1)
+```
+
+<p>Which assumption is most likely to be violated?</p>
+<div class="mc-options">
+  <label><input type="radio" name="qs2-q4" data-correct="false"> Validity</label>
+  <label><input type="radio" name="qs2-q4" data-correct="false"> Representativeness</label>
+  <label><input type="radio" name="qs2-q4" data-correct="false"> Additivity</label>
+  <label><input type="radio" name="qs2-q4" data-correct="false"> Linearity</label>
+  <label><input type="radio" name="qs2-q4" data-correct="false"> Independence of errors</label>
+  <label><input type="radio" name="qs2-q4" data-correct="true"> Equal variance of errors</label>
+  <label><input type="radio" name="qs2-q4" data-correct="false"> Normality of errors</label>
+  <label><input type="radio" name="qs2-q4" data-correct="false"> None of these</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Equal variance of errors. Each column is one courier. One courier's residuals are spread far wider than the others': some of its parcels arrive the next day and some take a week. Linearity isn't a concern here because the explanatory variable is categorical.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 5.</strong> Ibrahim models how the weight of a delivery van's load affects its fuel use over a fixed test route. All four diagnostic plots are shown below.</p>
+
+```{r quiz-q5, echo=FALSE, fig.width=9, fig.height=8}
+par(mfrow = c(2, 2))
+plot(van_mod)
+par(mfrow = c(1, 1))
+```
+
+<p>Which assumption, if any, do the plots suggest is violated?</p>
+<div class="mc-options">
+  <label><input type="radio" name="qs2-q5" data-correct="false"> Validity</label>
+  <label><input type="radio" name="qs2-q5" data-correct="false"> Representativeness</label>
+  <label><input type="radio" name="qs2-q5" data-correct="false"> Additivity</label>
+  <label><input type="radio" name="qs2-q5" data-correct="false"> Linearity</label>
+  <label><input type="radio" name="qs2-q5" data-correct="false"> Independence of errors</label>
+  <label><input type="radio" name="qs2-q5" data-correct="false"> Equal variance of errors</label>
+  <label><input type="radio" name="qs2-q5" data-correct="false"> Normality of errors</label>
+  <label><input type="radio" name="qs2-q5" data-correct="true"> None of these</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>None of these. The Residuals vs Fitted is flat, the spread is even, the Q-Q points follow the line, and no point comes close to a Cook's distance of 1. Remember, though, that the plots only check assumptions about the errors. Validity and representativeness still need thinking about separately.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 6.</strong> Callum is a running coach who wants to know how weekly training distance affects marathon finishing time in recreational runners. He collects training logs and finishing times from everyone who completed the Peterhead Marathon.</p>
+<p>Which assumption is most likely to be violated?</p>
+<div class="mc-options">
+  <label><input type="radio" name="qs2-q6" data-correct="false"> Validity</label>
+  <label><input type="radio" name="qs2-q6" data-correct="true"> Representativeness</label>
+  <label><input type="radio" name="qs2-q6" data-correct="false"> Additivity</label>
+  <label><input type="radio" name="qs2-q6" data-correct="false"> Linearity</label>
+  <label><input type="radio" name="qs2-q6" data-correct="false"> Independence of errors</label>
+  <label><input type="radio" name="qs2-q6" data-correct="false"> Equal variance of errors</label>
+  <label><input type="radio" name="qs2-q6" data-correct="false"> Normality of errors</label>
+  <label><input type="radio" name="qs2-q6" data-correct="false"> None of these</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Representativeness. Only finishers are included. Runners who trained too much and got injured, or too little and dropped out, are missing. Because the sample has been filtered based on the marathon outcome, the relationship among finishers can differ from the relationship among recreational runners in general. This is called survivorship bias which is a specific form of violating the assumption of representativeness.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 7.</strong> Daniel models how patient age affects length of hospital stay (days). Most patients go home within a few days, but a few stay for several weeks. The Q-Q Residuals plot is shown below.</p>
+
+```{r quiz-q7, echo=FALSE, fig.width=7, fig.height=4.5}
+plot(hosp_mod, which = 2)
+```
+
+<p>Which assumption is most likely to be violated?</p>
+<div class="mc-options">
+  <label><input type="radio" name="qs2-q7" data-correct="false"> Validity</label>
+  <label><input type="radio" name="qs2-q7" data-correct="false"> Representativeness</label>
+  <label><input type="radio" name="qs2-q7" data-correct="false"> Additivity</label>
+  <label><input type="radio" name="qs2-q7" data-correct="false"> Linearity</label>
+  <label><input type="radio" name="qs2-q7" data-correct="false"> Independence of errors</label>
+  <label><input type="radio" name="qs2-q7" data-correct="false"> Equal variance of errors</label>
+  <label><input type="radio" name="qs2-q7" data-correct="true"> Normality of errors</label>
+  <label><input type="radio" name="qs2-q7" data-correct="false"> None of these</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Normality of errors. The points peel away above the line at the upper end, showing a long right tail: a handful of very long stays the normal distribution doesn't expect. Be careful, though: Q-Q plots wobble at the tails even when a model is perfectly correct, especially with small samples. Two things make this one a genuine problem. First, the departure is large and systematic, a steady curve rather than a couple of stray points at the very end. Second, the sample is large (200 patients), so random wobble should be small. It also matches what we know about the data: a stay can't be shorter than zero days, but it can be very long.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 7b.</strong> Below are four Q-Q Residuals plots, A to D.</p>
+
+```{r quiz-q7b, echo=FALSE, fig.width=9, fig.height=8}
+par(mfrow = c(2, 2))
+for (nm in names(lineup)) plot(lineup[[nm]], which = 2, main = nm)
+par(mfrow = c(1, 1))
+```
+
+<p>Which of them indicates that the normality assumption is violated?</p>
+<div class="mc-options">
+  <label><input type="radio" name="qs2-q7b" data-correct="false"> Only A</label>
+  <label><input type="radio" name="qs2-q7b" data-correct="true"> Only B</label>
+  <label><input type="radio" name="qs2-q7b" data-correct="false"> Only C</label>
+  <label><input type="radio" name="qs2-q7b" data-correct="false"> Only D</label>
+  <label><input type="radio" name="qs2-q7b" data-correct="false"> All of them</label>
+  <label><input type="radio" name="qs2-q7b" data-correct="false"> None of them</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Only B, a sample of 20 patients from Daniel's hospital data. Notice that its whole pattern bends: the lowest points bunch together above the line, because a stay can't be shorter than zero days, while the highest points shoot away from it. A, C and D come from data simulated so that the residuals really are normal, and the model matches the simulation exactly. Their tails still wander away from the line, because with only 20 points the most extreme residuals bounce around a lot by chance. A few stray points at the ends, especially in a small sample, are not evidence of a problem. Look for a systematic bend across the whole plot, and ask whether it makes sense given what you know about how the data were generated.</p>
+</div>
+</div>
+
+<div class="question-block">
+<p><strong>Question 8.</strong> Grace grows tomato plants in a greenhouse under four combinations of fertiliser (yes/no) and watering (low/high). She models yield with fertiliser and watering as two separate explanatory variables.</p>
+<p>Which assumption is most likely to be violated?</p>
+<div class="mc-options">
+  <label><input type="radio" name="qs2-q8" data-correct="false"> Validity</label>
+  <label><input type="radio" name="qs2-q8" data-correct="false"> Representativeness</label>
+  <label><input type="radio" name="qs2-q8" data-correct="true"> Additivity</label>
+  <label><input type="radio" name="qs2-q8" data-correct="false"> Linearity</label>
+  <label><input type="radio" name="qs2-q8" data-correct="false"> Independence of errors</label>
+  <label><input type="radio" name="qs2-q8" data-correct="false"> Equal variance of errors</label>
+  <label><input type="radio" name="qs2-q8" data-correct="false"> Normality of errors</label>
+  <label><input type="radio" name="qs2-q8" data-correct="false"> None of these</label>
+</div>
+<button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+<div class="instructor-answer">
+<p>Additivity. Fertiliser probably helps less, or not at all, when plants are short of water. The model assumes fertiliser adds the same amount of yield whatever the watering level, so it misses that interaction.</p>
+</div>
+</div>
+
 # Assumption reference
 
 | Assumption | Description | Example of violation |
